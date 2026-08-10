@@ -520,6 +520,7 @@ const _ProjectController = {
       'compile-with-checkpoint',
       'themed-modals',
       'intermittent-connection-improvements',
+      'symbol-recognition',
     ].filter(Boolean)
 
     const getUserValues = async userId =>

@@ -45,7 +45,7 @@
   justify-content: space-between;
   align-items: stretch;
   font-family: $font-family-sans-serif;
-  font-size: var(--font-size-03);
+  font-size: var(--font-size-02);
   background: var(--symbol-palette-header-background);
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 10%);
 }
@@ -105,6 +105,7 @@
   line-height: 42px;
   height: 42px;
   width: 42px;
+  padding: 0;
   margin: var(--spacing-03);
   color: var(--symbol-palette-item-color);
   background: var(--symbol-palette-item-bg);
@@ -113,6 +114,18 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+// Recognised commands with no Unicode glyph show their command name instead of
+// an empty square. Shrink and wrap the name to fit the fixed glyph box; the full
+// \command is in the tooltip.
+.symbol-palette-item-label {
+  font-family: monospace;
+  font-size: 9px;
+  line-height: 1.1;
+  padding: 2px;
+  overflow: hidden;
+  overflow-wrap: anywhere;
 }
 
 .symbol-palette-item-command {
@@ -144,6 +157,24 @@
   align-items: stretch;
   white-space: nowrap;
   margin-left: var(--spacing-03);
+}
+
+.symbol-palette-draw-toggle {
+  display: inline-flex;
+  align-items: center;
+  align-self: center; // don't stretch to the full header height
+  margin: 0 var(--spacing-02);
+  padding: var(--spacing-02);
+  border: none;
+  border-radius: var(--border-radius-base);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+
+  &[aria-pressed='true'] {
+    background: var(--bg-accent-01);
+    color: var(--content-primary-dark); // white icon on the accent background
+  }
 }
 
 .symbol-palette-info-link,
@@ -194,4 +225,70 @@
   .upgrade-benefits {
     column-count: 2;
   }
+}
+
+.symbol-palette-draw {
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacing-04);
+  height: 100%;
+  padding: var(--spacing-04);
+}
+
+// left column: recognised-results grid, scrolls independently
+.symbol-palette-draw-results {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+// shown in the results column while the canvas is empty
+.symbol-palette-draw-instructions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  margin: 0;
+  padding: var(--spacing-06);
+  text-align: center;
+  opacity: 0.7;
+}
+
+// right column: square canvas pinned to the panel height
+.symbol-palette-draw-canvas-panel {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-02);
+  height: 100%;
+  aspect-ratio: 1;
+}
+
+.symbol-palette-draw-canvas {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+  border: 1px dashed var(--border-primary);
+  border-radius: var(--border-radius-base);
+  background: var(--bg-light-primary);
+  touch-action: none;
+}
+
+.symbol-palette-draw-toolbar {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--spacing-04);
+  min-height: 20px;
+  font-size: var(--font-size-01);
+}
+
+.symbol-palette-draw-clear {
+  appearance: none;
+  border: 1px solid var(--border-primary);
+  border-radius: var(--border-radius-base);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  padding: var(--spacing-01) var(--spacing-05);
 }

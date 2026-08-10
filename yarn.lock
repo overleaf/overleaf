@@ -8191,6 +8191,7 @@ __metadata:
     nvd3: "npm:^1.8.6"
     nyc: "npm:^17.1.0"
     on-headers: "npm:^1.0.2"
+    onnxruntime-web: "npm:1.26.0"
     otplib: "npm:^12.0.1"
     overleaf-editor-core: "workspace:*"
     p-limit: "npm:^2.3.0"
@@ -19119,6 +19120,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"flatbuffers@npm:^25.1.24":
+  version: 25.9.23
+  resolution: "flatbuffers@npm:25.9.23"
+  checksum: 10c0/957c4ae2a02be1703c98b36b4dc8ceb81613cf8e2333026afc95a7b68b088bed5458056dc29d0ab7ce8bc403b8c003732b0968d24aba46f5e7c8f71789a6bd9e
+  languageName: node
+  linkType: hard
+
 "flatted@npm:^3.2.9, flatted@npm:^3.4.2":
   version: 3.4.2
   resolution: "flatted@npm:3.4.2"
@@ -20061,6 +20069,13 @@ __metadata:
     gaxios: "npm:^6.0.0"
     jws: "npm:^4.0.0"
   checksum: 10c0/0a3dcacb1a3c4578abe1ee01c7d0bf20bffe8ded3ee73fc58885d53c00f6eb43b4e1372ff179f0da3ed5cfebd5b7c6ab8ae2776f1787e90d943691b4fe57c716
+  languageName: node
+  linkType: hard
+
+"guid-typescript@npm:^1.0.9":
+  version: 1.0.9
+  resolution: "guid-typescript@npm:1.0.9"
+  checksum: 10c0/fa0a2b2b4e06e0976a81c947b74e114b92f6647e84b52e24ab0981d2fdbaa1a640641d8fd269004dd7c581baebeb4f9d9782b74391e717e47c9b822bea4b3be6
   languageName: node
   linkType: hard
 
@@ -23260,7 +23275,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"long@npm:^5.0.0, long@npm:^5.3.2":
+"long@npm:^5.0.0, long@npm:^5.2.3, long@npm:^5.3.2":
   version: 5.3.2
   resolution: "long@npm:5.3.2"
   checksum: 10c0/7130fe1cbce2dca06734b35b70d380ca3f70271c7f8852c922a7c62c86c4e35f0c39290565eca7133c625908d40e126ac57c02b1b1a4636b9457d77e1e60b981
@@ -25837,6 +25852,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"onnxruntime-common@npm:1.26.0":
+  version: 1.26.0
+  resolution: "onnxruntime-common@npm:1.26.0"
+  checksum: 10c0/220679e2b0129fcc8efd710e1502f792ee5583173d261840369c2dd07bbfdcb9dbbeb027002131094f05e0d287354f7cf66605084b6eb0d90d9543fe485c8c6f
+  languageName: node
+  linkType: hard
+
+"onnxruntime-web@npm:1.26.0":
+  version: 1.26.0
+  resolution: "onnxruntime-web@npm:1.26.0"
+  dependencies:
+    flatbuffers: "npm:^25.1.24"
+    guid-typescript: "npm:^1.0.9"
+    long: "npm:^5.2.3"
+    onnxruntime-common: "npm:1.26.0"
+    platform: "npm:^1.3.6"
+    protobufjs: "npm:^7.2.4"
+  checksum: 10c0/6e63265dd2810c22897843c140b5c6b5912f285274f5f743af83ebdfeded863e5dea9f92e5f246cf72a0eb8ae4f38e64990869f6cd7472a0f20940b19b362c83
+  languageName: node
+  linkType: hard
+
 "open@npm:^10.0.3, open@npm:^10.2.0":
   version: 10.2.0
   resolution: "open@npm:10.2.0"
@@ -27048,7 +27084,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"platform@npm:^1.3.3":
+"platform@npm:^1.3.3, platform@npm:^1.3.6":
   version: 1.3.6
   resolution: "platform@npm:1.3.6"
   checksum: 10c0/69f2eb692e15f1a343dd0d9347babd9ca933824c8673096be746ff66f99f2bdc909fadd8609076132e6ec768349080babb7362299f2a7f885b98f1254ae6224b
