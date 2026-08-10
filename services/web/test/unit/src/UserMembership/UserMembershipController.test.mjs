@@ -285,7 +285,7 @@ describe('UserMembershipController', () => {
       subscription,
       users,
     }) => {
-      expect.assertions(4)
+      expect.assertions(5)
       subscription.managedUsersEnabled = false
       await UserMembershipController.manageGroupMembers(req, {
         render: (viewPath, viewParams) => {
@@ -293,6 +293,7 @@ describe('UserMembershipController', () => {
           expect(viewParams.users).to.deep.equal(users)
           expect(viewParams.groupSize).to.equal(subscription.membersLimit)
           expect(viewParams.managedUsersActive).to.equal(false)
+          expect(viewParams.customerIoEnabled).to.equal(true)
         },
       })
     })
@@ -432,13 +433,14 @@ describe('UserMembershipController', () => {
       req,
       user,
     }) => {
-      expect.assertions(2)
+      expect.assertions(3)
       req.user = user
       req.entityConfig = EntityConfigs.groupManagers
       await UserMembershipController.manageGroupManagers(req, {
         render: (viewPath, viewParams) => {
           expect(viewPath).to.equal('user_membership/group-managers-react')
           expect(viewParams.groupSize).to.equal(undefined)
+          expect(viewParams.customerIoEnabled).to.equal(true)
         },
       })
     })
@@ -449,7 +451,7 @@ describe('UserMembershipController', () => {
       user,
       institution,
     }) => {
-      expect.assertions(3)
+      expect.assertions(4)
       req.user = user
       req.entity = institution
       req.entityConfig = EntityConfigs.institution
@@ -460,6 +462,7 @@ describe('UserMembershipController', () => {
           )
           expect(viewParams.name).to.equal('Test Institution Name')
           expect(viewParams.groupSize).to.equal(undefined)
+          expect(viewParams.customerIoEnabled).to.equal(undefined)
         },
       })
     })

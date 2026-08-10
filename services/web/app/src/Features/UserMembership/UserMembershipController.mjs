@@ -74,6 +74,7 @@ async function manageGroupMembers(req, res, next) {
     canUseFlexibleLicensing: plan?.canUseFlexibleLicensing,
     canUseAddSeatsFeature,
     entityAccess: UserMembershipAuthorization.hasEntityAccess()(req),
+    customerIoEnabled: true,
   })
 }
 
@@ -82,7 +83,8 @@ async function manageGroupManagers(req, res, next) {
     req,
     res,
     next,
-    'user_membership/group-managers-react'
+    'user_membership/group-managers-react',
+    { customerIoEnabled: true }
   )
 }
 
@@ -104,7 +106,7 @@ async function managePublisherManagers(req, res, next) {
   )
 }
 
-async function _renderManagersPage(req, res, next, template) {
+async function _renderManagersPage(req, res, next, template, extraLocals = {}) {
   const { entity, entityConfig } = req
 
   const fetchV1Data = new Promise((resolve, reject) => {
@@ -135,6 +137,7 @@ async function _renderManagersPage(req, res, next, template) {
     users,
     groupId: entityPrimaryKey,
     entityAccess: UserMembershipAuthorization.hasEntityAccess()(req),
+    ...extraLocals,
   })
 }
 
@@ -202,6 +205,7 @@ async function manageGroupUsers(req, res) {
     entityAccess: UserMembershipAuthorization.hasEntityAccess()(req),
     canUseAddSeatsFeature,
     groupSSOActive: ssoConfig?.enabled,
+    customerIoEnabled: true,
   })
 }
 
