@@ -143,6 +143,62 @@ describe('FeatureUsageRateLimiter', function () {
     })
   })
 
+  describe('_recordFirstLimitReach', function () {
+    beforeEach(async function (ctx) {
+      ctx.periodStart = new Date()
+      await UserFeatureUsage.create({
+        _id: ctx.userId,
+        features: {
+          [MOCKED_FEATURE_NAME]: { usage: 101, periodStart: ctx.periodStart },
+        },
+      })
+    })
+
+    it('returns true for the first reach of the period', async function (ctx) {
+      expect(
+        await ctx.FeatureUsageRateLimiter._recordFirstLimitReach(
+          ctx.userId,
+          ctx.periodStart
+        )
+      ).to.be.true
+    })
+
+    it('returns false for later reaches in the same period', async function (ctx) {
+      await ctx.FeatureUsageRateLimiter._recordFirstLimitReach(
+        ctx.userId,
+        ctx.periodStart
+      )
+
+      expect(
+        await ctx.FeatureUsageRateLimiter._recordFirstLimitReach(
+          ctx.userId,
+          ctx.periodStart
+        )
+      ).to.be.false
+      expect(
+        await ctx.FeatureUsageRateLimiter._recordFirstLimitReach(
+          ctx.userId,
+          ctx.periodStart
+        )
+      ).to.be.false
+    })
+
+    it('returns true again once the period resets to a new periodStart', async function (ctx) {
+      await ctx.FeatureUsageRateLimiter._recordFirstLimitReach(
+        ctx.userId,
+        ctx.periodStart
+      )
+
+      const newPeriodStart = new Date(ctx.periodStart.getTime() + 1000)
+      expect(
+        await ctx.FeatureUsageRateLimiter._recordFirstLimitReach(
+          ctx.userId,
+          newPeriodStart
+        )
+      ).to.be.true
+    })
+  })
+
   describe('getRemainingFeatureUses', function () {
     beforeEach(function (ctx) {
       ctx._getAllowanceStub.resolves(100)
