@@ -245,6 +245,17 @@ class MockStripeApi extends AbstractMockApi {
     this.promotionCodes = []
     // Deterministic ids so tests don't depend on Date.now()/randomness.
     this.idCounter = 0
+    // When rateLimited is set, every request is answered with a 429.
+    this.rateLimited = false
+    this.rateLimitedReason = null
+  }
+
+  // Make every request fail with a 429, as Stripe does when we hit a rate-limit
+  // bucket. Pass a `Stripe-Rate-Limited-Reason` value, or null for a header-less
+  // 429 (an object-lock timeout).
+  rateLimit(reason) {
+    this.rateLimited = true
+    this.rateLimitedReason = reason ?? null
   }
 
   _nextId(prefix) {
@@ -391,6 +402,18 @@ class MockStripeApi extends AbstractMockApi {
   }
 
   applyRoutes() {
+    this.app.use((req, res, next) => {
+      if (!this.rateLimited) return next()
+      // Stripe-Should-Retry: false so the SDK fails fast instead of retrying.
+      res.set('Stripe-Should-Retry', 'false')
+      if (this.rateLimitedReason) {
+        res.set('Stripe-Rate-Limited-Reason', this.rateLimitedReason)
+      }
+      res.status(429).json({
+        error: { type: 'rate_limit_error', message: 'Too many requests' },
+      })
+    })
+
     this.app.post('/v1/customers', (req, res) => {
       const { body } = parseReq(req, createCustomerSchema)
       const id = this._nextId('cus')
