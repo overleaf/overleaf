@@ -187,7 +187,7 @@ describe('useConnectionOutageTracker', function () {
     ConnectionOutageTracker.clearAll()
   })
 
-  it('emits connection-restored once on websocket reconnect after >= 30s offline', function () {
+  it('emits connection-restored once on websocket reconnect', function () {
     const controller = {} as Controller
     mount(controller)
 
@@ -220,11 +220,11 @@ describe('useConnectionOutageTracker', function () {
     })
   })
 
-  it('emits an idle outage with unsavedDurationMs: 0 so no-edit blips still count', function () {
-    // Socket drops with no ops pending and none arrive during the outage.
-    // The record's oldestUnsavedOpAt stays null, and unsavedDurationMs must be 0
-    // rather than falling back to detectedAt (which would misreport 31s of work
-    // at risk when there was none).
+  it('drops an outage that ended with no unsaved work', function () {
+    // Socket drops with no ops pending and none arrive during the outage, so no
+    // work was ever at risk. Such an outage is indistinguishable from an idle
+    // tab or a sleeping machine and is not reported, but the record is still
+    // cleaned up.
     const controller = {} as Controller
     mount(controller)
 
@@ -234,16 +234,11 @@ describe('useConnectionOutageTracker', function () {
     cy.tick(31_000)
     cy.then(() => controller.set({ isConnected: true }))
     cy.tick(1) // flush FIRE passive effect
+    cy.findByTestId('stalled').should('have.text', 'false')
 
-    cy.get('@sendBeacon').should('have.been.calledOnce')
-    beaconSegmentation(BEACON_URL).should(segmentation => {
-      expect(segmentation).to.include({
-        resolution: 'reconnected',
-        unsavedDurationMs: 0,
-        pendingChars: 0,
-        inflightChars: 0,
-      })
-      expect(segmentation.outageDurationMs).to.be.at.least(31_000)
+    cy.get('@sendBeacon').should('not.have.been.called')
+    cy.then(() => {
+      expect(ConnectionOutageTracker.read(PROJECT_ID)).to.equal(null)
     })
   })
 
@@ -438,11 +433,13 @@ describe('useConnectionOutageTracker', function () {
     mount(controller)
     cy.tick(1) // flush RELOAD-survival mount effect
 
-    // Sent despite being far below the 30s threshold
     cy.get('@sendBeacon').should('have.been.calledOnce')
     beaconSegmentation(BEACON_URL).should(segmentation => {
+      // No unsaved work, but teardowns bypass the no-unsaved-work filter
       expect(segmentation).to.include({
         resolution: 'out-of-sync',
+        pendingChars: 0,
+        inflightChars: 0,
       })
       expect(segmentation.unsavedDurationMs).to.equal(0)
     })
@@ -463,8 +460,16 @@ describe('useConnectionOutageTracker', function () {
     const controller = {} as Controller
     mount(controller)
 
-    // First outage: drop while saving is already stalled
-    cy.then(() => controller.set({ isConnected: false, isSavingStalled: true }))
+    // First outage: drop while saving is already stalled. Unsaved work
+    // throughout, so neither outage is filtered out.
+    cy.then(() =>
+      controller.set({
+        isConnected: false,
+        isSavingStalled: true,
+        pendingChars: 4,
+        oldestOpAgeMs: 0,
+      })
+    )
     cy.tick(1) // flush START + SNAPSHOT passive effects
     cy.findByTestId('stalled').should('have.text', 'true')
     cy.tick(31_000)
@@ -493,7 +498,11 @@ describe('useConnectionOutageTracker', function () {
     mount(controller)
 
     cy.then(() =>
-      controller.set({ isSavingStalled: true, oldestOpAgeMs: 20_000 })
+      controller.set({
+        isSavingStalled: true,
+        pendingChars: 3,
+        oldestOpAgeMs: 20_000,
+      })
     )
     cy.tick(1) // flush START + SNAPSHOT passive effects
     cy.findByTestId('stalled').should('have.text', 'true')
@@ -509,26 +518,38 @@ describe('useConnectionOutageTracker', function () {
     })
   })
 
-  it('does not emit when offline for less than 30s', function () {
+  it('emits a short outage, so brief blips are reported too', function () {
     const controller = {} as Controller
     mount(controller)
 
-    cy.then(() => controller.set({ isConnected: false }))
-    cy.tick(1) // flush START passive effect
+    cy.then(() =>
+      controller.set({ isConnected: false, pendingChars: 2, oldestOpAgeMs: 0 })
+    )
+    cy.tick(1) // flush START + SNAPSHOT passive effects
     cy.findByTestId('stalled').should('have.text', 'true')
-    cy.tick(20_000)
+    cy.tick(2_000)
     cy.then(() => controller.set({ isConnected: true }))
     cy.tick(1) // flush FIRE passive effect
     cy.findByTestId('stalled').should('have.text', 'false')
 
-    cy.get('@sendBeacon').should('not.have.been.called')
+    cy.get('@sendBeacon').should('have.been.calledOnce')
+    beaconSegmentation(BEACON_URL).should(segmentation => {
+      expect(segmentation).to.include({ resolution: 'reconnected' })
+      expect(segmentation.outageDurationMs).to.be.lessThan(30_000)
+    })
   })
 
   it('emits a saved resolution for a saving-stalled-only episode (no websocket drop)', function () {
     const controller = {} as Controller
     mount(controller)
 
-    cy.then(() => controller.set({ isSavingStalled: true }))
+    cy.then(() =>
+      controller.set({
+        isSavingStalled: true,
+        pendingChars: 3,
+        oldestOpAgeMs: 0,
+      })
+    )
     cy.tick(1) // flush START + SNAPSHOT passive effects
     cy.findByTestId('stalled').should('have.text', 'true')
     cy.tick(31_000)
@@ -546,7 +567,14 @@ describe('useConnectionOutageTracker', function () {
     const controller = {} as Controller
     mount(controller)
 
-    cy.then(() => controller.set({ isConnected: false, isSavingStalled: true }))
+    cy.then(() =>
+      controller.set({
+        isConnected: false,
+        isSavingStalled: true,
+        pendingChars: 3,
+        oldestOpAgeMs: 0,
+      })
+    )
     cy.tick(1) // flush START + SNAPSHOT passive effects
     cy.findByTestId('stalled').should('have.text', 'true')
     cy.tick(31_000)
@@ -788,7 +816,7 @@ describe('useConnectionOutageTracker', function () {
     cy.tick(1) // flush FIRE passive effect
     cy.findByTestId('stalled').should('have.text', 'false')
 
-    // The record is gone by now, so the props come from the stash.
+    // The outage is over and its record removed, so the sync event stands alone.
     cy.then(() => {
       expect(ConnectionOutageTracker.read(PROJECT_ID)).to.equal(null)
       controller.eventEmitter.emit('ide:offlineChangesSynced', {

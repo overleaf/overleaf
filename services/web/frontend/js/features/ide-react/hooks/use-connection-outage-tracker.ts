@@ -14,7 +14,6 @@ import { useProjectContext } from '@/shared/context/project-context'
 import type { IdeEvents } from '@/features/ide-react/create-ide-event-emitter'
 import type { OpenDocuments } from '@/features/ide-react/editor/open-documents'
 
-const OUTAGE_THRESHOLD_MS = 30_000
 const EDIT_SNAPSHOT_INTERVAL_MS = 2_000
 const MAX_RELOAD_RESTORE_MS = 24 * 60 * 60 * 1000
 
@@ -70,43 +69,45 @@ function getOldestUnsavedOpAt(openDocs: OpenDocuments): number | null {
 // spannedReload is independent of the resolution: a reload during the outage
 // discards the in-memory op queue, so the work only survived if the offline
 // backup held it, however the outage went on to end.
+//
+// An outage that ended with no unsaved work is dropped, since we can't
+// distinguish between someone reading while offline and an idle tab.
 function emitOutageEnded(
   record: ConnectionOutageRecord,
   {
     resolution,
     spannedReload,
   }: { resolution: OutageResolution; spannedReload: boolean }
-) {
+): void {
   const props = readOutageProps(record)
-  if (
-    props.outageDurationMs >= OUTAGE_THRESHOLD_MS ||
-    props.unsavedDurationMs >= OUTAGE_THRESHOLD_MS
-  ) {
-    sendMB('connection-restored', {
-      ...props,
-      resolution,
-      spannedReload,
-      offlineBackupEnabled,
-    })
+  if (props.pendingChars === 0 && props.inflightChars === 0) {
+    return
   }
-  return props
-}
-
-// Reported whatever the duration: sub-threshold teardowns are doc errors
-// unrelated to connectivity, and separating those out needs them in the data.
-function emitTeardown(record: ConnectionOutageRecord, spannedReload: boolean) {
-  const { teardownAt } = record
-  if (teardownAt === undefined) {
-    return null
-  }
-  const props = readOutageProps(record, teardownAt)
   sendMB('connection-restored', {
     ...props,
+    resolution,
+    spannedReload,
+    offlineBackupEnabled,
+  })
+}
+
+// Sent whether or not any work was unsaved: a teardown is terminal and rare,
+// and one with no unsaved work is a doc error unrelated to connectivity, which
+// needs to stay separable in the data.
+function emitTeardown(
+  record: ConnectionOutageRecord,
+  spannedReload: boolean
+): void {
+  const { teardownAt } = record
+  if (teardownAt === undefined) {
+    return
+  }
+  sendMB('connection-restored', {
+    ...readOutageProps(record, teardownAt),
     resolution: 'out-of-sync' satisfies OutageResolution,
     spannedReload,
     offlineBackupEnabled,
   })
-  return props
 }
 
 export default function useConnectionOutageTracker(): void {
@@ -120,10 +121,6 @@ export default function useConnectionOutageTracker(): void {
 
   const prevWebsocketDisconnectedRef = useRef(websocketDisconnected)
   const prevStalledRef = useRef(stalled)
-  // The outage record is removed as soon as the connection is back, but the
-  // offline edits are only acknowledged (or rejected) some time after that, so
-  // keep the last known outage around to attach to the sync outcome.
-  const lastOutageRef = useRef<OutageProps | null>(null)
   // The socket starts out CLOSED, so every mount looks disconnected for a beat.
   // Nothing before the first connection is an outage.
   const hasConnectedRef = useRef(isConnected)
@@ -153,14 +150,14 @@ export default function useConnectionOutageTracker(): void {
     // flushed it inline already, but had no way to tell whether the beacon
     // landed, so report it again here and let detectedAt collapse the pair.
     if (record.teardownAt !== undefined) {
-      lastOutageRef.current = emitTeardown(record, true)
+      emitTeardown(record, true)
       ConnectionOutageTracker.remove(projectId)
       return
     }
 
     // Already recovered by mount time, emit and clean up
     if (!stalled) {
-      lastOutageRef.current = emitOutageEnded(record, {
+      emitOutageEnded(record, {
         resolution: 'reconnected',
         spannedReload: true,
       })
@@ -194,7 +191,7 @@ export default function useConnectionOutageTracker(): void {
       return
     }
     teardownFlushedRef.current = true
-    lastOutageRef.current = emitTeardown(record, spannedReloadRef.current)
+    emitTeardown(record, spannedReloadRef.current)
   }, [outOfSync, projectId])
 
   useEffect(() => {
@@ -258,7 +255,7 @@ export default function useConnectionOutageTracker(): void {
     ) {
       const record = ConnectionOutageTracker.read(projectId)
       if (record && record.teardownAt === undefined) {
-        lastOutageRef.current = emitOutageEnded(record, {
+        emitOutageEnded(record, {
           resolution: 'reconnected',
           spannedReload: spannedReloadRef.current,
         })
@@ -275,7 +272,7 @@ export default function useConnectionOutageTracker(): void {
     if (prevStalledRef.current === true && stalled === false) {
       const record = ConnectionOutageTracker.read(projectId)
       if (record && record.teardownAt === undefined) {
-        lastOutageRef.current = emitOutageEnded(record, {
+        emitOutageEnded(record, {
           resolution: 'saved',
           spannedReload: spannedReloadRef.current,
         })
