@@ -11,17 +11,23 @@ const { z, zz } = require('@overleaf/validation-tools')
 // schemas model them explicitly: comments/changes preloaded from web may lack `id`.
 // Tightening these is tracked as part of moving the shared editor payload
 // schemas into overleaf-editor-core.
+//
+// Old tracked changes created while the fixedRemoveChange flag existed
+// (removed in https://github.com/overleaf/internal/pull/23993) still carry
+// it in their op until accepted/rejected.
 
 const insertOp = z.strictObject({
   i: z.string(),
   p: z.number().int().min(0),
   u: z.boolean().optional(),
+  fixedRemoveChange: z.boolean().optional(),
 })
 
 const deleteOp = z.strictObject({
   d: z.string(),
   p: z.number().int().min(0),
   u: z.boolean().optional(),
+  fixedRemoveChange: z.boolean().optional(),
 })
 
 const commentOp = z.strictObject({

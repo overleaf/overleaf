@@ -14,17 +14,22 @@ import { z } from '@overleaf/validation-tools'
 // - history restores send id-less changes and comment ops with a `resolved`
 //   flag (stripped again by RangeManager), and detached comments without an
 //   id, see overleaf-editor-core/lib/doc_updater_compatible_ranges.js
+// - old tracked changes created while the fixedRemoveChange flag existed
+//   (removed in https://github.com/overleaf/internal/pull/23993) still carry
+//   it in their op until accepted/rejected
 
 const insertOp = z.strictObject({
   i: z.string(),
   p: z.number().int().min(0),
   u: z.boolean().optional(),
+  fixedRemoveChange: z.boolean().optional(),
 })
 
 const deleteOp = z.strictObject({
   d: z.string(),
   p: z.number().int().min(0),
   u: z.boolean().optional(),
+  fixedRemoveChange: z.boolean().optional(),
 })
 
 const commentOp = z.strictObject({
