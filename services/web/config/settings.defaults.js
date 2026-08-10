@@ -623,7 +623,6 @@ module.exports = {
   ],
 
   translatedLanguages: {
-    cn: '简体中文',
     cs: 'Čeština',
     da: 'Dansk',
     de: 'Deutsch',
@@ -638,11 +637,9 @@ module.exports = {
     no: 'Norsk',
     pl: 'Polski',
     pt: 'Português',
-    ro: 'Română',
     ru: 'Русский',
     sv: 'Svenska',
     tr: 'Türkçe',
-    uk: 'Українська',
     'zh-CN': '简体中文',
   },
 
