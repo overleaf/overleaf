@@ -166,9 +166,9 @@ const rawFileMetadata = z.union([
     main: z.boolean(),
     importedAt: z.iso.datetime().optional(),
   }),
-  // url import v1
+  // legacy v1 linked file
   z.strictObject({
-    agent: z.literal('url'),
+    agent: z.string(),
     agentDataId: z.number(),
     importedAt: z.iso.datetime().optional(),
   }),

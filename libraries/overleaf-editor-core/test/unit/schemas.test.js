@@ -221,6 +221,14 @@ describe('schemas', function () {
       expect(result.success).to.equal(true)
     })
 
+    it('accepts a legacy v1 wlfile import', function () {
+      const result = rawFileMetadata.safeParse({
+        agent: 'wlfile',
+        agentDataId: 1337,
+      })
+      expect(result.success).to.equal(true)
+    })
+
     it('accepts a legacy v1 main flag with an importedAt timestamp', function () {
       const result = rawFileMetadata.safeParse({
         main: true,
