@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react'
-import { EditorState } from '@codemirror/state'
-import { SyntaxNode } from '@lezer/common'
-import { syntaxTree } from '@codemirror/language'
 import { useProjectContext } from '@/shared/context/project-context'
 import { debugConsole } from '@/utils/debugging'
 import { CommandDefinition } from '../utils/command-definitions/command-definition'
 import { getCommandDefinitionIndexer } from '../utils/command-definitions/command-definition-indexer'
+import { commandNameAtPos } from '../utils/command-definitions/command-name-at-pos'
 import { useCodeMirrorStateContext } from '../components/codemirror-context'
 import { contextMenuStateField } from '../extensions/context-menu'
 
@@ -70,25 +68,4 @@ export function useContextMenuCommandDefinition() {
   const commandName = pos != null ? commandNameAtPos(state, pos) : null
   const commandDefinition = useCommandDefinition(commandName, tooltip)
   return { commandName, commandDefinition }
-}
-
-/**
- * Resolve the control sequence (e.g. `\mycmd`) at a document position, or null
- * if the position is not on a command. Walks up from the innermost node to the
- * nearest node carrying a control-sequence token, mirroring the command-usage
- * logic in tree-operations/commands.ts.
- */
-function commandNameAtPos(state: EditorState, pos: number): string | null {
-  const tree = syntaxTree(state)
-  // Bias right (as resolveCommandNode does) so a click on the command's first
-  // character resolves into it rather than the preceding token.
-  let node: SyntaxNode | null = tree.resolveInner(pos, 1)
-  for (; node; node = node.parent) {
-    const ctrlSeq = node.getChild('$CtrlSeq')
-    if (ctrlSeq && !ctrlSeq.type.is('$CtrlSym')) {
-      const name = state.sliceDoc(ctrlSeq.from, ctrlSeq.to)
-      return name.length > 0 ? name : null
-    }
-  }
-  return null
 }
