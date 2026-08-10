@@ -28,11 +28,13 @@ describe('<EditorFloatingMenu />', function () {
     trackChangesVisible = true,
     floatingMenu = true,
     withSettingsToggle = false,
+    focusMode = false,
   }: {
     migrationEnabled: boolean
     trackChangesVisible?: boolean
     floatingMenu?: boolean
     withSettingsToggle?: boolean
+    focusMode?: boolean
   }) {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     window.metaAttributesCache.set('ol-splitTestVariants', {
@@ -49,6 +51,7 @@ describe('<EditorFloatingMenu />', function () {
           scope={scope}
           features={{ trackChangesVisible }}
           userSettings={{ floatingMenu }}
+          layoutContext={{ focusMode }}
         >
           <CodeMirrorEditor />
           {withSettingsToggle && <FloatingMenuToggle />}
@@ -147,6 +150,14 @@ describe('<EditorFloatingMenu />', function () {
       })
 
       cy.get('@addComment').should('have.been.called')
+    })
+  })
+
+  describe('when in focus mode', function () {
+    it('does not show the floating menu', function () {
+      mountEditor({ migrationEnabled: true, focusMode: true })
+
+      cy.get('.editor-floating-menu').should('not.exist')
     })
   })
 

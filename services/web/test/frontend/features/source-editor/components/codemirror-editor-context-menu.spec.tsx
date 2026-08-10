@@ -365,6 +365,35 @@ describe('editor context menu', { scrollBehavior: false }, function () {
     })
   })
 
+  describe('when in focus mode', function () {
+    it('should hide the Add Comment item but keeps the other actions', function () {
+      const scope = mockScope()
+
+      cy.mount(
+        <TestContainer>
+          <EditorProviders
+            scope={scope}
+            features={{ trackChangesVisible: true }}
+            layoutContext={{ focusMode: true }}
+          >
+            <CodeMirrorEditor />
+          </EditorProviders>
+        </TestContainer>
+      )
+
+      cy.get('.cm-line').eq(10).rightclick()
+
+      cy.findByRole('menu').within(() => {
+        cy.findByRole('menuitem', { name: /cut/i }).should('be.enabled')
+        cy.findByRole('menuitem', { name: /copy/i }).should('be.enabled')
+        cy.findByRole('menuitem', { name: /suggest edits/i }).should(
+          'be.enabled'
+        )
+        cy.findByRole('menuitem', { name: /comment/i }).should('not.exist')
+      })
+    })
+  })
+
   describe('when text is selected', function () {
     it('should enable Cut, Copy, Paste, Delete, Suggest edits, and Comment', function () {
       const scope = mockScope()

@@ -50,6 +50,7 @@ export const useContextMenuItems = () => {
     changeLayout,
     pdfLayout,
     view: ideView,
+    focusMode,
   } = useLayoutContext()
   const visualPreviewEnabled = useFeatureFlag('visual-preview')
   const { t } = useTranslation()
@@ -306,7 +307,7 @@ export const useContextMenuItems = () => {
         label: t('comment'),
         handler: handleComment,
         disabled: isCursorOnEmptyLine(state),
-        show: permissions.comment,
+        show: permissions.comment && !focusMode,
         shortcut: getShortcut('insert-comment'),
       },
       {

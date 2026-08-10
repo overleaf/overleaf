@@ -41,6 +41,7 @@ const editorFloatingMenuActions = importOverleafModules(
 const EditorFloatingMenu: FC = () => {
   const state = useCodeMirrorStateContext()
   const view = useCodeMirrorViewContext()
+  const { focusMode } = useLayoutContext()
   const [show, setShow] = useState(true)
   const tooltipState = state.field(reviewTooltipField, false)
   const previousTooltipState = usePreviousValue(tooltipState)
@@ -72,7 +73,7 @@ const EditorFloatingMenu: FC = () => {
     }
   }, [show, tooltipState, view])
 
-  if (!show || !tooltipState) {
+  if (focusMode || !show || !tooltipState) {
     return null
   }
 
