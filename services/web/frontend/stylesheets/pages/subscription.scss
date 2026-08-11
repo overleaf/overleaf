@@ -31,6 +31,50 @@
       }
     }
   }
+
+  .cancel-loss-card {
+    background-color: var(--bg-light-secondary);
+    border-radius: var(--border-radius-base);
+    padding: var(--spacing-06);
+    margin-bottom: var(--spacing-06);
+
+    .cancel-loss-card-heading {
+      @include body-base;
+
+      font-weight: 600;
+      margin-bottom: var(--spacing-04);
+    }
+  }
+
+  .cancel-loss-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    .cancel-loss-list-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--spacing-04);
+
+      & + .cancel-loss-list-item {
+        margin-top: var(--spacing-04);
+      }
+    }
+
+    .cancel-loss-icon {
+      color: var(--content-danger);
+    }
+
+    .cancel-loss-lost {
+      color: var(--content-danger);
+      text-decoration: line-through;
+    }
+  }
+
+  .cancel-loss-actions {
+    display: flex;
+    gap: var(--spacing-04);
+  }
 }
 
 /**

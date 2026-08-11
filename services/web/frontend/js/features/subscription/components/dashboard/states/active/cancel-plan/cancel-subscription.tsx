@@ -14,6 +14,12 @@ import ExtendTrialButton from './extend-trial-button'
 import { useLocation } from '../../../../../../../shared/hooks/use-location'
 import { debugConsole } from '@/utils/debugging'
 import OLButton from '@/shared/components/ol/ol-button'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
+import isInFreeTrial from '../../../../../util/is-in-free-trial'
+import {
+  CancelSubscriptionLossMessaging,
+  getLossMessagingPlanType,
+} from './cancel-subscription-loss-messaging'
 
 const planCodeToDowngradeTo = 'paid-personal'
 
@@ -136,6 +142,7 @@ export function CancelSubscription() {
   const location = useLocation()
   const { personalSubscription, plans, userCanExtendTrial } =
     useSubscriptionDashboardContext()
+  const lossMessagingEnabled = useFeatureFlag('cancel-loss-messaging')
   const {
     isLoading: isLoadingCancel,
     isError: isErrorCancel,
@@ -175,6 +182,34 @@ export function CancelSubscription() {
   }
 
   const showExtendFreeTrial = userCanExtendTrial
+
+  // `cancel-loss-messaging` split test: show plan-specific losses instead of
+  // the bare confirmation, for non-trial individual subscribers with no other
+  // retention offer (trial extension or downgrade)
+  const lossMessagingPlanType = getLossMessagingPlanType(
+    personalSubscription.planCode
+  )
+  const showLossMessaging =
+    lossMessagingEnabled &&
+    !showExtendFreeTrial &&
+    !showDowngrade &&
+    lossMessagingPlanType !== null &&
+    !isInFreeTrial(personalSubscription.payment.trialEndsAt)
+
+  if (showLossMessaging) {
+    return (
+      <>
+        {isErrorCancel && <GenericErrorAlert />}
+        <CancelSubscriptionLossMessaging
+          planType={lossMessagingPlanType}
+          terminationDate={personalSubscription.payment.nextPaymentDueDate}
+          onCancelSubscription={handleCancelSubscription}
+          isButtonDisabled={isButtonDisabled}
+          isCancelLoading={isSuccessCancel || isLoadingCancel}
+        />
+      </>
+    )
+  }
 
   return (
     <>

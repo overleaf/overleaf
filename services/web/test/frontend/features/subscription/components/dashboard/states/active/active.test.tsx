@@ -387,6 +387,86 @@ describe('<ActiveSubscription />', function () {
       expect(hiddenText.getAttribute('aria-hidden')).to.equal('true')
     })
 
+    describe('cancel-loss-messaging split test', function () {
+      const enabledVariant: MetaTag = {
+        name: 'ol-splitTestVariants',
+        value: { 'cancel-loss-messaging': 'enabled' },
+      }
+
+      it('shows the loss messaging for a Standard subscriber when enabled', function () {
+        renderActiveSubscription(annualActiveSubscription, [enabledVariant])
+        showConfirmCancelUI()
+
+        screen.getByRole('heading', {
+          name: 'Are you sure you want to cancel?',
+        })
+        screen.getByText(
+          `Cancelling will end your subscription on ${annualActiveSubscription.payment.nextPaymentDueDate}.`
+        )
+        screen.getByRole('heading', {
+          name: 'You’ll be moved to the Free plan',
+        })
+        screen.getByText('AI Assistant and higher AI allowance')
+        screen.getByText('10 collaborators per project')
+        screen.getByRole('button', { name: 'Keep subscription' })
+        screen.getByRole('button', { name: 'Cancel subscription' })
+      })
+
+      it('shows the Pro losses for a Professional subscriber', function () {
+        const proSubscription = cloneDeep(annualActiveSubscription)
+        proSubscription.planCode = 'professional-annual'
+        renderActiveSubscription(proSubscription, [enabledVariant])
+        showConfirmCancelUI()
+
+        screen.getByText('AI Assistant and max AI allowance')
+        screen.getByText('Unlimited collaborators per project')
+      })
+
+      it('cancels the subscription and redirects', async function () {
+        fetchMock.post(cancelSubscriptionUrl, { status: 200 })
+        renderActiveSubscription(annualActiveSubscription, [enabledVariant])
+        showConfirmCancelUI()
+        fireEvent.click(
+          screen.getByRole('button', { name: 'Cancel subscription' })
+        )
+        const assignStub = this.locationWrapperStub.assign
+        await waitFor(() => {
+          expect(assignStub).to.have.been.called
+        })
+        sinon.assert.calledWithMatch(assignStub, '/user/subscription/canceled')
+      })
+
+      it('returns to the subscription dashboard on "Keep subscription"', function () {
+        renderActiveSubscription(annualActiveSubscription, [enabledVariant])
+        showConfirmCancelUI()
+        fireEvent.click(
+          screen.getByRole('button', { name: 'Keep subscription' })
+        )
+        expect(screen.queryByText('Are you sure you want to cancel?')).to.be
+          .null
+      })
+
+      it('keeps the default confirmation for a subscriber in trial', function () {
+        renderActiveSubscription(trialCollaboratorSubscription, [
+          enabledVariant,
+        ])
+        showConfirmCancelUI()
+
+        screen.getByText('We’d love you to stay')
+        expect(screen.queryByText('Are you sure you want to cancel?')).to.be
+          .null
+      })
+
+      it('keeps the default confirmation when the split test is not enabled', function () {
+        renderActiveSubscription(annualActiveSubscription)
+        showConfirmCancelUI()
+
+        screen.getByText('We’d love you to stay')
+        expect(screen.queryByText('Are you sure you want to cancel?')).to.be
+          .null
+      })
+    })
+
     describe('extend trial', function () {
       const canExtend: MetaTag = {
         name: 'ol-userCanExtendTrial',
