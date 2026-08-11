@@ -180,6 +180,10 @@ export const SplitTestSchema = new Schema(
       type: String,
       required: false,
     },
+    customerIoEnabled: {
+      type: Boolean,
+      required: false,
+    },
     archived: {
       type: Boolean,
       required: false,

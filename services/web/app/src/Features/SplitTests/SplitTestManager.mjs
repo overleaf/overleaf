@@ -5,6 +5,11 @@ import OError from '@overleaf/o-error'
 import _ from 'lodash'
 import { CacheFlow } from 'cache-flow'
 
+// customer.io silently drops attribute values over 1000 bytes, so cap the
+// number of split tests whose assignments are sent in the
+// `split_test_assignments` attribute
+const MAX_CUSTOMER_IO_SPLIT_TESTS = 25
+
 const ALPHA_PHASE = 'alpha'
 const LABS_PHASE = 'labs'
 const BETA_PHASE = 'beta'
@@ -158,11 +163,15 @@ async function updateSplitTestInfo(name, info, labsInfo) {
       `Cannot update split test '${name}': not found`
     )
   }
+  if (info.customerIoEnabled && !splitTest.customerIoEnabled) {
+    await _checkCustomerIoSplitTestLimit(splitTest._id)
+  }
   splitTest.description = info.description
   splitTest.expectedEndDate = info.expectedEndDate
   splitTest.ticketUrl = info.ticketUrl
   splitTest.reportsUrls = info.reportsUrls
   splitTest.winningVariant = info.winningVariant
+  splitTest.customerIoEnabled = Boolean(info.customerIoEnabled)
   if (labsInfo) {
     splitTest.labsTitle = labsInfo.title
     splitTest.labsDescription = labsInfo.description
@@ -536,6 +545,19 @@ function _updateVariantsWithNewConfiguration(
     }
   }
   return variantsCopy
+}
+
+async function _checkCustomerIoSplitTestLimit(splitTestId) {
+  const count = await SplitTest.countDocuments({
+    _id: { $ne: splitTestId },
+    customerIoEnabled: true,
+    archived: { $ne: true },
+  })
+  if (count >= MAX_CUSTOMER_IO_SPLIT_TESTS) {
+    throw new Errors.InvalidError(
+      `Cannot send more than ${MAX_CUSTOMER_IO_SPLIT_TESTS} split tests to customer.io: disable another split test first`
+    )
+  }
 }
 
 function _getTotalRolloutPercentage(variants) {

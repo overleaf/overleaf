@@ -45,7 +45,8 @@ function getProjection(splitTestName) {
 
 /**
  * @param id
- * @param {string} splitTestName
+ * @param {string} [splitTestName] restrict the `splitTests` sub-document to a
+ *   single test; omit to fetch all assignments.
  * @param {string} path
  * @return {Promise<SplitTestUser>}
  */
