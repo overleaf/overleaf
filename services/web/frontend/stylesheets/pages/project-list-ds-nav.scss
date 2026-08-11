@@ -125,11 +125,22 @@ body {
         .sidebar-filter-button {
           display: flex;
           align-items: center;
-          padding-left: calc(var(--spacing-05) + 24px + var(--spacing-05));
+          padding-left: calc(var(--spacing-05) + 20px + var(--spacing-05));
         }
 
         .sidebar-filter-button-with-icon {
-          padding-left: var(--spacing-05);
+          // Only the items with an icon are 44px tall: 20px of content between
+          // 12px paddings. The rest of the filters stay at 40px.
+          line-height: var(--line-height-02);
+          padding: var(--spacing-05);
+
+          // Without this the icon is an inline box sitting on the text
+          // baseline, which leaves descender space below it and stops
+          // align-items from centring it against the label.
+          .icon {
+            display: flex;
+            align-items: center;
+          }
 
           svg {
             margin-right: var(--spacing-05);
@@ -137,11 +148,11 @@ body {
         }
 
         .dropdown-header {
-          padding-left: calc(var(--spacing-06) + 24px + var(--spacing-05));
+          padding-left: calc(var(--spacing-06) + 20px + var(--spacing-05));
         }
 
         > li.tag button.tag-name {
-          padding-left: calc(var(--spacing-06) + 24px + var(--spacing-05));
+          padding-left: calc(var(--spacing-06) + 20px + var(--spacing-05));
         }
       }
     }
@@ -245,7 +256,10 @@ body {
         align-items: center;
         width: 100%;
         gap: var(--spacing-05);
-        padding: var(--spacing-04) var(--spacing-05);
+
+        // 20px of text between 12px paddings makes the item 44px tall.
+        line-height: var(--line-height-02);
+        padding: var(--spacing-05);
         border: none;
         border-radius: var(--border-radius-medium);
         background: none;

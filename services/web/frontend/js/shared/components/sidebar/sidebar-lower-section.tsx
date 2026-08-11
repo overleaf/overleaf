@@ -57,7 +57,7 @@ export function SidebarLowerSection({
                 role="menuitem"
                 className="ds-nav-page-switcher-item"
               >
-                <Question size={24} />
+                <Question size={20} />
                 <span className="ds-nav-page-switcher-item-label">
                   {t('help')}
                 </span>
@@ -97,7 +97,7 @@ export function SidebarLowerSection({
                 role="menuitem"
                 className="ds-nav-page-switcher-item"
               >
-                <User size={24} />
+                <User size={20} />
                 <span className="ds-nav-page-switcher-item-label">
                   {t('Account')}
                 </span>

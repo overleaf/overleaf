@@ -58,7 +58,7 @@ export default function SidebarFilters({
         activePage={activePage}
         filter="all"
         text={isLibraryEnabled ? t('projects') : t('all_projects')}
-        icon={isLibraryEnabled && <Folder size={24} />}
+        icon={isLibraryEnabled && <Folder size={20} />}
       />
       <SidebarFilter
         activePage={activePage}

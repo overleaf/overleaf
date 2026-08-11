@@ -97,7 +97,7 @@ function SidebarDsNav({
                 aria-current={isTrashActive ? 'page' : undefined}
                 onClick={() => selectFilter('trashed')}
               >
-                <Trash size={24} />
+                <Trash size={20} />
                 <span className="ds-nav-page-switcher-item-label">
                   {t('trash')}
                 </span>
