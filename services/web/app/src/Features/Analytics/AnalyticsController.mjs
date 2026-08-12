@@ -45,8 +45,23 @@ async function updateEditingSession(req, res, next) {
   res.sendStatus(202)
 }
 
+// TODO: remove after clients running pre-#36315 code have drained
+function isIdleConnectionRestoredEvent(event, body) {
+  if (event !== 'connection-restored') {
+    return false
+  }
+  if (body.resolution === 'out-of-sync') {
+    return false
+  }
+  return body.pendingChars === 0 && body.inflightChars === 0
+}
+
 function recordEvent(req, res, next) {
   if (!Features.hasFeature('analytics')) {
+    return res.sendStatus(202)
+  }
+  if (isIdleConnectionRestoredEvent(req.params.event, req.body)) {
+    metrics.inc('analytics_idle_connection_restored_blocked')
     return res.sendStatus(202)
   }
   delete req.body._csrf
