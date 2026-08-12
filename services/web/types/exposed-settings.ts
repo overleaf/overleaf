@@ -23,6 +23,7 @@ export type ExposedSettings = {
   hotjarVersion?: string
   ieeeBrandId: number
   isOverleaf: boolean
+  env: 'saas' | 'server-pro' | 'server-ce'
   maxEntitiesPerProject: number
   mixpanelLabsToken?: string
   projectUploadTimeout: number

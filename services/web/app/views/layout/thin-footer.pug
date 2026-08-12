@@ -7,7 +7,7 @@ footer.site-footer
 				if !settings.nav.hide_powered_by
 					li
 						//- year of Server Pro release, static
-						| © 2025
+						| © 2026
 						|
 						a(href='https://www.overleaf.com/for/enterprises') Powered by Overleaf
 
@@ -36,3 +36,8 @@ footer.site-footer
 							a(href=item.url class=item.class aria-label=item.label) !{item.text}
 						else
 							| !{item.text}
+		if settings.env === 'server-ce'
+			.row
+				.col-12
+					p.copyright-notice
+						| Overleaf Community Edition™ is a free unsupported software that may contain vulnerabilities and used at your own risk. Use of Overleaf Community Edition™ here is not operated, supported or endorsed by Overleaf®. It has been provided "AS IS" with all liability disclaimed (to the fullest extent lawful) and all rights reserved.

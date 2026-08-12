@@ -160,6 +160,11 @@ footer.site-footer {
       font-size: var(--font-size-05);
     }
   }
+
+  .copyright-notice {
+    font-size: var(--font-size-02);
+    line-height: calc($thin-footer-height / 2);
+  }
 }
 
 .site-footer-content {

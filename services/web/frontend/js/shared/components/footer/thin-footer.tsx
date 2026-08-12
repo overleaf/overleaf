@@ -3,7 +3,9 @@ import type {
   FooterMetadata,
 } from '@/shared/components/types/footer-metadata'
 import OLRow from '@/shared/components/ol/ol-row'
+import OLCol from '@/shared/components/ol/ol-col'
 import LanguagePicker from '@/shared/components/language-picker'
+import getMeta from '@/utils/meta.ts'
 import React from 'react'
 
 function FooterItemLi({
@@ -46,6 +48,7 @@ function ThinFooter({
   leftItems,
   rightItems,
 }: FooterMetadata) {
+  const { env } = getMeta('ol-ExposedSettings')
   const showLanguagePicker = Boolean(
     subdomainLang && Object.keys(subdomainLang).length > 1
   )
@@ -60,7 +63,7 @@ function ThinFooter({
             {showPoweredBy ? (
               <>
                 <li>
-                  {/* year of Server Pro release, static */}© 2025{' '}
+                  {/* year of Server Pro release, static */}© 2026{' '}
                   <a href="https://www.overleaf.com/for/enterprises">
                     Powered by Overleaf
                   </a>
@@ -86,6 +89,20 @@ function ThinFooter({
             ))}
           </ul>
         </OLRow>
+        {env === 'server-ce' && (
+          <OLRow>
+            <OLCol lg={12}>
+              <p className="copyright-notice">
+                Overleaf Community Edition™ is a free unsupported software that
+                may contain vulnerabilities and used at your own risk. Use of
+                Overleaf Community Edition™ here is not operated, supported or
+                endorsed by Overleaf®. It has been provided "AS IS" with all
+                liability disclaimed (to the fullest extent lawful) and all
+                rights reserved.
+              </p>
+            </OLCol>
+          </OLRow>
+        )}
       </div>
     </footer>
   )

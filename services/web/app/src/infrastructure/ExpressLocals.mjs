@@ -370,6 +370,7 @@ export default async function (webRouter, privateApiRouter, publicApiRouter) {
   webRouter.use(function (req, res, next) {
     res.locals.ExposedSettings = {
       isOverleaf: Settings.overleaf != null,
+      env: Settings.env,
       appName: Settings.appName,
       adminEmail: Settings.adminEmail,
       dropboxAppName:
