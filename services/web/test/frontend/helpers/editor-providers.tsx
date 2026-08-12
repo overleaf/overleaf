@@ -1,5 +1,6 @@
 // Disable prop type checks for test harnesses
 /* eslint-disable react/prop-types */
+import fetchMock from 'fetch-mock'
 import { merge } from 'lodash'
 import { SocketIOMock } from '@/ide/connection/SocketIoShim'
 import { IdeContext } from '@/shared/context/ide-context'
@@ -68,6 +69,22 @@ const defaultUserSettings = {
   ...defaultSettings,
   referencesSearchMode: 'simple',
 } satisfies UserSettings
+
+const CHANGES_USERS_ROUTE = 'editor-providers-changes-users'
+
+// ChangesUsersProvider fetches this on mount, so every test rendering the editor
+// context needs the route. Tests that care about the response register their own
+// route before rendering, which takes precedence over this one.
+function mockChangesUsers() {
+  const alreadyMocked = fetchMock.router.routes.some(
+    route => route.config.name === CHANGES_USERS_ROUTE
+  )
+  if (!alreadyMocked) {
+    fetchMock.get('express:/project/:projectId/changes/users', [], {
+      name: CHANGES_USERS_ROUTE,
+    })
+  }
+}
 
 export type EditorProvidersProps = {
   user?: Pick<
@@ -244,6 +261,8 @@ export function EditorProviders({
   // Add details for useUserContext
   window.metaAttributesCache.set('ol-user', { ...user, features })
   window.metaAttributesCache.set('ol-project_id', projectId)
+
+  mockChangesUsers()
 
   const customProviders: Record<string, FC<PropsWithChildren>> = {
     ConnectionProvider: makeConnectionProvider(socket),
