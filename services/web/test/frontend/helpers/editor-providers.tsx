@@ -94,6 +94,9 @@ export type EditorProvidersProps = {
     | 'signUpDate'
     | 'activeProfessionalGroupSubscriptions'
     | 'isProfessionalGroupPlan'
+    | 'isMemberOfGroupSubscription'
+    | 'hasInstitutionLicence'
+    | 'planCode'
   >
   projectId?: string
   projectName?: string
