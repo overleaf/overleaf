@@ -6,6 +6,7 @@ import { PaidSubscription } from '../../../../../../../../types/subscription/das
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useLocation } from '@/shared/hooks/use-location'
 import { stripHasSubscription } from '../../../../data/subscription-url'
+import isInFreeTrial from '../../../../util/is-in-free-trial'
 
 export function CancelSubscriptionButton() {
   const { t } = useTranslation()
@@ -18,10 +19,7 @@ export function CancelSubscriptionButton() {
   } = useSubscriptionDashboardContext()
 
   const subscription = personalSubscription as PaidSubscription
-  const isInTrial =
-    subscription?.payment.trialEndsAtFormatted &&
-    subscription?.payment.trialEndsAt &&
-    new Date(subscription.payment.trialEndsAt).getTime() > Date.now()
+  const isInTrial = isInFreeTrial(subscription?.payment.trialEndsAt)
   const hasPendingOrActivePause =
     subscription.payment.state === 'paused' ||
     (subscription.payment.state === 'active' &&

@@ -33,6 +33,7 @@ import { formatCurrency } from '@/shared/utils/currency'
 import { ManagedInstitution } from '../../../../../types/subscription/dashboard/managed-institution'
 import { Publisher } from '../../../../../types/subscription/dashboard/publisher'
 import { formatTime } from '@/features/utils/format-date'
+import { formatPaymentDateTime } from '../util/payment-dates'
 
 type SubscriptionDashboardContextValue = {
   groupPlanToChangeToCode: string
@@ -150,7 +151,7 @@ export function SubscriptionDashboardProvider({
       !personalSubscription.payment.pausedAt ||
       !personalSubscription.payment.remainingPauseCycles
     ) {
-      return personalSubscription.payment.nextPaymentDueAt
+      return formatPaymentDateTime(personalSubscription.payment.periodEnd)!
     }
     const pausedDate = new Date(personalSubscription.payment.pausedAt)
     pausedDate.setMonth(

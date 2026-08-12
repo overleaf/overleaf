@@ -8006,7 +8006,6 @@ __metadata:
     "@types/bootstrap": "npm:^5.2.10"
     "@types/chai": "npm:^4.3.0"
     "@types/chai-as-promised": "npm:^8.0.2"
-    "@types/dateformat": "npm:^5.0.3"
     "@types/diff": "npm:^5.2.3"
     "@types/dom-speech-recognition": "npm:^0.0.7"
     "@types/events": "npm:^3.0.3"
@@ -8100,7 +8099,6 @@ __metadata:
     cypress-multi-reporters: "npm:^2.0.5"
     cypress-plugin-tab: "npm:^1.0.5"
     d3: "npm:^3.5.16"
-    dateformat: "npm:1.0.4-1.2.3"
     daterangepicker: "npm:2.1.27"
     diff: "npm:^5.1.0"
     dompurify: "npm:^3.3.2"
@@ -10792,13 +10790,6 @@ __metadata:
   dependencies:
     "@types/node": "npm:*"
   checksum: 10c0/e3d476bb6b3a54a8934a97fe6ee4bd13e2e5eb29073929a4be76a52466602ffaea420b20774ffe8503f9fa24f3ae34817e95e7f625689fb0d1c10404f5b2889c
-  languageName: node
-  linkType: hard
-
-"@types/dateformat@npm:^5.0.3":
-  version: 5.0.3
-  resolution: "@types/dateformat@npm:5.0.3"
-  checksum: 10c0/828452c096b0b6901a64ce1f3a47fb96755f2451a2605b59fb271407526c62020d171aab6946f9268ca5a4d63db7952c32595bf30b49ed54b218414ec6a02261
   languageName: node
   linkType: hard
 
@@ -16428,13 +16419,6 @@ __metadata:
   dependencies:
     "@babel/runtime": "npm:^7.21.0"
   checksum: 10c0/e4b521fbf22bc8c3db332bbfb7b094fd3e7627de0259a9d17c7551e2d2702608a7307a449206065916538e384f37b181565447ce2637ae09828427aed9cb5581
-  languageName: node
-  linkType: hard
-
-"dateformat@npm:1.0.4-1.2.3":
-  version: 1.0.4-1.2.3
-  resolution: "dateformat@npm:1.0.4-1.2.3"
-  checksum: 10c0/290dec607d80e0a7dbc22d0c2ad19db04ef8c50d1969689b4542bca91c7383e99eadfbca3bc38dab7e8d77e987cc017d051744fe7b29a8b0926b2fe7b4a667b2
   languageName: node
   linkType: hard
 

@@ -27,6 +27,10 @@ import {
 } from '@/features/subscription/data/subscription-url'
 import { location } from '@/shared/components/location'
 import { MetaTag } from '@/utils/meta'
+import {
+  formatPaymentDate,
+  formatPaymentDateTime,
+} from '@/features/subscription/util/payment-dates'
 
 describe('<ActiveSubscription />', function () {
   let sendMBSpy: sinon.SinonSpy
@@ -75,7 +79,7 @@ describe('<ActiveSubscription />', function () {
     within(screen.getByTestId('renews-on')).getByText((_, el) =>
       Boolean(
         el?.textContent?.includes(
-          `Renews on ${subscription.payment.nextPaymentDueDate}`
+          `Renews on ${formatPaymentDate(subscription.payment.periodEnd)}`
         )
       )
     )
@@ -210,7 +214,7 @@ describe('<ActiveSubscription />', function () {
     within(screen.getByTestId('trial-ending')).getByText((_, el) =>
       Boolean(
         el?.textContent?.includes(
-          `You’re on a free trial which ends on ${trialSubscription.payment.trialEndsAtFormatted}`
+          `You’re on a free trial which ends on ${formatPaymentDateTime(trialSubscription.payment.trialEndsAt)}`
         )
       )
     )
@@ -288,7 +292,7 @@ describe('<ActiveSubscription />', function () {
         { exact: false }
       )
       const dates = screen.getAllByText(
-        annualActiveSubscription.payment.nextPaymentDueAt,
+        formatPaymentDate(annualActiveSubscription.payment.periodEnd)!,
         {
           exact: false,
         }
@@ -307,7 +311,10 @@ describe('<ActiveSubscription />', function () {
         { exact: false }
       )
       const dates = screen.getAllByText(
-        trialSubscription.payment.trialEndsAtFormatted!
+        formatPaymentDate(trialSubscription.payment.trialEndsAt)!,
+        {
+          exact: false,
+        }
       )
       expect(dates.length).to.equal(3)
       const button = screen.getByRole('button', {

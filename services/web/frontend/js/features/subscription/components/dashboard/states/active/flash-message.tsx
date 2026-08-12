@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next'
 import { PaidSubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
 import { useEffect, useState } from 'react'
 import { useLocation } from '@/shared/hooks/use-location'
+import { formatPaymentDateTime } from '../../../../util/payment-dates'
 
 export type FlashMessageName = 'paused' | 'unpaused' | 'error'
 
@@ -36,7 +37,9 @@ export function FlashMessage() {
             <Trans
               i18nKey="your_subscription_will_pause_on_short"
               values={{
-                pauseDate: subscription.payment.nextPaymentDueAt,
+                pauseDate: formatPaymentDateTime(
+                  subscription.payment.periodEnd
+                ),
               }}
               shouldUnescape
               tOptions={{ interpolation: { escapeValue: true } }}
