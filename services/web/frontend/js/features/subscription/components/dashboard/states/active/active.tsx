@@ -30,10 +30,6 @@ import { useLocation } from '@/shared/hooks/use-location'
 import { FlashMessage } from '@/features/subscription/components/dashboard/states/active/flash-message'
 import Notification from '@/shared/components/notification'
 import { PendingPlanChange } from './pending-plan-change'
-import {
-  formatPaymentDate,
-  formatPaymentDateTime,
-} from '../../../../util/payment-dates'
 
 export function ActiveSubscription({
   subscription,
@@ -142,7 +138,7 @@ export function ActiveSubscription({
       <p className="mb-1" data-testid="renews-on">
         <Trans
           i18nKey="renews_on"
-          values={{ date: formatPaymentDate(subscription.payment.periodEnd) }}
+          values={{ date: subscription.payment.nextPaymentDueDate }}
           shouldUnescape
           tOptions={{ interpolation: { escapeValue: true } }}
           components={[<strong />]} // eslint-disable-line react/jsx-key
@@ -202,12 +198,13 @@ export function ActiveSubscription({
       <hr />
       <h2 className="h3 fw-bold">{t('plan')}</h2>
       <h3 className="h5 mt-0 mb-1 fw-bold">{planName}</h3>
-      {isInFreeTrial(subscription.payment.trialEndsAt) && (
-        <TrialEnding
-          trialEndsAt={subscription.payment.trialEndsAt}
-          className="mb-1"
-        />
-      )}
+      {isInFreeTrial(subscription.payment.trialEndsAt) &&
+        subscription.payment.trialEndsAtFormatted && (
+          <TrialEnding
+            trialEndsAtFormatted={subscription.payment.trialEndsAtFormatted}
+            className="mb-1"
+          />
+        )}
       {subscription.payment.totalLicenses > 0 && (
         <p className="mb-1" data-testid="plan-licenses">
           {isLegacyPlan &&
@@ -248,9 +245,7 @@ export function ActiveSubscription({
               i18nKey="your_subscription_will_pause_on"
               values={{
                 planName: subscription.plan.name,
-                pauseDate: formatPaymentDateTime(
-                  subscription.payment.periodEnd
-                ),
+                pauseDate: subscription.payment.nextPaymentDueAt,
                 reactivationDate: getFormattedRenewalDate(),
               }}
               shouldUnescape

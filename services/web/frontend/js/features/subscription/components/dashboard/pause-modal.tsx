@@ -17,7 +17,6 @@ import * as eventTracking from '../../../../infrastructure/event-tracking'
 import PauseDuck from '../../images/pause-duck.svg'
 import GenericErrorAlert from './generic-error-alert'
 import { PaidSubscription } from '../../../../../../types/subscription/dashboard/subscription'
-import isInFreeTrial from '../../util/is-in-free-trial'
 
 const pauseMonthDurationOptions = [1, 2, 3]
 
@@ -40,7 +39,10 @@ export default function PauseSubscriptionModal() {
     const subscription = personalSubscription as PaidSubscription
     eventTracking.sendMB('subscription-page-cancel-button-click', {
       plan_code: subscription?.planCode,
-      is_trial: isInFreeTrial(subscription?.payment.trialEndsAt),
+      is_trial:
+        subscription?.payment.trialEndsAtFormatted &&
+        subscription?.payment.trialEndsAt &&
+        new Date(subscription.payment.trialEndsAt).getTime() > Date.now(),
     })
     setShowCancellation(true)
   }

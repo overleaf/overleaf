@@ -22,7 +22,6 @@ import { reactivateSubscriptionUrl } from '../../../../../../frontend/js/feature
 import fetchMock from 'fetch-mock'
 import sinon from 'sinon'
 import { location } from '@/shared/components/location'
-import { formatPaymentDateTime } from '@/features/subscription/util/payment-dates'
 
 describe('<PersonalSubscription />', function () {
   afterEach(function () {
@@ -78,12 +77,9 @@ describe('<PersonalSubscription />', function () {
         'Your subscription has been canceled and will terminate on',
         { exact: false }
       )
-      screen.getByText(
-        formatPaymentDateTime(canceledSubscription.payment!.periodEnd)!,
-        {
-          exact: false,
-        }
-      )
+      screen.getByText(canceledSubscription.payment!.nextPaymentDueAt, {
+        exact: false,
+      })
 
       screen.getByText('No further payments will be taken.', { exact: false })
 

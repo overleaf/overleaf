@@ -37,10 +37,12 @@ type PaymentProviderRecord = {
   additionalLicenses: number
   addOns: PaymentProviderAddOn[]
   totalLicenses: number
-  periodEnd: string
+  nextPaymentDueAt: string
+  nextPaymentDueDate: string
   currency: CurrencyCode
   planPrice: number
   state?: SubscriptionState
+  trialEndsAtFormatted: Nullable<string>
   trialEndsAt: Nullable<string>
   activeCoupons: PaymentProviderCoupon[]
   accountEmail: string

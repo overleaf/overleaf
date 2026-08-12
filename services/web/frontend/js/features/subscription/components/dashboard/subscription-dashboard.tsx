@@ -17,7 +17,6 @@ import Notification from '@/shared/components/notification'
 import WritefullManagedBundleAddOn from './states/active/change-plan/modals/writefull-bundle-management-modal'
 import RedirectAlerts from './redirect-alerts'
 import { PaidSubscription } from '@ol-types/subscription/dashboard/subscription'
-import { formatPaymentDate } from '../../util/payment-dates'
 
 function SubscriptionDashboard() {
   const { t } = useTranslation()
@@ -43,7 +42,7 @@ function SubscriptionDashboard() {
     subscription &&
     subscription.pendingPlan &&
     subscription.pendingPlan.name !== subscription.plan.name
-  const nextPaymentDueDate = formatPaymentDate(subscription?.payment?.periodEnd)
+  const nextPaymentDueDate = subscription?.payment?.nextPaymentDueDate
 
   return (
     <div className="container">

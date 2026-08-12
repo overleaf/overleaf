@@ -1,6 +1,4 @@
-export default function isInFreeTrial(
-  trialEndsAt?: string | null
-): trialEndsAt is string {
+export default function isInFreeTrial(trialEndsAt?: string | null) {
   if (!trialEndsAt) return false
 
   const endDate = new Date(trialEndsAt)

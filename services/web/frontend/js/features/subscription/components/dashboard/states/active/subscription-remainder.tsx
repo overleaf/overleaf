@@ -1,10 +1,5 @@
 import { Trans } from 'react-i18next'
 import { PaidSubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
-import isInFreeTrial from '../../../../util/is-in-free-trial'
-import {
-  formatPaymentDate,
-  formatPaymentDateTime,
-} from '../../../../util/payment-dates'
 
 type SubscriptionRemainderProps = {
   subscription: PaidSubscription
@@ -15,11 +10,14 @@ function SubscriptionRemainder({
   subscription,
   hideTime,
 }: SubscriptionRemainderProps) {
-  const stillInATrial = isInFreeTrial(subscription.payment.trialEndsAt)
+  const stillInATrial =
+    subscription.payment.trialEndsAtFormatted &&
+    subscription.payment.trialEndsAt &&
+    new Date(subscription.payment.trialEndsAt).getTime() > Date.now()
 
   const terminationDate = hideTime
-    ? formatPaymentDate(subscription.payment.periodEnd)
-    : formatPaymentDateTime(subscription.payment.periodEnd)
+    ? subscription.payment.nextPaymentDueDate
+    : subscription.payment.nextPaymentDueAt
   return stillInATrial ? (
     <Trans
       i18nKey="subscription_will_remain_active_until_end_of_trial_period_x"

@@ -9,7 +9,6 @@ import {
 } from '../../fixtures/subscriptions'
 import { ExposedSettings } from '../../../../../../types/exposed-settings'
 import { UserProvider } from '@/shared/context/user-context'
-import { formatPaymentDateTime } from '@/features/subscription/util/payment-dates'
 
 describe('successful subscription page', function () {
   it('renders the invoices link', function () {
@@ -123,7 +122,7 @@ describe('successful subscription page', function () {
           .getByText(/the next payment of/i)
           .textContent?.replace(/\xA0/g, ' ')
       ).to.equal(
-        `The next payment of ${annualActiveSubscriptionPro.payment.displayPrice} will be collected on ${formatPaymentDateTime(annualActiveSubscriptionPro.payment.periodEnd)}.`
+        `The next payment of ${annualActiveSubscriptionPro.payment.displayPrice} will be collected on ${annualActiveSubscriptionPro.payment.nextPaymentDueAt}.`
       )
       screen.getByText(/taxes may be added, depending on your billing address/i)
 

@@ -22,7 +22,6 @@ import sparkle from '@/shared/svgs/sparkle.svg'
 import { PaidSubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
 import { LICENSE_ADD_ON } from '@/features/group-management/components/upgrade-subscription/upgrade-subscription-plan-details'
 import WritefullManagedBundleAddOn from './change-plan/modals/writefull-bundle-management-modal'
-import { formatPaymentDate } from '../../../../util/payment-dates'
 
 type AddOnsProps = {
   subscription: PaidSubscription
@@ -190,7 +189,7 @@ function AddOns({
             )
           }
           displayPrice={addOnsDisplayPrices[addOn.addOnCode]}
-          nextBillingDate={formatPaymentDate(subscription.payment.periodEnd)!}
+          nextBillingDate={subscription.payment.nextPaymentDueDate}
         />
       ))}
       {hasAiAssistViaWritefull && <WritefullManagedBundleAddOn />}

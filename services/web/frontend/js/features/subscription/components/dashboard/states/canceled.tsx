@@ -6,7 +6,6 @@ import {
 } from '../../../data/add-on-codes'
 import ReactivateSubscription from '../reactivate-subscription'
 import OLButton from '@/shared/components/ol/ol-button'
-import { formatPaymentDateTime } from '../../../util/payment-dates'
 
 export function CanceledSubscription({
   subscription,
@@ -49,9 +48,7 @@ export function CanceledSubscription({
         <Trans
           i18nKey="subscription_canceled_and_terminate_on_x"
           values={{
-            terminateDate: formatPaymentDateTime(
-              subscription.payment.periodEnd
-            ),
+            terminateDate: subscription.payment.nextPaymentDueAt,
           }}
           shouldUnescape
           tOptions={{ interpolation: { escapeValue: true } }}
