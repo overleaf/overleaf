@@ -647,10 +647,10 @@ describe('<ShareProjectModal/>', function () {
 
     const user = userEvent.setup()
     await user.click(screen.getByTestId('add-collaborator-select'))
-    await user.click(screen.getByText('Viewer'))
+    await user.click(await screen.findByRole('option', { name: 'Viewer' }))
 
     const submitButton = screen.getByRole('button', { name: 'Invite' })
-    await userEvent.click(submitButton)
+    await user.click(submitButton)
 
     let calls: CallLog[] = []
     await waitFor(
@@ -704,9 +704,9 @@ describe('<ShareProjectModal/>', function () {
 
     const user = userEvent.setup()
     await user.click(screen.getByTestId('add-collaborator-select'))
-    const editorOption = screen.getByText('Editor').closest('button')
-    const reviewerOption = screen.getByText('Reviewer').closest('button')
-    const viewerOption = screen.getByText('Viewer').closest('button')
+    const editorOption = await screen.findByRole('option', { name: 'Editor' })
+    const reviewerOption = screen.getByRole('option', { name: /Reviewer/ })
+    const viewerOption = screen.getByRole('option', { name: 'Viewer' })
 
     expect(editorOption?.classList.contains('disabled')).to.be.true
     expect(reviewerOption?.classList.contains('disabled')).to.be.true
@@ -742,9 +742,9 @@ describe('<ShareProjectModal/>', function () {
     const user = userEvent.setup()
     await user.click(screen.getByTestId('add-collaborator-select'))
 
-    const editorOption = screen.getByText('Editor').closest('button')
-    const reviewerOption = screen.getByText('Reviewer').closest('button')
-    const viewerOption = screen.getByText('Viewer').closest('button')
+    const editorOption = await screen.findByRole('option', { name: 'Editor' })
+    const reviewerOption = screen.getByRole('option', { name: /Reviewer/ })
+    const viewerOption = screen.getByRole('option', { name: 'Viewer' })
 
     expect(editorOption?.classList.contains('disabled')).to.be.true
     expect(reviewerOption?.classList.contains('disabled')).to.be.true
