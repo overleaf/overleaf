@@ -29,7 +29,7 @@ export const scrollPosition = (
   }: {
     currentDoc: { doc_id: string }
   },
-  { visual }: { visual: boolean }
+  visual: boolean
 ) => {
   // store lineInfo for use on unload, when the DOM has already been unmounted
   let lineInfo: LineInfo

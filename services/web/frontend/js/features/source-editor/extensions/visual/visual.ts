@@ -21,13 +21,7 @@ import { pasteHtml } from './paste-html'
 import { commandTooltip } from '../command-tooltip'
 import { tableGeneratorTheme } from './table-generator'
 import { debugConsole } from '@/utils/debugging'
-import { PreviewPath } from '../../../../../../types/preview-path'
 import { getFileExtension } from '../../utils/file'
-
-type Options = {
-  visual: boolean
-  previewByPath: (path: string) => PreviewPath | null
-}
 
 // Module-provided visual editors registered via the
 // `sourceEditorVisualExtensions` hook. Module exposes `getExtensions(ext)`,
@@ -55,17 +49,16 @@ const visualState = StateField.define<boolean>({
   },
 })
 
-const configureVisualExtensions = (options: Options) =>
-  options.visual ? sharedVisualExtensions() : []
+const configureVisualExtensions = (showVisual: boolean) =>
+  showVisual ? sharedVisualExtensions() : []
 
-export const visual = (docName: string, options: Options): Extension => {
-  const extensions =
-    visualModuleExtensions(docName) ?? latexVisualExtensions(options)
+export const visual = (docName: string, showVisual: boolean): Extension => {
+  const extensions = visualModuleExtensions(docName) ?? latexVisualExtensions()
 
   return [
-    visualState.init(() => options.visual),
-    visualConf.of(configureVisualExtensions(options)),
-    visualOnly(options.visual, extensions),
+    visualState.init(() => showVisual),
+    visualConf.of(configureVisualExtensions(showVisual)),
+    visualOnly(showVisual, extensions),
   ]
 }
 
@@ -73,11 +66,11 @@ export const isVisual = (view: EditorView) => {
   return view.state.field(visualState, false) || false
 }
 
-export const setVisual = (options: Options): TransactionSpec => {
+export const setVisual = (showVisual: boolean): TransactionSpec => {
   return {
     effects: [
-      toggleVisualEffect.of(options.visual),
-      visualConf.reconfigure(configureVisualExtensions(options)),
+      toggleVisualEffect.of(showVisual),
+      visualConf.reconfigure(configureVisualExtensions(showVisual)),
     ],
   }
 }
@@ -202,9 +195,9 @@ const sharedVisualExtensions = () => [
   EditorView.contentAttributes.of({ 'aria-label': 'Visual Editor editing' }),
 ]
 
-const latexVisualExtensions = (options: Options): Extension => [
+const latexVisualExtensions = (): Extension => [
   listItemMarker,
-  atomicDecorations(options),
+  atomicDecorations,
   markDecorations, // NOTE: must be after atomicDecorations, so that mark decorations wrap inline widgets
   visualKeymap,
   commandTooltip,

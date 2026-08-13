@@ -31,7 +31,8 @@ import { setKeybindings } from '../extensions/keybindings'
 import { Highlight } from '../../../../../types/highlight'
 import { EditorView } from '@codemirror/view'
 import { useErrorBoundary } from 'react-error-boundary'
-import { setVisual } from '../extensions/visual/visual'
+import { isVisual, setVisual } from '../extensions/visual/visual'
+import { setFilePreview } from '../extensions/file-preview'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import { setDocName } from '@/features/source-editor/extensions/doc-name'
@@ -291,10 +292,9 @@ function useCodeMirrorScope(view: EditorView) {
   const showVisual =
     visual && !!openDocName && isCmVisualEditorAvailable(openDocName)
 
-  const visualRef = useRef({
-    previewByPath,
-    visual: showVisual,
-  })
+  const showVisualRef = useRef(showVisual)
+
+  const previewByPathRef = useRef(previewByPath)
 
   // Persist the search query in this hook when the document changes by keeping
   // a reference to the search query in sync with the editor state
@@ -308,21 +308,24 @@ function useCodeMirrorScope(view: EditorView) {
 
   const { showBoundary } = useErrorBoundary()
 
-  const handleException = useCallback((exception: any) => {
-    captureException(exception, {
-      tags: {
-        handler: 'cm6-exception',
-        // which editor mode is active ('visual' | 'code')
-        ol_editor_mode: visualRef.current.visual ? 'visual' : 'code',
-        // which editor keybindings are active ('default' | 'vim' | 'emacs')
-        ol_editor_keybindings: settingsRef.current.mode,
-        // whether Writefull is present ('extension' | 'integration' | 'none')
-        ol_extensions_writefull: window.writefull ? 'integration' : 'none',
-        // whether Grammarly is present
-        ol_extensions_grammarly: grammarlyExtensionPresent(),
-      },
-    })
-  }, [])
+  const handleException = useCallback(
+    (exception: any) => {
+      captureException(exception, {
+        tags: {
+          handler: 'cm6-exception',
+          // which editor mode is active ('visual' | 'code')
+          ol_editor_mode: isVisual(view) ? 'visual' : 'code',
+          // which editor keybindings are active ('default' | 'vim' | 'emacs')
+          ol_editor_keybindings: settingsRef.current.mode,
+          // whether Writefull is present ('extension' | 'integration' | 'none')
+          ol_extensions_writefull: window.writefull ? 'integration' : 'none',
+          // whether Grammarly is present
+          ol_extensions_grammarly: grammarlyExtensionPresent(),
+        },
+      })
+    },
+    [view]
+  )
 
   // create a new state when currentDocument changes
 
@@ -350,7 +353,8 @@ function useCodeMirrorScope(view: EditorView) {
           settings: settingsRef.current,
           phrases: phrasesRef.current,
           spelling: spellingRef.current,
-          visual: visualRef.current,
+          showVisual: showVisualRef.current,
+          previewByPath: previewByPathRef.current,
           projectFeatures: projectFeaturesRef.current,
           initialSearchQuery: searchQueryRef.current,
           showBoundary,
@@ -376,7 +380,7 @@ function useCodeMirrorScope(view: EditorView) {
         view.dispatch(spec)
       })
 
-      if (!visualRef.current.visual) {
+      if (!showVisualRef.current) {
         window.setTimeout(() => {
           view.dispatch(restoreScrollPosition())
           view.focus()
@@ -405,9 +409,9 @@ function useCodeMirrorScope(view: EditorView) {
   }, [view, openDocName])
 
   useEffect(() => {
-    visualRef.current.visual = showVisual
+    showVisualRef.current = showVisual
     window.setTimeout(() => {
-      view.dispatch(setVisual(visualRef.current))
+      view.dispatch(setVisual(showVisual))
       view.dispatch({
         effects: EditorView.scrollIntoView(view.state.selection.main.head),
       })
@@ -417,9 +421,9 @@ function useCodeMirrorScope(view: EditorView) {
   }, [view, showVisual])
 
   useEffect(() => {
-    visualRef.current.previewByPath = previewByPath
+    previewByPathRef.current = previewByPath
     window.setTimeout(() => {
-      view.dispatch(setVisual(visualRef.current))
+      view.dispatch(setFilePreview(previewByPath))
     })
   }, [view, previewByPath])
 
