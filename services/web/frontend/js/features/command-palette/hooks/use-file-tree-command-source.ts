@@ -6,6 +6,7 @@ import MiniSearch from 'minisearch'
 import { findInTree } from '@/features/file-tree/util/find-in-tree'
 import { debugConsole } from '@/utils/debugging'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import useIsNetworkStalled from '@/features/ide-react/hooks/use-is-network-stalled'
 
 type FlatFileTree = { path: string; name: string; id: string }[]
 
@@ -14,6 +15,7 @@ const FILE_POSITION_REGEX = /:(\d+)(?:,(\d+))?$/
 const useFileTreeCommandSource = (): CommandPaletteSource => {
   const { fileTreeData } = useFileTreeData()
   const { openDocWithId, openFileWithId } = useEditorManagerContext()
+  const networkStalled = useIsNetworkStalled()
 
   const flatFileTree = useMemo(
     () => flattenFileTree(fileTreeData),
@@ -52,6 +54,9 @@ const useFileTreeCommandSource = (): CommandPaletteSource => {
   )
 
   const defaults = useCallback((): CommandPaletteSearchResult[] => {
+    if (networkStalled) {
+      return []
+    }
     if (!flatFileTree) {
       return []
     }
@@ -67,12 +72,15 @@ const useFileTreeCommandSource = (): CommandPaletteSource => {
       }))
 
     return files
-  }, [flatFileTree, onSelect])
+  }, [flatFileTree, onSelect, networkStalled])
 
   const source: CommandPaletteSource = useMemo(
     () => ({
       id: 'file-tree',
       search(query) {
+        if (networkStalled) {
+          return []
+        }
         if (!index) {
           return []
         }
@@ -103,7 +111,7 @@ const useFileTreeCommandSource = (): CommandPaletteSource => {
       },
       defaults,
     }),
-    [index, onSelect, defaults]
+    [index, onSelect, defaults, networkStalled]
   )
   return source
 }
