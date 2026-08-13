@@ -702,6 +702,371 @@ describe('<ReviewPanel />', function () {
   })
 })
 
+describe('<ReviewPanel /> resolved comment in another file', function () {
+  const otherDocId = 'fake-nested-doc-id'
+  const otherDocThreadId = 'other-doc-thread-id'
+
+  beforeEach(function () {
+    window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
+    cy.interceptEvents()
+    cy.intercept('GET', '/project/*/changes/users', [])
+
+    cy.intercept('GET', '/project/*/threads', {
+      [otherDocThreadId]: {
+        messages: [
+          {
+            content: 'comment in another file',
+            id: `${otherDocThreadId}-1`,
+            timestamp: new Date('2025-01-01T00:00:00.000Z'),
+            user: userData,
+            user_id: USER_ID,
+          },
+        ],
+        resolved: true,
+        resolved_at: new Date('2025-01-02T00:00:00.000Z').toISOString(),
+        resolved_by_user_id: USER_ID,
+        resolved_by_user: userData,
+      },
+    })
+
+    cy.intercept('GET', '/project/*/ranges', [
+      {
+        id: otherDocId,
+        ranges: {
+          changes: [],
+          comments: [
+            {
+              id: 'other-doc-op-id',
+              op: { p: 161, c: 'Your introduction', t: otherDocThreadId },
+            },
+          ],
+          docId: otherDocId,
+        },
+      },
+    ])
+
+    cy.intercept(
+      'POST',
+      `/project/*/doc/${otherDocId}/thread/${otherDocThreadId}/reopen`,
+      {}
+    ).as('reopenThreadInOtherDoc')
+
+    cy.intercept(
+      'DELETE',
+      `/project/*/doc/${otherDocId}/thread/${otherDocThreadId}`,
+      {}
+    ).as('deleteThreadInOtherDoc')
+
+    const scope = mockScope(undefined, {
+      docOptions: {
+        rangesOptions: { removeCommentId: cy.stub().as('removeCommentId') },
+      },
+    })
+    const project = mockProject({
+      projectOwner: { _id: USER_ID },
+      projectFeatures: { trackChanges: false, trackChangesVisible: true },
+    })
+
+    cy.mount(
+      <TestContainer className="rp-size-expanded">
+        <EditorProviders
+          scope={scope}
+          providers={{ ProjectProvider: makeProjectProvider(project) }}
+        >
+          <CodeMirrorEditor />
+        </EditorProviders>
+      </TestContainer>
+    )
+
+    cy.get('.cm-content').should('have.css', 'opacity', '1')
+
+    // Open the review panel with keyboard shortcut
+    cy.findByText('contentLine 0').type('{command}j', { scrollBehavior: false })
+    cy.findByText('contentLine 1').type('{ctrl}j', { scrollBehavior: false })
+
+    cy.findByTestId('review-panel').should('exist')
+  })
+
+  it('names the other file in the resolved comments dropdown', function () {
+    cy.findByLabelText('Resolved comments').click()
+    cy.findByRole('tooltip').within(() => {
+      cy.findByText('foo.tex').should('exist')
+      cy.findByText('comment in another file').should('exist')
+    })
+  })
+
+  it('deletes the comment using the doc id of the thread', function () {
+    cy.findByLabelText('Resolved comments').click()
+    cy.findByRole('tooltip').within(() => {
+      cy.findByText('Delete').click({ force: true })
+    })
+    cy.wait('@deleteThreadInOtherDoc')
+      .its('request.url')
+      .should('contain', `/doc/${otherDocId}/thread/${otherDocThreadId}`)
+  })
+
+  it('leaves the ranges of the open document alone when deleting', function () {
+    cy.findByLabelText('Resolved comments').click()
+    cy.findByRole('tooltip').within(() => {
+      cy.findByText('Delete').click({ force: true })
+    })
+    cy.wait('@deleteThreadInOtherDoc')
+    cy.get('@removeCommentId').should('not.have.been.called')
+  })
+
+  it('reopens the comment using the doc id of the thread', function () {
+    cy.findByLabelText('Resolved comments').click()
+    cy.findByRole('tooltip').within(() => {
+      cy.findByText('Re-open').click({ force: true })
+    })
+    cy.wait('@reopenThreadInOtherDoc')
+      .its('request.url')
+      .should('contain', `/doc/${otherDocId}/thread/${otherDocThreadId}/reopen`)
+  })
+})
+
+describe('<ReviewPanel /> unresolved comment in another file', function () {
+  const otherDocId = 'fake-nested-doc-id'
+  const otherDocThreadId = 'other-doc-thread-id'
+
+  beforeEach(function () {
+    window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
+    cy.interceptEvents()
+    cy.intercept('GET', '/project/*/changes/users', [])
+
+    cy.intercept('GET', '/project/*/threads', {
+      [otherDocThreadId]: {
+        messages: [
+          {
+            content: 'comment in another file',
+            id: `${otherDocThreadId}-1`,
+            timestamp: new Date('2025-01-01T00:00:00.000Z'),
+            user: userData,
+            user_id: USER_ID,
+          },
+        ],
+      },
+    })
+
+    cy.intercept('GET', '/project/*/ranges', [
+      {
+        id: otherDocId,
+        ranges: {
+          changes: [],
+          comments: [
+            {
+              id: 'other-doc-op-id',
+              op: { p: 161, c: 'Your introduction', t: otherDocThreadId },
+            },
+          ],
+          docId: otherDocId,
+        },
+      },
+    ])
+
+    cy.intercept(
+      'POST',
+      `/project/*/doc/${otherDocId}/thread/${otherDocThreadId}/resolve`,
+      {}
+    ).as('resolveThreadInOtherDoc')
+
+    cy.intercept(
+      'DELETE',
+      `/project/*/doc/${otherDocId}/thread/${otherDocThreadId}`,
+      {}
+    ).as('deleteThreadInOtherDoc')
+
+    const scope = mockScope()
+    const project = mockProject({
+      projectOwner: { _id: USER_ID },
+      projectFeatures: { trackChanges: false, trackChangesVisible: true },
+    })
+
+    cy.mount(
+      <TestContainer className="rp-size-expanded">
+        <EditorProviders
+          scope={scope}
+          providers={{ ProjectProvider: makeProjectProvider(project) }}
+        >
+          <CodeMirrorEditor />
+        </EditorProviders>
+      </TestContainer>
+    )
+
+    cy.get('.cm-content').should('have.css', 'opacity', '1')
+
+    // Open the review panel with keyboard shortcut
+    cy.findByText('contentLine 0').type('{command}j', { scrollBehavior: false })
+    cy.findByText('contentLine 1').type('{ctrl}j', { scrollBehavior: false })
+
+    cy.findByTestId('review-panel').should('exist')
+
+    // Overview mode lists the comments of every file, not just the open one
+    cy.findByRole('tab', { name: /overview/i }).click()
+    cy.findByText('comment in another file').should('exist')
+  })
+
+  it('resolves the comment using the doc id of the thread', function () {
+    // Find the resolve icon button using the hidden label
+    cy.findByText('Resolve comment').click({ force: true })
+    cy.wait('@resolveThreadInOtherDoc')
+      .its('request.url')
+      .should(
+        'contain',
+        `/doc/${otherDocId}/thread/${otherDocThreadId}/resolve`
+      )
+  })
+
+  it('deletes the comment using the doc id of the thread', function () {
+    // Find the options icon button using the hidden label
+    cy.findByText('More options')
+      .first()
+      .click({ force: true, scrollBehavior: false })
+    cy.findByRole('menu').within(() => {
+      cy.findByText('Delete').click({ scrollBehavior: false })
+    })
+    cy.findByRole('dialog').within(() => {
+      cy.findByRole('button', { name: 'Delete' }).click()
+    })
+    cy.wait('@deleteThreadInOtherDoc')
+      .its('request.url')
+      .should('contain', `/doc/${otherDocId}/thread/${otherDocThreadId}`)
+  })
+})
+
+describe('<ReviewPanel /> resolved comment in another file (history OT)', function () {
+  const otherDocId = 'fake-nested-doc-id'
+  const otherDocPath = 'figures/foo.tex'
+  const otherDocThreadId = 'other-doc-thread-id'
+  const quotedText = 'Your introduction'
+
+  beforeEach(function () {
+    window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
+    window.metaAttributesCache.set('ol-otMigrationStage', 1)
+    cy.interceptEvents()
+    cy.intercept('GET', '/project/*/changes/users', [])
+
+    cy.intercept('GET', '/project/*/threads', {
+      [otherDocThreadId]: {
+        messages: [
+          {
+            content: 'comment in another file',
+            id: `${otherDocThreadId}-1`,
+            timestamp: new Date('2025-01-01T00:00:00.000Z'),
+            user: userData,
+            user_id: USER_ID,
+          },
+        ],
+        resolved: true,
+        resolved_at: new Date('2025-01-02T00:00:00.000Z').toISOString(),
+        resolved_by_user_id: USER_ID,
+        resolved_by_user: userData,
+      },
+    })
+
+    // In history OT the resolved comments menu reads project ranges from the
+    // project snapshot rather than from /project/:id/ranges. Inline the file
+    // content in the chunk so no blobs need fetching.
+    cy.intercept('POST', '/project/*/flush', { statusCode: 204 })
+    cy.intercept('GET', '/project/*/changes?*', { body: [] })
+    cy.intercept('GET', '/project/*/latest/history', {
+      body: {
+        chunk: {
+          history: {
+            snapshot: {
+              files: {
+                [otherDocPath]: {
+                  content: quotedText,
+                  comments: [
+                    {
+                      id: otherDocThreadId,
+                      ranges: [{ pos: 0, length: quotedText.length }],
+                      resolved: true,
+                    },
+                  ],
+                },
+              },
+            },
+            changes: [],
+          },
+          startVersion: 0,
+        },
+      },
+    })
+
+    cy.intercept(
+      'POST',
+      `/project/*/doc/${otherDocId}/thread/${otherDocThreadId}/reopen`,
+      {}
+    ).as('reopenThreadInOtherDoc')
+
+    cy.intercept(
+      'DELETE',
+      `/project/*/doc/${otherDocId}/thread/${otherDocThreadId}`,
+      {}
+    ).as('deleteThreadInOtherDoc')
+
+    const scope = mockScope(undefined, { docOptions: { historyOT: true } })
+    const project = mockProject({
+      projectOwner: { _id: USER_ID },
+      projectFeatures: { trackChanges: false, trackChangesVisible: true },
+    })
+
+    cy.mount(
+      <TestContainer className="rp-size-expanded">
+        <EditorProviders
+          scope={scope}
+          providers={{ ProjectProvider: makeProjectProvider(project) }}
+        >
+          <CodeMirrorEditor />
+        </EditorProviders>
+      </TestContainer>
+    )
+
+    cy.get('.cm-content').should('have.css', 'opacity', '1')
+
+    // Open the review panel with keyboard shortcut
+    cy.findByText('contentLine 0').type('{command}j', { scrollBehavior: false })
+    cy.findByText('contentLine 1').type('{ctrl}j', { scrollBehavior: false })
+
+    cy.findByTestId('review-panel').should('exist')
+  })
+
+  it('names the other file in the resolved comments dropdown', function () {
+    cy.findByLabelText('Resolved comments').click()
+    cy.findByRole('tooltip').within(() => {
+      cy.findByText('foo.tex').should('exist')
+      cy.findByText('comment in another file').should('exist')
+    })
+  })
+
+  it('deletes the comment over HTTP rather than submitting an op', function () {
+    // Opening the panel edits the doc, which submits ops of its own
+    cy.get('@historyOTSubmitOp').invoke('resetHistory')
+    cy.findByLabelText('Resolved comments').click()
+    cy.findByRole('tooltip').within(() => {
+      cy.findByText('Delete').click({ force: true })
+    })
+    cy.wait('@deleteThreadInOtherDoc')
+      .its('request.url')
+      .should('contain', `/doc/${otherDocId}/thread/${otherDocThreadId}`)
+    cy.get('@historyOTSubmitOp').should('not.have.been.called')
+  })
+
+  it('reopens the comment over HTTP rather than submitting an op', function () {
+    // Opening the panel edits the doc, which submits ops of its own
+    cy.get('@historyOTSubmitOp').invoke('resetHistory')
+    cy.findByLabelText('Resolved comments').click()
+    cy.findByRole('tooltip').within(() => {
+      cy.findByText('Re-open').click({ force: true })
+    })
+    cy.wait('@reopenThreadInOtherDoc')
+      .its('request.url')
+      .should('contain', `/doc/${otherDocId}/thread/${otherDocThreadId}/reopen`)
+    cy.get('@historyOTSubmitOp').should('not.have.been.called')
+  })
+})
+
 describe('<ReviewPanel /> review tooltip without write permission', function () {
   beforeEach(function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)

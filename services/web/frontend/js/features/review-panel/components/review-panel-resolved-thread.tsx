@@ -16,8 +16,9 @@ import { useUserContext } from '@/shared/context/user-context'
 export const ReviewPanelResolvedThread: FC<{
   id: ThreadId
   comment: Change<CommentOperation>
+  docId: string
   docName: string
-}> = ({ id, comment, docName }) => {
+}> = ({ id, comment, docId, docName }) => {
   const { t } = useTranslation()
   const { reopenThread, deleteThread } = useThreadsActionsContext()
   const [processing, setProcessing] = useState(false)
@@ -33,7 +34,7 @@ export const ReviewPanelResolvedThread: FC<{
   const handleReopenThread = useCallback(async () => {
     setProcessing(true)
     try {
-      await reopenThread(id)
+      await reopenThread(id, docId)
     } catch (err) {
       debugConsole.error(err)
       showGenericMessageModal(
@@ -43,12 +44,12 @@ export const ReviewPanelResolvedThread: FC<{
     } finally {
       setProcessing(false)
     }
-  }, [id, reopenThread, showGenericMessageModal, t])
+  }, [id, docId, reopenThread, showGenericMessageModal, t])
 
   const handleDeleteThread = useCallback(async () => {
     setProcessing(true)
     try {
-      await deleteThread(id)
+      await deleteThread(id, docId)
     } catch (err) {
       debugConsole.error(err)
       showGenericMessageModal(
@@ -58,7 +59,7 @@ export const ReviewPanelResolvedThread: FC<{
     } finally {
       setProcessing(false)
     }
-  }, [id, deleteThread, showGenericMessageModal, t])
+  }, [id, docId, deleteThread, showGenericMessageModal, t])
 
   return (
     <div

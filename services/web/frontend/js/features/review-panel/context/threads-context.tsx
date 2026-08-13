@@ -43,9 +43,9 @@ export const ThreadsContext = createContext<Threads | undefined>(undefined)
 
 type ThreadsActions = {
   addComment: (pos: number, text: string, content: string) => Promise<void>
-  resolveThread: (threadId: ThreadId) => Promise<void>
-  reopenThread: (threadId: ThreadId) => Promise<void>
-  deleteThread: (threadId: ThreadId) => Promise<void>
+  resolveThread: (threadId: ThreadId, docId: string) => Promise<void>
+  reopenThread: (threadId: ThreadId, docId: string) => Promise<void>
+  deleteThread: (threadId: ThreadId, docId: string) => Promise<void>
   addMessage: (threadId: ThreadId, content: string) => Promise<void>
   editMessage: (
     threadId: ThreadId,
@@ -293,23 +293,25 @@ export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
 
         currentDocument.submitOp(op)
       },
-      async resolveThread(threadId: string) {
+      async resolveThread(threadId: string, docId: string) {
         await postJSON(
-          `/project/${projectId}/doc/${currentDocument.doc_id}/thread/${threadId}/resolve`
+          `/project/${projectId}/doc/${docId}/thread/${threadId}/resolve`
         )
         sendEvent('rp-comment-resolve', { view: reviewPanelView })
       },
-      async reopenThread(threadId: string) {
+      async reopenThread(threadId: string, docId: string) {
         await postJSON(
-          `/project/${projectId}/doc/${currentDocument.doc_id}/thread/${threadId}/reopen`
+          `/project/${projectId}/doc/${docId}/thread/${threadId}/reopen`
         )
         sendEvent('rp-comment-reopen')
       },
-      async deleteThread(threadId: string) {
+      async deleteThread(threadId: string, docId: string) {
         await deleteJSON(
-          `/project/${projectId}/doc/${currentDocument.doc_id}/thread/${threadId}`
+          `/project/${projectId}/doc/${docId}/thread/${threadId}`
         )
-        currentDocument.ranges?.removeCommentId(threadId)
+        if (docId === currentDocument.doc_id) {
+          currentDocument.ranges?.removeCommentId(threadId)
+        }
         sendEvent('rp-comment-delete')
       },
       async addMessage(threadId: ThreadId, content: string) {
@@ -347,6 +349,10 @@ export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
     }
 
     if (isHistoryOT) {
+      // ops can only be submitted for the open document, so threads in other
+      // documents go through the HTTP API instead
+      const httpActions = { ...actions }
+
       // TODO: dispatch on view instead?
       Object.assign(actions, {
         async addComment(pos: number, text: string, content: string) {
@@ -370,7 +376,12 @@ export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
             effects: rangesUpdatedEffect.of(null),
           })
         },
-        async resolveThread(threadId: string) {
+        async resolveThread(threadId: string, docId: string) {
+          if (docId !== currentDocument.doc_id) {
+            await httpActions.resolveThread(threadId, docId)
+            return
+          }
+
           const op = new SetCommentStateOperation(threadId, true)
           currentDocument.historyOTShareDoc.submitOp([op])
           sendEvent('rp-comment-resolve', { view: reviewPanelView })
@@ -378,7 +389,12 @@ export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
             effects: rangesUpdatedEffect.of(null),
           })
         },
-        async reopenThread(threadId: string) {
+        async reopenThread(threadId: string, docId: string) {
+          if (docId !== currentDocument.doc_id) {
+            await httpActions.reopenThread(threadId, docId)
+            return
+          }
+
           const op = new SetCommentStateOperation(threadId, false)
           currentDocument.historyOTShareDoc.submitOp([op])
           sendEvent('rp-comment-reopen')
@@ -386,7 +402,12 @@ export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
             effects: rangesUpdatedEffect.of(null),
           })
         },
-        async deleteThread(threadId: string) {
+        async deleteThread(threadId: string, docId: string) {
+          if (docId !== currentDocument.doc_id) {
+            await httpActions.deleteThread(threadId, docId)
+            return
+          }
+
           const op = new DeleteCommentOperation(threadId)
           currentDocument.historyOTShareDoc.submitOp([op])
           sendEvent('rp-comment-delete')

@@ -44,7 +44,7 @@ export const ReviewPanelComment = memo<{
     const handleResolveComment = useCallback(async () => {
       setProcessing(true)
       try {
-        await resolveThread(comment.op.t)
+        await resolveThread(comment.op.t, docId)
       } catch (err) {
         debugConsole.error(err)
         showGenericMessageModal(
@@ -54,7 +54,7 @@ export const ReviewPanelComment = memo<{
       } finally {
         setProcessing(false)
       }
-    }, [comment.op.t, resolveThread, showGenericMessageModal, t])
+    }, [comment.op.t, docId, resolveThread, showGenericMessageModal, t])
 
     const handleEditMessage = useCallback(
       async (commentId: CommentId, content: string) => {
@@ -110,7 +110,7 @@ export const ReviewPanelComment = memo<{
       async (commentId: ThreadId) => {
         setProcessing(true)
         try {
-          await deleteThread(commentId)
+          await deleteThread(commentId, docId)
         } catch (err) {
           debugConsole.error(err)
           showGenericMessageModal(
@@ -121,7 +121,7 @@ export const ReviewPanelComment = memo<{
           setProcessing(false)
         }
       },
-      [deleteThread, showGenericMessageModal, t]
+      [docId, deleteThread, showGenericMessageModal, t]
     )
 
     const handleSubmitReply = useCallback(
