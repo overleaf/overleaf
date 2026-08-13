@@ -128,6 +128,7 @@
   --form-select-option-disabled-color: var(--content-disabled-dark);
 }
 
+// Keep in sync with services/web/frontend/js/features/source-editor/extensions/command-tooltip.ts
 @mixin light-input {
   --input-field-color: var(--content-primary);
   --input-field-bg: var(--bg-light-primary);
@@ -532,6 +533,7 @@ input[type='range'] {
 input.form-control[type='text'],
 input.form-control[type='search'],
 input.form-control[type='number'],
+input.form-control[type='url'],
 textarea.form-control {
   color: var(--input-field-color);
   background-color: var(--input-field-bg);
