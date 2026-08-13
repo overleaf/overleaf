@@ -127,9 +127,6 @@ const grantClipboardPermissions = () => {
 describe('editor context menu', { scrollBehavior: false }, function () {
   beforeEach(function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
-    window.metaAttributesCache.set('ol-splitTestVariants', {
-      'editor-context-menu': 'enabled',
-    })
     cy.intercept('POST', '/project/*/track_changes', {
       statusCode: 200,
       body: {},
@@ -709,27 +706,6 @@ describe('editor context menu', { scrollBehavior: false }, function () {
     })
   })
 
-  describe('when feature flag is disabled', function () {
-    it('should not show the context menu', function () {
-      window.metaAttributesCache.set('ol-splitTestVariants', {
-        'editor-context-menu': 'default',
-      })
-
-      const scope = mockScope()
-
-      cy.mount(
-        <TestContainer>
-          <EditorProviders scope={scope}>
-            <CodeMirrorEditor />
-          </EditorProviders>
-        </TestContainer>
-      )
-
-      cy.get('.cm-line').eq(10).rightclick()
-      cy.findByRole('menu').should('not.exist')
-    })
-  })
-
   describe('when a user does not have edit permissions', function () {
     it('should only show Copy, Select all, Comment (hidden Cut, Paste, Delete, Suggest edits)', function () {
       const scope = mockScope()
@@ -1107,7 +1083,6 @@ describe('editor context menu', { scrollBehavior: false }, function () {
 
     it('should hide button when visual preview is enabled', function () {
       window.metaAttributesCache.set('ol-splitTestVariants', {
-        'editor-context-menu': 'enabled',
         'visual-preview': 'enabled',
       })
 
@@ -1365,25 +1340,6 @@ describe('editor context menu', { scrollBehavior: false }, function () {
 
       cy.get('.cm-content').focus()
       cy.get('body').type('{esc}')
-      cy.findByRole('menu').should('not.exist')
-    })
-
-    it('should not show context menu on gutter when feature flag is disabled', function () {
-      window.metaAttributesCache.set('ol-splitTestVariants', {
-        'editor-context-menu': 'default',
-      })
-
-      const scope = mockScope()
-
-      cy.mount(
-        <TestContainer>
-          <EditorProviders scope={scope}>
-            <CodeMirrorEditor />
-          </EditorProviders>
-        </TestContainer>
-      )
-
-      cy.get('.cm-gutterElement').eq(5).rightclick()
       cy.findByRole('menu').should('not.exist')
     })
   })

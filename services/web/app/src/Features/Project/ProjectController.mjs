@@ -497,7 +497,6 @@ const _ProjectController = {
       'wf-citations-checker',
       'wf-citations-checker-on-selection',
       'writefull-asymetric-queue-size-per-model',
-      'editor-context-menu',
       'email-notifications',
       'wf-enable-freemium-super-complete',
       'wf-enable-super-complete-promotion',

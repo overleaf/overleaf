@@ -12,7 +12,6 @@ import {
   useCodeMirrorViewContext,
 } from './codemirror-context'
 import { contextMenuStateField } from '../extensions/context-menu'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useContextMenuItems } from '../hooks/use-context-menu-items'
 import DropdownListItem from '@/shared/components/dropdown/dropdown-list-item'
 import { sendContextMenuEvent } from '../utils/context-menu-analytics'
@@ -20,10 +19,9 @@ import { sendContextMenuEvent } from '../utils/context-menu-analytics'
 const EditorContextMenu: FC = () => {
   const state = useCodeMirrorStateContext()
   const view = useCodeMirrorViewContext()
-  const editorContextMenuEnabled = useFeatureFlag('editor-context-menu')
 
   const menuState = state.field(contextMenuStateField, false)
-  if (!editorContextMenuEnabled || !menuState?.tooltip) {
+  if (!menuState?.tooltip) {
     return null
   }
 

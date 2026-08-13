@@ -32,28 +32,20 @@ const mouseDownStateField = StateField.define<boolean>({
 
 const reviewTooltipCompartment = new Compartment()
 
-export const reviewTooltip = (
-  enabled: boolean,
-  editorContextMenuEnabled: boolean = false
-): Extension => {
+export const reviewTooltip = (enabled: boolean): Extension => {
   return [
     addCommentRangesField,
-    reviewTooltipCompartment.of(
-      enabled ? reviewTooltipMenu(editorContextMenuEnabled) : []
-    ),
+    reviewTooltipCompartment.of(enabled ? reviewTooltipMenu() : []),
   ]
 }
 
-export const setReviewTooltip = (
-  enabled: boolean,
-  editorContextMenuEnabled: boolean
-): TransactionSpec => ({
+export const setReviewTooltip = (enabled: boolean): TransactionSpec => ({
   effects: reviewTooltipCompartment.reconfigure(
-    enabled ? reviewTooltipMenu(editorContextMenuEnabled) : []
+    enabled ? reviewTooltipMenu() : []
   ),
 })
 
-const reviewTooltipMenu = (editorContextMenuEnabled: boolean): Extension => {
+const reviewTooltipMenu = (): Extension => {
   let mouseUpListener: null | (() => void) = null
   const disableMouseUpListener = () => {
     if (mouseUpListener) {
@@ -68,7 +60,7 @@ const reviewTooltipMenu = (editorContextMenuEnabled: boolean): Extension => {
     EditorView.domEventHandlers({
       mousedown: (event, view) => {
         // Hide tooltip when opening the context menu
-        if (editorContextMenuEnabled && isContextMenuMouseEvent(event)) {
+        if (isContextMenuMouseEvent(event)) {
           return false
         }
 
