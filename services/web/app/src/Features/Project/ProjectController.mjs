@@ -504,7 +504,6 @@ const _ProjectController = {
       'wf-rebrand',
       'testing-ai-usage',
       'wf-fake-non-english-suggestions',
-      'editor-tabs',
       'overleaf-code',
       'export-docx',
       'sharing-updates',

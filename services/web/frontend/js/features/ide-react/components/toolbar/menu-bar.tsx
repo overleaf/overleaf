@@ -26,7 +26,6 @@ import getMeta from '@/utils/meta'
 import EditorCloneProjectModalWrapper from '@/features/clone-project-modal/components/editor-clone-project-modal-wrapper'
 import useOpenProject from '@/shared/hooks/use-open-project'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 import ReviewModeOptions from './review-mode-options'
 
 const menubarExtraComponents = importOverleafModules(
@@ -53,8 +52,6 @@ export const ToolbarMenuBar = () => {
   const anonymous = getMeta('ol-anonymous')
   const showSupport = getMeta('ol-showSupport')
   const showDocumentation = getMeta('ol-wikiEnabled')
-
-  const hasEditorTabs = useFeatureFlag('editor-tabs')
 
   useCommandProvider(
     () => [
@@ -291,16 +288,14 @@ export const ToolbarMenuBar = () => {
             }
             onClick={toggleBreadcrumbs}
           />
-          {hasEditorTabs && (
-            <MenuBarOption
-              eventKey="show_editor_tabs"
-              title={t('show_editor_tabs')}
-              leadingIcon={
-                editorTabs ? 'check' : <OLDropdownItem.EmptyLeadingIcon />
-              }
-              onClick={toggleEditorTabs}
-            />
-          )}
+          <MenuBarOption
+            eventKey="show_editor_tabs"
+            title={t('show_editor_tabs')}
+            leadingIcon={
+              editorTabs ? 'check' : <OLDropdownItem.EmptyLeadingIcon />
+            }
+            onClick={toggleEditorTabs}
+          />
           <MenuBarOption
             eventKey="show_equation_preview"
             title={t('show_equation_preview')}

@@ -206,15 +206,6 @@ function selectDoc(id: string, path?: string[]) {
   selectEntity(makeDocEntity(id, DOC_NAMES[id], path))
 }
 
-function enableEditorTabs() {
-  cy.window().then(win => {
-    win.metaAttributesCache.set('ol-splitTestVariants', {
-      'editor-tabs': 'enabled',
-    })
-    win.metaAttributesCache.set('ol-labsExperiments', ['editor-tabs'])
-  })
-}
-
 describe('File Tabs', function () {
   function mountTabs(options?: { rootFolder?: any; userSettings?: any }) {
     const rootFolder = options?.rootFolder ?? defaultRootFolder
@@ -241,7 +232,6 @@ describe('File Tabs', function () {
     cy.interceptEvents()
     cy.interceptTutorials()
     cy.interceptCompile()
-    enableEditorTabs()
 
     // Clear persisted tab state from localStorage
     cy.window().then(win => {
@@ -1208,7 +1198,6 @@ describe('File Tabs', function () {
       cy.clock()
       cy.window().then(win => {
         win.metaAttributesCache.set('ol-splitTestVariants', {
-          'editor-tabs': 'enabled',
           'intermittent-connection-improvements': 'enabled',
         })
       })
@@ -1235,11 +1224,6 @@ describe('File Tabs', function () {
     })
 
     it('does not disable tabs when the feature flag is off', function () {
-      cy.window().then(win => {
-        win.metaAttributesCache.set('ol-splitTestVariants', {
-          'editor-tabs': 'enabled',
-        })
-      })
       mountWithStaleDocs()
       cy.then(() => selectDoc(DOC_IDS.main))
       cy.tick(1000)

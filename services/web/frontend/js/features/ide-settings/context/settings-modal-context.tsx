@@ -102,7 +102,6 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
   const { settingsShown, setSettingsShown } = useLayoutContext()
 
   const hasEmailNotifications = useFeatureFlag('email-notifications')
-  const hasEditorTabs = useFeatureFlag('editor-tabs')
   const hasToolbarMigration = useFeatureFlag('writefull-toolbar-migration')
 
   const editorTabExtraSections = useSlotSections(editorTabExtraSectionHooks)
@@ -137,12 +136,10 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
               {
                 key: 'editorTabs',
                 component: <EditorTabsSetting />,
-                hidden: !hasEditorTabs,
               },
               {
                 key: 'previewTabs',
                 component: <PreviewTabsSetting />,
-                hidden: !hasEditorTabs,
               },
               {
                 key: 'mode',
@@ -336,7 +333,6 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
     ],
     [
       t,
-      hasEditorTabs,
       overallTheme,
       hasEmailNotifications,
       isOverleaf,
