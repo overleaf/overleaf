@@ -23,6 +23,7 @@ import {
   FolderUploadConflicts,
 } from '@/features/file-tree/components/file-tree-create/file-tree-upload-conflicts'
 import getMeta from '@/utils/meta'
+import { useActiveOverallTheme } from '@/shared/hooks/use-active-overall-theme'
 
 export default function FileTreeUploadDoc() {
   const { parentFolderId, cancel, droppedFiles, setDroppedFiles } =
@@ -215,6 +216,8 @@ export default function FileTreeUploadDoc() {
     )
   })
 
+  const uppyTheme = useActiveOverallTheme('themed-modals')
+
   useEffect(() => {
     if (uppy && droppedFiles) {
       uppy.setOptions({
@@ -312,6 +315,7 @@ export default function FileTreeUploadDoc() {
             proudlyDisplayPoweredByUppy={false}
             // allow files or folders to be selected
             fileManagerSelectionType="both"
+            theme={uppyTheme}
             locale={{
               strings: {
                 // Text to show on the droppable area.

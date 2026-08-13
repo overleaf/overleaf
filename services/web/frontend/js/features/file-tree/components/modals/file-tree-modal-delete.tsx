@@ -11,6 +11,7 @@ import {
 import OLButton from '@/shared/components/ol/ol-button'
 import Notification from '@/shared/components/notification'
 import { useFileTreeSelectable } from '../../contexts/file-tree-selectable'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 function FileTreeModalDelete() {
   const { t } = useTranslation()
@@ -26,6 +27,8 @@ function FileTreeModalDelete() {
 
   const { select } = useFileTreeSelectable()
 
+  const themed = useFeatureFlag('themed-modals')
+
   if (!isDeleting) return null // the modal will not be rendered; return early
 
   function handleHide() {
@@ -38,7 +41,7 @@ function FileTreeModalDelete() {
   }
 
   return (
-    <OLModal show onHide={handleHide}>
+    <OLModal show onHide={handleHide} themed={themed}>
       <OLModalHeader>
         <OLModalTitle>{t('delete')}</OLModalTitle>
       </OLModalHeader>

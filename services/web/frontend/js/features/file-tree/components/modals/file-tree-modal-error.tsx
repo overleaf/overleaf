@@ -16,11 +16,13 @@ import {
   OLModalTitle,
 } from '@/shared/components/ol/ol-modal'
 import OLButton from '@/shared/components/ol/ol-button'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 function FileTreeModalError() {
   const { t } = useTranslation()
 
   const { isRenaming, isMoving, cancel, error } = useFileTreeActionable()
+  const themed = useFeatureFlag('themed-modals')
 
   // the modal will not be rendered; return early
   if (!error) return null
@@ -67,7 +69,7 @@ function FileTreeModalError() {
   }
 
   return (
-    <OLModal show onHide={handleHide}>
+    <OLModal show onHide={handleHide} themed={themed}>
       <OLModalHeader>
         <OLModalTitle>{errorTitle()}</OLModalTitle>
       </OLModalHeader>

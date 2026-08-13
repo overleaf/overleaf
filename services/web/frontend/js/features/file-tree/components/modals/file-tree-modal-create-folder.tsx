@@ -15,11 +15,13 @@ import OLButton from '@/shared/components/ol/ol-button'
 import OLFormControl from '@/shared/components/ol/ol-form-control'
 import OLFormLabel from '@/shared/components/ol/ol-form-label'
 import OLFormGroup from '@/shared/components/ol/ol-form-group'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 function FileTreeModalCreateFolder() {
   const { t } = useTranslation()
   const [name, setName] = useState('')
   const [validName, setValidName] = useState(true)
+  const themed = useFeatureFlag('themed-modals')
 
   const { isCreatingFolder, inFlight, finishCreatingFolder, cancel, error } =
     useFileTreeActionable()
@@ -51,7 +53,12 @@ function FileTreeModalCreateFolder() {
   }
 
   return (
-    <OLModal show onHide={handleHide}>
+    <OLModal
+      show
+      onHide={handleHide}
+      themed={themed}
+      className="file-tree-modal-create-folder"
+    >
       <OLModalHeader>
         <OLModalTitle>{t('new_folder')}</OLModalTitle>
       </OLModalHeader>
