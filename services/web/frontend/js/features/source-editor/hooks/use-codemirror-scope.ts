@@ -33,6 +33,7 @@ import { EditorView } from '@codemirror/view'
 import { useErrorBoundary } from 'react-error-boundary'
 import { isVisual, setVisual } from '../extensions/visual/visual'
 import { setFilePreview } from '../extensions/file-preview'
+import { setDocFolder } from '../extensions/doc-folder'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import { setDocName } from '@/features/source-editor/extensions/doc-name'
@@ -287,7 +288,7 @@ function useCodeMirrorScope(view: EditorView) {
 
   const editableRef = useRef(permissions.write || permissions.trackedWrite)
 
-  const { previewByPath } = useFileTreePathContext()
+  const { previewByPath, dirname } = useFileTreePathContext()
 
   const showVisual =
     visual && !!openDocName && isCmVisualEditorAvailable(openDocName)
@@ -295,6 +296,14 @@ function useCodeMirrorScope(view: EditorView) {
   const showVisualRef = useRef(showVisual)
 
   const previewByPathRef = useRef(previewByPath)
+
+  const dirnameRef = useRef(dirname)
+
+  // Kept fresh here, above the state-creation effect, so that effect sees the
+  // new file tree on a simultaneous tree-change + doc-switch.
+  useEffect(() => {
+    dirnameRef.current = dirname
+  }, [dirname])
 
   // Persist the search query in this hook when the document changes by keeping
   // a reference to the search query in sync with the editor state
@@ -355,6 +364,7 @@ function useCodeMirrorScope(view: EditorView) {
           spelling: spellingRef.current,
           showVisual: showVisualRef.current,
           previewByPath: previewByPathRef.current,
+          currentDocFolder: dirnameRef.current(currentDocument.doc_id),
           projectFeatures: projectFeaturesRef.current,
           initialSearchQuery: searchQueryRef.current,
           showBoundary,
@@ -423,9 +433,12 @@ function useCodeMirrorScope(view: EditorView) {
   useEffect(() => {
     previewByPathRef.current = previewByPath
     window.setTimeout(() => {
-      view.dispatch(setFilePreview(previewByPath))
+      view.dispatch(
+        setFilePreview(previewByPath),
+        setDocFolder(currentDocument ? dirname(currentDocument.doc_id) : null)
+      )
     })
-  }, [view, previewByPath])
+  }, [view, previewByPath, dirname, currentDocument])
 
   useEffect(() => {
     editableRef.current = permissions.write || permissions.trackedWrite

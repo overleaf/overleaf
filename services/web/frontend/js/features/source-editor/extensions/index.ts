@@ -49,6 +49,7 @@ import { breadcrumbPanel } from './breadcrumbs-panel'
 import { geometryChangeEvent } from './geometry-change-event'
 import { docName } from './doc-name'
 import { filePreview } from './file-preview'
+import { docFolder } from './doc-folder'
 import { fileTreeItemDrop } from './file-tree-item-drop'
 import { mathPreview } from './math-preview'
 import { ranges } from './ranges'
@@ -135,6 +136,7 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
 
   docName(options.docName),
   filePreview(options.previewByPath),
+  docFolder(options.currentDocFolder),
 
   // NOTE: `annotations` needs to be before `language`
   annotations(),
