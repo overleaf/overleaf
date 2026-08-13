@@ -11,7 +11,7 @@ const LearnWikiLink: FC<React.PropsWithChildren<{ href: string }>> = ({
 export const FigureModalHelp = () => {
   const { t } = useTranslation()
   return (
-    <>
+    <div className="figure-modal-help">
       <p>{t('this_tool_helps_you_insert_figures')}</p>
       <b>{t('editing_captions')}</b>
       <p>{t('when_you_tick_the_include_caption_box')}</p>
@@ -63,6 +63,6 @@ export const FigureModalHelp = () => {
           ]}
         />
       </p>
-    </>
+    </div>
   )
 }

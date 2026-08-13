@@ -28,6 +28,7 @@ import { prepareLines } from '../../utils/prepare-lines'
 import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
 import { isSvgFile } from '../../utils/file'
 import { PastedImageData } from '../../utils/paste-image'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 const FigureModalBody = lazy(() => import('./figure-modal-body'))
 
@@ -41,6 +42,7 @@ export const FigureModal = memo(function FigureModal() {
 
 const FigureModalContent = () => {
   const { t } = useTranslation()
+  const themed = useFeatureFlag('themed-modals')
 
   const getTitle = useCallback(
     (state: FigureModalSource) => {
@@ -344,6 +346,7 @@ const FigureModalContent = () => {
       className="figure-modal"
       show
       returnFocusOnDeactivate={false}
+      themed={themed}
     >
       <OLModalHeader>
         <OLModalTitle>

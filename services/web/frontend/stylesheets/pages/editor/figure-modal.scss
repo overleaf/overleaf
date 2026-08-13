@@ -1,8 +1,45 @@
+:root {
+  --figure-modal-source-button-bg-color: var(--bg-light-primary);
+}
+
+@include theme('default') {
+  .modal-themed {
+    --figure-modal-source-button-bg-color: var(--bg-dark-secondary);
+  }
+}
+
+.figure-modal {
+  @include themed-links;
+
+  .form-label,
+  .form-text {
+    color: var(--content-secondary-themed);
+  }
+
+  .form-label:has(+ .form-control[disabled], + .form-control-wrapper-disabled) {
+    color: var(--content-disabled-themed);
+  }
+
+  .text-success {
+    color: var(--content-positive-themed) !important;
+  }
+
+  .text-danger {
+    color: var(--content-danger-themed) !important;
+  }
+}
+
+.figure-modal-help {
+  --bs-code-color: var(--content-secondary-themed);
+
+  color: var(--content-primary-themed);
+}
+
 .figure-modal-help-link,
 .figure-modal-help-link:hover,
 .figure-modal-help-link:focus,
 .figure-modal-help-link:active {
-  color: var(--neutral-90) !important;
+  color: var(--content-primary-themed) !important;
   text-decoration: none;
 }
 
@@ -22,8 +59,8 @@
   width: 100%;
   height: 120px;
   padding: var(--spacing-07) var(--spacing-08);
-  border: 1px dashed #eaeaea;
-  background-color: #fafafa;
+  border: 1px dashed var(--border-divider-themed);
+  background-color: var(--bg-secondary-themed);
   justify-content: space-between;
   border-radius: var(--border-radius-medium);
 }
@@ -31,9 +68,9 @@
 .file-container-file {
   display: flex;
   align-items: center;
-  border: 1px solid var(--neutral-20);
+  border: 1px solid var(--border-divider-themed);
   border-radius: var(--border-radius-medium);
-  background-color: white;
+  background-color: var(--bg-primary-themed);
   height: 100%;
   padding: var(--spacing-06) var(--spacing-07);
 }
@@ -68,7 +105,8 @@
   align-items: center;
   box-shadow: 0 2px 4px 0 #1e253029;
   line-height: 44px;
-  background-color: var(--white);
+  background-color: var(--figure-modal-source-button-bg-color);
+  color: var(--content-primary-themed);
   border-radius: var(--border-radius-base);
   border: none;
   padding: 0 var(--spacing-04);
