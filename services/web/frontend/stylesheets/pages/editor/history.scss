@@ -577,3 +577,7 @@ ul[role='tree'].history-file-tree-list-inner {
 .doc-container {
   background: var(--bg-light-primary);
 }
+
+#add-history-label .form-label {
+  color: var(--content-secondary-themed);
+}

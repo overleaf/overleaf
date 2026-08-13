@@ -22,6 +22,7 @@ import { useEditorContext } from '@/shared/context/editor-context'
 import OLTag from '@/shared/components/ol/ol-tag'
 import OLButton from '@/shared/components/ol/ol-button'
 import TagIcon from '@/shared/components/tag-icon'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 type TagProps = {
   label: LoadedLabel
@@ -38,6 +39,7 @@ const ChangeTag = forwardRef<HTMLElement, TagProps>(
     const { signal } = useAbortController()
     const { removeUpdateLabel } = useAddOrRemoveLabels()
     const { isLoading, isSuccess, isError, error, reset, runAsync } = useAsync()
+    const themed = useFeatureFlag('themed-modals')
     const isPseudoCurrentStateLabel = isPseudoLabel(label)
     const isOwnedByCurrentUser = !isPseudoCurrentStateLabel
       ? label.user_id === currentUserId
@@ -100,6 +102,7 @@ const ChangeTag = forwardRef<HTMLElement, TagProps>(
             onExited={handleModalExited}
             onHide={() => setShowDeleteModal(false)}
             id="delete-history-label"
+            themed={themed}
           >
             <OLModalHeader>
               <OLModalTitle>{t('history_delete_label')}</OLModalTitle>

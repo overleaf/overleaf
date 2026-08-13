@@ -21,6 +21,7 @@ import { useRefWithAutoFocus } from '../../../../shared/hooks/use-ref-with-auto-
 import { debugConsole } from '@/utils/debugging'
 import OLFormControl from '@/shared/components/ol/ol-form-control'
 import OLFormLabel from '@/shared/components/ol/ol-form-label'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 type AddLabelModalProps = {
   show: boolean
@@ -43,6 +44,7 @@ function AddLabelModal({ show, setShow, version }: AddLabelModalProps) {
   const { projectId } = useHistoryContext()
   const { signal } = useAbortController()
   const { addUpdateLabel } = useAddOrRemoveLabels()
+  const themed = useFeatureFlag('themed-modals')
 
   const { autoFocusedRef, resetAutoFocus } =
     useRefWithAutoFocus<HTMLInputElement>()
@@ -86,6 +88,7 @@ function AddLabelModal({ show, setShow, version }: AddLabelModalProps) {
       onExited={handleModalExited}
       onHide={() => setShow(false)}
       id="add-history-label"
+      themed={themed}
     >
       <OLModalHeader>
         <OLModalTitle>{t('history_add_label')}</OLModalTitle>

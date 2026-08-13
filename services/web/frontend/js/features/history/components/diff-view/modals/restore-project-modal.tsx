@@ -9,6 +9,7 @@ import { formatDate } from '@/utils/dates'
 import { useCallback } from 'react'
 import OLButton from '@/shared/components/ol/ol-button'
 import { useTranslation } from 'react-i18next'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 type RestoreProjectModalProps = {
   setShow: React.Dispatch<React.SetStateAction<boolean>>
@@ -26,13 +27,14 @@ export const RestoreProjectModal = ({
   onRestore,
 }: RestoreProjectModalProps) => {
   const { t } = useTranslation()
+  const themed = useFeatureFlag('themed-modals')
 
   const onCancel = useCallback(() => {
     setShow(false)
   }, [setShow])
 
   return (
-    <OLModal onHide={() => setShow(false)} show={show}>
+    <OLModal onHide={() => setShow(false)} show={show} themed={themed}>
       <OLModalHeader>
         <OLModalTitle>{t('restore_this_version')}</OLModalTitle>
       </OLModalHeader>
