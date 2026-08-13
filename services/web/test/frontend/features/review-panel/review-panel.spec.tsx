@@ -770,6 +770,9 @@ describe('<ReviewPanel /> resolved comment in another file', function () {
     cy.mount(
       <TestContainer className="rp-size-expanded">
         <EditorProviders
+          // Disable tabs since the review panel is rendered differently
+          // when tabs are enabled
+          userSettings={{ editorTabs: false }}
           scope={scope}
           providers={{ ProjectProvider: makeProjectProvider(project) }}
         >
@@ -1015,6 +1018,9 @@ describe('<ReviewPanel /> resolved comment in another file (history OT)', functi
     cy.mount(
       <TestContainer className="rp-size-expanded">
         <EditorProviders
+          // Disable tabs since the review panel is rendered differently
+          // when tabs are enabled
+          userSettings={{ editorTabs: false }}
           scope={scope}
           providers={{ ProjectProvider: makeProjectProvider(project) }}
         >
