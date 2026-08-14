@@ -1457,6 +1457,7 @@
   "pause_subscription": "",
   "pause_subscription_for": "",
   "pay_now": "",
+  "payment_details": "",
   "payment_error_3ds_failed": "",
   "payment_error_generic": "",
   "payment_error_intermittent_error": "",

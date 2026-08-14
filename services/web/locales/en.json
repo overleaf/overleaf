@@ -1894,6 +1894,7 @@
   "pause_subscription": "Pause subscription",
   "pause_subscription_for": "Pause subscription for",
   "pay_now": "Pay now",
+  "payment_details": "Payment details",
   "payment_error_3ds_failed": "We couldn’t complete your payment because authentication wasn’t successful. Please try again or choose a different payment method. If the problem continues please <0>contact us</0>.",
   "payment_error_generic": "Sorry, something went wrong. Please try again. If the problem continues please <0>contact us</0>.",
   "payment_error_intermittent_error": "We were unable to process your payment. Please try again later or <0>contact us</0> for assistance.",
