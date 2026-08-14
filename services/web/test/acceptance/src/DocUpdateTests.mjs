@@ -86,7 +86,7 @@ describe('DocUpdate', function () {
       lines: ['a'],
       version: 1,
       ranges: {},
-      lastUpdatedAt: new Date(),
+      lastUpdatedAt: String(Date.now()),
       lastUpdatedBy: this.user.id,
     }
   })

@@ -59,6 +59,8 @@ describe('ProjectController', function () {
       promises: {
         deleteProject: sinon.stub().resolves(),
         restoreProject: sinon.stub().resolves(),
+        archiveProject: sinon.stub().resolves(),
+        unarchiveProject: sinon.stub().resolves(),
       },
       findArchivedProjects: sinon.stub(),
     }
@@ -543,7 +545,8 @@ describe('ProjectController', function () {
     ctx.req = {
       query: {},
       params: {
-        Project_id: ctx.project_id,
+        // real Express req.params are always strings
+        Project_id: ctx.project_id.toString(),
       },
       headers: {},
       connection: {
@@ -652,6 +655,16 @@ describe('ProjectController', function () {
         ctx.ProjectController.updateProjectSettings(ctx.req, ctx.res)
       })
     })
+
+    it('should reject a malformed mainBibliographyDocId', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.req.body = { mainBibliographyDocId: 'not-an-object-id' }
+        ctx.ProjectController.updateProjectSettings(ctx.req, ctx.res, err => {
+          expect(err).to.exist
+          resolve()
+        })
+      })
+    })
   })
 
   describe('updateProjectAdminSettings', function () {
@@ -733,7 +746,7 @@ describe('ProjectController', function () {
       await new Promise(resolve => {
         ctx.res.sendStatus = code => {
           ctx.ProjectDeleter.promises.deleteProject
-            .calledWith(ctx.project_id, {
+            .calledWith(ctx.project_id.toString(), {
               deleterUser: ctx.user,
               ipAddress: ctx.req.ip,
               deletedReason: 'user',
@@ -747,12 +760,42 @@ describe('ProjectController', function () {
     })
   })
 
+  describe('archiveProject', function () {
+    it('should call the project deleter', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.res.sendStatus = code => {
+          ctx.ProjectDeleter.promises.archiveProject
+            .calledWith(ctx.project_id.toString(), ctx.user._id)
+            .should.equal(true)
+          code.should.equal(200)
+          resolve()
+        }
+        ctx.ProjectController.archiveProject(ctx.req, ctx.res)
+      })
+    })
+  })
+
+  describe('unarchiveProject', function () {
+    it('should call the project deleter', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.res.sendStatus = code => {
+          ctx.ProjectDeleter.promises.unarchiveProject
+            .calledWith(ctx.project_id.toString(), ctx.user._id)
+            .should.equal(true)
+          code.should.equal(200)
+          resolve()
+        }
+        ctx.ProjectController.unarchiveProject(ctx.req, ctx.res)
+      })
+    })
+  })
+
   describe('restoreProject', function () {
     it('should tell the project deleter', async function (ctx) {
       await new Promise(resolve => {
         ctx.res.sendStatus = code => {
           ctx.ProjectDeleter.promises.restoreProject
-            .calledWith(ctx.project_id)
+            .calledWith(ctx.project_id.toString())
             .should.equal(true)
           code.should.equal(200)
           resolve()
@@ -767,7 +810,7 @@ describe('ProjectController', function () {
       await new Promise(resolve => {
         ctx.res.json = json => {
           ctx.ProjectDuplicator.promises.duplicate
-            .calledWith(ctx.user, ctx.project_id, ctx.projectName)
+            .calledWith(ctx.user, ctx.project_id.toString(), ctx.projectName)
             .should.equal(true)
           json.project_id.should.equal(ctx.project_id)
           resolve()
@@ -873,7 +916,7 @@ describe('ProjectController', function () {
   describe('renameProject', function () {
     beforeEach(function (ctx) {
       ctx.newProjectName = 'my supper great new project'
-      ctx.req.body.newProjectName = ctx.newProjectName
+      ctx.req.body = { newProjectName: ctx.newProjectName }
       ctx.req.params.Project_id = ctx.project_id.toString()
     })
 
@@ -1101,7 +1144,7 @@ describe('ProjectController', function () {
           resCode.should.equal(401)
           ctx.AuthorizationManager.promises.getPrivilegeLevelForProject.should.have.been.calledWith(
             ctx.user._id,
-            ctx.project_id,
+            ctx.project_id.toString(),
             'some-token'
           )
           resolve()
@@ -1140,7 +1183,7 @@ describe('ProjectController', function () {
       await new Promise(resolve => {
         ctx.res.render = (pageName, opts) => {
           ctx.ProjectUpdateHandler.promises.markAsOpened
-            .calledWith(ctx.project_id)
+            .calledWith(ctx.project_id.toString())
             .should.equal(true)
           resolve()
         }
@@ -1357,13 +1400,13 @@ describe('ProjectController', function () {
           })
           describe('when the projectId does not match (0)', function () {
             beforeEach(function (ctx) {
-              ctx.req.params.Project_id = ObjectId.createFromTime(0)
+              ctx.req.params.Project_id = ObjectId.createFromTime(0).toString()
             })
             checkNonMatch()
           })
           describe('when the projectId does not match (42)', function () {
             beforeEach(function (ctx) {
-              ctx.req.params.Project_id = ObjectId.createFromTime(42)
+              ctx.req.params.Project_id = ObjectId.createFromTime(42).toString()
             })
             checkNonMatch()
           })
@@ -1375,21 +1418,21 @@ describe('ProjectController', function () {
           })
           describe('when the projectId matches (0)', function () {
             beforeEach(function (ctx) {
-              ctx.req.params.Project_id = ObjectId.createFromTime(0)
+              ctx.req.params.Project_id = ObjectId.createFromTime(0).toString()
             })
             checkMatch()
             checkForBetaUser()
           })
           describe('when the projectId does not match (1)', function () {
             beforeEach(function (ctx) {
-              ctx.req.params.Project_id = ObjectId.createFromTime(1)
+              ctx.req.params.Project_id = ObjectId.createFromTime(1).toString()
             })
             checkNonMatch()
             checkForBetaUser()
           })
           describe('when the projectId does not match (42)', function () {
             beforeEach(function (ctx) {
-              ctx.req.params.Project_id = ObjectId.createFromTime(42)
+              ctx.req.params.Project_id = ObjectId.createFromTime(42).toString()
             })
             checkNonMatch()
           })
@@ -1400,26 +1443,26 @@ describe('ProjectController', function () {
           })
           describe('when the projectId matches (0)', function () {
             beforeEach(function (ctx) {
-              ctx.req.params.Project_id = ObjectId.createFromTime(0)
+              ctx.req.params.Project_id = ObjectId.createFromTime(0).toString()
             })
             checkMatch()
           })
           describe('when the projectId matches (9)', function () {
             beforeEach(function (ctx) {
-              ctx.req.params.Project_id = ObjectId.createFromTime(9)
+              ctx.req.params.Project_id = ObjectId.createFromTime(9).toString()
             })
             checkMatch()
             checkForBetaUser()
           })
           describe('when the projectId does not match (10)', function () {
             beforeEach(function (ctx) {
-              ctx.req.params.Project_id = ObjectId.createFromTime(10)
+              ctx.req.params.Project_id = ObjectId.createFromTime(10).toString()
             })
             checkNonMatch()
           })
           describe('when the projectId does not match (42)', function () {
             beforeEach(function (ctx) {
-              ctx.req.params.Project_id = ObjectId.createFromTime(42)
+              ctx.req.params.Project_id = ObjectId.createFromTime(42).toString()
             })
             checkNonMatch()
             checkForBetaUser()
@@ -1431,26 +1474,26 @@ describe('ProjectController', function () {
           })
           describe('when the projectId matches (0)', function () {
             beforeEach(function (ctx) {
-              ctx.req.params.Project_id = ObjectId.createFromTime(0)
+              ctx.req.params.Project_id = ObjectId.createFromTime(0).toString()
             })
             checkMatch()
             checkForBetaUser()
           })
           describe('when the projectId matches (10)', function () {
             beforeEach(function (ctx) {
-              ctx.req.params.Project_id = ObjectId.createFromTime(10)
+              ctx.req.params.Project_id = ObjectId.createFromTime(10).toString()
             })
             checkMatch()
           })
           describe('when the projectId matches (42)', function () {
             beforeEach(function (ctx) {
-              ctx.req.params.Project_id = ObjectId.createFromTime(42)
+              ctx.req.params.Project_id = ObjectId.createFromTime(42).toString()
             })
             checkMatch()
           })
           describe('when the projectId matches (99)', function () {
             beforeEach(function (ctx) {
-              ctx.req.params.Project_id = ObjectId.createFromTime(99)
+              ctx.req.params.Project_id = ObjectId.createFromTime(99).toString()
             })
             checkMatch()
           })
@@ -1570,7 +1613,7 @@ describe('ProjectController', function () {
           ctx.res.render = (pageName, opts) => {
             ctx.Modules.promises.hooks.fire.should.have.been.calledWith(
               'enforceCollaboratorLimit',
-              ctx.project_id
+              ctx.project_id.toString()
             )
             resolve()
           }
@@ -1928,8 +1971,8 @@ describe('ProjectController', function () {
   describe('projectEntitiesJson', function () {
     beforeEach(function (ctx) {
       ctx.SessionManager.getLoggedInUserId = sinon.stub().returns('abc')
-      ctx.req.params = { Project_id: 'abcd' }
-      ctx.project = { _id: 'abcd' }
+      ctx.req.params = { Project_id: '507f191e810c19729de860ea' }
+      ctx.project = { _id: '507f191e810c19729de860ea' }
       ctx.docs = [
         { path: '/things/b.txt', doc: true },
         { path: '/main.tex', doc: true },
@@ -1945,7 +1988,7 @@ describe('ProjectController', function () {
       await new Promise(resolve => {
         ctx.res.json = data => {
           expect(data).to.deep.equal({
-            project_id: 'abcd',
+            project_id: '507f191e810c19729de860ea',
             entities: [
               { path: '/main.tex', type: 'doc' },
               { path: '/things/a.txt', type: 'file' },

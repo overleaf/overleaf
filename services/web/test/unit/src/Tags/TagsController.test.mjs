@@ -1,12 +1,17 @@
-import { assert, beforeEach, describe, it, vi } from 'vitest'
+import { afterEach, assert, beforeEach, describe, it, vi } from 'vitest'
 import sinon from 'sinon'
-import { InvalidRequestError } from '@overleaf/validation-tools'
+import {
+  InvalidRequestError,
+  setReqValidationModeForTests,
+} from '@overleaf/validation-tools'
 
 const modulePath = '../../../../app/src/Features/Tags/TagsController.mjs'
 
 describe('TagsController', function () {
-  const userId = '123nd3ijdks'
-  const projectId = '123njdskj9jlk'
+  const userId = '507f191e810c19729de860ea'
+  const projectId = '507f191e810c19729de860eb'
+  const tagId = '507f191e810c19729de860ec'
+  const projectId2 = '507f191e810c19729de860ed'
 
   beforeEach(async function (ctx) {
     ctx.TagsHandler = {
@@ -40,9 +45,7 @@ describe('TagsController', function () {
 
     ctx.TagsController = (await import(modulePath)).default
     ctx.req = {
-      params: {
-        projectId,
-      },
+      params: {},
       session: {
         user: {
           _id: userId,
@@ -55,6 +58,10 @@ describe('TagsController', function () {
     ctx.res.status = sinon.stub().returns(ctx.res)
     ctx.res.end = sinon.stub()
     ctx.res.json = sinon.stub()
+  })
+
+  afterEach(function () {
+    setReqValidationModeForTests(null)
   })
 
   it('get all tags', async function (ctx) {
@@ -126,8 +133,8 @@ describe('TagsController', function () {
 
   it('delete a tag', async function (ctx) {
     await new Promise(resolve => {
-      ctx.req.params.tagId = ctx.tagId = 'tag-id-123'
-      ctx.req.session.user._id = ctx.userId = 'user-id-123'
+      ctx.req.params.tagId = ctx.tagId = tagId
+      ctx.req.session.user._id = ctx.userId = userId
       ctx.TagsController.deleteTag(ctx.req, {
         status: code => {
           assert.equal(code, 204)
@@ -145,10 +152,48 @@ describe('TagsController', function () {
     })
   })
 
+  describe('rename a tag', function () {
+    beforeEach(function (ctx) {
+      ctx.req.params.tagId = ctx.tagId = tagId
+      ctx.req.session.user._id = ctx.userId = userId
+    })
+
+    it('with a name', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.req.body = {
+          name: (ctx.tagName = 'new-name'),
+        }
+        ctx.TagsController.renameTag(ctx.req, {
+          status: code => {
+            assert.equal(code, 204)
+            sinon.assert.calledWith(
+              ctx.TagsHandler.promises.renameTag,
+              ctx.userId,
+              ctx.tagId,
+              ctx.tagName
+            )
+            resolve()
+            return {
+              end: () => {},
+            }
+          },
+        })
+      })
+    })
+
+    it('with an empty name, even when the schema is in log-only mode', async function (ctx) {
+      setReqValidationModeForTests('log')
+      ctx.req.body = { name: '' }
+      await ctx.TagsController.renameTag(ctx.req, ctx.res)
+      sinon.assert.calledWith(ctx.res.status, 400)
+      sinon.assert.notCalled(ctx.TagsHandler.promises.renameTag)
+    })
+  })
+
   describe('edit a tag', function () {
     beforeEach(function (ctx) {
-      ctx.req.params.tagId = ctx.tagId = 'tag-id-123'
-      ctx.req.session.user._id = ctx.userId = 'user-id-123'
+      ctx.req.params.tagId = ctx.tagId = tagId
+      ctx.req.session.user._id = ctx.userId = userId
     })
 
     it('with a name and no color', async function (ctx) {
@@ -201,17 +246,25 @@ describe('TagsController', function () {
 
     it('without a name', function (ctx) {
       ctx.req.body = { name: undefined }
-      ctx.TagsController.renameTag(ctx.req, ctx.res).should.be.rejectedWith(
+      ctx.TagsController.editTag(ctx.req, ctx.res).should.be.rejectedWith(
         InvalidRequestError
       )
+    })
+
+    it('with an empty name, even when the schema is in log-only mode', async function (ctx) {
+      setReqValidationModeForTests('log')
+      ctx.req.body = { name: '' }
+      await ctx.TagsController.editTag(ctx.req, ctx.res)
+      sinon.assert.calledWith(ctx.res.status, 400)
+      sinon.assert.notCalled(ctx.TagsHandler.promises.editTag)
     })
   })
 
   it('add a project to a tag', async function (ctx) {
     await new Promise(resolve => {
-      ctx.req.params.tagId = ctx.tagId = 'tag-id-123'
-      ctx.req.params.projectId = ctx.projectId = 'project-id-123'
-      ctx.req.session.user._id = ctx.userId = 'user-id-123'
+      ctx.req.params.tagId = ctx.tagId = tagId
+      ctx.req.params.projectId = ctx.projectId = projectId
+      ctx.req.session.user._id = ctx.userId = userId
       ctx.TagsController.addProjectToTag(ctx.req, {
         status: code => {
           assert.equal(code, 204)
@@ -232,12 +285,9 @@ describe('TagsController', function () {
 
   it('add projects to a tag', async function (ctx) {
     await new Promise(resolve => {
-      ctx.req.params.tagId = ctx.tagId = 'tag-id-123'
-      ctx.req.body.projectIds = ctx.projectIds = [
-        'project-id-123',
-        'project-id-234',
-      ]
-      ctx.req.session.user._id = ctx.userId = 'user-id-123'
+      ctx.req.params.tagId = ctx.tagId = tagId
+      ctx.req.body.projectIds = ctx.projectIds = [projectId, projectId2]
+      ctx.req.session.user._id = ctx.userId = userId
       ctx.TagsController.addProjectsToTag(ctx.req, {
         status: code => {
           assert.equal(code, 204)
@@ -258,9 +308,9 @@ describe('TagsController', function () {
 
   it('remove a project from a tag', async function (ctx) {
     await new Promise(resolve => {
-      ctx.req.params.tagId = ctx.tagId = 'tag-id-123'
-      ctx.req.params.projectId = ctx.projectId = 'project-id-123'
-      ctx.req.session.user._id = ctx.userId = 'user-id-123'
+      ctx.req.params.tagId = ctx.tagId = tagId
+      ctx.req.params.projectId = ctx.projectId = projectId
+      ctx.req.session.user._id = ctx.userId = userId
       ctx.TagsController.removeProjectFromTag(ctx.req, {
         status: code => {
           assert.equal(code, 204)
@@ -281,12 +331,9 @@ describe('TagsController', function () {
 
   it('remove projects from a tag', async function (ctx) {
     await new Promise(resolve => {
-      ctx.req.params.tagId = ctx.tagId = 'tag-id-123'
-      ctx.req.body.projectIds = ctx.projectIds = [
-        'project-id-123',
-        'project-id-234',
-      ]
-      ctx.req.session.user._id = ctx.userId = 'user-id-123'
+      ctx.req.params.tagId = ctx.tagId = tagId
+      ctx.req.body.projectIds = ctx.projectIds = [projectId, projectId2]
+      ctx.req.session.user._id = ctx.userId = userId
       ctx.TagsController.removeProjectsFromTag(ctx.req, {
         status: code => {
           assert.equal(code, 204)

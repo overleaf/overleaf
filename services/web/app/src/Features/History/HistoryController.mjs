@@ -62,7 +62,7 @@ async function headBlob(req, res) {
 }
 
 const requestBlobSchema = z.object({
-  params: z.object({
+  params: z.strictObject({
     project_id: zz.coercedObjectId(),
     hash: zz.hex().length(40),
   }),
@@ -141,6 +141,16 @@ function setBlobCacheHeaders(res, etag) {
 
 const proxyToHistoryApiSchema = z.object({
   // both project_id and Project_id are accepted for backwards compatibility
+  params: z.strictObject({
+    Project_id: zz.objectId().optional(),
+    project_id: zz.objectId().optional(),
+    doc_id: zz.objectId().optional(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const proxyToHistoryApiFallbackSchema = z.object({
   params: z.object({
     Project_id: zz.objectId().optional(),
     project_id: zz.objectId().optional(),
@@ -154,7 +164,9 @@ const proxyToHistoryApiSchema = z.object({
  * @param {any} next
  */
 async function proxyToHistoryApi(req, res, next) {
-  parseReq(req, proxyToHistoryApiSchema)
+  parseReq(req, proxyToHistoryApiSchema, {
+    fallbackSchema: proxyToHistoryApiFallbackSchema,
+  })
   const userId = SessionManager.getLoggedInUserId(req.session)
   const url = settings.apis.project_history.url + req.url
 
@@ -184,6 +196,14 @@ async function proxyToHistoryApi(req, res, next) {
 }
 
 const proxyToHistoryApiAndInjectUserDetailsSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const proxyToHistoryApiAndInjectUserDetailsFallbackSchema = z.object({
   params: z.object({
     Project_id: zz.objectId(),
   }),
@@ -195,7 +215,9 @@ const proxyToHistoryApiAndInjectUserDetailsSchema = z.object({
  * @param {any} next
  */
 async function proxyToHistoryApiAndInjectUserDetails(req, res, next) {
-  parseReq(req, proxyToHistoryApiAndInjectUserDetailsSchema)
+  parseReq(req, proxyToHistoryApiAndInjectUserDetailsSchema, {
+    fallbackSchema: proxyToHistoryApiAndInjectUserDetailsFallbackSchema,
+  })
   const userId = SessionManager.getLoggedInUserId(req.session)
   const url = settings.apis.project_history.url + req.url
   const body = await fetchJson(url, {
@@ -207,6 +229,18 @@ async function proxyToHistoryApiAndInjectUserDetails(req, res, next) {
 }
 
 const resyncProjectHistorySchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+  }),
+  body: z.strictObject({
+    historyRangesMigration: z.enum(['forwards', 'backwards']).optional(),
+    resyncProjectStructureOnly: z.boolean().default(false),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const resyncProjectHistoryFallbackSchema = z.object({
   params: z.object({
     Project_id: zz.objectId(),
   }),
@@ -224,7 +258,9 @@ const resyncProjectHistorySchema = z.object({
 async function resyncProjectHistory(req, res, next) {
   // increase timeout to 6 minutes
   res.setTimeout(6 * 60 * 1000)
-  const { params, body } = parseReq(req, resyncProjectHistorySchema)
+  const { params, body } = parseReq(req, resyncProjectHistorySchema, {
+    fallbackSchema: resyncProjectHistoryFallbackSchema,
+  })
   const projectId = params.Project_id
   const opts = {
     historyRangesMigration: body.historyRangesMigration,
@@ -248,6 +284,18 @@ async function resyncProjectHistory(req, res, next) {
 }
 
 const restoreFileFromV2Schema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+  }),
+  body: z.strictObject({
+    version: z.number().int().min(0),
+    pathname: zz.filepath(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const restoreFileFromV2FallbackSchema = z.object({
   params: z.object({
     project_id: zz.objectId(),
   }),
@@ -263,7 +311,9 @@ const restoreFileFromV2Schema = z.object({
  * @param {any} next
  */
 async function restoreFileFromV2(req, res, next) {
-  const { params, body } = parseReq(req, restoreFileFromV2Schema)
+  const { params, body } = parseReq(req, restoreFileFromV2Schema, {
+    fallbackSchema: restoreFileFromV2FallbackSchema,
+  })
   const { project_id: projectId } = params
   const { version, pathname } = body
   const userId = SessionManager.getLoggedInUserId(req.session)
@@ -295,6 +345,18 @@ async function restoreFileFromV2(req, res, next) {
 }
 
 const revertFileSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+  }),
+  body: z.strictObject({
+    version: z.number().int().min(0),
+    pathname: zz.filepath(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const revertFileFallbackSchema = z.object({
   params: z.object({
     project_id: zz.objectId(),
   }),
@@ -310,7 +372,9 @@ const revertFileSchema = z.object({
  * @param {any} next
  */
 async function revertFile(req, res, next) {
-  const { params, body } = parseReq(req, revertFileSchema)
+  const { params, body } = parseReq(req, revertFileSchema, {
+    fallbackSchema: revertFileFallbackSchema,
+  })
   const { project_id: projectId } = params
   const { version, pathname } = body
   const userId = SessionManager.getLoggedInUserId(req.session)
@@ -343,6 +407,17 @@ async function revertFile(req, res, next) {
 }
 
 const revertProjectSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+  }),
+  body: z.strictObject({
+    version: z.number().int().min(0),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const revertProjectFallbackSchema = z.object({
   params: z.object({
     project_id: zz.objectId(),
   }),
@@ -357,7 +432,9 @@ const revertProjectSchema = z.object({
  * @param {any} next
  */
 async function revertProject(req, res, next) {
-  const { params, body } = parseReq(req, revertProjectSchema)
+  const { params, body } = parseReq(req, revertProjectSchema, {
+    fallbackSchema: revertProjectFallbackSchema,
+  })
   const { project_id: projectId } = params
   const { version } = body
   const userId = SessionManager.getLoggedInUserId(req.session)
@@ -384,6 +461,14 @@ async function revertProject(req, res, next) {
 }
 
 const getLabelsSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const getLabelsFallbackSchema = z.object({
   params: z.object({
     Project_id: zz.objectId(),
   }),
@@ -395,7 +480,9 @@ const getLabelsSchema = z.object({
  * @param {any} next
  */
 async function getLabels(req, res, next) {
-  const { params } = parseReq(req, getLabelsSchema)
+  const { params } = parseReq(req, getLabelsSchema, {
+    fallbackSchema: getLabelsFallbackSchema,
+  })
   const projectId = params.Project_id
 
   let labels = await fetchJson(
@@ -407,6 +494,18 @@ async function getLabels(req, res, next) {
 }
 
 const createLabelSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+  }),
+  body: z.strictObject({
+    comment: z.string(),
+    version: z.number().int().min(0),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const createLabelFallbackSchema = z.object({
   params: z.object({
     Project_id: zz.objectId(),
   }),
@@ -422,7 +521,9 @@ const createLabelSchema = z.object({
  * @param {any} next
  */
 async function createLabel(req, res, next) {
-  const { params, body } = parseReq(req, createLabelSchema)
+  const { params, body } = parseReq(req, createLabelSchema, {
+    fallbackSchema: createLabelFallbackSchema,
+  })
   const projectId = params.Project_id
   const { comment, version } = body
   const userId = SessionManager.getLoggedInUserId(req.session)
@@ -519,6 +620,15 @@ function _displayNameForUser(user) {
 }
 
 const deleteLabelSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+    label_id: zz.objectId(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const deleteLabelFallbackSchema = z.object({
   params: z.object({
     Project_id: zz.objectId(),
     label_id: zz.objectId(),
@@ -531,7 +641,9 @@ const deleteLabelSchema = z.object({
  * @param {any} next
  */
 async function deleteLabel(req, res, next) {
-  const { params } = parseReq(req, deleteLabelSchema)
+  const { params } = parseReq(req, deleteLabelSchema, {
+    fallbackSchema: deleteLabelFallbackSchema,
+  })
   const { Project_id: projectId, label_id: labelId } = params
   const userId = SessionManager.getLoggedInUserId(req.session)
 
@@ -553,7 +665,7 @@ async function deleteLabel(req, res, next) {
 }
 
 const downloadZipOfVersionSchema = z.object({
-  params: z.object({
+  params: z.strictObject({
     project_id: zz.objectId(),
     version: z.coerce.number().int().min(0),
   }),
@@ -719,7 +831,7 @@ async function _pipeHistoryZipToResponse(v1ProjectId, version, name, req, res) {
 }
 
 const getLatestHistorySchema = z.object({
-  params: z.object({
+  params: z.strictObject({
     project_id: zz.objectId(),
   }),
 })
@@ -737,7 +849,7 @@ async function getLatestHistory(req, res, next) {
 }
 
 const getChangesSchema = z.object({
-  params: z.object({
+  params: z.strictObject({
     project_id: zz.objectId(),
   }),
   query: z.object({

@@ -5,6 +5,7 @@ import { RateLimiter } from '../../infrastructure/RateLimiter.mjs'
 import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.mjs'
 import Settings from '@overleaf/settings'
 import AsyncLocalStorage from '../../infrastructure/AsyncLocalStorage.mjs'
+import { getRawReqInput } from '../../infrastructure/Validation.mjs'
 
 const rateLimiters = {
   projectUpload: new RateLimiter('project-upload', {
@@ -42,7 +43,7 @@ export default {
         RateLimiterMiddleware.rateLimit(rateLimiters.projectUpload),
         ProjectUploadController.multerMiddleware,
         (req, res, next) => {
-          req.query.type = 'docx'
+          getRawReqInput(req).query.type = 'docx'
           next()
         },
         ProjectUploadController.importDocument

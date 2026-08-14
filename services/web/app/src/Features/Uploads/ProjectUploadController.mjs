@@ -22,8 +22,55 @@ import {
 import DocumentConversionManager from './DocumentConversionManager.mjs'
 import ProjectOptionsHandler from '../Project/ProjectOptionsHandler.mjs'
 import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
+import { parseReq, z, zz } from '../../infrastructure/Validation.mjs'
 
 const defaultsDeep = lodash.defaultsDeep
+
+const uploadMetaTypeSchema = z.string().optional()
+
+const uploadProjectSchema = z.object({
+  body: z.strictObject({
+    name: z.string().nonempty(),
+    type: uploadMetaTypeSchema,
+    relativePath: zz.filepath().optional(),
+  }),
+  file: zz.uploadedFile(),
+})
+
+const uploadFileSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+  }),
+  query: z.object({
+    folder_id: zz.objectId().optional(),
+  }),
+  body: z.strictObject({
+    // validated for presence/length by hand below (not schema-enforced),
+    // so an invalid name keeps returning the existing friendly
+    // {success:false, error:'invalid_filename'} response instead of a
+    // generic validation error
+    name: z.string().optional(),
+    relativePath: zz.filepath().optional(),
+    type: uploadMetaTypeSchema,
+    targetFolderId: zz.objectId().optional(),
+  }),
+  file: zz.uploadedFile(),
+})
+
+const importDocumentSchema = z.object({
+  query: z.object({
+    // validated for the ['docx','markdown'] allowlist by hand below, so an
+    // unsupported value keeps returning the existing friendly
+    // {success:false, error:'invalid_import_type'} response
+    type: z.string().optional(),
+  }),
+  body: z.strictObject({
+    name: z.string().nonempty(),
+    relativePath: zz.filepath().optional(),
+    type: uploadMetaTypeSchema,
+  }),
+  file: zz.uploadedFile(),
+})
 
 const upload = multer(
   defaultsDeep(
@@ -45,8 +92,11 @@ const upload = multer(
 function uploadProject(req, res, next) {
   const timer = new metrics.Timer('project-upload')
   const userId = SessionManager.getLoggedInUserId(req.session)
-  const { path } = req.file
-  const name = Path.basename(req.body.name, '.zip')
+  const { body, file } = parseReq(req, uploadProjectSchema, {
+    logOnly: true,
+  })
+  const { path } = file
+  const name = Path.basename(body.name, '.zip')
   return ProjectUploadManager.createProjectFromZipArchive(
     userId,
     name,
@@ -84,11 +134,14 @@ function uploadProject(req, res, next) {
  */
 async function uploadFile(req, res, next) {
   const timer = new metrics.Timer('file-upload')
-  const name = req.body.name
-  const { path } = req.file
-  const projectId = req.params.Project_id
+  const { params, query, body, file } = parseReq(req, uploadFileSchema, {
+    logOnly: true,
+  })
+  const name = body.name
+  const { path } = file
+  const projectId = params.Project_id
   const userId = SessionManager.getLoggedInUserId(req.session)
-  let { folder_id: folderId } = req.query
+  let folderId = query.folder_id
   if (name == null || name.length === 0 || name.length > 150) {
     await fsPromises.unlink(path).catch(unlinkErr => {
       logger.warn({ err: unlinkErr, path }, 'error unlinking uploaded file')
@@ -101,7 +154,7 @@ async function uploadFile(req, res, next) {
 
   try {
     // preserve the directory structure from an uploaded folder
-    const { relativePath } = req.body
+    const { relativePath } = body
     // NOTE: Uppy sends a "null" string for `relativePath` when the file is not nested in a folder
     if (relativePath && relativePath !== 'null') {
       const { path } = await ProjectLocator.promises.findElement({
@@ -186,15 +239,18 @@ async function uploadFile(req, res, next) {
  */
 async function importDocument(req, res, next) {
   const userId = SessionManager.getLoggedInUserId(req.session)
-  const { path } = req.file
-  const conversionType = req.query.type
+  const { query, body, file } = parseReq(req, importDocumentSchema, {
+    logOnly: true,
+  })
+  const { path } = file
+  const conversionType = query.type
   if (!['docx', 'markdown'].includes(conversionType)) {
     return res.status(400).json({
       success: false,
       error: req.i18n.translate('invalid_import_type'),
     })
   }
-  const name = Path.basename(req.body.name, Path.extname(req.body.name))
+  const name = Path.basename(body.name, Path.extname(body.name))
   logger.debug({ path, userId, conversionType }, 'importing document file')
   try {
     const archivePath =

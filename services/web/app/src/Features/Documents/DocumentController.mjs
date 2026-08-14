@@ -8,11 +8,97 @@ import _ from 'lodash'
 import { plainTextResponse } from '../../infrastructure/Response.mjs'
 import { expressify } from '@overleaf/promise-utils'
 import Modules from '../../infrastructure/Modules.mjs'
+import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
+
+// Zod schemas for the sharejs-text-ot ranges data (RangesTracker format)
+// that document-updater flushes to this endpoint -- NOT the unrelated
+// overleaf-editor-core StringFileData rawComment/rawTrackedChange shape
+// (that's the canonical history-ot representation, a different shape used
+// elsewhere for linked-file/history payloads).
+//
+// This mirrors document-updater's own app/js/schemas.js (the sender) and
+// docstore's app/js/schemas.js (the next hop, which this data is forwarded
+// to untouched via DocstoreManager) -- see those files' comments for why the
+// fields are this permissive: ids aren't always ObjectIds (RangesTracker ids
+// are seed+increment strings; legacy documents carry arbitrary string thread
+// ids), and history restores send id-less changes/detached comments plus a
+// `resolved` flag.
+const insertOp = z.strictObject({
+  i: z.string(),
+  p: z.number().int().min(0),
+  u: z.boolean().optional(),
+})
+
+const deleteOp = z.strictObject({
+  d: z.string(),
+  p: z.number().int().min(0),
+  u: z.boolean().optional(),
+})
+
+const commentOp = z.strictObject({
+  c: z.string().optional(),
+  p: z.number().int().min(0).optional(),
+  t: z.string().optional(),
+  u: z.boolean().optional(),
+  // sent by history restores; removed again by RangesManager
+  resolved: z.boolean().optional(),
+})
+
+const rangeMetadata = z.strictObject({
+  user_id: z.string().optional(),
+  ts: z.string().optional(),
+})
+
+const comment = z.strictObject({
+  id: z.string().optional(),
+  op: commentOp,
+  metadata: rangeMetadata.optional(),
+})
+
+const trackedChange = z.strictObject({
+  id: z.string().optional(),
+  op: insertOp.or(deleteOp).optional(),
+  metadata: rangeMetadata.optional(),
+})
+
+const rangesSchema = z.strictObject({
+  comments: z.array(comment).optional(),
+  changes: z.array(trackedChange).optional(),
+})
+
+const getDocumentSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+    doc_id: zz.objectId(),
+  }),
+  query: z.object({
+    plain: z.stringbool().optional(),
+    peek: z.stringbool().optional(),
+  }),
+})
+
+// Rollout-temporary fallback (loosened primary schema; no zod validation
+// existed for this route on main); delete when this route's
+// REQ_VALIDATION_MODE instrumentation is removed.
+const getDocumentFallbackSchema = z.object({
+  params: z.object({
+    Project_id: z.string(),
+    doc_id: z.string(),
+  }),
+  query: z.object({
+    plain: z.stringbool().optional(),
+    peek: z.stringbool().optional(),
+  }),
+})
 
 async function getDocument(req, res) {
-  const { Project_id: projectId, doc_id: docId } = req.params
-  const plain = req.query.plain === 'true'
-  const peek = req.query.peek === 'true'
+  const { params, query } = parseReq(req, getDocumentSchema, {
+    logOnly: true,
+    fallbackSchema: getDocumentFallbackSchema,
+  })
+  const { Project_id: projectId, doc_id: docId } = params
+  const plain = query.plain === true
+  const peek = query.peek === true
   const project = await ProjectGetter.promises.getProject(projectId, {
     rootFolder: true,
     overleaf: true,
@@ -77,9 +163,30 @@ async function getDocument(req, res) {
   }
 }
 
+const setDocumentSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+    doc_id: zz.objectId(),
+  }),
+  body: z.strictObject({
+    // by the time document-updater flushes a doc to web, `lines` has always
+    // been normalised to a plain string array (see
+    // DocumentManager.flushDocIfLoaded's `file.getLines()` call for
+    // history-ot docs) -- never the raw StringFileData shape.
+    lines: z.array(z.string()),
+    version: z.number().int(),
+    ranges: rangesSchema,
+    lastUpdatedAt: z.coerce.number().int().positive().nullish(),
+    lastUpdatedBy: zz.objectId().nullish(),
+  }),
+})
+
 async function setDocument(req, res) {
-  const { Project_id: projectId, doc_id: docId } = req.params
-  const { lines, version, ranges, lastUpdatedAt, lastUpdatedBy } = req.body
+  const { params, body } = parseReq(req, setDocumentSchema, {
+    logOnly: true,
+  })
+  const { Project_id: projectId, doc_id: docId } = params
+  const { lines, version, ranges, lastUpdatedAt, lastUpdatedBy } = body
   const result = await ProjectEntityUpdateHandler.promises.updateDocLines(
     projectId,
     docId,
@@ -105,9 +212,23 @@ async function setDocument(req, res) {
   res.json(result)
 }
 
+const trackChangesRejectedSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+    doc_id: zz.objectId(),
+  }),
+  body: z.strictObject({
+    rejectedChangeAuthorIds: z.array(zz.objectId()),
+    userId: zz.objectId().optional(),
+  }),
+})
+
 async function trackChangesRejected(req, res) {
-  const { Project_id: projectId, doc_id: docId } = req.params
-  const { rejectedChangeAuthorIds, userId } = req.body
+  const { params, body } = parseReq(req, trackChangesRejectedSchema, {
+    logOnly: true,
+  })
+  const { Project_id: projectId, doc_id: docId } = params
+  const { rejectedChangeAuthorIds, userId } = body
   await Modules.promises.hooks.fire(
     'trackChangesRejected',
     projectId,

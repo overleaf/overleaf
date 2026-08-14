@@ -201,6 +201,25 @@ describe('HistoryController', function () {
     })
   })
 
+  describe('proxyToHistoryApi (with an invalid request)', function () {
+    beforeEach(async function (ctx) {
+      ctx.req = {
+        url: '/mock/url',
+        method: 'GET',
+        session: sinon.stub(),
+        params: { Project_id: 'not-an-object-id' },
+      }
+      ctx.res = { set: sinon.stub() }
+      await ctx.HistoryController.proxyToHistoryApi(ctx.req, ctx.res, ctx.next)
+    })
+
+    it('rejects the request without calling the history api', function (ctx) {
+      ctx.next.should.have.been.calledOnce
+      ctx.next.firstCall.args[0].should.be.an.instanceof(Error)
+      ctx.fetchStreamWithResponse.should.not.have.been.called
+    })
+  })
+
   describe('proxyToHistoryApiAndInjectUserDetails', function () {
     beforeEach(async function (ctx) {
       ctx.req = {
@@ -280,6 +299,28 @@ describe('HistoryController', function () {
     })
   })
 
+  describe('proxyToHistoryApiAndInjectUserDetails (with an invalid request)', function () {
+    beforeEach(async function (ctx) {
+      ctx.req = {
+        url: '/mock/url',
+        method: 'GET',
+        params: { Project_id: 'not-an-object-id' },
+      }
+      ctx.res = { json: sinon.stub() }
+      await ctx.HistoryController.proxyToHistoryApiAndInjectUserDetails(
+        ctx.req,
+        ctx.res,
+        ctx.next
+      )
+    })
+
+    it('rejects the request without calling the history api', function (ctx) {
+      ctx.next.should.have.been.calledOnce
+      ctx.next.firstCall.args[0].should.be.an.instanceof(Error)
+      ctx.fetchJson.should.not.have.been.called
+    })
+  })
+
   describe('resyncProjectHistory', function () {
     describe('for a project without project-history enabled', function () {
       beforeEach(async function (ctx) {
@@ -327,6 +368,29 @@ describe('HistoryController', function () {
 
       it('responds with a 204', function (ctx) {
         ctx.res.sendStatus.should.have.been.calledWith(204)
+      })
+    })
+
+    describe('with an invalid historyRangesMigration value', function () {
+      beforeEach(async function (ctx) {
+        ctx.req = {
+          params: { Project_id: ctx.project_id },
+          body: { historyRangesMigration: 'sideways' },
+        }
+        ctx.res = { setTimeout: sinon.stub(), sendStatus: sinon.stub() }
+
+        await ctx.HistoryController.resyncProjectHistory(
+          ctx.req,
+          ctx.res,
+          ctx.next
+        )
+      })
+
+      it('rejects the request without resyncing', function (ctx) {
+        ctx.next.should.have.been.calledOnce
+        ctx.next.firstCall.args[0].should.be.an.instanceof(Error)
+        ctx.ProjectEntityUpdateHandler.promises.resyncProjectHistory.should.not
+          .have.been.called
       })
     })
   })
@@ -487,6 +551,106 @@ describe('HistoryController', function () {
       ctx.next.should.have.been.calledOnce
       ctx.next.firstCall.args[0].should.be.an.instanceof(Error)
       ctx.RestoreManager.promises.revertProject.should.not.have.been.called
+    })
+  })
+
+  describe('getLabels', function () {
+    beforeEach(function (ctx) {
+      ctx.res = { json: sinon.stub() }
+      ctx.labels = [{ id: 'label-1', comment: 'a label' }]
+      ctx.fetchJson.resolves(ctx.labels)
+    })
+
+    it('fetches and returns the labels for a valid request', async function (ctx) {
+      ctx.req = { params: { Project_id: ctx.project_id } }
+      await ctx.HistoryController.getLabels(ctx.req, ctx.res, ctx.next)
+      ctx.fetchJson.should.have.been.calledWith(
+        `${ctx.settings.apis.project_history.url}/project/${ctx.project_id}/labels`
+      )
+      ctx.res.json.should.have.been.calledWith(ctx.labels)
+    })
+
+    it('rejects a malformed Project_id without calling the history api', async function (ctx) {
+      ctx.req = { params: { Project_id: 'not-an-object-id' } }
+      await ctx.HistoryController.getLabels(ctx.req, ctx.res, ctx.next)
+      ctx.next.should.have.been.calledOnce
+      ctx.next.firstCall.args[0].should.be.an.instanceof(Error)
+      ctx.fetchJson.should.not.have.been.called
+    })
+  })
+
+  describe('createLabel', function () {
+    beforeEach(function (ctx) {
+      ctx.res = { json: sinon.stub() }
+    })
+
+    it('creates and returns the label for a valid request', async function (ctx) {
+      ctx.req = {
+        params: { Project_id: ctx.project_id },
+        body: { comment: 'a label', version: 3 },
+        session: {},
+      }
+      ctx.label = { id: 'label-1', comment: 'a label', version: 3 }
+      ctx.fetchJson.resolves(ctx.label)
+      await ctx.HistoryController.createLabel(ctx.req, ctx.res, ctx.next)
+      ctx.fetchJson.should.have.been.calledWith(
+        `${ctx.settings.apis.project_history.url}/project/${ctx.project_id}/labels`,
+        {
+          method: 'POST',
+          json: { comment: 'a label', version: 3, user_id: ctx.user_id },
+        }
+      )
+      ctx.res.json.should.have.been.calledWith(
+        sinon.match({ comment: 'a label', version: 3 })
+      )
+    })
+
+    it('rejects a negative version without calling the history api', async function (ctx) {
+      ctx.req = {
+        params: { Project_id: ctx.project_id },
+        body: { comment: 'a label', version: -1 },
+        session: {},
+      }
+      await ctx.HistoryController.createLabel(ctx.req, ctx.res, ctx.next)
+      ctx.next.should.have.been.calledOnce
+      ctx.next.firstCall.args[0].should.be.an.instanceof(Error)
+      ctx.fetchJson.should.not.have.been.called
+    })
+  })
+
+  describe('deleteLabel', function () {
+    beforeEach(function (ctx) {
+      ctx.res = { sendStatus: sinon.stub() }
+      ctx.labelId = '000000000000000087654321'
+      ctx.ProjectGetter.promises = {
+        getProject: sinon.stub().resolves({
+          owner_ref: { equals: sinon.stub().returns(true) },
+        }),
+      }
+    })
+
+    it('deletes the label for a valid request', async function (ctx) {
+      ctx.req = {
+        params: { Project_id: ctx.project_id, label_id: ctx.labelId },
+        session: {},
+      }
+      await ctx.HistoryController.deleteLabel(ctx.req, ctx.res, ctx.next)
+      ctx.fetchNothing.should.have.been.calledWith(
+        `${ctx.settings.apis.project_history.url}/project/${ctx.project_id}/labels/${ctx.labelId}`,
+        { method: 'DELETE' }
+      )
+      ctx.res.sendStatus.should.have.been.calledWith(204)
+    })
+
+    it('rejects a malformed label_id without calling the history api', async function (ctx) {
+      ctx.req = {
+        params: { Project_id: ctx.project_id, label_id: 'not-an-object-id' },
+        session: {},
+      }
+      await ctx.HistoryController.deleteLabel(ctx.req, ctx.res, ctx.next)
+      ctx.next.should.have.been.calledOnce
+      ctx.next.firstCall.args[0].should.be.an.instanceof(Error)
+      ctx.fetchNothing.should.not.have.been.called
     })
   })
 

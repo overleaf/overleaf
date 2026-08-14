@@ -532,6 +532,112 @@ describe('ProjectInviteTests', function () {
         })
       })
 
+      it('should reject an unrecognized field in the invite request body', function (done) {
+        this.sendingUser.getCsrfToken(err => {
+          if (err) {
+            return done(err)
+          }
+          this.sendingUser.request.post(
+            {
+              uri: `/project/${this.projectId}/invite`,
+              json: {
+                email: this.email,
+                privileges: 'readAndWrite',
+                notARealField: 'nope',
+              },
+            },
+            (err, response) => {
+              if (err) {
+                return done(err)
+              }
+              expect(response.statusCode).to.equal(400)
+              done()
+            }
+          )
+        })
+      })
+
+      it('should reject an invalid invite id when revoking an invite', function (done) {
+        this.sendingUser.getCsrfToken(err => {
+          if (err) {
+            return done(err)
+          }
+          this.sendingUser.request.delete(
+            {
+              uri: `/project/${this.projectId}/invite/not-a-valid-invite-id`,
+            },
+            (err, response) => {
+              if (err) {
+                return done(err)
+              }
+              expect(response.statusCode).to.equal(404)
+              done()
+            }
+          )
+        })
+      })
+
+      it('should reject an invalid invite id when resending an invite', function (done) {
+        this.sendingUser.getCsrfToken(err => {
+          if (err) {
+            return done(err)
+          }
+          this.sendingUser.request.post(
+            {
+              uri: `/project/${this.projectId}/invite/not-a-valid-invite-id/resend`,
+            },
+            (err, response) => {
+              if (err) {
+                return done(err)
+              }
+              expect(response.statusCode).to.equal(404)
+              done()
+            }
+          )
+        })
+      })
+
+      it('should allow the project owner to resend an invite', function (done) {
+        Async.series(
+          [
+            cb => {
+              createInvite(
+                this.sendingUser,
+                this.projectId,
+                this.email,
+                (err, invite) => {
+                  if (err) {
+                    return cb(err)
+                  }
+                  this.invite = invite
+                  cb()
+                }
+              )
+            },
+            cb => {
+              this.sendingUser.getCsrfToken(err => {
+                if (err) {
+                  return cb(err)
+                }
+                this.sendingUser.request.post(
+                  {
+                    uri: `/project/${this.projectId}/invite/${this.invite._id}/resend`,
+                  },
+                  (err, response) => {
+                    if (err) {
+                      return cb(err)
+                    }
+                    expect(response.statusCode).to.equal(201)
+                    cb()
+                  }
+                )
+              })
+            },
+          ],
+          done
+        )
+      })
+
       it('should allow the project owner to create and remove invites', function (done) {
         Async.series(
           [
@@ -835,6 +941,70 @@ describe('ProjectInviteTests', function () {
             done
           )
         })
+
+        it('should reject a malformed project id when viewing the invite', function (done) {
+          const link = this.link.replace(
+            this.projectId,
+            'not-a-valid-project-id'
+          )
+          tryFollowInviteLink(this.user, link, (err, response) => {
+            if (err) {
+              return done(err)
+            }
+            expect(response.statusCode).to.equal(404)
+            done()
+          })
+        })
+
+        it('should accept a genuine native HTML form submission (form-encoded body, no CSRF header)', function (done) {
+          // views/project/invite/show-legacy.pug submits this as a plain
+          // native HTML form (data-ol-regular-form): no JS involved, so
+          // the token only ever travels as a hidden _csrf form field,
+          // never as a header.
+          this.user.getCsrfToken(err => {
+            if (err) {
+              return done(err)
+            }
+            this.user.submitNativeForm(
+              `/project/${this.projectId}/invite/token/${this.invite.token}/accept`,
+              { token: this.invite.token },
+              (err, response) => {
+                if (err) {
+                  return done(err)
+                }
+                expect(response.statusCode).to.equal(302)
+                expect(response.headers.location).to.equal(
+                  `/project/${this.projectId}`
+                )
+                done()
+              }
+            )
+          })
+        })
+
+        it('should still reject an unrecognized field in the body', function (done) {
+          this.user.getCsrfToken(err => {
+            if (err) {
+              return done(err)
+            }
+            this.user.request.post(
+              {
+                uri: `/project/${this.projectId}/invite/token/${this.invite.token}/accept`,
+                json: {
+                  token: this.invite.token,
+                  notARealField: 'nope',
+                },
+              },
+              (err, response) => {
+                if (err) {
+                  return done(err)
+                }
+                expect(response.statusCode).to.equal(400)
+                done()
+              }
+            )
+          })
+        })
       })
     })
 
@@ -1035,6 +1205,91 @@ describe('ProjectInviteTests', function () {
                 cb()
               }
             )
+          },
+        ],
+        done
+      )
+    })
+
+    it('should reject an unrecognized field when updating a sharing link', function (done) {
+      this.sendingUser.getCsrfToken(err => {
+        if (err) {
+          return done(err)
+        }
+        this.sendingUser.request.post(
+          {
+            uri: `/project/${this.projectId}/sharing-link`,
+            json: {
+              privileges: 'readOnly',
+              notARealField: 'nope',
+            },
+          },
+          (err, response) => {
+            if (err) {
+              return done(err)
+            }
+            expect(response.statusCode).to.equal(400)
+            done()
+          }
+        )
+      })
+    })
+
+    it('should reject a malformed project id when viewing the sharing-link page', function (done) {
+      this.sendingUser.request.get(
+        {
+          uri: '/project/not-a-valid-project-id/share',
+        },
+        (err, response) => {
+          if (err) {
+            return done(err)
+          }
+          expect(response.statusCode).to.equal(404)
+          done()
+        }
+      )
+    })
+
+    it('should reject an unrecognized field when validating a sharing link', function (done) {
+      Async.series(
+        [
+          cb => this.user.login(cb),
+          cb => {
+            updateSharingLink(
+              this.sendingUser,
+              this.projectId,
+              'readOnly',
+              (err, link) => {
+                if (err) {
+                  return cb(err)
+                }
+                this.sharingLink = link
+                cb()
+              }
+            )
+          },
+          cb => {
+            this.user.getCsrfToken(err => {
+              if (err) {
+                return cb(err)
+              }
+              this.user.request.post(
+                {
+                  uri: `/project/${this.projectId}/share/validate`,
+                  json: {
+                    token: this.sharingLink.token,
+                    notARealField: 'nope',
+                  },
+                },
+                (err, response) => {
+                  if (err) {
+                    return cb(err)
+                  }
+                  expect(response.statusCode).to.equal(400)
+                  cb()
+                }
+              )
+            })
           },
         ],
         done

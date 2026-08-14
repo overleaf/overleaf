@@ -67,6 +67,22 @@ const { ObjectId } = mongodb
  */
 
 const updateProjectAdminSettingsSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.coercedObjectId(ObjectId),
+  }),
+  body: z.strictObject({
+    publicAccessLevel: z
+      .enum(
+        [PublicAccessLevels.PRIVATE, PublicAccessLevels.TOKEN_BASED],
+        'unexpected access level'
+      )
+      .optional(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const updateProjectAdminSettingsFallbackSchema = z.object({
   params: z.object({
     Project_id: zz.coercedObjectId(ObjectId),
   }),
@@ -81,6 +97,24 @@ const updateProjectAdminSettingsSchema = z.object({
 })
 
 const updateProjectSettingsSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.coercedObjectId(),
+  }),
+  body: z.strictObject({
+    compiler: z.string().optional(),
+    imageName: z.string().optional(),
+    png2pdf: z.boolean().optional(),
+    mainBibliographyDocId: zz.objectId().optional(),
+    name: z.string().optional(),
+    rootDocId: zz.objectId().optional(),
+    spellCheckLanguage: z.string().optional(),
+    referenceFormat: z.enum(['bibtex', 'biblatex']).optional(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const updateProjectSettingsFallbackSchema = z.object({
   params: z.object({
     Project_id: zz.coercedObjectId(),
   }),
@@ -96,6 +130,64 @@ const updateProjectSettingsSchema = z.object({
   }),
 })
 
+const projectIdParamSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+  }),
+})
+
+const lowerCaseProjectIdParamSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+  }),
+})
+
+const expireDeletedProjectSchema = z.object({
+  params: z.strictObject({
+    projectId: zz.objectId(),
+  }),
+})
+
+const cloneProjectSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+  }),
+  body: z.strictObject({
+    projectName: z.string().optional(),
+    isDebugCopy: z.boolean().optional(),
+    cloneHistory: z.boolean().optional(),
+    cloneRanges: z.boolean().optional(),
+    tags: z.array(z.strictObject({ id: zz.objectId() })).optional(),
+  }),
+})
+
+const newProjectSchema = z.object({
+  body: z.strictObject({
+    projectName: z.string().optional(),
+    template: z.string().optional(),
+  }),
+})
+
+const renameProjectSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+  }),
+  body: z.strictObject({
+    newProjectName: z.string(),
+  }),
+})
+
+const loadEditorSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+    detachRole: z.enum(['detacher', 'detached']).optional(),
+  }),
+  query: z.object({
+    debug_pdf_detach: z.string().optional(),
+    ws: z.string().optional(),
+  }),
+})
+
 const _ProjectController = {
   _isInPercentageRollout(rolloutName, objectId, percentage) {
     if (Settings.bypassPercentageRollouts === true) {
@@ -108,7 +200,9 @@ const _ProjectController = {
   },
 
   async updateProjectSettings(req, res) {
-    const { params, body } = parseReq(req, updateProjectSettingsSchema)
+    const { params, body } = parseReq(req, updateProjectSettingsSchema, {
+      fallbackSchema: updateProjectSettingsFallbackSchema,
+    })
     const projectId = params.Project_id
 
     if (body.compiler != null) {
@@ -156,7 +250,9 @@ const _ProjectController = {
   },
 
   async updateProjectAdminSettings(req, res) {
-    const { params, body } = parseReq(req, updateProjectAdminSettingsSchema)
+    const { params, body } = parseReq(req, updateProjectAdminSettingsSchema, {
+      fallbackSchema: updateProjectAdminSettingsFallbackSchema,
+    })
     const projectId = params.Project_id
     const user = SessionManager.getSessionUser(req.session)
     if (!Features.hasFeature('link-sharing')) {
@@ -183,7 +279,10 @@ const _ProjectController = {
   },
 
   async deleteProject(req, res) {
-    const projectId = req.params.Project_id
+    const { params } = parseReq(req, projectIdParamSchema, {
+      logOnly: true,
+    })
+    const projectId = params.Project_id
     const user = SessionManager.getSessionUser(req.session)
     await ProjectDeleter.promises.deleteProject(projectId, {
       deleterUser: user,
@@ -200,7 +299,10 @@ const _ProjectController = {
   },
 
   async archiveProject(req, res) {
-    const projectId = req.params.Project_id
+    const { params } = parseReq(req, projectIdParamSchema, {
+      logOnly: true,
+    })
+    const projectId = params.Project_id
     const userId = SessionManager.getLoggedInUserId(req.session)
     await ProjectDeleter.promises.archiveProject(projectId, userId)
     ProjectAuditLogHandler.addEntryIfManagedInBackground(
@@ -213,7 +315,10 @@ const _ProjectController = {
   },
 
   async unarchiveProject(req, res) {
-    const projectId = req.params.Project_id
+    const { params } = parseReq(req, projectIdParamSchema, {
+      logOnly: true,
+    })
+    const projectId = params.Project_id
     const userId = SessionManager.getLoggedInUserId(req.session)
     await ProjectDeleter.promises.unarchiveProject(projectId, userId)
     ProjectAuditLogHandler.addEntryIfManagedInBackground(
@@ -226,7 +331,10 @@ const _ProjectController = {
   },
 
   async trashProject(req, res) {
-    const projectId = req.params.project_id
+    const { params } = parseReq(req, lowerCaseProjectIdParamSchema, {
+      logOnly: true,
+    })
+    const projectId = params.project_id
     const userId = SessionManager.getLoggedInUserId(req.session)
     await ProjectDeleter.promises.trashProject(projectId, userId)
     ProjectAuditLogHandler.addEntryIfManagedInBackground(
@@ -239,7 +347,10 @@ const _ProjectController = {
   },
 
   async untrashProject(req, res) {
-    const projectId = req.params.project_id
+    const { params } = parseReq(req, lowerCaseProjectIdParamSchema, {
+      logOnly: true,
+    })
+    const projectId = params.project_id
     const userId = SessionManager.getLoggedInUserId(req.session)
     await ProjectDeleter.promises.untrashProject(projectId, userId)
     ProjectAuditLogHandler.addEntryIfManagedInBackground(
@@ -257,14 +368,19 @@ const _ProjectController = {
   },
 
   async expireDeletedProject(req, res) {
-    const { projectId } = req.params
+    const {
+      params: { projectId },
+    } = parseReq(req, expireDeletedProjectSchema, { logOnly: true })
     await ProjectDeleter.promises.expireDeletedProject(projectId)
     res.sendStatus(200)
   },
 
   async restoreProject(req, res) {
     const user = SessionManager.getLoggedInUserId(req.session)
-    const projectId = req.params.Project_id
+    const { params } = parseReq(req, projectIdParamSchema, {
+      logOnly: true,
+    })
+    const projectId = params.Project_id
     await ProjectDeleter.promises.restoreProject(projectId)
     ProjectAuditLogHandler.addEntryIfManagedInBackground(
       projectId,
@@ -278,8 +394,11 @@ const _ProjectController = {
   async cloneProject(req, res, next) {
     res.setTimeout(5 * 60 * 1000) // allow extra time for the copy to complete
     metrics.inc('cloned-project')
-    const projectId = req.params.Project_id
-    let { projectName, isDebugCopy, cloneHistory, cloneRanges, tags } = req.body
+    const { params, body } = parseReq(req, cloneProjectSchema, {
+      logOnly: true,
+    })
+    const projectId = params.Project_id
+    let { projectName, isDebugCopy, cloneHistory, cloneRanges, tags } = body
     const currentUser = SessionManager.getSessionUser(req.session)
     if (!hasAdminAccess(currentUser)) {
       isDebugCopy = false
@@ -345,9 +464,10 @@ const _ProjectController = {
       email,
       _id: userId,
     } = currentUser
+    const { body } = parseReq(req, newProjectSchema, { logOnly: true })
     const projectName =
-      req.body.projectName != null ? req.body.projectName.trim() : undefined
-    const { template } = req.body
+      body.projectName != null ? body.projectName.trim() : undefined
+    const { template } = body
 
     const project = await (template === 'example'
       ? ProjectCreationHandler.promises.createExampleProject(
@@ -376,8 +496,11 @@ const _ProjectController = {
   },
 
   async renameProject(req, res) {
-    const projectId = req.params.Project_id
-    const newName = req.body.newProjectName
+    const { params, body } = parseReq(req, renameProjectSchema, {
+      logOnly: true,
+    })
+    const projectId = params.Project_id
+    const newName = body.newProjectName
     await EditorController.promises.renameProject(projectId, newName)
     res.sendStatus(200)
   },
@@ -398,7 +521,10 @@ const _ProjectController = {
   },
 
   async projectEntitiesJson(req, res) {
-    const projectId = req.params.Project_id
+    const { params } = parseReq(req, projectIdParamSchema, {
+      logOnly: true,
+    })
+    const projectId = params.Project_id
     const project = await ProjectGetter.promises.getProject(projectId)
 
     const { docs, files } =
@@ -416,6 +542,9 @@ const _ProjectController = {
 
   async loadEditor(req, res, next) {
     const timer = new metrics.Timer('load-editor')
+    const { params, query } = parseReq(req, loadEditorSchema, {
+      logOnly: true,
+    })
     if (!Settings.editorIsOpen) {
       return res.render('general/closed', { title: 'updating_site' })
     }
@@ -461,12 +590,12 @@ const _ProjectController = {
       }
     }
 
-    const projectId = req.params.Project_id
+    const projectId = params.Project_id
 
     // should not be used in place of split tests query param overrides (?my-split-test-name=my-variant)
     function shouldDisplayFeature(name, variantFlag) {
-      if (req.query && req.query[name]) {
-        return req.query[name] === 'true'
+      if (query[name]) {
+        return query[name] === 'true'
       } else {
         return variantFlag === true
       }
@@ -727,7 +856,7 @@ const _ProjectController = {
         wsUrl = Settings.wsUrlV2
         metricName += '-v2'
       }
-      if (req.query && req.query.ws === 'fallback') {
+      if (query.ws === 'fallback') {
         // `?ws=fallback` will connect to the bare origin, and ignore
         //   the custom wsUrl. Hence it must load the client side
         //   javascript from there too.
@@ -807,7 +936,7 @@ const _ProjectController = {
 
       const debugPdfDetach = shouldDisplayFeature('debug_pdf_detach')
 
-      const detachRole = req.params.detachRole
+      const detachRole = params.detachRole
 
       const showSymbolPalette =
         !Features.hasFeature('saas') ||

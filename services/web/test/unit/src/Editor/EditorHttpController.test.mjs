@@ -51,7 +51,8 @@ describe('EditorHttpController', function () {
     ctx.folder = { _id: new ObjectId() }
     ctx.source = 'editor'
 
-    ctx.parentFolderId = 'mock-folder-id'
+    // parent_folder_id/entity_id/folder_id are all validated as Mongo ObjectIds
+    ctx.parentFolderId = new ObjectId().toString()
     ctx.req = new MockRequest(vi)
     ctx.res = new MockResponse(vi)
     ctx.next = sinon.stub()
@@ -526,7 +527,7 @@ describe('EditorHttpController', function () {
 
   describe('addDoc', function () {
     beforeEach(function (ctx) {
-      ctx.req.params = { Project_id: ctx.project._id }
+      ctx.req.params = { Project_id: ctx.project._id.toString() }
       ctx.req.body = {
         name: (ctx.docName = 'doc-name'),
         parent_folder_id: ctx.parentFolderId,
@@ -543,7 +544,7 @@ describe('EditorHttpController', function () {
 
       it('should call EditorController.addDoc', function (ctx) {
         expect(ctx.EditorController.promises.addDoc).to.have.been.calledWith(
-          ctx.project._id,
+          ctx.project._id.toString(),
           ctx.parentFolderId,
           ctx.docName,
           [],
@@ -588,7 +589,7 @@ describe('EditorHttpController', function () {
   describe('addFolder', function () {
     beforeEach(function (ctx) {
       ctx.folderName = 'folder-name'
-      ctx.req.params = { Project_id: ctx.project._id }
+      ctx.req.params = { Project_id: ctx.project._id.toString() }
       ctx.req.body = {
         name: ctx.folderName,
         parent_folder_id: ctx.parentFolderId,
@@ -605,7 +606,7 @@ describe('EditorHttpController', function () {
 
       it('should call EditorController.addFolder', function (ctx) {
         expect(ctx.EditorController.promises.addFolder).to.have.been.calledWith(
-          ctx.project._id,
+          ctx.project._id.toString(),
           ctx.parentFolderId,
           ctx.folderName,
           'editor'
@@ -661,10 +662,11 @@ describe('EditorHttpController', function () {
 
   describe('renameEntity', function () {
     beforeEach(function (ctx) {
-      ctx.entityId = 'entity-id-123'
-      ctx.entityType = 'entity-type'
+      // entity_id is validated as a Mongo ObjectId; entity_type as an enum
+      ctx.entityId = new ObjectId().toString()
+      ctx.entityType = 'doc'
       ctx.req.params = {
-        Project_id: ctx.project._id,
+        Project_id: ctx.project._id.toString(),
         entity_id: ctx.entityId,
         entity_type: ctx.entityType,
       }
@@ -684,7 +686,7 @@ describe('EditorHttpController', function () {
         expect(
           ctx.EditorController.promises.renameEntity
         ).to.have.been.calledWith(
-          ctx.project._id,
+          ctx.project._id.toString(),
           ctx.entityId,
           ctx.entityType,
           ctx.newName,
@@ -725,11 +727,13 @@ describe('EditorHttpController', function () {
   describe('moveEntity', function () {
     beforeEach(async function (ctx) {
       await new Promise(resolve => {
-        ctx.entityId = 'entity-id-123'
-        ctx.entityType = 'entity-type'
-        ctx.folderId = 'folder-id-123'
+        // entity_id/folder_id are validated as Mongo ObjectIds; entity_type
+        // as an enum
+        ctx.entityId = new ObjectId().toString()
+        ctx.entityType = 'doc'
+        ctx.folderId = new ObjectId().toString()
         ctx.req.params = {
-          Project_id: ctx.project._id,
+          Project_id: ctx.project._id.toString(),
           entity_id: ctx.entityId,
           entity_type: ctx.entityType,
         }
@@ -741,7 +745,7 @@ describe('EditorHttpController', function () {
 
     it('should call EditorController.moveEntity', function (ctx) {
       expect(ctx.EditorController.promises.moveEntity).to.have.been.calledWith(
-        ctx.project._id,
+        ctx.project._id.toString(),
         ctx.entityId,
         ctx.folderId,
         ctx.entityType,
@@ -755,35 +759,40 @@ describe('EditorHttpController', function () {
     })
   })
 
-  describe('deleteEntity', function () {
-    beforeEach(async function (ctx) {
-      await new Promise(resolve => {
-        ctx.entityId = 'entity-id-123'
-        ctx.entityType = 'entity-type'
-        ctx.req.params = {
-          Project_id: ctx.project._id,
-          entity_id: ctx.entityId,
-          entity_type: ctx.entityType,
-        }
-        ctx.res.callback = resolve
-        ctx.EditorHttpController.deleteEntity(ctx.req, ctx.res)
+  for (const [name, entityType] of [
+    ['deleteDoc', 'doc'],
+    ['deleteFile', 'file'],
+    ['deleteFolder', 'folder'],
+  ]) {
+    describe(name, function () {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
+          // entity_id is validated as a Mongo ObjectId
+          ctx.entityId = new ObjectId().toString()
+          ctx.req.params = {
+            Project_id: ctx.project._id.toString(),
+            entity_id: ctx.entityId,
+          }
+          ctx.res.callback = resolve
+          ctx.EditorHttpController[name](ctx.req, ctx.res)
+        })
+      })
+
+      it('should call EditorController.deleteEntity', function (ctx) {
+        expect(
+          ctx.EditorController.promises.deleteEntity
+        ).to.have.been.calledWith(
+          ctx.project._id.toString(),
+          ctx.entityId,
+          entityType,
+          'editor',
+          ctx.user._id
+        )
+      })
+
+      it('should send back a success response', function (ctx) {
+        expect(ctx.res.statusCode).to.equal(204)
       })
     })
-
-    it('should call EditorController.deleteEntity', function (ctx) {
-      expect(
-        ctx.EditorController.promises.deleteEntity
-      ).to.have.been.calledWith(
-        ctx.project._id,
-        ctx.entityId,
-        ctx.entityType,
-        'editor',
-        ctx.user._id
-      )
-    })
-
-    it('should send back a success response', function (ctx) {
-      expect(ctx.res.statusCode).to.equal(204)
-    })
-  })
+  }
 })

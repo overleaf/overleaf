@@ -8,18 +8,17 @@ const outputWildcardSchema = z.object({
   params: z.strictObject({
     project_id: zz.objectId().or(zz.submissionId()),
     build_id: zz.buildId(),
-    // bare `*` wildcard -- Express populates the match under numeric key 0
-    0: zz.filepath(),
+    file: zz.filepath(),
   }),
 })
 
 class MockClsiNginxApi extends AbstractMockApi {
   applyRoutes() {
     this.app.get(
-      '/project/:project_id/build/:build_id/output/*',
+      '/project/:project_id/build/:build_id/output/:file(.+)',
       (req, res) => {
         const { params } = parseReq(req, outputWildcardSchema)
-        const filename = params[0]
+        const filename = params.file
         if (filename === 'output.pdf') {
           plainTextResponse(res, 'mock-pdf')
         } else if (filename === 'output.log') {

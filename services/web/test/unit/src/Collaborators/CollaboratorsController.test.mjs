@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
+import {
+  InvalidParamsError,
+  InvalidRequestError,
+} from '@overleaf/validation-tools'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
 import MockRequest from '../helpers/MockRequest.mjs'
 import MockResponse from '../helpers/MockResponse.mjs'
@@ -51,7 +55,11 @@ describe('CollaboratorsController', function () {
       promises: {
         getAllInvitedMembers: sinon.stub(),
         getProjectAccess: sinon.stub().resolves(ctx.projectAccess),
+        getPublicShareTokens: sinon.stub(),
       },
+    }
+    ctx.Features = {
+      hasFeature: sinon.stub().returns(true),
     }
     ctx.AuthorizationManager = {
       promises: {
@@ -100,6 +108,7 @@ describe('CollaboratorsController', function () {
     }
     ctx.TokenAccessHandler = {
       getRequestToken: sinon.stub().returns('access-token'),
+      createTokenHashPrefix: sinon.stub().returns('hash-prefix'),
     }
 
     ctx.ProjectAuditLogHandler = {
@@ -236,6 +245,10 @@ describe('CollaboratorsController', function () {
       default: ctx.EmailHandler,
     }))
 
+    vi.doMock('../../../../app/src/infrastructure/Features.mjs', () => ({
+      default: ctx.Features,
+    }))
+
     ctx.CollaboratorsController = (await import(MODULE_PATH)).default
   })
 
@@ -243,8 +256,8 @@ describe('CollaboratorsController', function () {
     beforeEach(async function (ctx) {
       await new Promise(resolve => {
         ctx.req.params = {
-          Project_id: ctx.projectId,
-          user_id: ctx.user._id,
+          Project_id: ctx.projectId.toString(),
+          user_id: ctx.user._id.toString(),
         }
         ctx.res.sendStatus = sinon.spy(() => {
           resolve()
@@ -256,14 +269,17 @@ describe('CollaboratorsController', function () {
     it('should from the user from the project', function (ctx) {
       expect(
         ctx.CollaboratorsHandler.promises.removeUserFromProject
-      ).to.have.been.calledWith(ctx.projectId, ctx.user._id)
+      ).to.have.been.calledWith(
+        ctx.projectId.toString(),
+        ctx.user._id.toString()
+      )
     })
 
     it('should emit a userRemovedFromProject event to the proejct', function (ctx) {
       expect(ctx.EditorRealTimeController.emitToRoom).to.have.been.calledWith(
-        ctx.projectId,
+        ctx.projectId.toString(),
         'userRemovedFromProject',
-        ctx.user._id
+        ctx.user._id.toString()
       )
     })
 
@@ -273,36 +289,51 @@ describe('CollaboratorsController', function () {
 
     it('should have called emitToRoom', function (ctx) {
       expect(ctx.EditorRealTimeController.emitToRoom).to.have.been.calledWith(
-        ctx.projectId,
+        ctx.projectId.toString(),
         'project:membership:changed'
       )
     })
 
     it('should look up the collaborator email', function (ctx) {
       expect(ctx.UserGetter.promises.getUser).to.have.been.calledWith(
-        { _id: ctx.user._id },
+        { _id: ctx.user._id.toString() },
         { email: 1 }
       )
     })
 
     it('should write a project audit log', function (ctx) {
       ctx.ProjectAuditLogHandler.addEntryInBackground.should.have.been.calledWith(
-        ctx.projectId,
+        ctx.projectId.toString(),
         'remove-collaborator',
         ctx.user._id,
         ctx.req.ip,
         {
-          userId: ctx.user._id,
+          userId: ctx.user._id.toString(),
           collaboratorEmail: 'user@example.com',
         }
       )
     })
   })
 
+  describe('removeUserFromProject with a malformed project id', function () {
+    it('rejects the request instead of removing anyone', async function (ctx) {
+      ctx.req.params = {
+        Project_id: 'not-an-object-id',
+        user_id: ctx.user._id.toString(),
+      }
+      await ctx.CollaboratorsController.removeUserFromProject(
+        ctx.req,
+        ctx.res
+      ).should.be.rejectedWith(InvalidParamsError)
+      expect(ctx.CollaboratorsHandler.promises.removeUserFromProject).to.not
+        .have.been.called
+    })
+  })
+
   describe('removeSelfFromProject', function () {
     beforeEach(async function (ctx) {
       await new Promise(resolve => {
-        ctx.req.params = { Project_id: ctx.projectId }
+        ctx.req.params = { Project_id: ctx.projectId.toString() }
         ctx.res.sendStatus = sinon.spy(() => {
           resolve()
         })
@@ -313,12 +344,12 @@ describe('CollaboratorsController', function () {
     it('should remove the logged in user from the project', function (ctx) {
       expect(
         ctx.CollaboratorsHandler.promises.removeUserFromProject
-      ).to.have.been.calledWith(ctx.projectId, ctx.user._id)
+      ).to.have.been.calledWith(ctx.projectId.toString(), ctx.user._id)
     })
 
     it('should emit a userRemovedFromProject event to the proejct', function (ctx) {
       expect(ctx.EditorRealTimeController.emitToRoom).to.have.been.calledWith(
-        ctx.projectId,
+        ctx.projectId.toString(),
         'userRemovedFromProject',
         ctx.user._id
       )
@@ -327,7 +358,7 @@ describe('CollaboratorsController', function () {
     it('should remove the project from all tags', function (ctx) {
       expect(
         ctx.TagsHandler.promises.removeProjectFromAllTags
-      ).to.have.been.calledWith(ctx.user._id, ctx.projectId)
+      ).to.have.been.calledWith(ctx.user._id, ctx.projectId.toString())
     })
 
     it('should return a success code', function (ctx) {
@@ -336,7 +367,7 @@ describe('CollaboratorsController', function () {
 
     it('should emit a project:membership:changed event to the project', function (ctx) {
       expect(ctx.EditorRealTimeController.emitToRoom).to.have.been.calledWith(
-        ctx.projectId,
+        ctx.projectId.toString(),
         'project:membership:changed',
         { members: true }
       )
@@ -344,7 +375,7 @@ describe('CollaboratorsController', function () {
 
     it('should write a project audit log', function (ctx) {
       ctx.ProjectAuditLogHandler.addEntryInBackground.should.have.been.calledWith(
-        ctx.projectId,
+        ctx.projectId.toString(),
         'leave-project',
         ctx.user._id,
         ctx.req.ip
@@ -352,10 +383,22 @@ describe('CollaboratorsController', function () {
     })
   })
 
+  describe('removeSelfFromProject with a malformed project id', function () {
+    it('rejects the request instead of removing anyone', async function (ctx) {
+      ctx.req.params = { Project_id: 'not-an-object-id' }
+      await ctx.CollaboratorsController.removeSelfFromProject(
+        ctx.req,
+        ctx.res
+      ).should.be.rejectedWith(InvalidParamsError)
+      expect(ctx.CollaboratorsHandler.promises.removeUserFromProject).to.not
+        .have.been.called
+    })
+  })
+
   describe('getAllMembers', function () {
     beforeEach(async function (ctx) {
       await new Promise(resolve => {
-        ctx.req.params = { Project_id: ctx.projectId }
+        ctx.req.params = { Project_id: ctx.projectId.toString() }
         ctx.res.json = sinon.spy(() => {
           resolve()
         })
@@ -409,6 +452,18 @@ describe('CollaboratorsController', function () {
     })
   })
 
+  describe('getAllMembers with a malformed project id', function () {
+    it('rejects the request instead of listing members', async function (ctx) {
+      ctx.req.params = { Project_id: 'not-an-object-id' }
+      await ctx.CollaboratorsController.getAllMembers(
+        ctx.req,
+        ctx.res
+      ).should.be.rejectedWith(InvalidParamsError)
+      expect(ctx.CollaboratorsGetter.promises.getAllInvitedMembers).to.not.have
+        .been.called
+    })
+  })
+
   describe('getAccessRequests', function () {
     beforeEach(async function (ctx) {
       ctx.requesterId = new ObjectId()
@@ -440,6 +495,18 @@ describe('CollaboratorsController', function () {
       expect(ctx.res.json).to.have.been.calledWith({
         editAccessRequests: ctx.editAccessRequests,
       })
+    })
+  })
+
+  describe('getAccessRequests with a malformed project id', function () {
+    it('rejects the request instead of listing access requests', async function (ctx) {
+      ctx.req.params = { Project_id: 'not-an-object-id' }
+      await ctx.CollaboratorsController.getAccessRequests(
+        ctx.req,
+        ctx.res
+      ).should.be.rejectedWith(InvalidParamsError)
+      expect(ctx.CollaboratorsGetter.promises.getProjectAccess).to.not.have.been
+        .called
     })
   })
 
@@ -500,6 +567,23 @@ describe('CollaboratorsController', function () {
           ctx.next
         )
       })
+    })
+
+    it('rejects an unrecognized field in the body instead of falling back', async function (ctx) {
+      ctx.req.body = { privilegeLevel: 'readOnly', notARealField: 'nope' }
+      await new Promise(resolve => {
+        ctx.next = sinon.spy(err => {
+          expect(err).to.be.instanceOf(InvalidRequestError)
+          resolve()
+        })
+        ctx.CollaboratorsController.setCollaboratorInfo(
+          ctx.req,
+          ctx.res,
+          ctx.next
+        )
+      })
+      expect(ctx.CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel).to
+        .not.have.been.called
     })
 
     describe('when setting privilege level to readAndWrite', function () {
@@ -644,6 +728,19 @@ describe('CollaboratorsController', function () {
         ctx.CollaboratorsController.transferOwnership(ctx.req, ctx.res)
       })
     })
+
+    it('rejects an unrecognized field in the body instead of falling back', async function (ctx) {
+      ctx.req.body = {
+        user_id: ctx.user._id.toString(),
+        notARealField: 'nope',
+      }
+      await ctx.CollaboratorsController.transferOwnership(
+        ctx.req,
+        ctx.res
+      ).should.be.rejectedWith(InvalidRequestError)
+      expect(ctx.OwnershipTransferHandler.promises.transferOwnership).to.not
+        .have.been.called
+    })
   })
 
   describe('requestAccess', function () {
@@ -758,6 +855,19 @@ describe('CollaboratorsController', function () {
     })
   })
 
+  describe('requestAccess with a malformed project id', function () {
+    it('rejects the request instead of recording it', async function (ctx) {
+      ctx.req.params = { Project_id: 'not-an-object-id' }
+      ctx.req.body = { privilegeLevel: 'readAndWrite' }
+      await ctx.CollaboratorsController.requestAccess(
+        ctx.req,
+        ctx.res
+      ).should.be.rejectedWith(InvalidParamsError)
+      expect(ctx.CollaboratorsHandler.promises.requestAccess).to.not.have.been
+        .called
+    })
+  })
+
   describe('declineAccessRequest', function () {
     beforeEach(function (ctx) {
       ctx.requesterId = new ObjectId()
@@ -847,6 +957,21 @@ describe('CollaboratorsController', function () {
         ctx.CollaboratorsController.declineAccessRequest(ctx.req, ctx.res)
       })
       expect(ctx.EmailHandler.promises.sendEmail).to.not.have.been.called
+    })
+  })
+
+  describe('declineAccessRequest with a malformed project id', function () {
+    it('rejects the request instead of declining it', async function (ctx) {
+      ctx.req.params = {
+        Project_id: 'not-an-object-id',
+        user_id: new ObjectId().toString(),
+      }
+      await ctx.CollaboratorsController.declineAccessRequest(
+        ctx.req,
+        ctx.res
+      ).should.be.rejectedWith(InvalidParamsError)
+      expect(ctx.CollaboratorsHandler.promises.declineAccessRequest).to.not.have
+        .been.called
     })
   })
 
@@ -1004,6 +1129,102 @@ describe('CollaboratorsController', function () {
           decision: 'accept',
         }
       )
+    })
+  })
+
+  describe('grantAccessRequest with a malformed project id', function () {
+    it('rejects the request instead of granting it', async function (ctx) {
+      ctx.req.params = {
+        Project_id: 'not-an-object-id',
+        user_id: new ObjectId().toString(),
+      }
+      ctx.req.body = { privilegeLevel: 'readAndWrite' }
+      await ctx.CollaboratorsController.grantAccessRequest(
+        ctx.req,
+        ctx.res
+      ).should.be.rejectedWith(InvalidParamsError)
+      expect(ctx.CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel).to
+        .not.have.been.called
+    })
+  })
+
+  describe('getShareTokens', function () {
+    beforeEach(function (ctx) {
+      ctx.req.params = { Project_id: ctx.projectId.toString() }
+    })
+
+    it('rejects a malformed project id before checking anything else', async function (ctx) {
+      ctx.req.params = { Project_id: 'not-an-object-id' }
+      await ctx.CollaboratorsController.getShareTokens(
+        ctx.req,
+        ctx.res
+      ).should.be.rejectedWith(InvalidParamsError)
+      expect(ctx.CollaboratorsGetter.promises.getPublicShareTokens).to.not.have
+        .been.called
+    })
+
+    it('returns 403 when link sharing is disabled', async function (ctx) {
+      ctx.Features.hasFeature.withArgs('link-sharing').returns(false)
+      await new Promise(resolve => {
+        ctx.res.sendStatus = sinon.spy(() => resolve())
+        ctx.CollaboratorsController.getShareTokens(ctx.req, ctx.res)
+      })
+      expect(ctx.res.sendStatus).to.have.been.calledWith(403)
+      expect(ctx.CollaboratorsGetter.promises.getPublicShareTokens).to.not.have
+        .been.called
+    })
+
+    it('returns 403 when the logged in user has no share tokens', async function (ctx) {
+      ctx.CollaboratorsGetter.promises.getPublicShareTokens.resolves(null)
+      await new Promise(resolve => {
+        ctx.res.sendStatus = sinon.spy(() => resolve())
+        ctx.CollaboratorsController.getShareTokens(ctx.req, ctx.res)
+      })
+      expect(ctx.res.sendStatus).to.have.been.calledWith(403)
+    })
+
+    it('returns the hashed tokens for a logged in user', async function (ctx) {
+      ctx.CollaboratorsGetter.promises.getPublicShareTokens.resolves({
+        readOnly: 'ro-token',
+        readAndWrite: 'rw-token',
+      })
+      await new Promise(resolve => {
+        ctx.res.json = sinon.spy(() => resolve())
+        ctx.CollaboratorsController.getShareTokens(ctx.req, ctx.res)
+      })
+      expect(
+        ctx.CollaboratorsGetter.promises.getPublicShareTokens
+      ).to.have.been.calledWith(
+        new ObjectId(ctx.user._id.toString()),
+        new ObjectId(ctx.projectId.toString())
+      )
+      expect(ctx.res.json).to.have.been.calledWith({
+        readOnly: 'ro-token',
+        readAndWrite: 'rw-token',
+        readOnlyHashPrefix: 'hash-prefix',
+        readAndWriteHashPrefix: 'hash-prefix',
+      })
+    })
+
+    it('falls back to the session token for an anonymous request', async function (ctx) {
+      ctx.SessionManager.getLoggedInUserId = sinon.stub().returns(null)
+      ctx.TokenAccessHandler.getRequestToken = sinon
+        .stub()
+        .returns('anon-ro-token')
+      await new Promise(resolve => {
+        ctx.res.json = sinon.spy(() => resolve())
+        ctx.CollaboratorsController.getShareTokens(ctx.req, ctx.res)
+      })
+      expect(ctx.CollaboratorsGetter.promises.getPublicShareTokens).to.not.have
+        .been.called
+      expect(ctx.TokenAccessHandler.getRequestToken).to.have.been.calledWith(
+        ctx.req,
+        ctx.projectId.toString()
+      )
+      expect(ctx.res.json).to.have.been.calledWith({
+        readOnly: 'anon-ro-token',
+        readOnlyHashPrefix: 'hash-prefix',
+      })
     })
   })
 })

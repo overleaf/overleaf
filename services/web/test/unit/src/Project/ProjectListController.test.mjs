@@ -1,8 +1,12 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
 import Settings from '@overleaf/settings'
+import {
+  InvalidRequestError,
+  setReqValidationModeForTests,
+} from '@overleaf/validation-tools'
 
 const ObjectId = mongodb.ObjectId
 
@@ -333,6 +337,10 @@ describe('ProjectListController', function () {
       },
     }
     ctx.res = {}
+  })
+
+  afterEach(function () {
+    setReqValidationModeForTests(null)
   })
 
   describe('projectListPage', function () {
@@ -1317,6 +1325,112 @@ describe('ProjectListController', function () {
         )
       }
       await ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
+    })
+  })
+
+  describe('getProjectsJson', function () {
+    beforeEach(function (ctx) {
+      ctx.projects = [
+        { _id: 1, lastUpdated: new Date(1), owner_ref: 'user-1' },
+        { _id: 2, lastUpdated: new Date(2), owner_ref: 'user-2' },
+      ]
+      ctx.allProjects = {
+        owned: ctx.projects,
+        readAndWrite: [],
+        readOnly: [],
+        tokenReadAndWrite: [],
+        tokenReadOnly: [],
+        review: [],
+      }
+      ctx.ProjectGetter.promises.findAllUsersProjects.resolves(ctx.allProjects)
+      ctx.next = sinon.stub()
+    })
+
+    it('should respond with the paginated/filtered/sorted projects', async function (ctx) {
+      ctx.req.body = {
+        filters: { ownedByUser: true },
+        sort: { by: 'lastUpdated', order: 'desc' },
+        page: { size: 20 },
+      }
+      await new Promise(resolve => {
+        ctx.res.json = data => {
+          expect(data.totalSize).to.equal(ctx.projects.length)
+          expect(data.projects).to.have.length(ctx.projects.length)
+          resolve()
+        }
+        ctx.ProjectListController.getProjectsJson(ctx.req, ctx.res, ctx.next)
+      })
+      sinon.assert.notCalled(ctx.next)
+    })
+
+    it('should work with only a sort and no filters/page', async function (ctx) {
+      ctx.req.body = { sort: { by: 'title', order: 'asc' } }
+      await new Promise(resolve => {
+        ctx.res.json = data => {
+          expect(data.totalSize).to.equal(ctx.projects.length)
+          resolve()
+        }
+        ctx.ProjectListController.getProjectsJson(ctx.req, ctx.res, ctx.next)
+      })
+    })
+
+    it('should not reject an unsupported sort.by value in log mode', async function (ctx) {
+      setReqValidationModeForTests('log')
+      ctx.req.body = { sort: { by: 'not-a-real-field', order: 'asc' } }
+      await ctx.ProjectListController.getProjectsJson(
+        ctx.req,
+        ctx.res,
+        ctx.next
+      )
+      sinon.assert.calledOnce(ctx.next)
+      const err = ctx.next.firstCall.args[0]
+      expect(err).to.not.be.instanceOf(InvalidRequestError)
+      expect(err.message).to.equal('Invalid sorting criteria')
+    })
+
+    it('should not reject an unknown filter key in log mode', async function (ctx) {
+      setReqValidationModeForTests('log')
+      ctx.req.body = { filters: { notARealFilter: true } }
+      await new Promise(resolve => {
+        ctx.res.json = data => {
+          expect(data.totalSize).to.equal(ctx.projects.length)
+          resolve()
+        }
+        ctx.ProjectListController.getProjectsJson(ctx.req, ctx.res, ctx.next)
+      })
+      sinon.assert.notCalled(ctx.next)
+    })
+
+    describe('request validation', function () {
+      beforeEach(function () {
+        setReqValidationModeForTests('enforce')
+      })
+
+      it('rejects an unsupported sort.by value', async function (ctx) {
+        ctx.req.body = { sort: { by: 'not-a-real-field', order: 'asc' } }
+        await ctx.ProjectListController.getProjectsJson(
+          ctx.req,
+          ctx.res,
+          ctx.next
+        )
+        sinon.assert.calledWith(
+          ctx.next,
+          sinon.match.instanceOf(InvalidRequestError)
+        )
+      })
+
+      it('rejects an unknown filter key', async function (ctx) {
+        ctx.req.body = { filters: { notARealFilter: true } }
+        await ctx.ProjectListController.getProjectsJson(
+          ctx.req,
+          ctx.res,
+          ctx.next
+        )
+        sinon.assert.calledWith(
+          ctx.next,
+          sinon.match.instanceOf(InvalidRequestError)
+        )
+      })
     })
   })
 })

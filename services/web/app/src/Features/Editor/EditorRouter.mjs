@@ -1,9 +1,12 @@
-import EditorHttpController from './EditorHttpController.mjs'
+import EditorHttpController, {
+  joinProjectSchema,
+} from './EditorHttpController.mjs'
 import AuthenticationController from '../Authentication/AuthenticationController.mjs'
 import AuthorizationMiddleware from '../Authorization/AuthorizationMiddleware.mjs'
 import { RateLimiter } from '../../infrastructure/RateLimiter.mjs'
 import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.mjs'
 import AsyncLocalStorage from '../../infrastructure/AsyncLocalStorage.mjs'
+import { parseReq } from '../../infrastructure/Validation.mjs'
 
 const rateLimiters = {
   addDocToProject: new RateLimiter('add-doc-to-project', {
@@ -74,8 +77,9 @@ export default {
       AuthenticationController.requirePrivateApiAuth(),
       RateLimiterMiddleware.rateLimit(rateLimiters.joinProject, {
         params: ['Project_id'],
-        // keep schema in sync with controller
-        getUserId: req => req.body.userId,
+        // reuses the controller's own schema so the two can't drift
+        getUserId: req =>
+          parseReq(req, joinProjectSchema, { logOnly: true }).body.userId,
       }),
       EditorHttpController.joinProject
     )

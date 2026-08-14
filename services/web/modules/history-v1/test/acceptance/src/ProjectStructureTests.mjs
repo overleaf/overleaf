@@ -677,7 +677,7 @@ describe('ProjectStructureChanges', function () {
       renameItem(
         owner,
         exampleProjectId,
-        'Doc',
+        'doc',
         exampleDocId,
         'wombat.tex',
         () => {

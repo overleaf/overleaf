@@ -14,18 +14,8 @@ const lookupSchema = z.object({
     // matches clsi-cache's own getLastOutputFileParamsSchema /
     // getLatestOutputFileParamsSchema (HTTPController.js)
     editorBuildId: zz.editorBuildId().optional(),
-    // this is a wildcard `:filename(.*)` param forwarded to a storage
-    // lookup key, so it gets the same zz.filepath() traversal hardening as
-    // clsi-cache's own filenameSchema
+    // matches clsi-cache's own filenameSchema (HTTPController.js)
     filename: zz.filepath(),
-    // this repo's patched Express additionally populates req.params[0]
-    // (the filename minus its first character) for a *named* regex
-    // wildcard like `:filename(.*)` -- unlike a bare `*` (see
-    // MockClsiNginxApi.mjs's outputWildcardSchema, which only gets the
-    // numeric key). A strictObject that doesn't account for this key
-    // rejects every real (non-empty filename) request with a 404
-    // "Unrecognized key: 0" before it ever reaches the lookup below.
-    0: z.string(),
   }),
 })
 
@@ -106,21 +96,20 @@ class MockClsiCache extends AbstractMockApi {
   applyRoutes() {
     // getOutputFile's two routes (with/without the per-user segment)
     this.app.get(
-      '/project/:project_id/user/:user_id/build/:editorBuildId/search/output/:filename(.*)',
+      '/project/:project_id/user/:user_id/build/:editorBuildId/search/output/:filename',
       (req, res) => this._lookup(req, res)
     )
     this.app.get(
-      '/project/:project_id/build/:editorBuildId/search/output/:filename(.*)',
+      '/project/:project_id/build/:editorBuildId/search/output/:filename',
       (req, res) => this._lookup(req, res)
     )
     // getLatestOutputFile's two routes (with/without the per-user segment)
     this.app.get(
-      '/project/:project_id/user/:user_id/latest/output/:filename(.*)',
+      '/project/:project_id/user/:user_id/latest/output/:filename',
       (req, res) => this._lookup(req, res)
     )
-    this.app.get(
-      '/project/:project_id/latest/output/:filename(.*)',
-      (req, res) => this._lookup(req, res)
+    this.app.get('/project/:project_id/latest/output/:filename', (req, res) =>
+      this._lookup(req, res)
     )
 
     this.app.get('/content/:contentId', (req, res) => {

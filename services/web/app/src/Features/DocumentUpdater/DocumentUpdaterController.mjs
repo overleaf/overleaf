@@ -3,10 +3,19 @@ import DocumentUpdaterHandler from './DocumentUpdaterHandler.mjs'
 import ProjectLocator from '../Project/ProjectLocator.mjs'
 import { plainTextResponse } from '../../infrastructure/Response.mjs'
 import { expressify } from '@overleaf/promise-utils'
+import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
+
+const getDocSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+    Doc_id: zz.objectId(),
+  }),
+})
 
 async function getDoc(req, res) {
-  const projectId = req.params.Project_id
-  const docId = req.params.Doc_id
+  const { params } = parseReq(req, getDocSchema, { logOnly: true })
+  const projectId = params.Project_id
+  const docId = params.Doc_id
 
   try {
     const { element: doc } = await ProjectLocator.promises.findElement({

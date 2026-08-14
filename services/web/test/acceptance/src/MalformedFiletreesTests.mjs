@@ -9,10 +9,22 @@ const lastUpdated = new Date(42)
 const lastUpdatedBy = new ObjectId()
 const lastUpdatedChanged = new Date(1337)
 
+// Deprecation warnings (e.g. node:punycode's DEP0040) print as an extra
+// logger line on the script's stdout, which breaks the deep-equal
+// assertions below on the captured output; suppress them for this child
+// process only, not the main app/test process.
+const runScriptEnv = {
+  ...process.env,
+  NODE_OPTIONS: [process.env.NODE_OPTIONS, '--no-deprecation']
+    .filter(Boolean)
+    .join(' '),
+}
+
 async function runScriptFind() {
   try {
     const result = await promisify(exec)(
-      ['node', 'scripts/find_malformed_filetrees.mjs'].join(' ')
+      ['node', 'scripts/find_malformed_filetrees.mjs'].join(' '),
+      { env: runScriptEnv }
     )
     return result.stdout.split('\n').filter(filterOutput)
   } catch (error) {
@@ -30,7 +42,7 @@ async function runScriptFix(instructions) {
         'scripts/fix_malformed_filetree.mjs',
         `--logs=<(echo '${adhocFile}')`,
       ].join(' '),
-      { shell: '/bin/bash' }
+      { shell: '/bin/bash', env: runScriptEnv }
     )
   } catch (error) {
     logger.error({ error }, 'fix script failed unexpectedly')

@@ -12,7 +12,7 @@ describe('DocumentController', function () {
     ctx.res = new MockResponse(vi)
     ctx.req = new MockRequest(vi)
     ctx.next = sinon.stub()
-    ctx.doc = { _id: 'doc-id-123' }
+    ctx.doc = { _id: '5c9a5d5b0000000000000002' }
     ctx.doc_lines = ['one', 'two', 'three']
     ctx.version = 42
     ctx.ranges = {
@@ -36,11 +36,15 @@ describe('DocumentController', function () {
       ],
     }
     ctx.pathname = '/a/b/c/file.tex'
-    ctx.lastUpdatedAt = new Date().getTime()
-    ctx.lastUpdatedBy = 'fake-last-updater-id'
+    // stored/read back as a string -- Redis (ioredis mget) always returns
+    // strings, and document-updater's RedisManager never parses this key
+    // back to a number, so this is a numeric-looking string on the wire,
+    // not a JS number.
+    ctx.lastUpdatedAt = String(new Date().getTime())
+    ctx.lastUpdatedBy = '5c9a5d5b0000000000000003'
     ctx.rev = 5
     ctx.project = {
-      _id: 'project-id-123',
+      _id: '5c9a5d5b0000000000000001',
       overleaf: {
         history: {
           id: 1234,
@@ -212,7 +216,7 @@ describe('DocumentController', function () {
           ctx.doc_lines,
           ctx.version,
           ctx.ranges,
-          ctx.lastUpdatedAt,
+          Number(ctx.lastUpdatedAt),
           ctx.lastUpdatedBy
         )
       })
@@ -237,7 +241,11 @@ describe('DocumentController', function () {
           ctx.ProjectEntityUpdateHandler.promises.updateDocLines.rejects(
             new Errors.NotFoundError('document does not exist')
           )
-          ctx.req.body = { lines: ctx.doc_lines }
+          ctx.req.body = {
+            lines: ctx.doc_lines,
+            version: ctx.version,
+            ranges: ctx.ranges,
+          }
           ctx.next.callsFake(() => {
             resolve()
           })

@@ -189,7 +189,6 @@ describe('ProjectDuplicateNames', function () {
               json: true,
               qs: {
                 folder_id: this.rootFolderId,
-                qqfilename: 'frog.jpg',
               },
               formData: {
                 name: 'frog.jpg',
@@ -276,7 +275,6 @@ describe('ProjectDuplicateNames', function () {
               json: true,
               qs: {
                 folder_id: this.rootFolderId,
-                qqfilename: 'frog.jpg',
               },
               formData: {
                 qqfile: {

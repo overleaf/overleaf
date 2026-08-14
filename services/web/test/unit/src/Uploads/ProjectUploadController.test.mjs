@@ -5,11 +5,18 @@
  * DS206: Consider reworking classes to avoid initClass
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
+import Path from 'node:path'
 import MockRequest from '../helpers/MockRequest.mjs'
 import MockResponse from '../helpers/MockResponse.mjs'
 import ArchiveErrors from '../../../../app/src/Features/Uploads/ArchiveErrors.mjs'
+import {
+  InvalidParamsError,
+  InvalidRequestError,
+  setReqValidationModeForTests,
+} from '@overleaf/validation-tools'
+import { asZodError } from '@overleaf/validation-tools/testUtils.js'
 import {
   FileTooLargeError,
   DocumentConversionError,
@@ -22,6 +29,21 @@ vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
 
 const modulePath =
   '../../../../app/src/Features/Uploads/ProjectUploadController.mjs'
+
+// A minimal but schema-valid multer file object (zz.uploadedFile()), keyed
+// off the temp path used throughout these tests.
+function uploadedFile(path) {
+  return {
+    fieldname: 'qqfile',
+    originalname: Path.basename(path),
+    encoding: '7bit',
+    mimetype: 'application/octet-stream',
+    size: 1234,
+    destination: Path.dirname(path),
+    filename: Path.basename(path),
+    path,
+  }
+}
 
 describe('ProjectUploadController', function () {
   beforeEach(async function (ctx) {
@@ -142,13 +164,15 @@ describe('ProjectUploadController', function () {
     ctx.ProjectUploadController = (await import(modulePath)).default
   })
 
+  afterEach(function () {
+    setReqValidationModeForTests(null)
+  })
+
   describe('uploadProject', function () {
     beforeEach(function (ctx) {
       ctx.path = '/path/to/file/on/disk.zip'
       ctx.fileName = 'filename.zip'
-      ctx.req.file = {
-        path: ctx.path,
-      }
+      ctx.req.file = uploadedFile(ctx.path)
       ctx.req.body = {
         name: ctx.fileName,
       }
@@ -157,7 +181,7 @@ describe('ProjectUploadController', function () {
           _id: ctx.user_id,
         },
       }
-      ctx.project = { _id: (ctx.project_id = 'project-id-123') }
+      ctx.project = { _id: (ctx.project_id = '507f191e810c19729de860ea') }
 
       ctx.fs.unlink = sinon.stub()
       ctx.fsPromises.unlink = sinon.stub().resolves()
@@ -253,17 +277,80 @@ describe('ProjectUploadController', function () {
         ctx.fs.unlink.calledWith(ctx.path).should.equal(true)
       })
     })
+
+    describe('request validation', function () {
+      beforeEach(function () {
+        setReqValidationModeForTests('enforce')
+      })
+
+      it('rejects an unrecognized body field', function (ctx) {
+        ctx.req.body.extraField = 'nope'
+        expect(() =>
+          ctx.ProjectUploadController.uploadProject(ctx.req, ctx.res)
+        ).to.throw(InvalidRequestError)
+        expect(ctx.fs.unlink).not.to.have.been.called
+      })
+
+      it('accepts relativePath set to the literal "null" string', function (ctx) {
+        ctx.req.body.relativePath = 'null'
+        ctx.ProjectUploadManager.createProjectFromZipArchive = sinon
+          .stub()
+          .callsArgWith(3, null, ctx.project)
+        ctx.ProjectUploadController.uploadProject(ctx.req, ctx.res)
+        expect(ctx.res.body).to.deep.equal(
+          JSON.stringify({
+            success: true,
+            project_id: ctx.project_id,
+          })
+        )
+      })
+
+      it('accepts a nested relativePath', function (ctx) {
+        ctx.req.body.relativePath = 'folder/main.tex'
+        ctx.ProjectUploadManager.createProjectFromZipArchive = sinon
+          .stub()
+          .callsArgWith(3, null, ctx.project)
+        ctx.ProjectUploadController.uploadProject(ctx.req, ctx.res)
+        expect(ctx.res.body).to.deep.equal(
+          JSON.stringify({
+            success: true,
+            project_id: ctx.project_id,
+          })
+        )
+      })
+
+      it('rejects a relativePath that attempts path traversal', function (ctx) {
+        ctx.req.body.relativePath = '../../etc/passwd'
+        let error
+        try {
+          ctx.ProjectUploadController.uploadProject(ctx.req, ctx.res)
+        } catch (err) {
+          error = err
+        }
+        expect(
+          sinon
+            .match({
+              name: 'InvalidRequestError',
+              zodError: asZodError({
+                code: 'custom',
+                path: ['body', 'relativePath'],
+                message: 'path traversal detected',
+              }),
+            })
+            .test(error)
+        ).to.be.true
+        expect(ctx.fs.unlink).not.to.have.been.called
+      })
+    })
   })
 
   describe('uploadFile', function () {
     beforeEach(function (ctx) {
-      ctx.project_id = 'project-id-123'
-      ctx.folder_id = 'folder-id-123'
+      ctx.project_id = '507f191e810c19729de860ea'
+      ctx.folder_id = '507f191e810c19729de860eb'
       ctx.path = '/path/to/file/on/disk.png'
       ctx.fileName = 'filename.png'
-      ctx.req.file = {
-        path: ctx.path,
-      }
+      ctx.req.file = uploadedFile(ctx.path)
       ctx.req.body = {
         name: ctx.fileName,
       }
@@ -480,13 +567,25 @@ describe('ProjectUploadController', function () {
         ctx.fsPromises.unlink.calledWith(ctx.path).should.equal(true)
       })
     })
+
+    describe('request validation', function () {
+      beforeEach(function () {
+        setReqValidationModeForTests('enforce')
+      })
+
+      it('rejects a malformed Project_id param', async function (ctx) {
+        ctx.req.params.Project_id = 'not-an-object-id'
+        await expect(
+          ctx.ProjectUploadController.uploadFile(ctx.req, ctx.res)
+        ).to.be.rejectedWith(InvalidParamsError)
+        expect(ctx.fsPromises.unlink).not.to.have.been.called
+      })
+    })
   })
 
   describe('importDocument', function () {
     beforeEach(async function (ctx) {
-      ctx.req.file = {
-        path: '/path/to/uploaded/file.docx',
-      }
+      ctx.req.file = uploadedFile('/path/to/uploaded/file.docx')
       ctx.req.body = {
         name: 'file.docx',
       }
@@ -563,9 +662,7 @@ describe('ProjectUploadController', function () {
 
     describe('with conversionType=markdown', async function () {
       beforeEach(async function (ctx) {
-        ctx.req.file = {
-          path: '/path/to/uploaded/file.md',
-        }
+        ctx.req.file = uploadedFile('/path/to/uploaded/file.md')
         ctx.req.body = {
           name: 'file.md',
         }
@@ -773,6 +870,23 @@ describe('ProjectUploadController', function () {
 
       it('should unlink the uploaded file', function (ctx) {
         expect(ctx.fsPromises.unlink).to.have.been.calledWith(ctx.req.file.path)
+      })
+    })
+
+    describe('request validation', function () {
+      beforeEach(function () {
+        setReqValidationModeForTests('enforce')
+      })
+
+      it('rejects an unrecognized body field', async function (ctx) {
+        ctx.req.body.extraField = 'nope'
+        await expect(
+          ctx.ProjectUploadController.importDocument(ctx.req, ctx.res)
+        ).to.be.rejectedWith(InvalidRequestError)
+        expect(
+          ctx.DocumentConversionManager.promises
+            .convertDocumentToLaTeXZipArchive
+        ).not.to.have.been.called
       })
     })
   })

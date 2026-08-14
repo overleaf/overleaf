@@ -23,7 +23,7 @@ const SUPPORTED_CONVERSION_TYPES = new Map([
 ])
 
 const exportProjectConversionSchema = z.object({
-  params: z.object({
+  params: z.strictObject({
     Project_id: zz.objectId(),
     type: z.enum([...SUPPORTED_CONVERSION_TYPES.keys()]),
   }),
@@ -34,7 +34,7 @@ const exportProjectConversionSchema = z.object({
 })
 
 const downloadPreparedProjectExportSchema = z.object({
-  params: z.object({
+  params: z.strictObject({
     Project_id: zz.objectId(),
     buildId: zz.buildId(),
     conversionId: z.uuid(),
@@ -43,6 +43,37 @@ const downloadPreparedProjectExportSchema = z.object({
   }),
   query: z.object({
     clsiserverid: zz.clsiServerId().optional(),
+  }),
+})
+
+const downloadProjectParamsSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+  }),
+})
+
+// Guarded by AuthorizationMiddleware.ensureUserCanReadMultipleProjects, which
+// already rejects a request unless every comma-separated id can be read by
+// the current user (an empty/missing project_ids fails that check too), so
+// by the time this handler runs the field is a real, non-empty id list.
+const downloadMultipleProjectsSchema = z.object({
+  query: z.object({
+    project_ids: z
+      .string()
+      .transform(s => s.split(','))
+      .pipe(z.array(zz.objectId())),
+  }),
+})
+
+// Rollout-temporary fallback (loosened primary schema; no zod validation
+// existed for this route on main); delete when this route's
+// REQ_VALIDATION_MODE instrumentation is removed.
+const downloadMultipleProjectsFallbackSchema = z.object({
+  query: z.object({
+    project_ids: z
+      .string()
+      .transform(s => s.split(','))
+      .pipe(z.array(z.string())),
   }),
 })
 
@@ -170,7 +201,10 @@ export default {
 
   downloadProject(req, res, next) {
     const userId = SessionManager.getLoggedInUserId(req.session)
-    const projectId = req.params.Project_id
+    const { params } = parseReq(req, downloadProjectParamsSchema, {
+      logOnly: true,
+    })
+    const projectId = params.Project_id
     Metrics.inc('zip-downloads')
     DocumentUpdaterHandler.flushProjectToMongo(projectId, function (error) {
       if (error) {
@@ -225,7 +259,11 @@ export default {
 
   downloadMultipleProjects(req, res, next) {
     const userId = SessionManager.getLoggedInUserId(req.session)
-    const projectIds = req.query.project_ids.split(',')
+    const { query } = parseReq(req, downloadMultipleProjectsSchema, {
+      logOnly: true,
+      fallbackSchema: downloadMultipleProjectsFallbackSchema,
+    })
+    const projectIds = query.project_ids
     Metrics.inc('zip-downloads-multiple')
     DocumentUpdaterHandler.flushMultipleProjectsToMongo(
       projectIds,

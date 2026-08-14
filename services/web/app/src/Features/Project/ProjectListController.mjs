@@ -33,6 +33,36 @@ import PermissionsManager from '../Authorization/PermissionsManager.mjs'
 import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
 import { OnboardingDataCollection } from '../../models/OnboardingDataCollection.mjs'
 import UserSettingsHelper from './UserSettingsHelper.mjs'
+import { parseReq, z, zz } from '../../infrastructure/Validation.mjs'
+
+const getProjectsJsonSchema = z.object({
+  body: z.strictObject({
+    filters: z
+      .strictObject({
+        ownedByUser: z.boolean().optional(),
+        sharedWithUser: z.boolean().optional(),
+        archived: z.boolean().optional(),
+        trashed: z.boolean().optional(),
+        // null is a distinct, meaningful value (see _hasActiveFilter) --
+        // not the same as the field being absent
+        tag: z.string().nullish(),
+        search: z.string().optional(),
+      })
+      .optional(),
+    sort: z
+      .strictObject({
+        by: z.enum(['lastUpdated', 'title', 'owner']).optional(),
+        order: z.enum(['asc', 'desc']).optional(),
+      })
+      .optional(),
+    page: z
+      .strictObject({
+        size: z.number().int().positive().optional(),
+        lastId: zz.objectId().optional(),
+      })
+      .optional(),
+  }),
+})
 
 /**
  * @import { GetProjectsRequest, GetProjectsResponse, AllUsersProjects, MongoProject, FormattedProject, MongoTag, SubscriptionRecord } from "./types"
@@ -669,7 +699,8 @@ async function projectListPage(req, res, next) {
  * @returns {Promise<void>}
  */
 async function getProjectsJson(req, res) {
-  const { filters, page, sort } = req.body
+  const { body } = parseReq(req, getProjectsJsonSchema, { logOnly: true })
+  const { filters, page, sort } = body
   const userId = SessionManager.getLoggedInUserId(req.session)
   const projectsPage = await _getProjects(userId, filters, sort, page)
   res.json(projectsPage)
@@ -694,8 +725,8 @@ async function _checkForOldDebugProjects(userId) {
 /**
  * @param {string} userId
  * @param {Filters} filters
- * @param {Sort} sort
- * @param {Page} page
+ * @param {Partial<Sort>} sort
+ * @param {Partial<Page>} page
  * @returns {Promise<{totalSize: number, projects: Project[]}>}
  * @private
  */
@@ -807,8 +838,8 @@ function _applyFilters(projects, tags, filters, userId) {
 
 /**
  * @param {FormattedProject[]} projects
- * @param {Sort} sort
- * @param {Page} page
+ * @param {Partial<Sort>} sort
+ * @param {Partial<Page>} page
  * @returns {FormattedProject[]}
  * @private
  */
