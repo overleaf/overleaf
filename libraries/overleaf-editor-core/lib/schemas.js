@@ -113,7 +113,8 @@ const rawLinkedFileData = z.discriminatedUnion('provider', [
     v1_source_doc_id: z.number().optional(),
     source_output_file_path: z.string(),
     build_id: zz.buildId().optional(),
-    clsiServerId: z.string().optional(),
+    compileGroup: zz.compileGroup().optional(),
+    clsiServerId: zz.clsiServerId().optional(),
     importedAt: z.iso.datetime().optional(),
   }),
   z.strictObject({

@@ -156,6 +156,19 @@ describe('schemas', function () {
       expect(result.success).to.equal(true)
     })
 
+    it('accepts a project_output_file provider with verbose details', function () {
+      const result = rawLinkedFileData.safeParse({
+        provider: 'project_output_file',
+        source_project_id: '507f1f77bcf86cd799439011',
+        source_output_file_path: 'output.pdf',
+        compileGroup: 'standard',
+        clsiServerId: 'clsi-pre-emp-e2-f-tqnd',
+        build_id: '1234-abcd',
+        importedAt: '2026-08-14T00:00:00.000Z',
+      })
+      expect(result.success).to.equal(true)
+    })
+
     it('rejects a project_output_file provider with a malformed build_id', function () {
       const result = rawLinkedFileData.safeParse({
         provider: 'project_output_file',
