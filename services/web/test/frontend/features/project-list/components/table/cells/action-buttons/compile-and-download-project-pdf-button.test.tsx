@@ -10,6 +10,7 @@ import {
 import fetchMock from 'fetch-mock'
 import * as eventTracking from '@/infrastructure/event-tracking'
 import getMeta from '@/utils/meta'
+import { SplitTestProvider } from '@/shared/context/split-test-context'
 
 describe('<CompileAndDownloadProjectPDFButton />', function () {
   let sendMBSpy: sinon.SinonSpy
@@ -19,7 +20,9 @@ describe('<CompileAndDownloadProjectPDFButton />', function () {
     this.locationWrapperSandbox = sinon.createSandbox()
     this.locationWrapperStub = this.locationWrapperSandbox.stub(location)
     render(
-      <CompileAndDownloadProjectPDFButtonTooltip project={projectsData[0]} />
+      <SplitTestProvider>
+        <CompileAndDownloadProjectPDFButtonTooltip project={projectsData[0]} />
+      </SplitTestProvider>
     )
   })
 

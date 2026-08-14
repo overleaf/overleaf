@@ -5,6 +5,7 @@ import {
   ProjectListContext,
   ProjectListContextValue,
 } from '../../../../../../../../frontend/js/features/project-list/context/project-list-context'
+import { SplitTestProvider } from '@/shared/context/split-test-context'
 
 const { deletableList } = makeLongProjectList(40)
 
@@ -17,9 +18,11 @@ describe('<DeleteProjectsButton />', function () {
     } as ProjectListContextValue
 
     render(
-      <ProjectListContext.Provider value={value}>
-        <DeleteProjectsButton />
-      </ProjectListContext.Provider>
+      <SplitTestProvider>
+        <ProjectListContext.Provider value={value}>
+          <DeleteProjectsButton />
+        </ProjectListContext.Provider>
+      </SplitTestProvider>
     )
 
     const btn = screen.getByRole('button', { name: /delete/i })

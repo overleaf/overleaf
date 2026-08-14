@@ -1,4 +1,19 @@
 import UploadProjectModal from '../../../../../../frontend/js/features/project-list/components/new-project-button/upload-project-modal'
+import { SplitTestProvider } from '@/shared/context/split-test-context'
+import { UserSettingsProvider } from '@/shared/context/user-settings-context'
+
+function mountModal() {
+  cy.mount(
+    <SplitTestProvider>
+      <UserSettingsProvider>
+        <UploadProjectModal
+          onHide={cy.stub()}
+          openProject={cy.stub().as('openProject')}
+        />
+      </UserSettingsProvider>
+    </SplitTestProvider>
+  )
+}
 
 describe('<UploadProjectModal />', function () {
   const maxUploadSize = 10 * 1024 * 1024 // 10 MB
@@ -14,12 +29,7 @@ describe('<UploadProjectModal />', function () {
       body: { success: true, project_id: '123abc' },
     }).as('uploadProject')
 
-    cy.mount(
-      <UploadProjectModal
-        onHide={cy.stub()}
-        openProject={cy.stub().as('openProject')}
-      />
-    )
+    mountModal()
 
     cy.findByRole('button', {
       name: 'Select a .zip file',
@@ -34,12 +44,7 @@ describe('<UploadProjectModal />', function () {
   })
 
   it('shows error on file type other than zip', function () {
-    cy.mount(
-      <UploadProjectModal
-        onHide={cy.stub()}
-        openProject={cy.stub().as('openProject')}
-      />
-    )
+    mountModal()
 
     cy.findByRole('button', {
       name: 'Select a .zip file',
@@ -54,12 +59,7 @@ describe('<UploadProjectModal />', function () {
   })
 
   it('shows error for files bigger than maxUploadSize', function () {
-    cy.mount(
-      <UploadProjectModal
-        onHide={cy.stub()}
-        openProject={cy.stub().as('openProject')}
-      />
-    )
+    mountModal()
 
     const file = new File(['test'], 'test.zip', { type: 'application/zip' })
     Object.defineProperty(file, 'size', { value: maxUploadSize + 1 })
@@ -82,12 +82,7 @@ describe('<UploadProjectModal />', function () {
       body: { success: false },
     }).as('uploadProject')
 
-    cy.mount(
-      <UploadProjectModal
-        onHide={cy.stub()}
-        openProject={cy.stub().as('openProject')}
-      />
-    )
+    mountModal()
 
     cy.findByRole('button', {
       name: 'Select a .zip file',

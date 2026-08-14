@@ -576,6 +576,7 @@ async function projectListPage(req, res, next) {
     'import-docx',
     'overleaf-library',
     'import-markdown',
+    'themed-modals',
   ].filter(Boolean)
 
   await Promise.all(

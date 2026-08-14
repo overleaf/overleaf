@@ -13,6 +13,7 @@ import {
 } from '@/shared/components/ol/ol-modal'
 import OLButton from '@/shared/components/ol/ol-button'
 import Notification from '@/shared/components/notification'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 type DeleteTagModalProps = {
   id: string
@@ -29,6 +30,7 @@ export default function DeleteTagModal({
 }: DeleteTagModalProps) {
   const { t } = useTranslation()
   const { isLoading, isError, runAsync } = useAsync()
+  const themed = useFeatureFlag('themed-modals')
 
   const runDeleteTag = useCallback(
     (tagId: string) => {
@@ -46,7 +48,14 @@ export default function DeleteTagModal({
   }
 
   return (
-    <OLModal show animation onHide={onClose} id={id} backdrop="static">
+    <OLModal
+      show
+      animation
+      onHide={onClose}
+      id={id}
+      backdrop="static"
+      themed={themed}
+    >
       <OLModalHeader>
         <OLModalTitle>{t('delete_tag')}</OLModalTitle>
       </OLModalHeader>

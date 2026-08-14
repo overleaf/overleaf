@@ -14,6 +14,7 @@ import {
   OLModalHeader,
   OLModalTitle,
 } from '@/shared/components/ol/ol-modal'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 type ProjectsActionModalProps = {
   title?: string
@@ -38,6 +39,7 @@ function ProjectsActionModal({
   const [errors, setErrors] = useState<Array<any>>([])
   const [isProcessing, setIsProcessing] = useState(false)
   const isMounted = useIsMounted()
+  const themed = useFeatureFlag('themed-modals')
 
   async function handleActionForProjects(projects: Array<Project>) {
     const errored = []
@@ -79,6 +81,8 @@ function ProjectsActionModal({
       onHide={handleCloseModal}
       id="action-project-modal"
       backdrop="static"
+      themed={themed}
+      className="project-list-action-modal"
     >
       <OLModalHeader>
         <OLModalTitle>{title}</OLModalTitle>

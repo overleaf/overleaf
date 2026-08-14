@@ -21,6 +21,7 @@ import OLFormLabel from '@/shared/components/ol/ol-form-label'
 import OLButton from '@/shared/components/ol/ol-button'
 import Notification from '@/shared/components/notification'
 import OLFormControl from '@/shared/components/ol/ol-form-control'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 type ManageTagModalProps = {
   id: string
@@ -51,6 +52,7 @@ export function ManageTagModal({
   } = useAsync()
   const [newTagName, setNewTagName] = useState<string | undefined>(tag?.name)
   const { selectedColor } = useSelectColor(tag?.color)
+  const themed = useFeatureFlag('themed-modals')
 
   const runDeleteTag = useCallback(
     (tagId: string) => {
@@ -89,7 +91,15 @@ export function ManageTagModal({
   }
 
   return (
-    <OLModal show animation onHide={onClose} id={id} backdrop="static">
+    <OLModal
+      show
+      animation
+      onHide={onClose}
+      id={id}
+      backdrop="static"
+      themed={themed}
+      className="project-list-modal"
+    >
       <OLModalHeader>
         <OLModalTitle>{t('edit_tag')}</OLModalTitle>
       </OLModalHeader>

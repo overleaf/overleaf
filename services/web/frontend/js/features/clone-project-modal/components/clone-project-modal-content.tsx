@@ -17,6 +17,7 @@ import OLFormLabel from '@/shared/components/ol/ol-form-label'
 import OLButton from '@/shared/components/ol/ol-button'
 import { Tag } from '../../../../../app/src/Features/Tags/types'
 import getMeta from '@/utils/meta.ts'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export default function CloneProjectModalContent({
   handleHide,
@@ -37,6 +38,7 @@ export default function CloneProjectModalContent({
 }) {
   const { t } = useTranslation()
   const { maxUploadSize } = getMeta('ol-ExposedSettings')
+  const themed = useFeatureFlag('themed-modals')
 
   const [error, setError] = useState<FetchError | null>(null)
   const [clonedProjectName, setClonedProjectName] = useState(
@@ -116,6 +118,7 @@ export default function CloneProjectModalContent({
                     key={tag._id}
                     tag={tag}
                     removeTag={removeTag}
+                    themed={themed}
                   />
                 ))}
               </div>

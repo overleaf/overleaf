@@ -5,6 +5,7 @@ import sinon from 'sinon'
 import ModalContentNewProjectForm from '../../../../../../frontend/js/features/project-list/components/new-project-button/modal-content-new-project-form'
 import { location } from '@/shared/components/location'
 import * as projectListApi from '@/features/project-list/util/api'
+import { SplitTestProvider } from '@/shared/context/split-test-context'
 
 describe('<ModalContentNewProjectForm />', function () {
   beforeEach(function () {
@@ -27,7 +28,11 @@ describe('<ModalContentNewProjectForm />', function () {
       },
     })
 
-    render(<ModalContentNewProjectForm onCancel={() => {}} />)
+    render(
+      <SplitTestProvider>
+        <ModalContentNewProjectForm onCancel={() => {}} />
+      </SplitTestProvider>
+    )
 
     const createButton = screen.getByRole('button', {
       name: 'Create',
@@ -67,10 +72,12 @@ describe('<ModalContentNewProjectForm />', function () {
       .rejects(new Error('tag add failed'))
 
     render(
-      <ModalContentNewProjectForm
-        onCancel={() => {}}
-        initialTags={[{ _id: 'tag-1', user_id: 'user-1', name: 'Tag 1' }]}
-      />
+      <SplitTestProvider>
+        <ModalContentNewProjectForm
+          onCancel={() => {}}
+          initialTags={[{ _id: 'tag-1', user_id: 'user-1', name: 'Tag 1' }]}
+        />
+      </SplitTestProvider>
     )
 
     fireEvent.change(screen.getByLabelText('Project name'), {
@@ -99,7 +106,11 @@ describe('<ModalContentNewProjectForm />', function () {
       body: errorMessage,
     })
 
-    render(<ModalContentNewProjectForm onCancel={() => {}} />)
+    render(
+      <SplitTestProvider>
+        <ModalContentNewProjectForm onCancel={() => {}} />
+      </SplitTestProvider>
+    )
 
     fireEvent.change(screen.getByLabelText('Project name'), {
       target: { value: '/' },
@@ -125,7 +136,11 @@ describe('<ModalContentNewProjectForm />', function () {
       body: errorMessage,
     })
 
-    render(<ModalContentNewProjectForm onCancel={() => {}} />)
+    render(
+      <SplitTestProvider>
+        <ModalContentNewProjectForm onCancel={() => {}} />
+      </SplitTestProvider>
+    )
 
     fireEvent.change(screen.getByLabelText('Project name'), {
       target: { value: '\\' },
@@ -151,7 +166,11 @@ describe('<ModalContentNewProjectForm />', function () {
       body: errorMessage,
     })
 
-    render(<ModalContentNewProjectForm onCancel={() => {}} />)
+    render(
+      <SplitTestProvider>
+        <ModalContentNewProjectForm onCancel={() => {}} />
+      </SplitTestProvider>
+    )
 
     fireEvent.change(screen.getByLabelText('Project name'), {
       target: {
