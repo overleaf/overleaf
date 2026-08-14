@@ -28,7 +28,7 @@ import { DEFAULT_PRICE_VERSION } from './PriceVersions.mjs'
 import { User } from '../../models/User.mjs'
 import UserGetter from '../User/UserGetter.mjs'
 import { sanitizeSessionUserForFrontEnd } from '../../infrastructure/FrontEndUser.mjs'
-import { z, parseReq } from '../../infrastructure/Validation.mjs'
+import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
 import { PaymentProviderSubscriptionChange } from './PaymentProviderEntities.mjs'
 
 const { AddOnNotPresentError, MultiplePendingChangesError } = Errors
@@ -149,11 +149,24 @@ function formatGroupPlansDataForDash() {
   }
 }
 
+const userSubscriptionPageSchema = z.object({
+  query: z.object({
+    // rendered verbatim into the subscription dashboard; not consumed as a
+    // real error-code enum by this handler.
+    errorCode: z.string().optional(),
+    // not consumed
+    hasSubscription: z.stringbool().optional(),
+  }),
+})
+
 /**
  * @param {any} req
  * @param {any} res
  */
 async function userSubscriptionPage(req, res) {
+  const { query } = parseReq(req, userSubscriptionPageSchema, {
+    logOnly: true,
+  })
   const user = SessionManager.getSessionUser(req.session)
   await SplitTestHandler.promises.getAssignment(req, res, 'sharing-updates')
   await SplitTestHandler.promises.getAssignment(
@@ -200,7 +213,7 @@ async function userSubscriptionPage(req, res) {
   const userCanExtendTrial = (
     await Modules.promises.hooks.fire('userCanExtendTrial', user)
   )?.[0]
-  const redirectedPaymentErrorCode = req.query.errorCode
+  const redirectedPaymentErrorCode = query.errorCode
   const isInTrial = SubscriptionHelper.isInTrial(
     personalSubscription?.payment?.trialEndsAt
   )
@@ -338,11 +351,35 @@ async function userSubscriptionPage(req, res) {
   res.render('subscriptions/dashboard-react', data)
 }
 
+const successfulSubscriptionSchema = z.object({
+  query: z.object({
+    // only ever sent as the literal 'true', or omitted entirely -- see
+    // callers in modules/subscriptions/.../root.tsx.
+    upgrade: z.stringbool().optional(),
+  }),
+})
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+// `query.upgrade` is compared against the literal boolean `true` below, so
+// a raw passthrough still needs to produce a real boolean.
+const successfulSubscriptionFallbackSchema = z.object({
+  query: z.object({
+    upgrade: z
+      .unknown()
+      .optional()
+      .transform(v => v === 'true' || v === true),
+  }),
+})
+
 /**
  * @param {any} req
  * @param {any} res
  */
 async function successfulSubscription(req, res) {
+  const { query } = parseReq(req, successfulSubscriptionSchema, {
+    logOnly: true,
+    fallbackSchema: successfulSubscriptionFallbackSchema,
+  })
   const user = SessionManager.getSessionUser(req.session)
   if (!user) {
     throw new Error('User is not logged in')
@@ -354,7 +391,7 @@ async function successfulSubscription(req, res) {
     )
 
   const postCheckoutRedirect = req.session?.postCheckoutRedirect
-  const isUpgrade = req.query.upgrade === 'true'
+  const isUpgrade = query.upgrade === true
 
   if (!personalSubscription) {
     res.redirect('/user/subscription/plans')
@@ -382,7 +419,7 @@ async function successfulSubscription(req, res) {
 }
 
 const pauseSubscriptionSchema = z.object({
-  params: z.object({
+  params: z.strictObject({
     pauseCycles: z.coerce.number().int().max(12),
   }),
 })
@@ -520,12 +557,21 @@ function cancelV1Subscription(req, res, next) {
   )
 }
 
+const previewAddonPurchaseSchema = z.object({
+  params: z.strictObject({
+    addOnCode: z.string(),
+  }),
+})
+
 /**
  * @param {any} req
  * @param {any} res
  */
 async function previewAddonPurchase(req, res) {
-  const addOnCode = req.params.addOnCode
+  const { params } = parseReq(req, previewAddonPurchaseSchema, {
+    logOnly: true,
+  })
+  const addOnCode = params.addOnCode
 
   if (addOnCode !== AI_ADD_ON_CODE) {
     return HttpErrorHandler.notFound(req, res, `Unknown add-on: ${addOnCode}`)
@@ -546,7 +592,7 @@ async function purchaseAddon(req, res, next) {
 }
 
 const removeAddonSchema = z.object({
-  params: z.object({
+  params: z.strictObject({
     addOnCode: z.string(),
   }),
 })
@@ -601,7 +647,7 @@ async function removeAddon(req, res, next) {
 }
 
 const reactivateAddonSchema = z.object({
-  params: z.object({
+  params: z.strictObject({
     addOnCode: z.string(),
   }),
 })
@@ -639,13 +685,25 @@ async function reactivateAddon(req, res) {
   }
 }
 
+const previewSubscriptionSchema = z.object({
+  query: z.object({
+    planCode: z.string().optional(),
+    // rendered verbatim into the preview page; not consumed as a real
+    // error-code enum by this handler.
+    errorCode: z.string().optional(),
+  }),
+})
+
 /**
  * @param {any} req
  * @param {any} res
  * @param {any} next
  */
 async function previewSubscription(req, res, next) {
-  const planCode = req.query.planCode
+  const { query } = parseReq(req, previewSubscriptionSchema, {
+    logOnly: true,
+  })
+  const planCode = query.planCode
   if (!planCode) {
     return HttpErrorHandler.notFound(req, res, 'Missing plan code')
   }
@@ -698,7 +756,7 @@ async function previewSubscription(req, res, next) {
 
   res.render('subscriptions/preview-change', {
     changePreview,
-    redirectedPaymentErrorCode: req.query.errorCode,
+    redirectedPaymentErrorCode: query.errorCode,
     trialDisabledReason,
   })
 }
@@ -777,15 +835,27 @@ function reactivateSubscription(req, res, next) {
   })
 }
 
+// Recurly's webhook body is `{ <event_name>: { ...event-specific fields } }`
+// -- the event name is one of an open-ended set defined by Recurly (this
+// handler only actively branches on a known subset; anything else falls
+// through to the generic 200 response below), and the payload shape varies
+// per event type. This is a genuinely open map, not a shape we can name
+// field-by-field.
+const recurlyCallbackSchema = z.object({
+  body: z.record(z.string(), z.unknown()),
+})
+
 /**
  * @param {any} req
  * @param {any} res
  * @param {any} next
  */
 function recurlyCallback(req, res, next) {
-  logger.debug({ data: req.body }, 'received recurly callback')
-  const event = Object.keys(req.body)[0]
-  const eventData = req.body[event]
+  const { body } = parseReq(req, recurlyCallbackSchema, { logOnly: true })
+  logger.debug({ data: body }, 'received recurly callback')
+  const event = Object.keys(body)[0]
+  /** @type {any} the shape varies per Recurly event type -- see the schema comment above */
+  const eventData = body[event]
 
   RecurlyEventHandler.sendRecurlyAnalyticsEvent(event, eventData).catch(error =>
     logger.error(
@@ -885,15 +955,39 @@ function recurlyNotificationParser(req, res, next) {
   )
 }
 
+const refreshUserFeaturesSchema = z.object({
+  params: z.strictObject({
+    user_id: zz.objectId(),
+  }),
+})
+
 /**
  * @param {any} req
  * @param {any} res
  */
 async function refreshUserFeatures(req, res) {
-  const { user_id: userId } = req.params
+  const { params } = parseReq(req, refreshUserFeaturesSchema, {
+    logOnly: true,
+  })
+  const { user_id: userId } = params
   await FeaturesUpdater.promises.refreshFeatures(userId, 'acceptance-test')
   res.sendStatus(200)
 }
+
+// This is invoked as a shared helper from several different routes'
+// handlers (PlansController, InterstitialPaymentController,
+// PaymentController), not mounted as a route itself -- like middleware, it
+// validates only the fields it reads, non-strictly, so it doesn't reject
+// fields that belong to whichever route's own schema actually owns the
+// request.
+const getRecommendedCurrencySchema = z.object({
+  query: z.object({
+    // only trusted for site admins (checked below); an override for
+    // testing/support purposes.
+    ip: z.ipv4().optional(),
+    currency: z.string().optional(),
+  }),
+})
 
 /**
  * @param {any} req
@@ -901,20 +995,23 @@ async function refreshUserFeatures(req, res) {
  * @returns {Promise<{currency: CurrencyCode, recommendedCurrency: CurrencyCode, countryCode: string|undefined}>}
  */
 async function getRecommendedCurrency(req, res) {
+  const { query } = parseReq(req, getRecommendedCurrencySchema, {
+    logOnly: true,
+  })
   const userId = SessionManager.getLoggedInUserId(req.session)
   let ip = req.ip
   if (
-    req.query?.ip &&
+    query?.ip &&
     (await AuthorizationManager.promises.isUserSiteAdmin(userId))
   ) {
-    ip = req.query.ip
+    ip = query.ip
   }
   const currencyLookup = await GeoIpLookup.promises.getCurrencyCode(ip)
   const countryCode = currencyLookup.countryCode
   const recommendedCurrency = currencyLookup.currencyCode
 
   let currency = null
-  const queryCurrency = req.query.currency?.toUpperCase()
+  const queryCurrency = query.currency?.toUpperCase()
   if (queryCurrency && GeoIpLookup.isValidCurrencyParam(queryCurrency)) {
     currency = queryCurrency
   } else if (recommendedCurrency) {
@@ -922,24 +1019,37 @@ async function getRecommendedCurrency(req, res) {
   }
 
   return {
-    currency,
+    // `currency` can genuinely be null (no query override and no
+    // GeoIP-recommended currency); the return type below is looser than
+    // the cast.
+    currency: /** @type {any} */ (currency),
     recommendedCurrency,
     countryCode,
   }
 }
+
+// Shared helper, same caveat as getRecommendedCurrency above.
+const getLatamCountryBannerDetailsSchema = z.object({
+  query: z.object({
+    ip: z.ipv4().optional(),
+  }),
+})
 
 /**
  * @param {any} req
  * @param {any} res
  */
 async function getLatamCountryBannerDetails(req, res) {
+  const { query } = parseReq(req, getLatamCountryBannerDetailsSchema, {
+    logOnly: true,
+  })
   const userId = SessionManager.getLoggedInUserId(req.session)
   let ip = req.ip
   if (
-    req.query?.ip &&
+    query?.ip &&
     (await AuthorizationManager.promises.isUserSiteAdmin(userId))
   ) {
-    ip = req.query.ip
+    ip = query.ip
   }
   const currencyLookup = await GeoIpLookup.promises.getCurrencyCode(ip)
   const countryCode = currencyLookup.countryCode

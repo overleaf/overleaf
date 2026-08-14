@@ -11,6 +11,11 @@ import { expressify } from '@overleaf/promise-utils'
 import Features from '../../infrastructure/Features.mjs'
 import Modules from '../../infrastructure/Modules.mjs'
 import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
+import {
+  z,
+  parseReq,
+  getRawReqInput,
+} from '../../infrastructure/Validation.mjs'
 
 function popSessionValue(session, key) {
   const value = session[key]
@@ -20,9 +25,17 @@ function popSessionValue(session, key) {
   return value
 }
 
+const settingsPageSchema = z.object({
+  query: z.object({
+    remove: z.string().optional(),
+    'oauth-complete': z.string().optional(),
+  }),
+})
+
 async function settingsPage(req, res) {
+  const { query } = parseReq(req, settingsPageSchema, { logOnly: true })
   const userId = SessionManager.getLoggedInUserId(req.session)
-  const reconfirmationRemoveEmail = req.query.remove
+  const reconfirmationRemoveEmail = query.remove
   // SSO
   delete req.session.ssoError
   const ssoErrorMessage = popSessionValue(req.session, 'ssoErrorMessage')
@@ -247,6 +260,12 @@ async function emailPreferencesPage(req, res) {
   })
 }
 
+const loginPageSchema = z.object({
+  query: z.object({
+    redir: z.string().optional(),
+  }),
+})
+
 const UserPagesController = {
   accountSuspended: expressify(accountSuspended),
   logout: expressify(logout),
@@ -268,16 +287,21 @@ const UserPagesController = {
   },
 
   loginPage(req, res) {
+    const { query } = parseReq(req, loginPageSchema, { logOnly: true })
+
     // if user is being sent to /login with explicit redirect (redir=/foo),
     // such as being sent from the editor to /login, then set the redirect explicitly
     if (
-      req.query.redir != null &&
+      query.redir != null &&
       AuthenticationController.getRedirectFromSession(req) == null
     ) {
-      AuthenticationController.setRedirectInSession(req, req.query.redir)
+      AuthenticationController.setRedirectInSession(req, query.redir)
     }
     const metadata = { robotsNoindexNofollow: false }
-    if (Object.keys(req.query).length !== 0) {
+    // any query param at all (not just `redir`) marks this page as noindex
+    // -- e.g. error/SSO-flow flags added by other callers -- read the raw
+    // query here rather than by name (case 1: verbatim forwarding)
+    if (Object.keys(getRawReqInput(req).query).length !== 0) {
       metadata.robotsNoindexNofollow = true
     }
     res.render('user/login', {

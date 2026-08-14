@@ -967,4 +967,24 @@ describe('UserEmailsController', function () {
       )
     })
   })
+
+  describe('showConfirm', function () {
+    it('renders the confirm email page with the token from the query string', async function (ctx) {
+      ctx.req.query = { token: 'mock-confirm-token' }
+      await ctx.UserEmailsController.showConfirm(ctx.req, ctx.res)
+      expect(ctx.res.renderedTemplate).to.equal('user/confirm_email')
+      expect(ctx.res.renderedVariables).to.deep.equal({
+        token: 'mock-confirm-token',
+        title: 'confirm_email',
+      })
+    })
+
+    it('renders with an undefined token when none is supplied', async function (ctx) {
+      await ctx.UserEmailsController.showConfirm(ctx.req, ctx.res)
+      expect(ctx.res.renderedVariables).to.deep.equal({
+        token: undefined,
+        title: 'confirm_email',
+      })
+    })
+  })
 })

@@ -49,7 +49,7 @@ describe('TemplatesController', function () {
     ctx.next = sinon.stub()
     ctx.req = {
       body: {
-        brandVariationId: 'brand-variation-id',
+        brandVariationId: '789',
         compiler: 'compiler',
         mainFile: 'main-file',
         templateId: '123',
@@ -86,7 +86,7 @@ describe('TemplatesController', function () {
 
       it('should call TemplatesManager', function (ctx) {
         return ctx.TemplatesManager.promises.createProjectFromV1Template.should.have.been.calledWithMatch(
-          'brand-variation-id',
+          789,
           'compiler',
           'main-file',
           '123',
@@ -144,6 +144,19 @@ describe('TemplatesController', function () {
         ctx.next.should.have.been.calledWithMatch(sinon.match.instanceOf(Error))
         ctx.TemplatesManager.promises.createProjectFromV1Template.should.not
           .have.been.called
+      })
+
+      it('should reject a path-traversal-shaped brandVariationId', async function (ctx) {
+        ctx.req.body.brandVariationId = '1/../../v1/x'
+        await ctx.TemplatesController.createProjectFromV1Template(
+          ctx.req,
+          ctx.res,
+          ctx.next
+        )
+        ctx.next.should.have.been.calledWithMatch(sinon.match.instanceOf(Error))
+        ctx.TemplatesManager.promises.createProjectFromV1Template.should.not
+          .have.been.called
+        ctx.res.redirect.called.should.equal(false)
       })
     })
 
@@ -214,6 +227,13 @@ describe('TemplatesController', function () {
 
     it('should reject a missing id query param', async function (ctx) {
       delete ctx.req.query.id
+      await ctx.TemplatesController.getV1Template(ctx.req, ctx.res, ctx.next)
+      ctx.next.should.have.been.calledWithMatch(sinon.match.instanceOf(Error))
+      ctx.res.render.called.should.equal(false)
+    })
+
+    it('should reject a path-traversal-shaped brandVariationId query param', async function (ctx) {
+      ctx.req.query.brandVariationId = '1/../../v1/x'
       await ctx.TemplatesController.getV1Template(ctx.req, ctx.res, ctx.next)
       ctx.next.should.have.been.calledWithMatch(sinon.match.instanceOf(Error))
       ctx.res.render.called.should.equal(false)

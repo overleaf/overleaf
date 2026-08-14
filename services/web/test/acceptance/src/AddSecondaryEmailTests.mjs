@@ -53,6 +53,35 @@ describe('Add secondary email address confirmation code email', function () {
     expect(confirmCode.length).to.equal(6)
   })
 
+  it('should accept an explicit null g-recaptcha-response', async function () {
+    // The frontend's ReCaptcha2 component (recaptcha-2.tsx) sends a literal
+    // JSON `null` -- not an omitted field -- whenever it never mounted the
+    // widget (no sitekey, action disabled, or `window.Cypress` in dev E2E
+    // runs). CaptchaMiddleware's schema accepts that shape rather than
+    // 400ing on "expected string, received null", then strips the field
+    // from req.body before addWithConfirmationCodeSchema -- which doesn't
+    // declare the field at all -- ever sees it.
+    const nullCaptchaRes = await user.doRequest('POST', {
+      json: {
+        email: 'secondary-null-captcha@overleaf.com',
+        'g-recaptcha-response': null,
+      },
+      uri: `/user/emails/secondary`,
+    })
+    expect(nullCaptchaRes.response.statusCode).to.equal(200)
+  })
+
+  it('should reject a non-string g-recaptcha-response', async function () {
+    const badCaptchaRes = await user.doRequest('POST', {
+      json: {
+        email: 'secondary-bad-captcha@overleaf.com',
+        'g-recaptcha-response': ['not', 'a', 'string'],
+      },
+      uri: `/user/emails/secondary`,
+    })
+    expect(badCaptchaRes.response.statusCode).to.equal(400)
+  })
+
   describe('with a valid confirmation code', function () {
     beforeEach(async function () {
       this.result = await user.doRequest('POST', {
@@ -100,6 +129,16 @@ describe('Add secondary email address confirmation code email', function () {
       expect(this.result.response.statusCode).to.equal(403)
       expect(this.result.body.message.key).to.equal('invalid_confirmation_code')
     })
+  })
+
+  it('should reject a non-string confirmation code', async function () {
+    const badCodeRes = await user.doRequest('POST', {
+      json: {
+        code: ['not', 'a', 'string'],
+      },
+      uri: '/user/emails/confirm-secondary',
+    })
+    expect(badCodeRes.response.statusCode).to.equal(400)
   })
 
   describe('with a duplicate email', async function () {
