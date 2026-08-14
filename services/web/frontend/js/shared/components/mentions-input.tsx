@@ -89,14 +89,7 @@ const reviewPanelInputTheme = EditorView.theme({
   },
   '.cm-scroller': {
     lineHeight: 'var(--line-height-02)',
-    // Hide scrollbars so they don't consume layout width on systems that use
-    // non-overlay scrollbars (e.g. macOS "always show scrollbars"), which would
-    // otherwise trigger extra remeasure cycles. Scrolling still works via
-    // trackpad/keyboard.
     scrollbarWidth: 'none',
-    '&::-webkit-scrollbar': {
-      display: 'none',
-    },
   },
   '.cm-content': {
     // --rp-input-min-height is set per-variant on the host in review-panel.scss.
