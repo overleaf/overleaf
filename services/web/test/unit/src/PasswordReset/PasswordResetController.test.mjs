@@ -121,6 +121,10 @@ describe('PasswordResetController', function () {
   })
 
   describe('requestReset', function () {
+    beforeEach(function (ctx) {
+      ctx.req.body = { email: ctx.req.body.email }
+    })
+
     it('should tell the handler to process that email', async function (ctx) {
       ctx.PasswordResetHandler.promises.generateAndEmailResetToken.resolves(
         'primary'

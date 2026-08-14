@@ -44,7 +44,7 @@ function bucketFileKeyMiddleware(req, res, next) {
     logOnly: true,
   })
   req.bucket = params.bucket
-  req.key = params[0]
+  req.key = params.key
   next()
 }
 

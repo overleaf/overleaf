@@ -50,6 +50,31 @@ describe('Authentication', function () {
     })
   })
 
+  describe('logout', function () {
+    beforeEach('login', async function () {
+      await user.login()
+    })
+
+    it('should accept a genuine native HTML form submission (form-encoded body, no CSRF header)', async function () {
+      // The real "Log Out" menu item is a plain HTML form (see
+      // account-menu-items.tsx): no JS involved, so the token only ever
+      // travels as a hidden _csrf form field, never as a header. With no
+      // Accept header favouring JSON, logoutSchema's handler redirects
+      // the browser directly rather than returning a JSON body.
+      const { response } = await user.submitNativeForm('/logout')
+      expect(response.statusCode).to.equal(302)
+      expect(response.headers.location).to.equal('/login')
+    })
+
+    it('should still reject an unrecognized field in the body', async function () {
+      const { response } = await user.doRequest('POST', {
+        url: '/logout',
+        json: { _csrf: user.csrfToken, notARealField: 'nope' },
+      })
+      expect(response.statusCode).to.equal(400)
+    })
+  })
+
   describe('login', function () {
     beforeEach('doLogin', async function () {
       await user.login()

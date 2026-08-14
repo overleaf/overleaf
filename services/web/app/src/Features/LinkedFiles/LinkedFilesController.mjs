@@ -48,7 +48,84 @@ const {
 
 let LinkedFilesController
 
+// Per-provider shape of the client-submitted `data` object. This mirrors
+// overleaf-editor-core's `rawLinkedFileData` discriminated union (the
+// *stored* linkedFileData shape), but is not identical to it: `provider`
+// lives as a sibling of `data` here rather than inside it, `importedAt` is
+// never client-submitted (set server-side after validation), and a couple
+// of fields are intentionally looser than the stored shape because the
+// agents apply defaults/coercions between validation and storage --
+// `zotero`'s `format` defaults to 'bibtex' when absent (ZoteroAgent
+// `_getFormat`), and `project_file`/`project_output_file`'s
+// `v1_source_doc_id` may arrive as a number (existing callers do this; the
+// agent's `_canCreate` check rejects v1 ids with its own 403, so this must
+// not be intercepted by validation first).
 const createLinkedFileSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+  }),
+  body: z.discriminatedUnion('provider', [
+    z.strictObject({
+      name: z.string(),
+      parent_folder_id: zz.objectId(),
+      provider: z.literal('url'),
+      data: z.strictObject({
+        url: z.string(),
+      }),
+    }),
+    z.strictObject({
+      name: z.string(),
+      parent_folder_id: zz.objectId(),
+      provider: z.literal('project_file'),
+      data: z.strictObject({
+        source_project_id: zz.objectId().optional(),
+        v1_source_doc_id: z.union([z.string(), z.number()]).optional(),
+        source_entity_path: z.string(),
+      }),
+    }),
+    z.strictObject({
+      name: z.string(),
+      parent_folder_id: zz.objectId(),
+      provider: z.literal('project_output_file'),
+      data: z.strictObject({
+        source_project_id: zz.objectId().optional(),
+        v1_source_doc_id: z.union([z.string(), z.number()]).optional(),
+        source_output_file_path: z.string(),
+        build_id: zz.buildId().optional(),
+        clsiServerId: z.string().optional(),
+      }),
+    }),
+    z.strictObject({
+      name: z.string(),
+      parent_folder_id: zz.objectId(),
+      provider: z.literal('mendeley'),
+      data: z.strictObject({
+        group_id: zz.routeSegment().optional(),
+      }),
+    }),
+    z.strictObject({
+      name: z.string(),
+      parent_folder_id: zz.objectId(),
+      provider: z.literal('zotero'),
+      data: z.strictObject({
+        format: z.enum(['bibtex', 'biblatex']).optional(),
+        group_id: zz.routeSegment().optional(),
+      }),
+    }),
+    z.strictObject({
+      name: z.string(),
+      parent_folder_id: zz.objectId(),
+      provider: z.literal('papers'),
+      data: z.strictObject({
+        group_id: zz.routeSegment().optional(),
+      }),
+    }),
+  ]),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const createLinkedFileFallbackSchema = z.object({
   params: z.object({
     project_id: zz.objectId(),
   }),
@@ -61,6 +138,19 @@ const createLinkedFileSchema = z.object({
 })
 
 const refreshLinkedFileSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+    file_id: zz.objectId(),
+  }),
+  body: z.strictObject({
+    clientId: z.string().optional(),
+    shouldReindexReferences: z.boolean().optional(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const refreshLinkedFileFallbackSchema = z.object({
   params: z.object({
     project_id: zz.objectId(),
     file_id: zz.objectId(),
@@ -72,7 +162,9 @@ const refreshLinkedFileSchema = z.object({
 })
 
 async function createLinkedFile(req, res, next) {
-  const { params, body } = parseReq(req, createLinkedFileSchema)
+  const { params, body } = parseReq(req, createLinkedFileSchema, {
+    fallbackSchema: createLinkedFileFallbackSchema,
+  })
   const { project_id: projectId } = params
   const { name, provider, data, parent_folder_id: parentFolderId } = body
   const userId = SessionManager.getLoggedInUserId(req.session)
@@ -105,7 +197,9 @@ async function createLinkedFile(req, res, next) {
 }
 
 async function refreshLinkedFile(req, res, next) {
-  const { params, body } = parseReq(req, refreshLinkedFileSchema)
+  const { params, body } = parseReq(req, refreshLinkedFileSchema, {
+    fallbackSchema: refreshLinkedFileFallbackSchema,
+  })
   const { project_id: projectId, file_id: fileId } = params
   const { clientId, shouldReindexReferences } = body
   const userId = SessionManager.getLoggedInUserId(req.session)

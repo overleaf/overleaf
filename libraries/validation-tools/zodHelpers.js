@@ -207,29 +207,6 @@ const zz = {
       .regex(/^[a-zA-Z0-9-_]+$/, { message: 'invalid event name' })
       .max(240, { message: 'event name is too long' }),
   /**
-   * For endpoints that consume the request as a raw stream (e.g. blob
-   * uploads): asserts that no body parser consumed the stream before the
-   * handler. Accepts only undefined or the empty object that a skipping
-   * body parser leaves behind, and parses to undefined. If a body parser is
-   * later mounted on such a route, validation fails loudly instead of the
-   * handler silently reading an already-consumed stream.
-   */
-  streamedBody: () =>
-    z
-      .custom(
-        val => {
-          if (val === undefined) return true
-          return (
-            typeof val === 'object' &&
-            val !== null &&
-            !Buffer.isBuffer(val) &&
-            Object.keys(val).length === 0
-          )
-        },
-        { message: 'unexpected parsed request body on streamed endpoint' }
-      )
-      .transform(() => undefined),
-  /**
    * A multer file object (disk storage — the only storage backend we use),
    * for validating req.file / req.files on multipart routes. The
    * client-supplied originalname is held to the same traversal rules as

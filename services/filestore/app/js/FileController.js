@@ -4,11 +4,7 @@ import parseRange from 'range-parser'
 import Errors from './Errors.js'
 import { pipeline } from 'node:stream'
 import { parseReq } from '@overleaf/validation-tools'
-import {
-  getFileQuerySchema,
-  getFileQueryFallbackSchema,
-  insertFileSchema,
-} from './schemas.js'
+import { getFileQuerySchema, getFileQueryFallbackSchema } from './schemas.js'
 
 const maxSizeInBytes = 1024 * 1024 * 1024 // 1GB
 
@@ -125,7 +121,6 @@ function getFileHead(req, res, next) {
 }
 
 function insertFile(req, res, next) {
-  parseReq(req, insertFileSchema, { logOnly: true })
   metrics.inc('insertFile')
   const { key, bucket } = req
 

@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
+import { setReqValidationModeForTests } from '@overleaf/validation-tools'
 const modulePath =
   '../../../../app/src/Features/LinkedFiles/LinkedFilesController.mjs'
 
@@ -11,6 +12,10 @@ describe('LinkedFilesController', function () {
 
   afterEach(function (ctx) {
     ctx.clock.restore()
+  })
+
+  afterEach(function () {
+    setReqValidationModeForTests(null)
   })
 
   beforeEach(async function (ctx) {
@@ -25,9 +30,11 @@ describe('LinkedFilesController', function () {
     // ObjectIds, so use well-formed values throughout.
     ctx.projectId = '507f1f77bcf86cd799439011'
     ctx.parentFolderId = '507f191e810c19729de860eb'
-    ctx.provider = 'provider'
+    // must be one of the real, schema-validated provider literals; 'url' is
+    // the simplest shape (a single required `url` field in `data`).
+    ctx.provider = 'url'
     ctx.fileName = 'linked-file-name'
-    ctx.data = { customAgentData: 'foo' }
+    ctx.data = { url: 'https://example.com/foo' }
     ctx.LinkedFilesHandler = {
       promises: {
         getFileById: sinon.stub(),
@@ -140,7 +147,7 @@ describe('LinkedFilesController', function () {
             expect(ctx.Agent.promises.createLinkedFile).to.have.been.calledWith(
               ctx.projectId,
               {
-                customAgentData: 'foo',
+                url: 'https://example.com/foo',
                 provider: ctx.provider,
                 importedAt: ctx.fakeTime.toISOString(),
               },
@@ -153,6 +160,43 @@ describe('LinkedFilesController', function () {
         }
         ctx.LinkedFilesController.createLinkedFile(ctx.req, ctx.res, ctx.next)
       })
+    })
+
+    it('rejects a mendeley group_id containing a path separator without calling the agent', async function (ctx) {
+      setReqValidationModeForTests('enforce')
+      ctx.req.body.provider = 'mendeley'
+      ctx.req.body.data = { group_id: 'abcd/../../etc' }
+      await new Promise(resolve => {
+        ctx.next = sinon.stub().callsFake(() => resolve())
+        ctx.res = {
+          json: () => resolve(),
+          sendStatus: () => resolve(),
+        }
+        ctx.LinkedFilesController.createLinkedFile(ctx.req, ctx.res, ctx.next)
+      })
+      expect(ctx.next).to.have.been.calledOnce
+      expect(ctx.next.firstCall.args[0]?.name).to.equal('InvalidRequestError')
+      expect(ctx.Agent.promises.createLinkedFile).to.not.have.been.called
+    })
+
+    it('rejects a project_output_file build_id that is not in the hex-hyphen-hex shape without calling the agent', async function (ctx) {
+      setReqValidationModeForTests('enforce')
+      ctx.req.body.provider = 'project_output_file'
+      ctx.req.body.data = {
+        source_output_file_path: 'output.pdf',
+        build_id: 'not-a-valid-build-id',
+      }
+      await new Promise(resolve => {
+        ctx.next = sinon.stub().callsFake(() => resolve())
+        ctx.res = {
+          json: () => resolve(),
+          sendStatus: () => resolve(),
+        }
+        ctx.LinkedFilesController.createLinkedFile(ctx.req, ctx.res, ctx.next)
+      })
+      expect(ctx.next).to.have.been.calledOnce
+      expect(ctx.next.firstCall.args[0]?.name).to.equal('InvalidRequestError')
+      expect(ctx.Agent.promises.createLinkedFile).to.not.have.been.called
     })
   })
   describe('refreshLinkedFiles', function () {
@@ -211,6 +255,7 @@ describe('LinkedFilesController', function () {
     })
 
     it('rejects invalid params without calling the agent', async function (ctx) {
+      setReqValidationModeForTests('enforce')
       ctx.req.params.file_id = 'not-an-object-id'
       await new Promise(resolve => {
         ctx.next = sinon.stub().callsFake(() => resolve())

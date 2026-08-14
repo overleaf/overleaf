@@ -26527,12 +26527,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"passport-local@npm:^1.0.0":
+"passport-local@npm:1.0.0":
   version: 1.0.0
   resolution: "passport-local@npm:1.0.0"
   dependencies:
     passport-strategy: "npm:1.x.x"
   checksum: 10c0/59becb988014921a5d6056470d9373c41db452fcf113323064f39d53baa6f184e72151bf269ca6770511f7f0260e13632dacc7b6afdbf60ebf63e90327e186d4
+  languageName: node
+  linkType: hard
+
+"passport-local@patch:passport-local@npm%3A1.0.0#~/.yarn/patches/passport-local-npm-1.0.0-ed89961a0c.patch":
+  version: 1.0.0
+  resolution: "passport-local@patch:passport-local@npm%3A1.0.0#~/.yarn/patches/passport-local-npm-1.0.0-ed89961a0c.patch::version=1.0.0&hash=35e215"
+  dependencies:
+    passport-strategy: "npm:1.x.x"
+  checksum: 10c0/9b8275673fb4f0edb31a82553c9901413c857669dd9e75df26de0958ab3760391ae762fa7596cd28956510b45cb37c05eb8c95f07c75e8fe6e07a77b9a89e988
   languageName: node
   linkType: hard
 

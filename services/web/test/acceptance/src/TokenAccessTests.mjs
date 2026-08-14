@@ -7,6 +7,7 @@ import { db } from '../../../app/src/infrastructure/mongodb.mjs'
 import expectErrorResponse from './helpers/expectErrorResponse.mjs'
 import logger from '@overleaf/logger'
 import sinon from 'sinon'
+import TokenAccessHandler from '../../../app/src/Features/TokenAccess/TokenAccessHandler.mjs'
 
 const tryEditorAccess = (user, projectId, test, callback) =>
   async.series(
@@ -85,8 +86,11 @@ const _doTryTokenAccess = (
       return callback()
     }
     user.request.post(
+      // `token` here is a route param, not a body field -- the grant
+      // endpoints only read confirmedByUser/tokenHashPrefix from the body
+      // (see TokenAccessController.mjs's grantTokenAccessSchema).
       `${url}/grant`,
-      { json: { token } },
+      { json: {} },
       (err, response, body) => {
         if (err) {
           return callback(err)
@@ -132,8 +136,10 @@ const _doTryTokenAccept = (
       return callback()
     }
     user.request.post(
+      // `token` here is a route param, not a body field -- see the same
+      // note in _doTryTokenAccess above.
       `${url}/grant`,
-      { json: { token, confirmedByUser: true } },
+      { json: { confirmedByUser: true } },
       (err, response, body) => {
         if (err) {
           return callback(err)
@@ -1057,7 +1063,6 @@ describe('TokenAccess', function () {
                   `${this.tokens.readAndWrite}/grant`,
                   {
                     json: {
-                      token: this.tokens.readAndWrite,
                       tokenHashPrefix: urlFragment,
                     },
                   },
@@ -1093,6 +1098,98 @@ describe('TokenAccess', function () {
               expect(body.redir).to.equal(`/${tokenWithUrlFragment}`)
               cb()
             }),
+        ],
+        done
+      )
+    })
+  })
+
+  describe('anonymous read-and-write token, enabled', function () {
+    let previousAnonymousReadAndWriteEnabled
+    beforeEach(function () {
+      previousAnonymousReadAndWriteEnabled =
+        TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED
+      // ANONYMOUS_READ_AND_WRITE_ENABLED is spread onto the default export
+      // (a copy) as well as kept on `promises` (the original object) --
+      // both need to be flipped for the flag to take effect everywhere.
+      TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED = true
+      TokenAccessHandler.promises.ANONYMOUS_READ_AND_WRITE_ENABLED = true
+    })
+    afterEach(function () {
+      TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED =
+        previousAnonymousReadAndWriteEnabled
+      TokenAccessHandler.promises.ANONYMOUS_READ_AND_WRITE_ENABLED =
+        previousAnonymousReadAndWriteEnabled
+    })
+
+    beforeEach(function (done) {
+      this.owner.createProject(
+        `token-anon-rw-enabled-test${Math.random()}`,
+        (err, projectId) => {
+          if (err != null) {
+            return done(err)
+          }
+          this.projectId = projectId
+          this.owner.makeTokenBased(this.projectId, err => {
+            if (err != null) {
+              return done(err)
+            }
+            this.owner.getProject(this.projectId, (err, project) => {
+              if (err != null) {
+                return done(err)
+              }
+              this.tokens = project.tokens
+              done()
+            })
+          })
+        }
+      )
+    })
+
+    it('should grant the anonymous user read-and-write access and let them load the editor', function (done) {
+      async.series(
+        [
+          cb =>
+            tryEditorAccess(
+              this.anon,
+              this.projectId,
+              expectErrorResponse.restricted.html,
+              cb
+            ),
+          cb =>
+            tryReadAndWriteTokenAccess(
+              this.anon,
+              this.tokens.readAndWrite,
+              (response, body) => {
+                expect(response.statusCode).to.equal(200)
+              },
+              (response, body) => {
+                expect(response.statusCode).to.equal(200)
+                expect(body.redirect).to.equal(`/project/${this.projectId}`)
+                expect(body.grantAnonymousAccess).to.equal('readAndWrite')
+              },
+              cb
+            ),
+          cb =>
+            tryEditorAccess(
+              this.anon,
+              this.projectId,
+              (response, body) => {
+                expect(response.statusCode).to.equal(200)
+              },
+              cb
+            ),
+          cb =>
+            tryAnonContentAccess(
+              this.anon,
+              this.projectId,
+              this.tokens.readAndWrite,
+              (response, body) => {
+                expect(body.privilegeLevel).to.equal('readAndWrite')
+                expect(body.isRestrictedUser).to.equal(false)
+              },
+              cb
+            ),
         ],
         done
       )

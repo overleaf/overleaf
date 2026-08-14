@@ -75,6 +75,7 @@
     "forwarded@npm:0.2.0": "patch:forwarded@npm%3A0.2.0#~/.yarn/patches/forwarded-npm-0.2.0.patch",
     "multer@npm:2.2.0": "patch:multer@npm%3A2.2.0#~/.yarn/patches/multer-npm-2.2.0-4ed181c78f.patch",
     "node-fetch": "patch:node-fetch@npm%3A2.7.0#~/.yarn/patches/node-fetch-npm-2.7.0.patch",
+    "passport-local": "patch:passport-local@npm%3A1.0.0#~/.yarn/patches/passport-local-npm-1.0.0-ed89961a0c.patch",
     "passport-oauth2": "patch:passport-oauth2@npm%3A1.6.1#~/.yarn/patches/passport-oauth2-npm-1.6.1.patch",
     "send": "patch:send@npm%3A0.19.0#~/.yarn/patches/send-npm-0.19.0.patch",
     "serve-static": "1.16.2",

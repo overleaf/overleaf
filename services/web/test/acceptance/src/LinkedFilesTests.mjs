@@ -5,21 +5,31 @@ import Settings from '@overleaf/settings'
 import UserHelper from './helpers/User.mjs'
 import express from 'express'
 import { plainTextResponse } from '../../../app/src/infrastructure/Response.mjs'
+import { parseReq, z, handleValidationError } from '@overleaf/validation-tools'
+import { expectValidationErrorRaw } from '@overleaf/validation-tools/testUtils.js'
 
 const User = UserHelper.promises
 
+const linkedUrlProxySchema = z.object({
+  query: z.object({
+    url: z.string(),
+  }),
+})
+
 const LinkedUrlProxy = express()
 LinkedUrlProxy.get('/', (req, res, next) => {
-  if (req.query.url === 'http://example.com/foo') {
+  const { query } = parseReq(req, linkedUrlProxySchema)
+  if (query.url === 'http://example.com/foo') {
     return plainTextResponse(res, 'foo foo foo')
-  } else if (req.query.url === 'http://example.com/bar') {
+  } else if (query.url === 'http://example.com/bar') {
     return plainTextResponse(res, 'bar bar bar')
-  } else if (req.query.url === 'http://example.com/large') {
+  } else if (query.url === 'http://example.com/large') {
     return plainTextResponse(res, 'x'.repeat(Settings.maxUploadSize + 1))
   } else {
     return res.sendStatus(404)
   }
 })
+LinkedUrlProxy.use(handleValidationError)
 
 describe('LinkedFiles', function () {
   before(function () {
@@ -206,6 +216,38 @@ describe('LinkedFiles', function () {
       }))
       expect(response.statusCode).to.equal(404)
       expect(body).to.equal('Source file not found')
+    })
+
+    it('should reject a malformed file id when refreshing a linked file', async function () {
+      const { response, body } = await owner.doRequest('post', {
+        url: `/project/${projectOneId}/linked_file/not-an-object-id/refresh`,
+        json: true,
+      })
+      expectValidationErrorRaw(
+        { statusCode: response.statusCode, body },
+        404,
+        'file_id'
+      )
+    })
+
+    it('should reject a malformed source_project_id when creating a project_file linked file', async function () {
+      const { response, body } = await owner.doRequest('post', {
+        url: `/project/${projectOneId}/linked_file`,
+        json: {
+          name: 'test-link.txt',
+          parent_folder_id: projectOneRootFolderId,
+          provider: 'project_file',
+          data: {
+            source_project_id: 'not-an-object-id',
+            source_entity_path: `/${sourceDocName}`,
+          },
+        },
+      })
+      expectValidationErrorRaw(
+        { statusCode: response.statusCode, body },
+        400,
+        'source_project_id'
+      )
     })
   })
 
@@ -423,6 +465,26 @@ describe('LinkedFiles', function () {
       expect(response.statusCode).to.equal(200)
       expect(body).to.equal('foo foo foo')
     })
+
+    it('should reject an unrecognized field in the linked file data', async function () {
+      const { response, body } = await owner.doRequest('post', {
+        url: `/project/${projectOneId}/linked_file`,
+        json: {
+          provider: 'url',
+          data: {
+            url: 'http://example.com/foo',
+            notARealField: 'nope',
+          },
+          parent_folder_id: projectOneRootFolderId,
+          name: 'url-test-file-invalid',
+        },
+      })
+      expectValidationErrorRaw(
+        { statusCode: response.statusCode, body },
+        400,
+        'notARealField'
+      )
+    })
   })
 
   // TODO: Add test for asking for host that return ENOTFOUND
@@ -488,6 +550,48 @@ describe('LinkedFiles', function () {
       const refreshedFile = refreshedProject.rootFolder[0].fileRefs[0]
       expect(refreshedFile._id.toString()).to.equal(refreshedFileId.toString())
       expect(refreshedFile.name).to.equal('test.pdf')
+    })
+
+    it('should reject a malformed source_project_id when creating a project_output_file linked file', async function () {
+      const { response, body } = await owner.doRequest('post', {
+        url: `/project/${projectOneId}/linked_file`,
+        json: {
+          name: 'test.pdf',
+          parent_folder_id: projectOneRootFolderId,
+          provider: 'project_output_file',
+          data: {
+            source_project_id: 'not-an-object-id',
+            source_output_file_path: 'output.pdf',
+            build_id: '1234-abcd',
+          },
+        },
+      })
+      expectValidationErrorRaw(
+        { statusCode: response.statusCode, body },
+        400,
+        'source_project_id'
+      )
+    })
+
+    it('should reject a malformed build_id when creating a project_output_file linked file', async function () {
+      const { response, body } = await owner.doRequest('post', {
+        url: `/project/${projectOneId}/linked_file`,
+        json: {
+          name: 'test.pdf',
+          parent_folder_id: projectOneRootFolderId,
+          provider: 'project_output_file',
+          data: {
+            source_project_id: projectTwoId,
+            source_output_file_path: 'output.pdf',
+            build_id: 'not-a-valid-build-id',
+          },
+        },
+      })
+      expectValidationErrorRaw(
+        { statusCode: response.statusCode, body },
+        400,
+        'build_id'
+      )
     })
   })
 

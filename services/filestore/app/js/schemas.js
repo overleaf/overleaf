@@ -46,10 +46,7 @@ export const templateFileParamsFallbackSchema = z.object({
 export const bucketFileParamsSchema = z.object({
   params: z.strictObject({
     bucket: z.string().regex(/^[a-z0-9-]+$/),
-    // the anonymous `*` wildcard in app.js (kept anonymous rather than a
-    // named `:key(.*)` -- see the comment there for why); Express exposes
-    // its capture under the numeric key '0'. May contain nested segments.
-    0: zz.filepath(),
+    key: zz.filepath(),
   }),
 })
 
@@ -110,14 +107,4 @@ export const getFileQueryFallbackSchema = z.object({
   headers: z.object({
     range: z.string().optional(),
   }),
-})
-
-// insertFile reads the raw request stream itself (no body parser is
-// mounted), so the body is validated as a streamed body. No fallbackSchema:
-// insertFile never reads parseReq()'s return value (FileHandler.insertFile
-// reads the stream off `req` directly), so a raw passthrough on failure
-// can't hand the handler a wrong type -- a fallback here would just
-// duplicate the primary schema.
-export const insertFileSchema = z.object({
-  body: zz.streamedBody(),
 })

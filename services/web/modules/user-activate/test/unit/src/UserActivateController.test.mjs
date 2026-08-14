@@ -162,4 +162,38 @@ describe('UserActivateController', function () {
         .should.equal(true)
     })
   })
+
+  describe('register with a missing email', function () {
+    beforeEach(function (ctx) {
+      ctx.req.body = {}
+      ctx.res.sendStatus = sinon.stub()
+      ctx.UserRegistrationHandler.promises.registerNewUserAndSendActivationEmail =
+        sinon.stub().resolves({ user: ctx.user, setNewPasswordUrl: 'mock/url' })
+    })
+
+    it('should return 422', async function (ctx) {
+      await ctx.UserActivateController.register(ctx.req, ctx.res)
+      ctx.res.sendStatus.calledWith(422).should.equal(true)
+    })
+
+    it('should not register a user', async function (ctx) {
+      await ctx.UserActivateController.register(ctx.req, ctx.res)
+      sinon.assert.notCalled(
+        ctx.UserRegistrationHandler.promises
+          .registerNewUserAndSendActivationEmail
+      )
+    })
+  })
+
+  describe('register with an empty email', function () {
+    beforeEach(function (ctx) {
+      ctx.req.body = { email: '' }
+      ctx.res.sendStatus = sinon.stub()
+    })
+
+    it('should return 422', async function (ctx) {
+      await ctx.UserActivateController.register(ctx.req, ctx.res)
+      ctx.res.sendStatus.calledWith(422).should.equal(true)
+    })
+  })
 })

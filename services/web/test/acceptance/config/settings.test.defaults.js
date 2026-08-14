@@ -71,6 +71,9 @@ module.exports = {
       url: 'http://127.0.0.1:23013',
       downloadHost: 'http://127.0.0.1:23080',
     },
+    clsiCache: {
+      instances: [{ url: 'http://127.0.0.1:23081', shard: 'cache' }],
+    },
     realTime: {
       url: 'http://127.0.0.1:23026',
     },

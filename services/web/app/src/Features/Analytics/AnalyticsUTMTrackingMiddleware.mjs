@@ -1,16 +1,20 @@
 import RequestHelper from './RequestHelper.mjs'
 import AnalyticsManager from './AnalyticsManager.mjs'
-import { URL } from 'node:url'
 import Settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
+import { parseReq, getRawReqInput } from '../../infrastructure/Validation.mjs'
 import UrlHelper from '../Helpers/UrlHelper.mjs'
 
 function recordUTMTags() {
   return function (req, res, next) {
-    const rawQuery = req.query
+    const rawQuery = getRawReqInput(req).query
 
     try {
-      const utmValues = RequestHelper.parseUtm(rawQuery)
+      const { query } = parseReq(req, RequestHelper.utmQuerySchema, {
+        logOnly: true,
+      })
+
+      const utmValues = RequestHelper.parseUtm(query)
 
       if (utmValues) {
         const path = new URL(req.url, Settings.siteUrl).pathname

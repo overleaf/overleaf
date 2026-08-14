@@ -13,8 +13,8 @@ import Features from '../../infrastructure/Features.mjs'
 
 const { ObjectId } = mongodb
 
-const READ_AND_WRITE_TOKEN_PATTERN = '([0-9]+[a-z]{6,12})'
-const READ_ONLY_TOKEN_PATTERN = '([a-z]{12})'
+const READ_AND_WRITE_TOKEN_PATTERN = '[0-9]+[a-z]{6,12}'
+const READ_ONLY_TOKEN_PATTERN = '[a-z]{12}'
 
 const TokenAccessHandler = {
   TOKEN_TYPES: {

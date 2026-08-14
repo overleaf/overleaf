@@ -45,4 +45,26 @@ describe('UrlHelper', function () {
       )
     })
   })
+
+  describe('getCanonicalURL', function () {
+    it('strips the query string and hash', function (ctx) {
+      const req = {
+        headers: { host: '127.0.0.1:3000' },
+        originalUrl: '/blog/some-post?foo=bar#section',
+      }
+      expect(ctx.UrlHelper.getCanonicalURL(req)).to.equal(
+        'http://127.0.0.1:3000/blog/some-post'
+      )
+    })
+
+    it('strips a trailing slash', function (ctx) {
+      const req = {
+        headers: { host: '127.0.0.1:3000' },
+        originalUrl: '/blog/some-post/',
+      }
+      expect(ctx.UrlHelper.getCanonicalURL(req)).to.equal(
+        'http://127.0.0.1:3000/blog/some-post'
+      )
+    })
+  })
 })

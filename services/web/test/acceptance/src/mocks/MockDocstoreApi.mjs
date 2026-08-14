@@ -8,11 +8,13 @@ const insertOp = z.strictObject({
   i: z.string(),
   p: z.number().int().min(0),
   u: z.boolean().optional(),
+  fixedRemoveChange: z.boolean().optional(),
 })
 const deleteOp = z.strictObject({
   d: z.string(),
   p: z.number().int().min(0),
   u: z.boolean().optional(),
+  fixedRemoveChange: z.boolean().optional(),
 })
 const commentOp = z.strictObject({
   c: z.string().optional(),

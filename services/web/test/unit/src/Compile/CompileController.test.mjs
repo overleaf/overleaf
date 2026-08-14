@@ -1,10 +1,11 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import MockRequest from '../helpers/MockRequest.mjs'
 import MockResponse from '../helpers/MockResponse.mjs'
 import { Headers } from 'node-fetch'
 import { ReadableString } from '@overleaf/stream-utils'
 import { RequestFailedError } from '@overleaf/fetch-utils'
+import { setReqValidationModeForTests } from '@overleaf/validation-tools'
 import { asZodError } from '@overleaf/validation-tools/testUtils.js'
 
 const modulePath = '../../../../app/src/Features/Compile/CompileController.mjs'
@@ -390,7 +391,7 @@ describe('CompileController', function () {
 
     describe('with an editor id', function () {
       beforeEach(async function (ctx) {
-        ctx.req.body = { editorId: 'the-editor-id' }
+        ctx.req.body = { editorId: '550e8400-e29b-41d4-a716-446655440000' }
         await ctx.CompileController.compile(ctx.req, ctx.res, ctx.next)
       })
 
@@ -406,7 +407,7 @@ describe('CompileController', function () {
             enablePdfCaching: false,
             fileLineErrors: false,
             stopOnFirstError: false,
-            editorId: 'the-editor-id',
+            editorId: '550e8400-e29b-41d4-a716-446655440000',
             rootResourcePath: undefined,
           }
         )
@@ -657,6 +658,26 @@ describe('CompileController', function () {
     })
   })
 
+  describe('stopCompile', function () {
+    beforeEach(async function (ctx) {
+      ctx.CompileManager.promises.stopCompile = sinon.stub().resolves()
+      ctx.req.params = { Project_id: ctx.projectId }
+      ctx.req.session = {}
+      ctx.res.sendStatus = sinon.stub()
+      await ctx.CompileController.stopCompile(ctx.req, ctx.res, ctx.next)
+    })
+
+    it('should stop the compile for the project', function (ctx) {
+      ctx.CompileManager.promises.stopCompile
+        .calledWith(ctx.projectId, ctx.user_id)
+        .should.equal(true)
+    })
+
+    it('should return a 200', function (ctx) {
+      ctx.res.sendStatus.calledWith(200).should.equal(true)
+    })
+  })
+
   describe('compileSubmission', function () {
     beforeEach(function (ctx) {
       ctx.submission_id = 'sub-1234'
@@ -785,6 +806,22 @@ describe('CompileController', function () {
       })
     })
 
+    describe('with popupDownload', function () {
+      beforeEach(async function (ctx) {
+        ctx.req.query = {
+          clsiserverid: ctx.clsiServerId,
+          popupDownload: 'true',
+        }
+        await ctx.CompileController.downloadPdf(ctx.req, ctx.res, ctx.next)
+      })
+
+      it('should set the content-disposition to attachment', function (ctx) {
+        expect(ctx.res.setContentDisposition).toBeCalledWith('attachment', {
+          filename: 'test_namè__1.pdf',
+        })
+      })
+    })
+
     describe('anon', function () {
       beforeEach(async function (ctx) {
         ctx.SessionManager.getLoggedInUserId.returns(null)
@@ -795,6 +832,26 @@ describe('CompileController', function () {
         ctx.fetchUtils.fetchStreamWithResponse.should.have.been.calledWith(
           `${ctx.settings.apis.clsi.downloadHost}/project/${ctx.projectId}/build/${ctx.build_id}/output/output.pdf?clsiserverid=${ctx.clsiServerId}`
         )
+      })
+    })
+
+    describe('with an enable_pdf_caching query param', function () {
+      beforeEach(async function (ctx) {
+        // output-files.ts appends this to the PDF download link whenever
+        // pdf caching is enabled.
+        ctx.req.query = {
+          clsiserverid: ctx.clsiServerId,
+          enable_pdf_caching: 'true',
+        }
+        await ctx.CompileController.downloadPdf(ctx.req, ctx.res, ctx.next)
+      })
+
+      it('should not reject the request', function (ctx) {
+        ctx.next.should.not.have.been.called
+      })
+
+      it('should proxy the PDF from the CLSI', function (ctx) {
+        ctx.fetchUtils.fetchStreamWithResponse.should.have.been.called
       })
     })
 
@@ -892,6 +949,55 @@ describe('CompileController', function () {
         )
       })
     })
+
+    describe('with the full query string buildFileList sends for the archive link', function () {
+      beforeEach(async function (ctx) {
+        // services/web/frontend/js/features/pdf-preview/util/file-list.ts
+        // appends editorId/compileGroup to the shared params object, then
+        // one `files` entry per archived file -- a single file arrives as
+        // a bare string, not a one-element array. enable_pdf_caching is
+        // appended separately (see output-files.ts) whenever pdf caching is
+        // enabled.
+        ctx.req.query = {
+          clsiserverid: ctx.clsiServerId,
+          editorId: 'e58b482a-3c9e-4de1-9a05-d5e2f1c8f8f0',
+          compileGroup: 'priority',
+          files: 'output.pdf',
+          enable_pdf_caching: 'true',
+        }
+        await ctx.CompileController.getOutputZipFromClsi(
+          ctx.req,
+          ctx.res,
+          ctx.next
+        )
+      })
+
+      it('should not reject the request', function (ctx) {
+        ctx.next.should.not.have.been.called
+      })
+
+      it('should proxy to the CLSI', function (ctx) {
+        ctx.fetchUtils.fetchStreamWithResponse.should.have.been.called
+      })
+    })
+
+    describe('with multiple files in the query string', function () {
+      beforeEach(async function (ctx) {
+        ctx.req.query = {
+          clsiserverid: ctx.clsiServerId,
+          files: ['output.pdf', 'output.log'],
+        }
+        await ctx.CompileController.getOutputZipFromClsi(
+          ctx.req,
+          ctx.res,
+          ctx.next
+        )
+      })
+
+      it('should not reject the request', function (ctx) {
+        ctx.next.should.not.have.been.called
+      })
+    })
   })
 
   describe('getFileForSubmissionFromClsi', function () {
@@ -973,6 +1079,54 @@ describe('CompileController', function () {
         }
       )
     })
+
+    it('should reject a buildId that does not match the hex-hyphen-hex shape', async function (ctx) {
+      ctx.req.query.buildId = 'not-a-valid-build-id'
+      ctx.next = sinon.stub()
+      await ctx.CompileController.proxySyncCode(ctx.req, ctx.res, ctx.next)
+      ctx.next.should.have.been.calledWithMatch({
+        name: 'InvalidRequestError',
+        zodError: asZodError({
+          origin: 'string',
+          code: 'invalid_format',
+          format: 'regex',
+          pattern: '/^[0-9a-f]+-[0-9a-f]+$/',
+          path: ['query', 'buildId'],
+          message: 'invalid buildId',
+        }),
+      })
+      ctx.CompileManager.promises.syncTeX.should.have.been.calledOnce
+    })
+
+    describe('when the schema is in log-only mode', function () {
+      beforeEach(function () {
+        setReqValidationModeForTests('log')
+      })
+
+      afterEach(function () {
+        setReqValidationModeForTests(null)
+      })
+
+      it('should still reject a non-numeric line via the manual guard', async function (ctx) {
+        ctx.req.query.line = 'not-a-number'
+        ctx.next = sinon.stub()
+        await ctx.CompileController.proxySyncCode(ctx.req, ctx.res, ctx.next)
+        ctx.next.should.have.been.calledWithMatch({
+          message: 'invalid line parameter',
+        })
+        ctx.CompileManager.promises.syncTeX.should.have.been.calledOnce
+      })
+
+      it('should still reject a non-numeric column via the manual guard', async function (ctx) {
+        ctx.req.query.column = 'not-a-number'
+        ctx.next = sinon.stub()
+        await ctx.CompileController.proxySyncCode(ctx.req, ctx.res, ctx.next)
+        ctx.next.should.have.been.calledWithMatch({
+          message: 'invalid column parameter',
+        })
+        ctx.CompileManager.promises.syncTeX.should.have.been.calledOnce
+      })
+    })
   })
 
   describe('proxySyncPdf', function () {
@@ -1022,6 +1176,64 @@ describe('CompileController', function () {
           clsiServerId,
         }
       )
+    })
+
+    it('should reject a buildId that does not match the hex-hyphen-hex shape', async function (ctx) {
+      ctx.req.query.buildId = 'not-a-valid-build-id'
+      ctx.next = sinon.stub()
+      await ctx.CompileController.proxySyncPdf(ctx.req, ctx.res, ctx.next)
+      ctx.next.should.have.been.calledWithMatch({
+        name: 'InvalidRequestError',
+        zodError: asZodError({
+          origin: 'string',
+          code: 'invalid_format',
+          format: 'regex',
+          pattern: '/^[0-9a-f]+-[0-9a-f]+$/',
+          path: ['query', 'buildId'],
+          message: 'invalid buildId',
+        }),
+      })
+      ctx.CompileManager.promises.syncTeX.should.have.been.calledOnce
+    })
+
+    describe('when the schema is in log-only mode', function () {
+      beforeEach(function () {
+        setReqValidationModeForTests('log')
+      })
+
+      afterEach(function () {
+        setReqValidationModeForTests(null)
+      })
+
+      it('should still reject a non-numeric page via the manual guard', async function (ctx) {
+        ctx.req.query.page = 'not-a-number'
+        ctx.next = sinon.stub()
+        await ctx.CompileController.proxySyncPdf(ctx.req, ctx.res, ctx.next)
+        ctx.next.should.have.been.calledWithMatch({
+          message: 'invalid page parameter',
+        })
+        ctx.CompileManager.promises.syncTeX.should.have.been.calledOnce
+      })
+
+      it('should still reject a non-numeric h via the manual guard', async function (ctx) {
+        ctx.req.query.h = 'not-a-number'
+        ctx.next = sinon.stub()
+        await ctx.CompileController.proxySyncPdf(ctx.req, ctx.res, ctx.next)
+        ctx.next.should.have.been.calledWithMatch({
+          message: 'invalid h parameter',
+        })
+        ctx.CompileManager.promises.syncTeX.should.have.been.calledOnce
+      })
+
+      it('should still reject a non-numeric v via the manual guard', async function (ctx) {
+        ctx.req.query.v = 'not-a-number'
+        ctx.next = sinon.stub()
+        await ctx.CompileController.proxySyncPdf(ctx.req, ctx.res, ctx.next)
+        ctx.next.should.have.been.calledWithMatch({
+          message: 'invalid v parameter',
+        })
+        ctx.CompileManager.promises.syncTeX.should.have.been.calledOnce
+      })
     })
   })
 
@@ -1167,6 +1379,89 @@ describe('CompileController', function () {
         ctx.ClsiCacheController._downloadFromCacheWithParams.should.not.have
           .been.called
         expect(ctx.res.statusCode).to.equal(404)
+      })
+    })
+
+    describe('with a compileGroup query param', function () {
+      beforeEach(async function (ctx) {
+        // buildFileList (see file-list.ts) always appends this to every
+        // per-file download link it builds
+        ctx.req.query = {
+          clsiserverid: ctx.clsiServerId,
+          compileGroup: 'priority',
+        }
+        await ctx.CompileController.getFileFromClsi(ctx.req, ctx.res, ctx.next)
+      })
+
+      it('should not reject the request', function (ctx) {
+        ctx.next.should.not.have.been.called
+      })
+
+      it('should proxy to the CLSI', function (ctx) {
+        ctx.fetchUtils.fetchStreamWithResponse.should.have.been.called
+      })
+    })
+
+    describe('with an enable_pdf_caching query param', function () {
+      beforeEach(async function (ctx) {
+        // output-files.ts appends this to per-file download links whenever
+        // pdf caching is enabled.
+        ctx.req.query = {
+          clsiserverid: ctx.clsiServerId,
+          enable_pdf_caching: 'true',
+        }
+        await ctx.CompileController.getFileFromClsi(ctx.req, ctx.res, ctx.next)
+      })
+
+      it('should not reject the request', function (ctx) {
+        ctx.next.should.not.have.been.called
+      })
+
+      it('should proxy to the CLSI', function (ctx) {
+        ctx.fetchUtils.fetchStreamWithResponse.should.have.been.called
+      })
+    })
+
+    describe('with an invalid enable_pdf_caching query param', function () {
+      beforeEach(function (ctx) {
+        ctx.req.query = {
+          clsiserverid: ctx.clsiServerId,
+          enable_pdf_caching: 'notabool',
+        }
+        ctx.next = sinon.stub()
+      })
+
+      it('should reject the request', async function (ctx) {
+        await ctx.CompileController.getFileFromClsi(ctx.req, ctx.res, ctx.next)
+        ctx.next.should.have.been.calledWithMatch({
+          name: 'InvalidRequestError',
+          zodError: asZodError({
+            code: 'invalid_value',
+            expected: 'stringbool',
+            values: [
+              'true',
+              '1',
+              'yes',
+              'on',
+              'y',
+              'enabled',
+              'false',
+              '0',
+              'no',
+              'off',
+              'n',
+              'disabled',
+            ],
+            path: ['query', 'enable_pdf_caching'],
+            message:
+              'Invalid option: expected one of "true"|"1"|"yes"|"on"|"y"|"enabled"|"false"|"0"|"no"|"off"|"n"|"disabled"',
+          }),
+        })
+      })
+
+      it('should not open a request to CLSI', async function (ctx) {
+        await ctx.CompileController.getFileFromClsi(ctx.req, ctx.res, ctx.next)
+        ctx.fetchUtils.fetchStreamWithResponse.should.not.have.been.called
       })
     })
   })

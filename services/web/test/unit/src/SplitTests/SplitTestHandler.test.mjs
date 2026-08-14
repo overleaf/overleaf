@@ -543,6 +543,57 @@ describe('SplitTestHandler', function () {
     })
   })
 
+  describe('malformed query override values', function () {
+    describe('getAssignment', function () {
+      beforeEach(function (ctx) {
+        ctx.AnalyticsManager.getIdsFromSession.returns({
+          userId: 'abc123abc123',
+        })
+        ctx.req.query = { 'active-test': { nested: 'oops' } }
+      })
+
+      it('falls through to the computed assignment', async function (ctx) {
+        const { variant } = await ctx.SplitTestHandler.promises.getAssignment(
+          ctx.req,
+          ctx.res,
+          'active-test'
+        )
+        expect(variant).to.equal('variant-1')
+      })
+    })
+
+    describe('hasUserBeenAssignedToVariant', function () {
+      beforeEach(function (ctx) {
+        ctx.user = {
+          _id: new ObjectId(),
+          analyticsId: 'analytics-id',
+          splitTests: {
+            'active-test': [
+              {
+                variantName: 'variant-1',
+                versionNumber: 2,
+                assignedAt: 'active-test-assigned-at',
+              },
+            ],
+          },
+        }
+        ctx.SplitTestUserGetter.promises.getUser.resolves(ctx.user)
+        ctx.req.query = { 'active-test': { nested: 'oops' } }
+      })
+
+      it('still resolves the recorded assignment', async function (ctx) {
+        const assigned =
+          await ctx.SplitTestHandler.promises.hasUserBeenAssignedToVariant(
+            ctx.req,
+            ctx.user._id,
+            'active-test',
+            'variant-1'
+          )
+        expect(assigned).to.be.true
+      })
+    })
+  })
+
   describe('variant user limits', function () {
     beforeEach(function (ctx) {
       ctx.AnalyticsManager.getIdsFromSession.returns({

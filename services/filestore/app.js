@@ -69,13 +69,8 @@ if (settings.filestore.stores.template_files) {
   )
 }
 
-// Not a named `:key(.*)` param: Express 4.22.1's bundled path-to-regexp has a
-// bug where combining a named param with a custom (.*) regex both duplicates
-// the match under a numeric key AND corrupts the captured value (off-by-one
-// substring). The anonymous `*` wildcard doesn't have this bug, so keep it
-// and validate the numeric params[0] key directly (see schemas.js).
 app.get(
-  '/bucket/:bucket/key/*',
+  '/bucket/:bucket/key/:key(.+)',
   keyBuilder.bucketFileKeyMiddleware,
   fileController.getFile
 )

@@ -32,14 +32,14 @@ const projectFileParamsSchema = z.object({
 const bucketKeyParamsSchema = z.object({
   params: z.strictObject({
     bucket: z.string(),
-    0: zz.filepath(),
+    key: zz.filepath(),
   }),
 })
 
 const staticFileParamsSchema = z.object({
   params: z.strictObject({
     random_id: z.string(),
-    0: zz.filepath(),
+    path: zz.filepath(),
   }),
 })
 
@@ -81,18 +81,18 @@ const Server = {
       res.send(`${projectId}:${fileId}`)
     })
 
-    app.get('/bucket/:bucket/key/*', (req, res, next) => {
+    app.get('/bucket/:bucket/key/:key(.+)', (req, res, next) => {
       this.getFile(req.url)
       const {
-        params: { bucket, 0: key },
+        params: { bucket, key },
       } = parseReq(req, bucketKeyParamsSchema)
       res.send(`${bucket}:${key}`)
     })
 
-    app.get('/:random_id/*', (req, res, next) => {
+    app.get('/:random_id/:path(.+)', (req, res, next) => {
       this.getFile(req.url)
       const {
-        params: { 0: path },
+        params: { path },
       } = parseReq(req, staticFileParamsSchema)
       req.url = `/${path}`
       staticServer(req, res, next)

@@ -15,6 +15,7 @@ import SessionManager from '../Authentication/SessionManager.mjs'
 import logger from '@overleaf/logger'
 import SplitTestSessionHandler from './SplitTestSessionHandler.mjs'
 import SplitTestUserGetter from './SplitTestUserGetter.mjs'
+import { getRawReqInput } from '../../infrastructure/Validation.mjs'
 
 /**
  * @import { Assignment } from "./types"
@@ -69,7 +70,10 @@ async function getAssignment(
       await _loadSplitTestInfoInLocals(res.locals, splitTestName, req.session)
 
       if (!ignoreOverrides) {
-        let query = req.query || {}
+        // query keys are caller-supplied and dynamic (one per split test
+        // name), so this is read raw rather than by name (case 1: verbatim
+        // forwarding)
+        let query = getRawReqInput(req).query || {}
         if (includeReferer && req.headers.referer) {
           // Pick up the query of the top-level page, i.e. what's in the browsers address bar, from ajax requests.
           // E.g. /project/:id?split-test=foo -> ajax /project/:id/compile should see split-test=foo.
@@ -200,7 +204,10 @@ async function hasUserBeenAssignedToVariant(
   ignoreVersion = false
 ) {
   try {
-    const { session = {}, query = {} } = req
+    const { session = {} } = req
+    // same dynamic caller-supplied key as getAssignment() above (case 1:
+    // verbatim forwarding)
+    const { query } = getRawReqInput(req)
 
     const splitTest = await _getSplitTest(splitTestName)
     const currentVersion = SplitTestUtils.getCurrentVersion(splitTest)

@@ -842,40 +842,6 @@ describe('zodHelpers', () => {
     })
   })
 
-  describe('streamedBody', () => {
-    it('parses undefined (no body parser mounted) to undefined', () => {
-      const parsed = zz.streamedBody().safeParse(undefined)
-      expect(parsed.success).toBe(true)
-      expect(parsed.data).toBe(undefined)
-    })
-
-    it('parses the empty object left by a skipping body parser to undefined', () => {
-      const parsed = zz.streamedBody().safeParse({})
-      expect(parsed.success).toBe(true)
-      expect(parsed.data).toBe(undefined)
-    })
-
-    it('fails to parse a parsed JSON body', () => {
-      const parsed = zz.streamedBody().safeParse({ some: 'payload' })
-      expect(parsed.success).toBe(false)
-      expect(parsed.error?.issues).toMatchObject([
-        expect.objectContaining({
-          message: 'unexpected parsed request body on streamed endpoint',
-        }),
-      ])
-    })
-
-    it('fails to parse a raw buffer body', () => {
-      const parsed = zz.streamedBody().safeParse(Buffer.alloc(0))
-      expect(parsed.success).toBe(false)
-    })
-
-    it('fails to parse a string body', () => {
-      const parsed = zz.streamedBody().safeParse('text body')
-      expect(parsed.success).toBe(false)
-    })
-  })
-
   describe('uploadedFile', () => {
     const validFile = {
       fieldname: 'qqfile',
