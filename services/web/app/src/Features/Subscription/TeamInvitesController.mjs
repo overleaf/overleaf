@@ -17,6 +17,7 @@ import { RateLimiter } from '../../infrastructure/RateLimiter.mjs'
 import Modules from '../../infrastructure/Modules.mjs'
 import UserAuditLogHandler from '../User/UserAuditLogHandler.mjs'
 import { sanitizeSessionUserForFrontEnd } from '../../infrastructure/FrontEndUser.mjs'
+import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
 
 const rateLimiters = {
   resendGroupInvite: new RateLimiter('resend-group-invite', {
@@ -25,15 +26,22 @@ const rateLimiters = {
   }),
 }
 
+const createInviteSchema = z.object({
+  body: z.strictObject({
+    email: z.string(),
+  }),
+})
+
 /**
  * @param {any} req
  * @param {any} res
  * @param {any} next
  */
 async function createInvite(req, res, next) {
+  const { body } = parseReq(req, createInviteSchema, { logOnly: true })
   const teamManagerId = SessionManager.getLoggedInUserId(req.session)
   const subscription = req.entity
-  const email = EmailHelper.parseEmail(req.body.email)
+  const email = EmailHelper.parseEmail(body.email)
   if (!email) {
     return res.status(422).json({
       error: {
@@ -75,13 +83,28 @@ async function createInvite(req, res, next) {
   }
 }
 
+const viewInviteSchema = z.object({
+  params: z.strictObject({
+    token: z.string(),
+  }),
+  query: z.object({
+    // rendered verbatim into a `data-type='boolean'` meta tag (Pug
+    // auto-escapes); the frontend, not this handler, interprets it as a
+    // boolean, so it is not constrained to z.stringbool() here.
+    expired: z.string().optional(),
+  }),
+})
+
 /**
  * @param {any} req
  * @param {any} res
  * @param {any} next
  */
 async function viewInvite(req, res, next) {
-  const { token } = req.params
+  const { params, query } = parseReq(req, viewInviteSchema, {
+    logOnly: true,
+  })
+  const { token } = params
   const sessionUser = SessionManager.getSessionUser(req.session)
   const userId = sessionUser?._id
   const { invite, subscription } =
@@ -150,7 +173,7 @@ async function viewInvite(req, res, next) {
       return res.render('subscriptions/team/invite-managed', {
         inviterName: invite.inviterName,
         inviteToken: invite.token,
-        expired: req.query.expired,
+        expired: query.expired,
         validationStatus: Object.fromEntries(validationStatus),
         currentManagedUserAdminEmail,
         groupSSOActive,
@@ -171,7 +194,7 @@ async function viewInvite(req, res, next) {
         inviterName: invite.inviterName,
         inviteToken: invite.token,
         hasIndividualPaidSubscription,
-        expired: req.query.expired,
+        expired: query.expired,
         userRestrictions: Array.from(req.userRestrictions || []),
         currentManagedUserAdminEmail,
         groupSSOActive,
@@ -216,13 +239,20 @@ async function viewInvites(req, res, next) {
   })
 }
 
+const acceptInviteSchema = z.object({
+  params: z.strictObject({
+    token: z.string(),
+  }),
+})
+
 /**
  * @param {any} req
  * @param {any} res
  * @param {any} next
  */
 async function acceptInvite(req, res, next) {
-  const { token } = req.params
+  const { params } = parseReq(req, acceptInviteSchema, { logOnly: true })
+  const { token } = params
   const userId = SessionManager.getLoggedInUserId(req.session)
 
   const subscription = await TeamInvitesHandler.promises.acceptInvite(
@@ -252,14 +282,26 @@ async function acceptInvite(req, res, next) {
   res.json({ groupSSOActive })
 }
 
+const revokeInviteSchema = z.object({
+  // mounted at /manage/groups/:id/invites/:email -- `id` is consumed
+  // upstream by UserMembershipMiddleware.requireGroupMemberManagement()
+  // (which sets req.entity), but it's still present on req.params, so the
+  // strict schema below has to name it too.
+  params: z.strictObject({
+    id: zz.objectId(),
+    email: z.string(),
+  }),
+})
+
 /**
  * @param {any} req
  * @param {any} res
  * @param {any} next
  */
 function revokeInvite(req, res, next) {
+  const { params } = parseReq(req, revokeInviteSchema, { logOnly: true })
   const subscription = req.entity
-  const email = EmailHelper.parseEmail(req.params.email)
+  const email = EmailHelper.parseEmail(params.email)
   const teamManagerId = SessionManager.getLoggedInUserId(req.session)
   if (!email) {
     return res.sendStatus(400)
@@ -282,14 +324,21 @@ function revokeInvite(req, res, next) {
   )
 }
 
+const resendInviteSchema = z.object({
+  body: z.strictObject({
+    email: z.string(),
+  }),
+})
+
 /**
  * @param {any} req
  * @param {any} res
  * @param {any} next
  */
 async function resendInvite(req, res, next) {
+  const { body } = parseReq(req, resendInviteSchema, { logOnly: true })
   const { entity: subscription } = req
-  const userEmail = EmailHelper.parseEmail(req.body.email)
+  const userEmail = EmailHelper.parseEmail(body.email)
   await subscription.populate('admin_id', ['email', 'first_name', 'last_name'])
 
   if (!userEmail) {

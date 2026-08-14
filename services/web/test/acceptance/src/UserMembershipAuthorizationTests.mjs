@@ -167,6 +167,26 @@ describe('UserMembershipAuthorization', function () {
           done
         )
       })
+
+      it('should create the institution and redirect to its managers page', function (done) {
+        const newV1Id = this.institution.v1Id + 1000000
+        const url = `/entities/institution/create/${newV1Id}`
+        async.series(
+          [
+            this.user.login.bind(this.user),
+            cb => this.user.ensureAdmin(cb),
+            cb => this.user.ensureAdminRole('engineering', cb),
+            this.user.login.bind(this.user),
+            expectPost(this.user, url, {}, 302),
+            expectAccess(
+              this.user,
+              `/manage/institutions/${newV1Id}/managers`,
+              200
+            ),
+          ],
+          done
+        )
+      })
     })
   })
 
@@ -221,6 +241,25 @@ describe('UserMembershipAuthorization', function () {
             cb => this.user.ensureAdminRole('engineering', cb),
             this.user.login.bind(this.user),
             expectAccess(this.user, url, 200),
+          ],
+          done
+        )
+      })
+
+      it('should create the publisher and redirect to its managers page', function (done) {
+        const newSlug = `new-publisher-slug-${Date.now()}`
+        const url = `/entities/publisher/create/${newSlug}`
+        async.series(
+          [
+            cb => this.user.ensureAdmin(cb),
+            cb => this.user.ensureAdminRole('engineering', cb),
+            this.user.login.bind(this.user),
+            expectPost(this.user, url, {}, 302),
+            expectAccess(
+              this.user,
+              `/manage/publishers/${newSlug}/managers`,
+              200
+            ),
           ],
           done
         )

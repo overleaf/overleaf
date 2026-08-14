@@ -14,6 +14,12 @@ import Modules from '../../infrastructure/Modules.mjs'
 import UserMembershipAuthorization from './UserMembershipAuthorization.mjs'
 import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 import _ from 'lodash'
+import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
+
+// entity ids here may be a Mongo ObjectId-shaped subscription id (group),
+// a v1 numeric institution id, or a publisher slug -- the same handlers
+// serve all three entity types (see UserMembershipRouter.mjs).
+const entityIdSchema = z.union([z.string(), z.number()])
 
 async function manageGroupMembers(req, res, next) {
   const { entity: subscription, entityConfig } = req
@@ -259,9 +265,16 @@ async function exportCsv(req, res) {
   csvAttachment(res, csvParser.parse(users), 'Group.csv')
 }
 
+const addSchema = z.object({
+  body: z.strictObject({
+    email: z.string(),
+  }),
+})
+
 async function add(req, res) {
   const { entity, entityConfig } = req
-  const email = EmailHelper.parseEmail(req.body.email)
+  const { body } = parseReq(req, addSchema, { logOnly: true })
+  const email = EmailHelper.parseEmail(body.email)
   if (email == null) {
     return res.status(400).json({
       error: {
@@ -307,9 +320,17 @@ async function add(req, res) {
   res.json({ user })
 }
 
+const removeSchema = z.object({
+  params: z.strictObject({
+    id: entityIdSchema,
+    userId: zz.objectId(),
+  }),
+})
+
 async function remove(req, res) {
   const { entity, entityConfig } = req
-  const { userId } = req.params
+  const { params } = parseReq(req, removeSchema, { logOnly: true })
+  const { userId } = params
   if (entityConfig.readOnly) {
     throw new Errors.NotFoundError('Cannot remove users from entity')
   }
@@ -347,12 +368,42 @@ async function remove(req, res) {
   res.sendStatus(200)
 }
 
+// Unlike entityIdSchema above, this id is interpolated into
+// entityConfig.pathsFor()'s redirect Location right below, and -- once
+// persisted as the entity's primary key -- into Institution.mjs/
+// Publisher.mjs's fetchV1DataPromise v1 API URL. Both routes creating this
+// entity (publisher/institution) pass a plain Express route param, i.e. a
+// single path segment on the wire, so it must not be able to introduce an
+// extra path, query or fragment separator.
+const createEntityIdSchema = zz.routeSegment()
+
+const createSchema = z.object({
+  params: z.strictObject({
+    // `name` is never actually populated by the current router (neither
+    // `/entities/publisher/create/:id` nor `/entities/institution/create/:id`
+    // declares a `:name` param) but is included here, matching `new()`
+    // below, since it's exercised directly at the unit-test level.
+    name: z.string().optional(),
+    id: createEntityIdSchema,
+  }),
+})
+
 async function create(req, res) {
-  const entityId = req.params.id
+  const { params } = parseReq(req, createSchema, { logOnly: true })
+  const entityId = params.id
   const entityConfig = req.entityConfig
   await UserMembershipHandler.promises.createEntity(entityId, entityConfig)
   res.redirect(entityConfig.pathsFor(entityId).index)
 }
+
+const newSchema = z.object({
+  params: z.strictObject({
+    // see the comment on createSchema above -- `name` is never populated by
+    // the real router, only by unit tests calling this handler directly.
+    name: z.string().optional(),
+    id: entityIdSchema,
+  }),
+})
 
 export default {
   manageGroupMembers: expressify(manageGroupMembers),
@@ -364,9 +415,10 @@ export default {
   remove: expressify(remove),
   exportCsv: expressify(exportCsv),
   new(req, res, next) {
+    const { params } = parseReq(req, newSchema, { logOnly: true })
     res.render('user_membership/new', {
-      entityName: req.params.name,
-      entityId: req.params.id,
+      entityName: params.name,
+      entityId: params.id,
     })
   },
   create: expressify(create),
