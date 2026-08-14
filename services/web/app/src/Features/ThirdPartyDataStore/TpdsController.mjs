@@ -13,9 +13,28 @@ import HttpErrorHandler from '../Errors/HttpErrorHandler.mjs'
 import TpdsQueueManager from './TpdsQueueManager.mjs'
 import { parseReq, z, zz } from '@overleaf/validation-tools'
 
+// project_id/projectId is either a valid Mongo ObjectId (look up an existing
+// project) or absent/empty (fall back to resolving/creating by name) -- see
+// TpdsUpdateHandler.getOrCreateProject. When present and non-empty it always
+// reaches a Mongo lookup (ProjectGetter.getProject) before it can reach any
+// sink, so a bare zz.objectId() union covers this safely.
+const optionalProjectId = zz.objectId().or(z.literal('')).optional()
+
+const createProjectSchema = z.object({
+  params: z.strictObject({
+    user_id: zz.objectId(),
+  }),
+  body: z.strictObject({
+    projectName: z.string().optional(),
+  }),
+})
+
 async function createProject(req, res) {
-  const { user_id: userId } = req.params
-  let { projectName } = req.body
+  const {
+    params: { user_id: userId },
+    body,
+  } = parseReq(req, createProjectSchema, { logOnly: true })
+  let { projectName } = body
   projectName = await ProjectDetailsHandler.promises.generateUniqueName(
     userId,
     projectName
@@ -32,6 +51,23 @@ async function createProject(req, res) {
 }
 
 const resolveProjectSchema = z.object({
+  params: z.strictObject({
+    user_id: zz.objectId(),
+  }),
+  body: z
+    .strictObject({
+      projectId: zz.objectId(),
+    })
+    .or(
+      z.strictObject({
+        projectName: z.string().min(1),
+      })
+    ),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const resolveProjectFallbackSchema = z.object({
   params: z.object({
     user_id: zz.objectId(),
   }),
@@ -54,7 +90,9 @@ async function resolveProject(req, res) {
   const {
     params: { user_id: userId },
     body: { projectId, projectName },
-  } = parseReq(req, resolveProjectSchema)
+  } = parseReq(req, resolveProjectSchema, {
+    fallbackSchema: resolveProjectFallbackSchema,
+  })
   const project = await TpdsUpdateHandler.promises.getOrCreateProject(
     userId,
     projectId,
@@ -139,13 +177,22 @@ async function deleteUpdate(req, res) {
   res.sendStatus(200)
 }
 
+const updateFolderSchema = z.object({
+  body: z.strictObject({
+    userId: zz.objectId(),
+    projectId: optionalProjectId,
+    path: z.string(),
+  }),
+})
+
 /**
  * Update endpoint that accepts update details as JSON
  */
 async function updateFolder(req, res) {
-  const userId = req.body.userId
-  const projectId = req.body.projectId
-  const { projectName, filePath } = splitPath(projectId, req.body.path)
+  const {
+    body: { userId, projectId, path },
+  } = parseReq(req, updateFolderSchema, { logOnly: true })
+  const { projectName, filePath } = splitPath(projectId, path)
   const metadata = await TpdsUpdateHandler.promises.createFolder(
     userId,
     projectId,
@@ -173,9 +220,21 @@ async function updateFolder(req, res) {
 // .gitignore, etc because people are generally more explicit with the files
 // they want in git.
 
+const projectContentsParamsSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+    // GitHub-sync repo file path; reaches UpdateMerger without any
+    // Path.join() normalization first, so it needs its own hardening.
+    path: zz.safePath(),
+  }),
+})
+
 async function updateProjectContents(req, res) {
-  const projectId = req.params.project_id
-  const path = `/${req.params[0]}` // UpdateMerger expects leading slash
+  const { params } = parseReq(req, projectContentsParamsSchema, {
+    logOnly: true,
+  })
+  const projectId = params.project_id
+  const path = `/${params.path}` // UpdateMerger expects leading slash
   const source = req.headers['x-update-source'] || 'unknown'
 
   try {
@@ -203,8 +262,11 @@ async function updateProjectContents(req, res) {
 }
 
 async function deleteProjectContents(req, res) {
-  const projectId = req.params.project_id
-  const path = `/${req.params[0]}` // UpdateMerger expects leading slash
+  const { params } = parseReq(req, projectContentsParamsSchema, {
+    logOnly: true,
+  })
+  const projectId = params.project_id
+  const path = `/${params.path}` // UpdateMerger expects leading slash
   const source = req.headers['x-update-source'] || 'unknown'
 
   const entityId = await UpdateMerger.promises.deleteUpdate(
@@ -221,10 +283,22 @@ async function getQueues(req, res) {
   res.json(await TpdsQueueManager.promises.getQueues(userId))
 }
 
+const wildcardUpdateParamsSchema = z.object({
+  params: z.strictObject({
+    user_id: zz.objectId(),
+    project_id: optionalProjectId,
+    // Dropbox-supplied path (projectName/.../file, split up below). A path
+    // of exactly '/' is Dropbox's "the project folder itself was deleted"
+    // sentinel, which TpdsUpdateHandler.deleteUpdate acts on.
+    path: zz.safePath().or(z.literal('/')),
+  }),
+})
+
 function parseParams(req) {
-  const userId = req.params.user_id
-  const projectId = req.params.project_id
-  const { projectName, filePath } = splitPath(projectId, req.params[0])
+  const {
+    params: { user_id: userId, project_id: projectId, path },
+  } = parseReq(req, wildcardUpdateParamsSchema, { logOnly: true })
+  const { projectName, filePath } = splitPath(projectId, path)
   return { filePath, userId, projectName, projectId }
 }
 

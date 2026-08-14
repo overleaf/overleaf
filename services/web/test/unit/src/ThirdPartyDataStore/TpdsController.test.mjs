@@ -1,10 +1,14 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import mongodb from 'mongodb-legacy'
 import sinon from 'sinon'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
 import MockResponse from '../helpers/MockResponse.mjs'
 import MockRequest from '../helpers/MockRequest.mjs'
 import { asZodError } from '@overleaf/validation-tools/testUtils.js'
+import {
+  getRawReqInput,
+  setReqValidationModeForTests,
+} from '@overleaf/validation-tools'
 
 const ObjectId = mongodb.ObjectId
 
@@ -132,7 +136,7 @@ describe('TpdsController', function () {
       await new Promise(resolve => {
         const res = new MockResponse(vi)
         const req = new MockRequest(vi)
-        req.params.user_id = ctx.user_id
+        req.params = { ...getRawReqInput(req).params, user_id: ctx.user_id }
         req.body = { projectName: 'foo' }
         res.callback = err => {
           if (err) resolve(err)
@@ -163,6 +167,10 @@ describe('TpdsController', function () {
         params: { user_id: ctx.user_id },
         body: {},
       }
+    })
+
+    afterEach(function () {
+      setReqValidationModeForTests(null)
     })
 
     it('should throw without any input', async function (ctx) {
@@ -278,6 +286,41 @@ describe('TpdsController', function () {
         ctx.TpdsController.resolveProject(ctx.req, res)
       })
     })
+
+    it('should still resolve a body with an unrecognized field in log mode', async function (ctx) {
+      setReqValidationModeForTests('log')
+      await new Promise(resolve => {
+        ctx.req.body = { projectName: 'projectName', extra: 'nope' }
+        const res = {
+          json: payload => {
+            expect(payload).to.deep.equal({
+              status: 'success',
+              projectId: ctx.resolvedProject._id.toString(),
+              historyId: 42,
+              otMigrationStage: 1,
+            })
+            resolve()
+          },
+        }
+        ctx.TpdsController.resolveProject(ctx.req, res)
+      })
+    })
+
+    describe('when enforced', function () {
+      afterEach(function () {
+        setReqValidationModeForTests(null)
+      })
+
+      it('should reject a body with an unrecognized field', async function (ctx) {
+        setReqValidationModeForTests('enforce')
+        ctx.req.body = { projectName: 'projectName', extra: 'nope' }
+        const next = sinon.stub()
+        await ctx.TpdsController.resolveProject(ctx.req, {}, next)
+        expect(next).to.have.been.calledWithMatch({
+          name: 'InvalidRequestError',
+        })
+      })
+    })
   })
 
   describe('getting an update', function () {
@@ -286,7 +329,7 @@ describe('TpdsController', function () {
       ctx.path = '/here.txt'
       ctx.req = {
         params: {
-          0: `${ctx.projectName}${ctx.path}`,
+          path: `${ctx.projectName}${ctx.path}`,
           user_id: ctx.user_id,
           project_id: '',
         },
@@ -341,9 +384,11 @@ describe('TpdsController', function () {
     it('should process the update with the update receiver by id', async function (ctx) {
       await new Promise(resolve => {
         const path = '/here.txt'
+        // project_id is validated as a Mongo ObjectId
+        const projectId = new ObjectId().toString()
         const req = {
           pause() {},
-          params: { 0: path, user_id: ctx.user_id, project_id: '123' },
+          params: { path, user_id: ctx.user_id, project_id: projectId },
           session: {
             destroy() {},
           },
@@ -355,7 +400,7 @@ describe('TpdsController', function () {
           json: () => {
             ctx.TpdsUpdateHandler.promises.newUpdate.should.have.been.calledWith(
               ctx.user_id,
-              '123',
+              projectId,
               '', // projectName
               '/here.txt',
               req,
@@ -400,7 +445,7 @@ describe('TpdsController', function () {
       await new Promise(resolve => {
         const path = '/projectName/here.txt'
         const req = {
-          params: { 0: path, user_id: ctx.user_id, project_id: '' },
+          params: { path, user_id: ctx.user_id, project_id: '' },
           session: {
             destroy() {},
           },
@@ -429,8 +474,10 @@ describe('TpdsController', function () {
     it('should process the delete with the update receiver by id', async function (ctx) {
       await new Promise(resolve => {
         const path = '/here.txt'
+        // project_id is validated as a Mongo ObjectId
+        const projectId = new ObjectId().toString()
         const req = {
-          params: { 0: path, user_id: ctx.user_id, project_id: '123' },
+          params: { path, user_id: ctx.user_id, project_id: projectId },
           session: {
             destroy() {},
           },
@@ -442,7 +489,7 @@ describe('TpdsController', function () {
           sendStatus: () => {
             ctx.TpdsUpdateHandler.promises.deleteUpdate.should.have.been.calledWith(
               ctx.user_id,
-              '123',
+              projectId,
               '', // projectName
               '/here.txt',
               ctx.source
@@ -525,7 +572,7 @@ describe('TpdsController', function () {
   describe('parseParams', function () {
     it('should take the project name off the start and replace with slash', function (ctx) {
       const path = 'noSlashHere'
-      const req = { params: { 0: path, user_id: ctx.user_id } }
+      const req = { params: { path, user_id: ctx.user_id } }
       const result = ctx.TpdsController.parseParams(req)
       result.userId.should.equal(ctx.user_id)
       result.filePath.should.equal('/')
@@ -534,7 +581,7 @@ describe('TpdsController', function () {
 
     it('should take the project name off the start and it with no slashes in', function (ctx) {
       const path = '/project/file.tex'
-      const req = { params: { 0: path, user_id: ctx.user_id } }
+      const req = { params: { path, user_id: ctx.user_id } }
       const result = ctx.TpdsController.parseParams(req)
       result.userId.should.equal(ctx.user_id)
       result.filePath.should.equal('/file.tex')
@@ -543,7 +590,7 @@ describe('TpdsController', function () {
 
     it('should take the project name of and return a slash for the file path', function (ctx) {
       const path = '/project_name'
-      const req = { params: { 0: path, user_id: ctx.user_id } }
+      const req = { params: { path, user_id: ctx.user_id } }
       const result = ctx.TpdsController.parseParams(req)
       result.projectName.should.equal('project_name')
       result.filePath.should.equal('/')
@@ -554,8 +601,9 @@ describe('TpdsController', function () {
     beforeEach(async function (ctx) {
       ctx.req = {
         params: {
-          0: (ctx.path = 'chapters/main.tex'),
-          project_id: (ctx.project_id = 'project-id-123'),
+          path: (ctx.path = 'chapters/main.tex'),
+          // project_id is validated as a Mongo ObjectId
+          project_id: (ctx.project_id = new ObjectId().toString()),
         },
         session: {
           destroy: sinon.stub(),
@@ -595,8 +643,9 @@ describe('TpdsController', function () {
     beforeEach(async function (ctx) {
       ctx.req = {
         params: {
-          0: (ctx.path = 'chapters/main.tex'),
-          project_id: (ctx.project_id = 'project-id-123'),
+          path: (ctx.path = 'chapters/main.tex'),
+          // project_id is validated as a Mongo ObjectId
+          project_id: (ctx.project_id = new ObjectId().toString()),
         },
         session: {
           destroy: sinon.stub(),
