@@ -40,9 +40,19 @@ export default {
   grantAccessRequest: expressify(grantAccessRequest),
 }
 
+const removeUserFromProjectSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+    user_id: zz.objectId(),
+  }),
+})
+
 async function removeUserFromProject(req, res, next) {
-  const projectId = req.params.Project_id
-  const userId = req.params.user_id
+  const { params } = parseReq(req, removeUserFromProjectSchema, {
+    logOnly: true,
+  })
+  const projectId = params.Project_id
+  const userId = params.user_id
   const sessionUserId = SessionManager.getLoggedInUserId(req.session)
   await _removeUserIdFromProject(projectId, userId)
   EditorRealTimeController.emitToRoom(projectId, 'project:membership:changed', {
@@ -68,8 +78,17 @@ async function removeUserFromProject(req, res, next) {
   res.sendStatus(204)
 }
 
+const removeSelfFromProjectSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+  }),
+})
+
 async function removeSelfFromProject(req, res, next) {
-  const projectId = req.params.Project_id
+  const { params } = parseReq(req, removeSelfFromProjectSchema, {
+    logOnly: true,
+  })
+  const projectId = params.Project_id
   const userId = SessionManager.getLoggedInUserId(req.session)
   await _removeUserIdFromProject(projectId, userId)
   EditorRealTimeController.emitToRoom(projectId, 'project:membership:changed', {
@@ -86,8 +105,15 @@ async function removeSelfFromProject(req, res, next) {
   res.sendStatus(204)
 }
 
+const getAllMembersSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+  }),
+})
+
 async function getAllMembers(req, res, next) {
-  const projectId = req.params.Project_id
+  const { params } = parseReq(req, getAllMembersSchema, { logOnly: true })
+  const projectId = params.Project_id
   logger.debug({ projectId }, 'getting all active members for project')
   let members
   try {
@@ -98,11 +124,20 @@ async function getAllMembers(req, res, next) {
   res.json({ members })
 }
 
+const getAccessRequestsSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+  }),
+})
+
 // The pending access requests carry requester identities, so this is admin
 // gated by the router (ensureUserCanAdminProject). A requester's own
 // `myAccessRequest` is delivered via the editor bootstrap instead.
 async function getAccessRequests(req, res) {
-  const projectId = req.params.Project_id
+  const { params } = parseReq(req, getAccessRequestsSchema, {
+    logOnly: true,
+  })
+  const projectId = params.Project_id
   const projectAccess =
     await CollaboratorsGetter.promises.getProjectAccess(projectId)
   const editAccessRequests = await projectAccess.loadAccessRequestsView()
@@ -110,6 +145,22 @@ async function getAccessRequests(req, res) {
 }
 
 const setCollaboratorInfoSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+    user_id: zz.objectId(),
+  }),
+  body: z.strictObject({
+    privilegeLevel: z.enum([
+      PrivilegeLevels.READ_ONLY,
+      PrivilegeLevels.READ_AND_WRITE,
+      PrivilegeLevels.REVIEW,
+    ]),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const setCollaboratorInfoFallbackSchema = z.object({
   params: z.object({
     Project_id: zz.objectId(),
     user_id: zz.objectId(),
@@ -125,7 +176,9 @@ const setCollaboratorInfoSchema = z.object({
 
 async function setCollaboratorInfo(req, res, next) {
   try {
-    const { params, body } = parseReq(req, setCollaboratorInfoSchema)
+    const { params, body } = parseReq(req, setCollaboratorInfoSchema, {
+      fallbackSchema: setCollaboratorInfoFallbackSchema,
+    })
     const projectId = params.Project_id
     const userId = params.user_id
     const { privilegeLevel } = body
@@ -172,6 +225,17 @@ async function setCollaboratorInfo(req, res, next) {
 }
 
 const transferOwnershipSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+  }),
+  body: z.strictObject({
+    user_id: zz.objectId(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const transferOwnershipFallbackSchema = z.object({
   params: z.object({
     Project_id: zz.objectId(),
   }),
@@ -182,7 +246,9 @@ const transferOwnershipSchema = z.object({
 
 async function transferOwnership(req, res, next) {
   const sessionUser = SessionManager.getSessionUser(req.session)
-  const { params, body } = parseReq(req, transferOwnershipSchema)
+  const { params, body } = parseReq(req, transferOwnershipSchema, {
+    fallbackSchema: transferOwnershipFallbackSchema,
+  })
   const projectId = params.Project_id
   const toUserId = body.user_id
   try {
@@ -214,6 +280,20 @@ async function transferOwnership(req, res, next) {
 }
 
 const requestAccessSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+  }),
+  body: z.strictObject({
+    privilegeLevel: z.enum([
+      PrivilegeLevels.READ_AND_WRITE,
+      PrivilegeLevels.REVIEW,
+    ]),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const requestAccessFallbackSchema = z.object({
   params: z.object({
     Project_id: zz.objectId(),
   }),
@@ -238,7 +318,9 @@ const REQUESTABLE_LEVELS_BY_CURRENT_LEVEL = {
 }
 
 async function requestAccess(req, res) {
-  const { params, body } = parseReq(req, requestAccessSchema)
+  const { params, body } = parseReq(req, requestAccessSchema, {
+    fallbackSchema: requestAccessFallbackSchema,
+  })
   const projectId = params.Project_id
   const { privilegeLevel } = body
   const userId = SessionManager.getLoggedInUserId(req.session)
@@ -279,6 +361,18 @@ async function requestAccess(req, res) {
 }
 
 const declineAccessRequestSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+    user_id: zz.objectId(),
+  }),
+  body: z.strictObject({
+    notify: z.boolean().optional(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const declineAccessRequestFallbackSchema = z.object({
   params: z.object({
     Project_id: zz.objectId(),
     user_id: zz.objectId(),
@@ -289,7 +383,9 @@ const declineAccessRequestSchema = z.object({
 })
 
 async function declineAccessRequest(req, res) {
-  const { params, body } = parseReq(req, declineAccessRequestSchema)
+  const { params, body } = parseReq(req, declineAccessRequestSchema, {
+    fallbackSchema: declineAccessRequestFallbackSchema,
+  })
   const projectId = params.Project_id
   const userId = params.user_id
   const notify = body.notify === true
@@ -323,6 +419,22 @@ async function declineAccessRequest(req, res) {
 }
 
 const grantAccessRequestSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+    user_id: zz.objectId(),
+  }),
+  body: z.strictObject({
+    privilegeLevel: z.enum([
+      PrivilegeLevels.READ_AND_WRITE,
+      PrivilegeLevels.REVIEW,
+    ]),
+    notify: z.boolean().optional(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const grantAccessRequestFallbackSchema = z.object({
   params: z.object({
     Project_id: zz.objectId(),
     user_id: zz.objectId(),
@@ -337,7 +449,9 @@ const grantAccessRequestSchema = z.object({
 })
 
 async function grantAccessRequest(req, res) {
-  const { params, body } = parseReq(req, grantAccessRequestSchema)
+  const { params, body } = parseReq(req, grantAccessRequestSchema, {
+    fallbackSchema: grantAccessRequestFallbackSchema,
+  })
   const projectId = params.Project_id
   const requesterId = params.user_id
   const { privilegeLevel, notify } = body
@@ -507,8 +621,15 @@ async function _removeUserIdFromProject(projectId, userId) {
   await TagsHandler.promises.removeProjectFromAllTags(userId, projectId)
 }
 
+const getShareTokensSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+  }),
+})
+
 async function getShareTokens(req, res) {
-  const projectId = req.params.Project_id
+  const { params } = parseReq(req, getShareTokensSchema, { logOnly: true })
+  const projectId = params.Project_id
   const userId = SessionManager.getLoggedInUserId(req.session)
 
   if (!Features.hasFeature('link-sharing')) {
