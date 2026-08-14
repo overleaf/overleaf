@@ -310,10 +310,9 @@ $dropdown-item-min-height: 36px;
   justify-content: space-between;
 }
 
-.dropdown-shortcut-char {
-  display: inline-block;
-  width: 1em;
-  text-align: center;
+.dropdown-shortcut {
+  display: inline-flex;
+  gap: var(--spacing-02);
 }
 
 .dropdown-item-wide {

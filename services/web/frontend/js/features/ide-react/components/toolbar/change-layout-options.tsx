@@ -107,7 +107,7 @@ const shortcuts: Record<LayoutOption, string[] | null> = isMac
       pdfOnly: null,
       sideBySide: null,
       detachedPdf: null,
-      focusMode: ['⌃', '⇧', 'M'],
+      focusMode: ['Ctrl', 'Shift', 'M'],
     }
 
 export default function ChangeLayoutOptions() {

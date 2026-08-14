@@ -1,17 +1,8 @@
-import classNames from 'classnames'
-
 export function Shortcut({ keys }: { keys: string[] }) {
   return (
-    <span>
+    <span className="dropdown-shortcut">
       {keys.map((key, idx) => (
-        <span
-          className={classNames({
-            'dropdown-shortcut-char': key.length === 1,
-          })}
-          key={`${key}${idx}`}
-        >
-          {key}
-        </span>
+        <span key={`${key}${idx}`}>{key}</span>
       ))}
     </span>
   )
