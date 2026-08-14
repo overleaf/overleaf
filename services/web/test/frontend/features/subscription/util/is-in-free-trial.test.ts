@@ -1,6 +1,5 @@
 import { expect } from 'chai'
 import isInFreeTrial from '../../../../../frontend/js/features/subscription/util/is-in-free-trial'
-import dateformat from 'dateformat'
 
 describe('isInFreeTrial', function () {
   it('returns false when no date sent', function () {
@@ -15,10 +14,6 @@ describe('isInFreeTrial', function () {
   it('returns true when date is in the future', function () {
     const today = new Date()
     const sevenDaysFromToday = new Date().setDate(today.getDate() + 7)
-    const sevenDaysFromTodayFormatted = dateformat(
-      sevenDaysFromToday,
-      'dS mmmm yyyy'
-    )
-    expect(isInFreeTrial(sevenDaysFromTodayFormatted)).to.be.true
+    expect(isInFreeTrial(new Date(sevenDaysFromToday).toISOString())).to.be.true
   })
 })

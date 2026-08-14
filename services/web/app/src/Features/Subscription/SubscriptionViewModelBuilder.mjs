@@ -5,7 +5,6 @@ import PlansLocator from './PlansLocator.mjs'
 import { getLocalizedPlanPricing } from './PriceVersions.mjs'
 import { isStandaloneAiAddOnPlanCode } from './AiHelper.mjs'
 import PaymentProviderEntities from './PaymentProviderEntities.mjs'
-import SubscriptionFormatters from './SubscriptionFormatters.mjs'
 import SubscriptionLocator from './SubscriptionLocator.mjs'
 import InstitutionsGetter from '../Institutions/InstitutionsGetter.mjs'
 import InstitutionsManager from '../Institutions/InstitutionsManager.mjs'
@@ -257,9 +256,9 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
       }
     })
     const totalLicenses = (plan.membersLimit || 0) + additionalLicenses
-    const isInTrial =
-      paymentRecord.subscription.trialPeriodEnd &&
-      paymentRecord.subscription.trialPeriodEnd.getTime() > Date.now()
+    const isInTrial = SubscriptionHelper.isInTrial(
+      paymentRecord.subscription.trialPeriodEnd
+    )
 
     let isEligibleForPause = false
     const commonPauseConditions =
@@ -302,18 +301,10 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
       additionalLicenses,
       addOns,
       totalLicenses,
-      nextPaymentDueAt: SubscriptionFormatters.formatDateTime(
-        paymentRecord.subscription.periodEnd
-      ),
-      nextPaymentDueDate: SubscriptionFormatters.formatDate(
-        paymentRecord.subscription.periodEnd
-      ),
+      periodEnd: paymentRecord.subscription.periodEnd,
       currency: paymentRecord.subscription.currency,
       planPrice: paymentRecord.subscription.planPrice,
       state: paymentRecord.subscription.state,
-      trialEndsAtFormatted: SubscriptionFormatters.formatDateTime(
-        paymentRecord.subscription.trialPeriodEnd
-      ),
       trialEndsAt: paymentRecord.subscription.trialPeriodEnd,
       activeCoupons,
       accountEmail: paymentRecord.account.email,

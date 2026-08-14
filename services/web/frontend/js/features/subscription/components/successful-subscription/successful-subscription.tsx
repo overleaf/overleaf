@@ -15,6 +15,7 @@ import {
 import { PaidSubscription } from '../../../../../../types/subscription/dashboard/subscription'
 import { useBroadcastUser } from '@/shared/hooks/user-channel/use-broadcast-user'
 import { getUpgradePlanDisplayName } from '../../util/plan-display-names'
+import { formatPaymentDateTime } from '../../util/payment-dates'
 
 function SuccessfulSubscription() {
   const { t } = useTranslation()
@@ -56,8 +57,9 @@ function SuccessfulSubscription() {
                             i18nKey="next_payment_of_x_collectected_on_y"
                             values={{
                               paymentAmmount: subscription.payment.displayPrice,
-                              collectionDate:
-                                subscription.payment.nextPaymentDueAt,
+                              collectionDate: formatPaymentDateTime(
+                                subscription.payment.periodEnd
+                              ),
                             }}
                             shouldUnescape
                             tOptions={{ interpolation: { escapeValue: true } }}
@@ -175,7 +177,9 @@ function UpgradeSuccess({
                 i18nKey="next_payment_of_x_collectected_on_y"
                 values={{
                   paymentAmmount: subscription.payment.displayPrice,
-                  collectionDate: subscription.payment.nextPaymentDueAt,
+                  collectionDate: formatPaymentDateTime(
+                    subscription.payment.periodEnd
+                  ),
                 }}
                 shouldUnescape
                 tOptions={{ interpolation: { escapeValue: true } }}

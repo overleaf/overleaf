@@ -16,6 +16,7 @@ import { debugConsole } from '@/utils/debugging'
 import OLButton from '@/shared/components/ol/ol-button'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import isInFreeTrial from '../../../../../util/is-in-free-trial'
+import { formatPaymentDate } from '../../../../../util/payment-dates'
 import {
   CancelSubscriptionLossMessaging,
   getLossMessagingPlanType,
@@ -202,7 +203,9 @@ export function CancelSubscription() {
         {isErrorCancel && <GenericErrorAlert />}
         <CancelSubscriptionLossMessaging
           planType={lossMessagingPlanType}
-          terminationDate={personalSubscription.payment.nextPaymentDueDate}
+          terminationDate={
+            formatPaymentDate(personalSubscription.payment.periodEnd)!
+          }
           onCancelSubscription={handleCancelSubscription}
           isButtonDisabled={isButtonDisabled}
           isCancelLoading={isSuccessCancel || isLoadingCancel}
