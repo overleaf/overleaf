@@ -1122,6 +1122,183 @@ describe('EmailBuilder', function () {
         })
       })
 
+      describe('groupSharedWorkspaceDisabledForOwner', function () {
+        beforeEach(function (ctx) {
+          ctx.emailAddress = 'example@overleaf.com'
+          ctx.opts = {
+            to: ctx.emailAddress,
+            groupName: 'Example Group',
+            firstName: 'Joe',
+          }
+          ctx.email = ctx.EmailBuilder.buildEmail(
+            'groupSharedWorkspaceDisabledForOwner',
+            ctx.opts
+          )
+          ctx.expectedUrl = `${ctx.settings.siteUrl}/project`
+        })
+
+        it('should build the email', function (ctx) {
+          expect(ctx.email.html).to.exist
+          expect(ctx.email.text).to.exist
+        })
+
+        describe('HTML email', function () {
+          it('should include a CTA button and a fallback CTA link', function (ctx) {
+            const dom = cheerio.load(ctx.email.html)
+            expect(ctx.email.subject).to.equal(
+              'Your shared workspace has been disabled'
+            )
+            expect(ctx.email.html).to.contain(
+              'Your projects are back in your personal list.'
+            )
+            expect(ctx.email.html).to.contain(
+              `Your group administrator has disabled the shared workspace for ${ctx.opts.groupName}.`
+            )
+            const buttonLink = dom('a:contains("Open your projects")')
+            expect(buttonLink.length).to.equal(1)
+            expect(buttonLink.attr('href')).to.equal(ctx.expectedUrl)
+            expect(ctx.email.html).to.contain('copy and paste this link')
+            expect(ctx.email.html).to.contain(ctx.expectedUrl)
+          })
+        })
+
+        describe('plain text email', function () {
+          it('should contain the CTA link', function (ctx) {
+            expect(ctx.email.text).to.contain(ctx.expectedUrl)
+          })
+        })
+
+        it('escapes the group name in the HTML email', function (ctx) {
+          const email = ctx.EmailBuilder.buildEmail(
+            'groupSharedWorkspaceDisabledForOwner',
+            { ...ctx.opts, groupName: '<script>alert(1)</script>' }
+          )
+          expect(email.html).to.not.contain('<script>alert(1)</script>')
+          expect(email.html).to.contain('&lt;script&gt;alert(1)&lt;/script&gt;')
+        })
+      })
+
+      describe('groupSharedWorkspaceDisabledForMember', function () {
+        beforeEach(function (ctx) {
+          ctx.emailAddress = 'example@overleaf.com'
+          ctx.opts = {
+            to: ctx.emailAddress,
+            groupName: 'Example Group',
+            firstName: 'Joe',
+          }
+          ctx.email = ctx.EmailBuilder.buildEmail(
+            'groupSharedWorkspaceDisabledForMember',
+            ctx.opts
+          )
+          ctx.expectedUrl = `${ctx.settings.siteUrl}/project`
+        })
+
+        it('should build the email', function (ctx) {
+          expect(ctx.email.html).to.exist
+          expect(ctx.email.text).to.exist
+        })
+
+        describe('HTML email', function () {
+          it('should include a CTA button and a fallback CTA link', function (ctx) {
+            const dom = cheerio.load(ctx.email.html)
+            expect(ctx.email.subject).to.equal(
+              "Your group's shared workspace has been disabled"
+            )
+            expect(ctx.email.html).to.contain(
+              "Here's what's changed for your group."
+            )
+            expect(ctx.email.html).to.contain(
+              `Your group administrator has disabled the shared workspace for ${ctx.opts.groupName}.`
+            )
+            const buttonLink = dom('a:contains("Open your projects")')
+            expect(buttonLink.length).to.equal(1)
+            expect(buttonLink.attr('href')).to.equal(ctx.expectedUrl)
+            expect(ctx.email.html).to.contain('copy and paste this link')
+            expect(ctx.email.html).to.contain(ctx.expectedUrl)
+          })
+        })
+
+        describe('plain text email', function () {
+          it('should contain the CTA link', function (ctx) {
+            expect(ctx.email.text).to.contain(ctx.expectedUrl)
+          })
+        })
+
+        it('escapes the group name in the HTML email', function (ctx) {
+          const email = ctx.EmailBuilder.buildEmail(
+            'groupSharedWorkspaceDisabledForMember',
+            { ...ctx.opts, groupName: '<script>alert(1)</script>' }
+          )
+          expect(email.html).to.not.contain('<script>alert(1)</script>')
+          expect(email.html).to.contain('&lt;script&gt;alert(1)&lt;/script&gt;')
+        })
+      })
+
+      describe('groupSharedWorkspaceDisabledForAdmin', function () {
+        beforeEach(function (ctx) {
+          ctx.emailAddress = 'example@overleaf.com'
+          ctx.opts = {
+            to: ctx.emailAddress,
+            groupName: 'Example Group',
+            firstName: 'Joe',
+          }
+          ctx.email = ctx.EmailBuilder.buildEmail(
+            'groupSharedWorkspaceDisabledForAdmin',
+            ctx.opts
+          )
+          ctx.expectedUrl = `${ctx.settings.siteUrl}/project`
+        })
+
+        it('should build the email', function (ctx) {
+          expect(ctx.email.html).to.exist
+          expect(ctx.email.text).to.exist
+        })
+
+        describe('HTML email', function () {
+          it('should include a CTA button and a fallback CTA link', function (ctx) {
+            const dom = cheerio.load(ctx.email.html)
+            expect(ctx.email.subject).to.equal(
+              `Shared workspace disabled for ${ctx.opts.groupName}`
+            )
+            expect(ctx.email.html).to.contain(
+              "Here's a summary of what changed for your group."
+            )
+            expect(ctx.email.html).to.contain(
+              `You’ve disabled the shared workspace for ${ctx.opts.groupName}. Here's a summary of what happened.`
+            )
+            expect(ctx.email.html).to.contain(
+              'Projects in the workspace have been returned to their owners and are no longer visible to the whole group.'
+            )
+            expect(ctx.email.html).to.contain(
+              'Each project is now shared only with the collaborators the owner had already added.'
+            )
+            expect(ctx.email.html).to.contain(
+              'Group members have been notified of the change.'
+            )
+            const buttonLink = dom('a:contains("Open your projects")')
+            expect(buttonLink.length).to.equal(1)
+            expect(buttonLink.attr('href')).to.equal(ctx.expectedUrl)
+            expect(ctx.email.html).to.contain('copy and paste this link')
+            expect(ctx.email.html).to.contain(ctx.expectedUrl)
+          })
+        })
+
+        describe('plain text email', function () {
+          it('should contain the CTA link', function (ctx) {
+            expect(ctx.email.text).to.contain(ctx.expectedUrl)
+          })
+        })
+
+        it('escapes the group name in the HTML email', function (ctx) {
+          const email = ctx.EmailBuilder.buildEmail(
+            'groupSharedWorkspaceDisabledForAdmin',
+            { ...ctx.opts, groupName: '<script>alert(1)</script>' }
+          )
+          expect(email.html).to.not.contain('<script>alert(1)</script>')
+          expect(email.html).to.contain('&lt;script&gt;alert(1)&lt;/script&gt;')
+        })
+      })
+
       describe('groupDomainCapturedByGroupChanged', function () {
         it('should build active-domain-capture email', function (ctx) {
           const email = ctx.EmailBuilder.buildEmail(

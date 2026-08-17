@@ -1300,6 +1300,88 @@ templates.groupAiFeaturesEnabled = NoCTAEmailTemplate({
   },
 })
 
+templates.groupSharedWorkspaceDisabledForOwner = ctaTemplate({
+  subject() {
+    return `Your shared workspace has been disabled`
+  },
+  title() {
+    return `Your projects are back in your personal list.`
+  },
+  greeting(opts) {
+    return opts.firstName ? `Hi ${opts.firstName},` : 'Hi there,'
+  },
+  message(opts) {
+    const groupName = _.escape(opts.groupName)
+    return [
+      `Your group administrator has disabled the shared workspace for ${groupName}.`,
+      `Projects you owned in the workspace have been returned to your personal projects list. They’re no longer visible to the whole group — only collaborators you’d actively shared them with still have access.`,
+      `You don’t need to do anything. You can find your projects in your projects list as usual.`,
+    ]
+  },
+  ctaText() {
+    return 'Open your projects'
+  },
+  ctaURL() {
+    return `${settings.siteUrl}/project`
+  },
+})
+
+templates.groupSharedWorkspaceDisabledForMember = ctaTemplate({
+  subject() {
+    return `Your group's shared workspace has been disabled`
+  },
+  title() {
+    return `Here's what's changed for your group.`
+  },
+  greeting(opts) {
+    return opts.firstName ? `Hi ${opts.firstName},` : 'Hi there,'
+  },
+  message(opts) {
+    const groupName = _.escape(opts.groupName)
+    return [
+      `Your group administrator has disabled the shared workspace for ${groupName}.`,
+      `Projects that were in the shared workspace have been returned to their owners. You’ll still have access to any projects their owners have shared with you directly — but projects you could only see through the shared workspace may no longer be visible.`,
+      `You don’t need to do anything. If you’re not sure whether you still have access to a project, check with the project owner or your group administrator.`,
+    ]
+  },
+  ctaText() {
+    return 'Open your projects'
+  },
+  ctaURL() {
+    return `${settings.siteUrl}/project`
+  },
+})
+
+templates.groupSharedWorkspaceDisabledForAdmin = ctaTemplate({
+  subject(opts) {
+    return `Shared workspace disabled for ${opts.groupName}`
+  },
+  title() {
+    return `Here's a summary of what changed for your group.`
+  },
+  greeting(opts) {
+    return opts.firstName ? `Hi ${opts.firstName},` : 'Hi there,'
+  },
+  message(opts) {
+    const groupName = _.escape(opts.groupName)
+    return [
+      `You’ve disabled the shared workspace for ${groupName}. Here's a summary of what happened.`,
+      '<ul>' +
+        '<li>Projects in the workspace have been returned to their owners and are no longer visible to the whole group.</li>' +
+        '<li>Each project is now shared only with the collaborators the owner had already added.</li>' +
+        '<li>Group members have been notified of the change.</li>' +
+        '</ul>',
+      `No further action is needed on your part.`,
+    ]
+  },
+  ctaText() {
+    return 'Open your projects'
+  },
+  ctaURL() {
+    return `${settings.siteUrl}/project`
+  },
+})
+
 templates.groupDomainCapturedByGroupChanged = ctaTemplate({
   subject(opts) {
     return opts.domainCapturedByGroup

@@ -100,6 +100,7 @@ export default function ManagedGroupSubscriptions() {
   const isSharingPermissionsEnabled = useFeatureFlag(
     'sharing-updates-sharing-permissions'
   )
+  const isSharedWorkspaceEnabled = useFeatureFlag('shared-workspace')
   const aiTogglingSplitTestEnabled = useFeatureFlag('ai-toggling')
 
   if (!managedGroupSubscriptions) {
@@ -115,12 +116,18 @@ export default function ManagedGroupSubscriptions() {
       {managedGroupSubscriptions.map(subscription => {
         const isAdmin = usersEmail === subscription.admin_id.email
 
-        // Feature controls are currently rendered only for managed groups, where the admin can
-        // toggle AI Feature on/off. For non-managed groups, the section only displays notifications
-        // for features that have been disabled by Overleaf Support. When the `ai-toggling` split
-        // test is enabled, it's always displayed for non-managed groups that have the feature on.
-        // This flag will be deleted once AI Features toggling is available to all groups.
+        // Shared Workspace is available to both managed and non-managed groups, so while the
+        // `shared-workspace` split test has the group opted in, the section is rendered whenever
+        // Overleaf Support hasn't disabled the feature for them.
+        // AI Features toggling is narrower: it's only interactive for managed groups, so for
+        // non-managed groups the section falls back to displaying notifications for features that
+        // have been disabled by Overleaf Support. When the `ai-toggling` split test is enabled,
+        // it's also displayed for non-managed groups that have the feature on. Both flags will be
+        // deleted once their features are available to all groups.
         const shouldDisplayFeatureControls =
+          (isSharedWorkspaceEnabled &&
+            subscription.planLevelName === 'Pro' &&
+            subscription.features?.sharedWorkspace !== false) ||
           (subscription.features?.aiToggling && aiTogglingSplitTestEnabled) ||
           subscription.managedUsersEnabled ||
           subscription.groupPolicy?.userCannotUseAIFeatures ||

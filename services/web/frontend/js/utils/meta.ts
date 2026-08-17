@@ -296,6 +296,7 @@ export interface Meta {
   'ol-script-logs': ScriptLogType[]
   'ol-settingsGroupSSO': { enabled: boolean } | undefined
   'ol-settingsPlans': Plan[]
+  'ol-sharedWorkspaceEnabled': boolean
   'ol-sharingPermissions': SharingPermissions
   'ol-shouldAllowEditingDetails': boolean
   'ol-shouldLoadHotjar': boolean

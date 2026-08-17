@@ -2,6 +2,7 @@ import { expect } from 'chai'
 import { screen } from '@testing-library/react'
 import ManagedGroupSubscriptions from '../../../../../../frontend/js/features/subscription/components/dashboard/managed-group-subscriptions'
 import { ManagedGroupSubscription } from '../../../../../../types/subscription/dashboard/subscription'
+import { MetaTag } from '@/utils/meta'
 import {
   cleanUpContext,
   renderWithSubscriptionDashContext,
@@ -526,6 +527,140 @@ describe('<ManagedGroupSubscriptions />', function () {
               name: 'ol-splitTestVariants',
               value: { 'ai-toggling': 'enabled' },
             },
+          ],
+        })
+        expect(screen.queryByText('Feature controls')).to.be.null
+      })
+    })
+
+    describe('Shared Workspace', function () {
+      // metaAttributesCache isn't cleared between tests, so ol-splitTestVariants leaks from
+      // earlier tests. Every test below sets it explicitly to stay independent of run order.
+      function splitTestVariants(enabled: boolean): MetaTag {
+        return {
+          name: 'ol-splitTestVariants',
+          value: enabled ? { 'shared-workspace': 'enabled' } : {},
+        }
+      }
+
+      it('renders the feature controls row for a non-managed group when the feature is enabled', async function () {
+        renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+          metaTags: [
+            {
+              name: 'ol-managedGroupSubscriptions',
+              value: makeSubscription({
+                managedUsersEnabled: false,
+                features: {
+                  groupSSO: false,
+                  managedUsers: false,
+                  sharedWorkspace: true,
+                },
+              }),
+            },
+            { name: 'ol-usersEmail', value: adminEmail },
+            splitTestVariants(true),
+          ],
+        })
+        await screen.findByText('Feature controls')
+      })
+
+      it('renders the feature controls row for a non-managed group when the feature is unset', async function () {
+        renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+          metaTags: [
+            {
+              name: 'ol-managedGroupSubscriptions',
+              value: makeSubscription({
+                managedUsersEnabled: false,
+                features: { groupSSO: false, managedUsers: false },
+              }),
+            },
+            { name: 'ol-usersEmail', value: adminEmail },
+            splitTestVariants(true),
+          ],
+        })
+        await screen.findByText('Feature controls')
+      })
+
+      it('does not render the feature controls row when the split test is not enabled', function () {
+        renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+          metaTags: [
+            {
+              name: 'ol-managedGroupSubscriptions',
+              value: makeSubscription({
+                managedUsersEnabled: false,
+                features: {
+                  groupSSO: false,
+                  managedUsers: false,
+                  sharedWorkspace: true,
+                },
+              }),
+            },
+            { name: 'ol-usersEmail', value: adminEmail },
+            splitTestVariants(false),
+          ],
+        })
+        expect(screen.queryByText('Feature controls')).to.be.null
+      })
+
+      it('does not render the feature controls row when Overleaf Support has disabled the feature', function () {
+        renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+          metaTags: [
+            {
+              name: 'ol-managedGroupSubscriptions',
+              value: makeSubscription({
+                managedUsersEnabled: false,
+                features: {
+                  groupSSO: false,
+                  managedUsers: false,
+                  sharedWorkspace: false,
+                },
+              }),
+            },
+            { name: 'ol-usersEmail', value: adminEmail },
+            splitTestVariants(true),
+          ],
+        })
+        expect(screen.queryByText('Feature controls')).to.be.null
+      })
+
+      it('does not render the feature controls row when the user is not the group admin', function () {
+        renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+          metaTags: [
+            {
+              name: 'ol-managedGroupSubscriptions',
+              value: makeSubscription({
+                managedUsersEnabled: false,
+                features: {
+                  groupSSO: false,
+                  managedUsers: false,
+                  sharedWorkspace: true,
+                },
+              }),
+            },
+            { name: 'ol-usersEmail', value: 'other@example.com' },
+            splitTestVariants(true),
+          ],
+        })
+        expect(screen.queryByText('Feature controls')).to.be.null
+      })
+
+      it('does not render the feature controls row when the group is not on a Pro plan', function () {
+        renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+          metaTags: [
+            {
+              name: 'ol-managedGroupSubscriptions',
+              value: makeSubscription({
+                managedUsersEnabled: false,
+                planLevelName: 'Standard',
+                features: {
+                  groupSSO: false,
+                  managedUsers: false,
+                  sharedWorkspace: true,
+                },
+              }),
+            },
+            { name: 'ol-usersEmail', value: adminEmail },
+            splitTestVariants(true),
           ],
         })
         expect(screen.queryByText('Feature controls')).to.be.null
