@@ -200,6 +200,7 @@
   },
   "workspaces": [
     "jobs/mirror-documentation",
+    "jobs/quay-logging",
     "jobs/wiki-algolia",
     "libraries/*",
     "server-ce/test",
