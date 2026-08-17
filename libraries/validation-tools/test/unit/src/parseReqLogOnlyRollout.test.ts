@@ -437,6 +437,105 @@ describe('parseReq log-only rollout', () => {
       })
     })
 
+    describe('logFields', () => {
+      it('resolves a dotted path and includes it in failingValues (logOnly)', () => {
+        const req = { body: { zipUrl: '/bad/path' } } as Request
+        const schema = z.object({
+          body: z.object({ zipUrl: z.string().url() }),
+        })
+
+        parseReq(req, schema, {
+          logOnly: true,
+          logFields: ['body.zipUrl'],
+        })
+
+        expect(warnMock).toHaveBeenCalledTimes(1)
+        const [ctx] = warnMock.mock.calls[0] as WarnCall
+        expect(ctx.failingValues).toEqual({ 'body.zipUrl': '/bad/path' })
+      })
+
+      it('resolves a dotted path and includes it in failingValues (fallback-passed)', () => {
+        const req = { body: { zipUrl: '/bad/path' } } as Request
+        const primary = z.object({
+          body: z.object({ zipUrl: z.string().url() }),
+        })
+        const fallback = z.object({
+          body: z.object({ zipUrl: z.string() }),
+        })
+
+        parseReq(req, primary, {
+          fallbackSchema: fallback,
+          logFields: ['body.zipUrl'],
+        })
+
+        expect(warnMock).toHaveBeenCalledTimes(1)
+        const [ctx] = warnMock.mock.calls[0] as WarnCall
+        expect(ctx.kind).toBe('fallback-passed')
+        expect(ctx.failingValues).toEqual({ 'body.zipUrl': '/bad/path' })
+      })
+
+      it('uses <missing> for a path that does not exist in the input', () => {
+        const req = { body: {} } as Request
+        const schema = z.object({
+          body: z.object({ zipUrl: z.string() }),
+        })
+
+        parseReq(req, schema, {
+          logOnly: true,
+          logFields: ['body.zipUrl'],
+        })
+
+        expect(warnMock).toHaveBeenCalledTimes(1)
+        const [ctx] = warnMock.mock.calls[0] as WarnCall
+        expect(ctx.failingValues).toEqual({ 'body.zipUrl': undefined })
+      })
+
+      it('uses <missing> when an intermediate segment is missing', () => {
+        const req = { body: undefined } as unknown as Request
+        const schema = z.object({
+          body: z.object({ zipUrl: z.string() }),
+        })
+
+        parseReq(req, schema, {
+          logOnly: true,
+          logFields: ['body.zipUrl'],
+        })
+
+        expect(warnMock).toHaveBeenCalledTimes(1)
+        const [ctx] = warnMock.mock.calls[0] as WarnCall
+        expect(ctx.failingValues).toEqual({ 'body.zipUrl': '<missing>' })
+      })
+
+      it('truncates string values longer than 200 chars', () => {
+        const longValue = 'z'.repeat(250)
+        const req = { body: { zipUrl: longValue } } as Request
+        const schema = z.object({
+          body: z.object({ zipUrl: z.string().url() }),
+        })
+
+        parseReq(req, schema, {
+          logOnly: true,
+          logFields: ['body.zipUrl'],
+        })
+
+        expect(warnMock).toHaveBeenCalledTimes(1)
+        const [ctx] = warnMock.mock.calls[0] as WarnCall
+        expect(ctx.failingValues['body.zipUrl']).toHaveLength(200)
+        expect(ctx.failingValues['body.zipUrl']).toBe(longValue.slice(0, 200))
+      })
+
+      it('omits failingValues when logFields is not set', () => {
+        const req = { body: { name: 1234 } } as Request
+        const schema = z.object({ body: z.object({ name: z.string() }) })
+
+        parseReq(req, schema, { logOnly: true })
+
+        expect(warnMock).toHaveBeenCalledTimes(1)
+        const [ctx] = warnMock.mock.calls[0] as WarnCall
+        expect(ctx.failingValues).toBeUndefined()
+      })
+    })
+
     describe('success path', () => {
       it('enforce mode: returns the parsed data and logs nothing, even with opts set', () => {
         setReqValidationModeForTests('enforce')

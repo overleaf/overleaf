@@ -32,6 +32,10 @@ const {
  *   issues are logged). If it also fails, behavior falls back to logOnly
  *   above, classifying/throwing from the fallback's ZodError when logOnly
  *   is not set.
+ * @property {string[]} [logFields] - Dotted field paths (e.g. 'body.zipUrl')
+ *   whose raw input values are resolved and included in the schema-failure
+ *   log entry. Values are only resolved on failure; strings are truncated
+ *   to 200 chars.
  */
 
 /**
@@ -201,8 +205,10 @@ function sanitizeIssues(issues, depth = 0) {
  * @param {ZodType} schema - the primary schema; the dedup key.
  * @param {'log-only' | 'fallback-passed'} kind
  * @param {readonly ZodIssue[]} issues
+ * @param {Request} input - the (possibly lockdown-unwrapped) request input
+ * @param {string[]} [logFields] - dotted paths to resolve from input
  */
-function logSchemaFailure(req, schema, kind, issues) {
+function logSchemaFailure(req, schema, kind, issues, input, logFields) {
   if (!logger) return
 
   const sanitizedIssues = sanitizeIssues(issues)
@@ -226,8 +232,32 @@ function logSchemaFailure(req, schema, kind, issues) {
     .slice(2, 7)
     .join('\n')
 
+  /** @type {Record<string, unknown> | undefined} */
+  let resolvedFields
+  if (logFields) {
+    resolvedFields = {}
+    for (const field of logFields) {
+      let val = /** @type {any} */ (input)
+      for (const seg of field.split('.')) {
+        if (val == null || typeof val !== 'object') {
+          val = '<missing>'
+          break
+        }
+        val = val[seg]
+      }
+      resolvedFields[field] = typeof val === 'string' ? val.slice(0, 200) : val
+    }
+  }
+
   logger.warn(
-    { location, kind, issues: sanitizedIssues, caller, req },
+    {
+      location,
+      kind,
+      issues: sanitizedIssues,
+      caller,
+      req,
+      ...(resolvedFields && { failingValues: resolvedFields }),
+    },
     'req-validation: request failed schema in log-only rollout'
   )
 }
@@ -274,12 +304,26 @@ function parseReq(req, schema, opts) {
     if (opts.fallbackSchema) {
       const fallbackParsed = opts.fallbackSchema.safeParse(input)
       if (fallbackParsed.success) {
-        logSchemaFailure(req, schema, 'fallback-passed', parsed.error.issues)
+        logSchemaFailure(
+          req,
+          schema,
+          'fallback-passed',
+          parsed.error.issues,
+          input,
+          opts.logFields
+        )
         // The fallback's output, not T's -- see the return-type doc comment.
         return /** @type {output<T>} */ (fallbackParsed.data)
       }
       if (opts.logOnly) {
-        logSchemaFailure(req, schema, 'log-only', parsed.error.issues)
+        logSchemaFailure(
+          req,
+          schema,
+          'log-only',
+          parsed.error.issues,
+          input,
+          opts.logFields
+        )
         // The raw, un-coerced input, not T's -- see the return-type doc
         // comment.
         return /** @type {output<T>} */ (input)
@@ -289,7 +333,14 @@ function parseReq(req, schema, opts) {
       // preserve production's pre-refinement error shape.
       throwClassified(fallbackParsed.error)
     } else if (opts.logOnly) {
-      logSchemaFailure(req, schema, 'log-only', parsed.error.issues)
+      logSchemaFailure(
+        req,
+        schema,
+        'log-only',
+        parsed.error.issues,
+        input,
+        opts.logFields
+      )
       // The raw, un-coerced input, not T's -- see the return-type doc
       // comment.
       return /** @type {output<T>} */ (input)
