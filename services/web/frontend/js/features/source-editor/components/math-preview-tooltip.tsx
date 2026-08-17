@@ -24,6 +24,7 @@ import { mathPreviewStateField } from '../extensions/math-preview'
 import { getTooltip } from '@codemirror/view'
 import ReactDOM from 'react-dom'
 import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 const MathPreviewTooltipContainer: FC = () => {
   const state = useCodeMirrorStateContext()
@@ -58,6 +59,8 @@ const MathPreviewTooltipContainer: FC = () => {
 
 const MathPreviewTooltipMenu: FC = () => {
   const { t } = useTranslation()
+
+  const themed = useFeatureFlag('themed-modals')
 
   const [showDisableModal, setShowDisableModal] = useState(false)
   const { setMathPreview } = useProjectSettingsContext()
@@ -115,7 +118,7 @@ const MathPreviewTooltipMenu: FC = () => {
       </OLDropdown>
 
       {showDisableModal && (
-        <OLModal show onHide={closeDisableModal}>
+        <OLModal show onHide={closeDisableModal} themed={themed}>
           <OLModalHeader>
             <OLModalTitle>{t('disable_equation_preview')}</OLModalTitle>
           </OLModalHeader>

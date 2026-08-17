@@ -139,17 +139,17 @@ export const WordCountsClient: FC<{ data: WordCountData }> = ({ data }) => {
           </tbody>
         </table>
       </Row>
-      <Row className="border-top py-2">
+      <Row className="word-count-row py-2">
         <Col xs={12}>
           <b>{t('headers')}:</b> {data.headers}
         </Col>
       </Row>
-      <Row className="border-top py-2">
+      <Row className="word-count-row py-2">
         <Col xs={12}>
           <b>{t('inline_math')}:</b> {data.mathInline}
         </Col>
       </Row>
-      <Row className="border-top py-2 pb-0">
+      <Row className="word-count-row py-2 pb-0">
         <Col xs={12}>
           <b>{t('display_math')}:</b> {data.mathDisplay}
         </Col>
