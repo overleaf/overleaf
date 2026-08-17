@@ -314,7 +314,7 @@ export const FileContainer: FC<{
           aria-label={t('remove_or_replace_figure')}
           onClick={() => onDelete && onDelete()}
         >
-          <MaterialIcon type="cancel" />
+          <MaterialIcon type="cancel" className="icon-danger" />
         </OLButton>
       </div>
     </div>
