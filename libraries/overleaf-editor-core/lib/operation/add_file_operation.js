@@ -55,7 +55,9 @@ class AddFileOperation extends Operation {
   /** @inheritdoc */
   findBlobHashes(blobHashes) {
     const hash = this.file.getHash()
+    const rangesHash = this.file.getRangesHash()
     if (hash) blobHashes.add(hash)
+    if (rangesHash) blobHashes.add(rangesHash)
   }
 
   /** @inheritdoc */
