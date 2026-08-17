@@ -513,7 +513,7 @@ async function acceptChanges(req, res) {
     `accepting ${changeIds.length} changes via http`
   )
   const timer = new Metrics.Timer('http.acceptChanges')
-  const changeContributors =
+  const { changeContributors, previews } =
     await DocumentManager.promises.acceptChangesWithLock(
       projectId,
       docId,
@@ -525,7 +525,7 @@ async function acceptChanges(req, res) {
     `accepted ${changeIds.length} changes via http`
   )
 
-  res.status(200).json({ changeContributors })
+  res.status(200).json({ changeContributors, previews })
 }
 
 const commentWithUserSchema = z.object({

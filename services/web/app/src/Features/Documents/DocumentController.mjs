@@ -214,6 +214,21 @@ async function setDocument(req, res) {
   res.json(result)
 }
 
+const changePreview = z.strictObject({
+  sectionPath: z.array(z.string()),
+  startLine: z.number().int().min(1),
+  changes: z.array(
+    z.strictObject({
+      i: z.string().optional(),
+      d: z.string().optional(),
+      p: z.number().int().min(0),
+    })
+  ),
+  slice: z.string(),
+  sliceStart: z.number().int().min(0),
+  userIds: z.array(zz.objectId()),
+})
+
 const trackChangesRejectedSchema = z.object({
   params: z.strictObject({
     Project_id: zz.objectId(),
@@ -222,6 +237,7 @@ const trackChangesRejectedSchema = z.object({
   body: z.strictObject({
     rejectedChangeAuthorIds: z.array(zz.objectId()),
     userId: zz.objectId().optional(),
+    previews: z.array(changePreview).optional(),
   }),
 })
 
@@ -230,13 +246,14 @@ async function trackChangesRejected(req, res) {
     logOnly: true,
   })
   const { Project_id: projectId, doc_id: docId } = params
-  const { rejectedChangeAuthorIds, userId } = body
+  const { rejectedChangeAuthorIds, userId, previews } = body
   await Modules.promises.hooks.fire(
     'trackChangesRejected',
     projectId,
     docId,
     userId,
-    rejectedChangeAuthorIds
+    rejectedChangeAuthorIds,
+    previews
   )
   res.sendStatus(204)
 }

@@ -13,6 +13,7 @@ const { extractOriginOrSource } = require('./Utils')
 const { getTotalSizeOfLines } = require('./Limits')
 const Settings = require('@overleaf/settings')
 const RangesTracker = require('@overleaf/ranges-tracker')
+const { buildSparseChangePreviews } = require('./TrackedChangePreview')
 const {
   StringFileData,
   SetCommentStateOperation,
@@ -350,7 +351,6 @@ const DocumentManager = {
     if (changeIds == null) {
       changeIds = []
     }
-    let changeContributors = []
 
     const {
       lines,
@@ -367,6 +367,19 @@ const DocumentManager = {
     if (type === 'history-ot') {
       throw new Errors.OTTypeMismatchError('sharejs-text-ot', 'history-ot')
     }
+
+    // Snapshot the accepted change objects and lines before applying the
+    // accept, so we can build the email-notification previews from them.
+    const acceptedChanges = (ranges.changes || []).filter(change =>
+      changeIds.includes(change.id)
+    )
+    const changeContributors = acceptedChanges
+      .map(change => change?.metadata?.user_id)
+      .filter(userId => userId)
+    const previews = buildSparseChangePreviews({
+      changes: acceptedChanges,
+      lines,
+    })
 
     const newRanges = RangesManager.acceptChanges(
       projectId,
@@ -396,20 +409,14 @@ const DocumentManager = {
         projectHistoryId,
       })
 
-      if (historyUpdates.length === 0) {
-        return changeContributors
+      if (historyUpdates.length > 0) {
+        await ProjectHistoryRedisManager.promises.queueOps(
+          projectId,
+          ...historyUpdates.map(op => JSON.stringify(op))
+        )
       }
-
-      await ProjectHistoryRedisManager.promises.queueOps(
-        projectId,
-        ...historyUpdates.map(op => JSON.stringify(op))
-      )
     }
-    changeContributors = (ranges.changes || [])
-      .filter(change => changeIds.includes(change.id))
-      .map(change => change?.metadata?.user_id)
-      .filter(userId => userId)
-    return changeContributors
+    return { changeContributors, previews }
   },
 
   async updateCommentState(projectId, docId, commentId, userId, resolved) {
@@ -716,13 +723,12 @@ const DocumentManager = {
 
   async acceptChangesWithLock(projectId, docId, changeIds) {
     const UpdateManager = require('./UpdateManager')
-    const changeContributors = await UpdateManager.promises.lockUpdatesAndDo(
+    return await UpdateManager.promises.lockUpdatesAndDo(
       DocumentManager.acceptChanges,
       projectId,
       docId,
       changeIds
     )
-    return changeContributors
   },
 
   async updateCommentStateWithLock(

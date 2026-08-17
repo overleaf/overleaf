@@ -92,6 +92,7 @@ describe('UpdateManager', function () {
       },
     }
 
+    this.buildSparseChangePreviews = sinon.stub().returns([])
     this.UpdateManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
         './ProjectLockManager': this.ProjectLockManager,
@@ -107,6 +108,9 @@ describe('UpdateManager', function () {
         './WebApiManager': this.WebApiManager,
         './Profiler': this.Profiler,
         './ProjectHistoryRedisManager': this.ProjectHistoryRedisManager,
+        './TrackedChangePreview': {
+          buildSparseChangePreviews: this.buildSparseChangePreviews,
+        },
       },
     })
   })
@@ -610,6 +614,17 @@ describe('UpdateManager', function () {
           historyUpdates: this.historyUpdates,
           removedChangeIds: ['change-1', 'change-2'],
         })
+        this.mockPreviews = [
+          {
+            sectionPath: ['Intro'],
+            startLine: 1,
+            changes: [{ d: 'x', p: 0 }],
+            slice: 'x',
+            sliceStart: 0,
+            userIds: ['author-1', 'author-2'],
+          },
+        ]
+        this.buildSparseChangePreviews.returns(this.mockPreviews)
         await this.UpdateManager.promises.applyUpdate(
           this.project_id,
           this.doc_id,
@@ -617,12 +632,23 @@ describe('UpdateManager', function () {
         )
       })
 
-      it('should notify web of the rejected tracked changes', function () {
+      it('should call buildSparseChangePreviews with the rejected changes and lines', function () {
+        this.buildSparseChangePreviews.should.have.been.calledWith({
+          changes: [
+            { id: 'change-1', metadata: { user_id: 'author-1' } },
+            { id: 'change-2', metadata: { user_id: 'author-2' } },
+          ],
+          lines: this.lines,
+        })
+      })
+
+      it('should notify web of the rejected tracked changes with the previews', function () {
         this.WebApiManager.promises.notifyTrackChangesRejected.should.have.been.calledWith(
           this.project_id,
           this.doc_id,
           this.rejectedChangeAuthorIds,
-          this.updateMeta.user_id
+          this.updateMeta.user_id,
+          this.mockPreviews
         )
       })
     })

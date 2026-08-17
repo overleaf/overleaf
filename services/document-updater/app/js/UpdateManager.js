@@ -17,6 +17,7 @@ const WebApiManager = require('./WebApiManager')
 const Profiler = require('./Profiler')
 const { isInsert, isDelete, getDocLength, computeDocHash } = require('./Utils')
 const HistoryOTUpdateManager = require('./HistoryOTUpdateManager')
+const { buildSparseChangePreviews } = require('./TrackedChangePreview')
 
 /**
  * @import { Ranges, Update, HistoryUpdate } from "./types"
@@ -214,9 +215,16 @@ const UpdateManager = {
       // Look up the authors of those rejected changes from the pre-update
       // ranges so we can notify web below.
       if (removedChangeIds.length > 0) {
-        const rejectedChangeAuthorIds = (ranges?.changes || [])
-          .filter(change => removedChangeIds.includes(change.id))
-          .map(change => change.metadata.user_id)
+        const rejectedChanges = (ranges?.changes || []).filter(change =>
+          removedChangeIds.includes(change.id)
+        )
+        const rejectedChangeAuthorIds = rejectedChanges.map(
+          change => change.metadata.user_id
+        )
+        const previews = buildSparseChangePreviews({
+          changes: rejectedChanges,
+          lines,
+        })
 
         // Fire-and-forget without awaiting because
         // we hold the project lock here, and the result of the
@@ -226,7 +234,8 @@ const UpdateManager = {
             projectId,
             docId,
             rejectedChangeAuthorIds,
-            update.meta?.user_id
+            update.meta?.user_id,
+            previews
           )
           .catch(err => {
             logger.warn(

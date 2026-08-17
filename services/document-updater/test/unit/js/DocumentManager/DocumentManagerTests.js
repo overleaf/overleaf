@@ -61,6 +61,7 @@ describe('DocumentManager', function () {
       maxUnflushedAgeMs: 300 * 1000, // 5 minutes
     }
 
+    this.buildSparseChangePreviews = sinon.stub().returns([])
     this.DocumentManager = SandboxedModule.require(modulePath, {
       requires: {
         './RedisManager': this.RedisManager,
@@ -73,6 +74,9 @@ describe('DocumentManager', function () {
         './HistoryOTUpdateManager': this.HistoryOTUpdateManager,
         './RangesManager': this.RangesManager,
         './Errors': Errors,
+        './TrackedChangePreview': {
+          buildSparseChangePreviews: this.buildSparseChangePreviews,
+        },
         '@overleaf/settings': this.Settings,
       },
     })
@@ -849,7 +853,7 @@ describe('DocumentManager', function () {
       })
 
       it('should return the change contributors', function () {
-        expect(this.result).to.deep.equal(['mock-user-id-0'])
+        expect(this.result.changeContributors).to.deep.equal(['mock-user-id-0'])
       })
     })
 
@@ -874,12 +878,46 @@ describe('DocumentManager', function () {
       })
 
       it('should return the change contributors', function () {
-        expect(this.result).to.deep.equal([
+        expect(this.result.changeContributors).to.deep.equal([
           'mock-user-id-1',
           'mock-user-id-2',
           'mock-user-id-3',
           'mock-user-id-4',
         ])
+      })
+    })
+
+    describe('preview building', function () {
+      beforeEach(async function () {
+        this.mockPreviews = [
+          {
+            sectionPath: ['Intro'],
+            startLine: 1,
+            changes: [{ i: 'x', p: 0 }],
+            slice: 'x',
+            sliceStart: 0,
+            userIds: ['mock-user-id-0'],
+          },
+        ]
+        this.buildSparseChangePreviews.returns(this.mockPreviews)
+        this.result = await this.DocumentManager.promises.acceptChanges(
+          this.project_id,
+          this.doc_id,
+          [this.change_id]
+        )
+      })
+
+      it('should call buildSparseChangePreviews with the accepted changes and doc lines', function () {
+        this.buildSparseChangePreviews.should.have.been.calledWith({
+          changes: [
+            { id: 'mock-change-id', metadata: { user_id: 'mock-user-id-0' } },
+          ],
+          lines: this.lines,
+        })
+      })
+
+      it('should return the previews from the helper', function () {
+        expect(this.result.previews).to.equal(this.mockPreviews)
       })
     })
 

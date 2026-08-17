@@ -208,7 +208,7 @@ async function clearProjectState(projectId) {
  * @param {string} userId
  */
 async function acceptChanges(projectId, docId, changeIds, userId) {
-  const { changeContributors } = await fetchJson(
+  const { changeContributors, previews } = await fetchJson(
     `${BASE_URL}/project/${projectId}/doc/${docId}/change/accept`,
     {
       method: 'POST',
@@ -221,7 +221,8 @@ async function acceptChanges(projectId, docId, changeIds, userId) {
     projectId,
     docId,
     userId,
-    changeContributors
+    changeContributors,
+    previews
   )
 }
 

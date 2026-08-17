@@ -582,6 +582,50 @@ describe('DocumentUpdaterHandler', function () {
 
     describe('successfully', function () {
       beforeEach(async function (ctx) {
+        ctx.previews = [
+          {
+            sectionPath: ['Intro'],
+            startLine: 2,
+            changes: [{ i: 'hello', p: 5 }],
+            slice: 'first line\nsecond line hello',
+            sliceStart: 0,
+            userIds: ['mock-user-id-1'],
+          },
+        ]
+        ctx.docUpdaterMock
+          .post(`/project/${ctx.project_id}/doc/${ctx.doc_id}/change/accept`, {
+            change_ids: [ctx.change_id],
+          })
+          .reply(200, {
+            changeContributors: ctx.change_contributors,
+            previews: ctx.previews,
+          })
+        await ctx.handler.promises.acceptChanges(
+          ctx.project_id,
+          ctx.doc_id,
+          [ctx.change_id],
+          ctx.user_id
+        )
+      })
+
+      it('should accept the change in the document updater', function (ctx) {
+        expect(ctx.docUpdaterMock.isDone()).to.be.true
+      })
+
+      it('should fire the changesAccepted hook with contributors and previews', function (ctx) {
+        expect(ctx.modulesHooksFire).to.have.been.calledWith(
+          'changesAccepted',
+          ctx.project_id,
+          ctx.doc_id,
+          ctx.user_id,
+          ctx.change_contributors,
+          ctx.previews
+        )
+      })
+    })
+
+    describe('when the document updater does not return preview data', function () {
+      beforeEach(async function (ctx) {
         ctx.docUpdaterMock
           .post(`/project/${ctx.project_id}/doc/${ctx.doc_id}/change/accept`, {
             change_ids: [ctx.change_id],
@@ -595,17 +639,14 @@ describe('DocumentUpdaterHandler', function () {
         )
       })
 
-      it('should accept the change in the document updater', function (ctx) {
-        expect(ctx.docUpdaterMock.isDone()).to.be.true
-      })
-
-      it('should fire the changesAccepted hook with change contributors', function (ctx) {
+      it('should fire the changesAccepted hook with undefined preview data', function (ctx) {
         expect(ctx.modulesHooksFire).to.have.been.calledWith(
           'changesAccepted',
           ctx.project_id,
           ctx.doc_id,
           ctx.user_id,
-          ctx.change_contributors
+          ctx.change_contributors,
+          undefined
         )
       })
     })

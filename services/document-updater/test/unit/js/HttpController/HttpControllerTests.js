@@ -692,9 +692,20 @@ describe('HttpController', function () {
     describe('successfully with a single change', function () {
       beforeEach(async function () {
         this.changeContributors = ['user-id-1', 'user-id-2']
-        this.DocumentManager.promises.acceptChangesWithLock.resolves(
-          this.changeContributors
-        )
+        this.previews = [
+          {
+            sectionPath: [],
+            startLine: 1,
+            changes: [{ i: 'x', p: 0 }],
+            slice: 'x',
+            sliceStart: 0,
+            userIds: ['user-id-1'],
+          },
+        ]
+        this.DocumentManager.promises.acceptChangesWithLock.resolves({
+          changeContributors: this.changeContributors,
+          previews: this.previews,
+        })
         await this.HttpController.acceptChanges(this.req, this.res, this.next)
       })
 
@@ -706,10 +717,11 @@ describe('HttpController', function () {
         )
       })
 
-      it('should return a successful 200 with a list of the change contributors', function () {
+      it('should return a successful 200 with the contributors and previews', function () {
         this.res.status.should.have.been.calledWith(200)
         this.res.json.should.have.been.calledWith({
           changeContributors: this.changeContributors,
+          previews: this.previews,
         })
       })
 
@@ -736,6 +748,10 @@ describe('HttpController', function () {
           'ddddddddddddddddddddddd4',
         ]
         this.req.body = { change_ids: this.change_ids }
+        this.DocumentManager.promises.acceptChangesWithLock.resolves({
+          changeContributors: [],
+          previews: [],
+        })
         await this.HttpController.acceptChanges(this.req, this.res, this.next)
       })
 

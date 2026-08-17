@@ -153,6 +153,37 @@ describe('DocumentController', function () {
       expect(response.statusCode).to.equal(204)
     })
 
+    it('should accept the previews document-updater sends and return 204', async function () {
+      const response = await privateApiRequest({
+        method: 'post',
+        url: `/project/${projectId}/doc/${docId}/changes/reject`,
+        json: {
+          rejectedChangeAuthorIds: [owner._id.toString()],
+          userId: owner._id.toString(),
+          // the shape buildSparseChangePreviews emits, one entry per cluster
+          previews: [
+            {
+              sectionPath: ['Introduction'],
+              startLine: 2,
+              changes: [{ i: 'inserted', p: 5 }],
+              slice: 'first line\nsecond line inserted',
+              sliceStart: 0,
+              userIds: [owner._id.toString()],
+            },
+            {
+              sectionPath: [],
+              startLine: 404,
+              changes: [{ d: 'removed', p: 5000 }],
+              slice: 'text around the second cluster',
+              sliceStart: 4900,
+              userIds: [owner._id.toString()],
+            },
+          ],
+        },
+      })
+      expect(response.statusCode).to.equal(204)
+    })
+
     it('should reject a non-ObjectId rejectedChangeAuthorIds entry', async function () {
       const response = await privateApiRequest({
         method: 'post',
