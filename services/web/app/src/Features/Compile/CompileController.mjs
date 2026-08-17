@@ -356,20 +356,6 @@ const getOutputZipFromClsiSchema = z.object({
   }),
   query: z.object({
     clsiserverid: zz.clsiServerId().optional(),
-    // frontend's buildFileList always appends editorId/compileGroup, and
-    // (for the "Download all" archive link specifically) one `files` entry
-    // per output file, to the query string it builds
-    // (services/web/frontend/js/features/pdf-preview/util/file-list.ts).
-    // None of these three are read by the handler below -- the backend
-    // already knows the build's full file list -- they're carried along
-    // only because the archive URL is built from the same query-params
-    // object as the per-file download links.
-    editorId: z.uuid().optional(),
-    compileGroup: zz.compileGroup().optional(),
-    // a single file in the archive arrives as a bare string, not a
-    // one-element array -- Express's query parser only produces an array
-    // once a query key repeats
-    files: z.union([z.string(), z.array(z.string())]).optional(),
     // not consumed, traffic tag
     enable_pdf_caching: z.stringbool().optional(),
   }),
