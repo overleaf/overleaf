@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import { expect } from 'chai'
 import SidebarDsNav from '../../../../../../frontend/js/features/project-list/components/sidebar/sidebar-ds-nav'
 import {
@@ -44,6 +44,9 @@ describe('<SidebarDsNav />', function () {
     window.metaAttributesCache.set('ol-splitTestVariants', {
       'overleaf-library': 'enabled',
     })
+    window.metaAttributesCache.set('ol-inactiveTutorials', [
+      'library-new-badge',
+    ])
     window.metaAttributesCache.set('ol-userSettings', {})
     window.metaAttributesCache.set('ol-navbar', {
       sessionUser: { email: 'fake@example.com' },
@@ -90,6 +93,46 @@ describe('<SidebarDsNav />', function () {
     expect(
       screen.getByRole('button', { name: 'Trash' }).getAttribute('aria-current')
     ).to.be.null
+  })
+
+  describe('library "New" badge', function () {
+    it('shows the badge on the projects page when the tutorial is active', async function () {
+      window.metaAttributesCache.set('ol-inactiveTutorials', [])
+
+      await renderSidebar({ activePage: 'projects' })
+
+      const link = screen.getByRole('link', { name: /library/i })
+      expect(within(link).getByText('New')).to.exist
+    })
+
+    it('hides the badge once the tutorial has been dismissed', async function () {
+      window.metaAttributesCache.set('ol-inactiveTutorials', [
+        'library-new-badge',
+      ])
+
+      await renderSidebar({ activePage: 'projects' })
+
+      const link = screen.getByRole('link', { name: /library/i })
+      expect(within(link).queryByText('New')).to.be.null
+    })
+
+    it('hides the badge on the library page itself', async function () {
+      window.metaAttributesCache.set('ol-inactiveTutorials', [])
+
+      await renderSidebar({ activePage: 'library' })
+
+      const link = screen.getByRole('link', { name: /library/i })
+      expect(within(link).queryByText('New')).to.be.null
+    })
+
+    it('hides the badge in the library trash', async function () {
+      window.metaAttributesCache.set('ol-inactiveTutorials', [])
+
+      await renderSidebar({ activePage: 'library', trashActive: true })
+
+      const link = screen.getByRole('link', { name: /library/i })
+      expect(within(link).queryByText('New')).to.be.null
+    })
   })
 
   describe('add affiliation widget', function () {

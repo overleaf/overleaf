@@ -36,8 +36,10 @@ function SidebarDsNav({
       ? trashActive
       : selectedTagId === undefined && filter === 'trashed'
   const [dsNavLibraryLinkModule] = importOverleafModules('dsNavLibraryLink')
-  const DsNavLibraryLink: JSXElementConstructor<{ active?: boolean }> =
-    dsNavLibraryLinkModule?.import.default
+  const DsNavLibraryLink: JSXElementConstructor<{
+    active?: boolean
+    inLibrary?: boolean
+  }> = dsNavLibraryLinkModule?.import.default
   const { mousePos, getHandleProps, getTargetProps } = usePersistedResize({
     name: 'project-sidebar',
   })
@@ -87,6 +89,7 @@ function SidebarDsNav({
               {DsNavLibraryLink && (
                 <DsNavLibraryLink
                   active={activePage === 'library' && !trashActive}
+                  inLibrary={activePage === 'library'}
                 />
               )}
               <button

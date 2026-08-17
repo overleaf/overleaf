@@ -1473,6 +1473,7 @@
   "libraries": "Libraries",
   "library": "Library",
   "library_entry_too_large": "This entry is too large to add. Library entries can be up to __limit__. Try trimming the entry and adding it again.",
+  "library_is_new_give_feedback": "Library is new. <0>Give feedback</0>",
   "library_size_limit_reached": "Your library has reached its size limit of __limit__. Remove some references before adding more.",
   "library_too_many_references": "Your library has reached its limit of __limit__ references. Remove some references before adding more.",
   "license": "License",

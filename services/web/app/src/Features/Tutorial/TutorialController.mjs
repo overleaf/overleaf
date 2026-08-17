@@ -33,6 +33,7 @@ const VALID_KEYS = [
   'themed-dashboard-intro',
   'dimensions-consent',
   'dimensions-rail-popover',
+  'library-new-badge',
 ]
 
 // tutorialKey is validated against the same known-key enum the handlers
