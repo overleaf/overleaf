@@ -347,6 +347,11 @@ module.exports = {
     },
     // symlinks: false, // enable this while using `npm link`
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs', '.json'],
+    // Resolve onnxruntime-web to the variant that doesn't embed
+    // `new URL(...)` references to its own wasm files, as the wasm is
+    // loaded from modules/symbol-recognition via `ort.env.wasm.wasmPaths`
+    // ('...' keeps the default condition names)
+    conditionNames: ['onnxruntime-web-use-extern-wasm', '...'],
     fallback: {
       events: require.resolve('events'),
       // for react-dnd + React 17
