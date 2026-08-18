@@ -331,7 +331,7 @@
     "css-minimizer-webpack-plugin": "^8.0.0",
     "csv-parse": "^6.2.1",
     "csv-stringify": "^6.7.0",
-    "cypress": "15.12.0",
+    "cypress": "15.20.1",
     "cypress-multi-reporters": "^2.0.5",
     "cypress-plugin-tab": "^1.0.5",
     "d3": "^3.5.16",
