@@ -3,15 +3,24 @@
 Migrations for the app environment live in this folder, and use the [East](https://github.com/okv/east) migration
 framework.
 
-We have a yarn script which wraps east: `yarn run migrations -- ...`
+We have a yarn script which wraps east: `yarn run migrations ...`
 
 For example:
 
 ```shell
-yarn run migrations -- list -t 'server-ce'
+yarn run migrations list -t 'server-ce'
 ```
 
-For SAAS, use the rake tasks for staging/production
+**Note:** don't put a `--` between `migrations` and the east arguments. npm strips a lone `--` before forwarding args to
+a script, but Yarn 4 (which this repo uses) does not. Instead, it forwards the literal `--` straight into `east`'s
+argv, which breaks its subcommand parsing (e.g. `list -t 'saas'` becomes `Unrecognized status "-t"`).
+
+**Note:** run this against the dev-env Mongo from inside the docker network (e.g. via `bin/run web ...`), not directly
+from the host. The dev-env Mongo is a single-node replica set whose member is advertised as `mongo:27017`, which only
+resolves inside the compose network. `make services/web/migrate` takes care of this but for anything other than a
+simple run of outstanding migrations, such as a rollback, you'll need this.
+
+For SAAS, use the rake tasks for staging/production:
 
 ```shell
 rake deploy:migrations:list[staging]
@@ -36,7 +45,7 @@ Our adapter will refuse to run if this flag is not set.
 To create a new migration, run:
 
 ```shell
-yarn run migrations -- create <migration name>
+yarn run migrations create <migration name>
 ```
 
 This command will create a new migration file in the migrations folder, based on a template. The template provides
@@ -54,7 +63,7 @@ through the migrations' mechanism.
 To run all migrations in a server-ce environment:
 
 ```shell
-yarn run migrations -- migrate -t 'server-ce'
+yarn run migrations migrate -t 'server-ce'
 # Note: They are run by default on container start.
 ```
 
