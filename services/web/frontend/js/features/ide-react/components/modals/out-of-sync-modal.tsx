@@ -10,6 +10,7 @@ import {
   OLModalHeader,
   OLModalTitle,
 } from '@/shared/components/ol/ol-modal'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export type OutOfSyncModalProps = {
   editorContent: string
@@ -21,6 +22,7 @@ function OutOfSyncModal({ editorContent, show, onHide }: OutOfSyncModalProps) {
   const { t } = useTranslation()
   const location = useLocation()
   const [editorContentShown, setEditorContentShown] = useState(false)
+  const themed = useFeatureFlag('themed-modals')
   const editorContentRows = (editorContent.match(/\n/g)?.length || 0) + 1
 
   useEffect(() => {
@@ -43,6 +45,7 @@ function OutOfSyncModal({ editorContent, show, onHide }: OutOfSyncModalProps) {
       className="out-of-sync-modal"
       backdrop={false}
       keyboard={false}
+      themed={themed}
     >
       <OLModalHeader>
         <OLModalTitle>{t('out_of_sync')}</OLModalTitle>

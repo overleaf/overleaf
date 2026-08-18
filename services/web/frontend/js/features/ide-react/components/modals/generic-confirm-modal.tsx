@@ -9,6 +9,7 @@ import {
 } from '@/shared/components/ol/ol-modal'
 import OLButton from '@/shared/components/ol/ol-button'
 import { ButtonProps } from '@/shared/components/types/button-props'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export type GenericConfirmModalOwnProps = {
   title: string
@@ -30,9 +31,10 @@ function GenericConfirmModal({
   ...modalProps
 }: GenericConfirmModalProps) {
   const { t } = useTranslation()
+  const themed = useFeatureFlag('themed-modals')
 
   return (
-    <OLModal {...modalProps}>
+    <OLModal {...modalProps} themed={themed}>
       <OLModalHeader>
         <OLModalTitle>{title}</OLModalTitle>
       </OLModalHeader>

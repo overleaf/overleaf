@@ -8,6 +8,7 @@ import {
   OLModalTitle,
 } from '@/shared/components/ol/ol-modal'
 import OLButton from '@/shared/components/ol/ol-button'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export type GenericMessageModalOwnProps = {
   title: string
@@ -23,9 +24,10 @@ function GenericMessageModal({
   ...modalProps
 }: GenericMessageModalProps) {
   const { t } = useTranslation()
+  const themed = useFeatureFlag('themed-modals')
 
   return (
-    <OLModal {...modalProps}>
+    <OLModal {...modalProps} themed={themed}>
       <OLModalHeader>
         <OLModalTitle>{title}</OLModalTitle>
       </OLModalHeader>

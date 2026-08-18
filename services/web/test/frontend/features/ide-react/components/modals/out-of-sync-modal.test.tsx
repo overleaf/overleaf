@@ -4,6 +4,7 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import OutOfSyncModal from '@/features/ide-react/components/modals/out-of-sync-modal'
 import * as eventTracking from '@/infrastructure/event-tracking'
 import { location } from '@/shared/components/location'
+import { SplitTestProvider } from '@/shared/context/split-test-context'
 
 describe('<OutOfSyncModal />', function () {
   let sendMBSpy: sinon.SinonSpy
@@ -12,12 +13,14 @@ describe('<OutOfSyncModal />', function () {
 
   const renderModal = (props: { show?: boolean } = {}) =>
     render(
-      <OutOfSyncModal
-        editorContent="offline content"
-        show
-        onHide={onHide}
-        {...props}
-      />
+      <SplitTestProvider>
+        <OutOfSyncModal
+          editorContent="offline content"
+          show
+          onHide={onHide}
+          {...props}
+        />
+      </SplitTestProvider>
     )
 
   beforeEach(function () {

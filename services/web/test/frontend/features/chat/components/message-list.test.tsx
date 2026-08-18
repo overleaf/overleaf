@@ -18,13 +18,13 @@ describe('<MessageList />', function () {
 
     return (
       <UserProvider>
-        <ModalsContextProvider>
-          <SplitTestProvider>
+        <SplitTestProvider>
+          <ModalsContextProvider>
             <ChatContext.Provider value={mockContextValue as any}>
               {children}
             </ChatContext.Provider>
-          </SplitTestProvider>
-        </ModalsContextProvider>
+          </ModalsContextProvider>
+        </SplitTestProvider>
       </UserProvider>
     )
   }
