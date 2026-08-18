@@ -85,6 +85,15 @@ RUN set -eu; \
       echo "ERROR: tlmgr cannot install from ${REPO}."; \
       echo "Auto-install would degrade to empty stub .sty files. Update TLNET_REPO."; \
       exit 1; }; \
+    echo "Installing language support (German + Western European)..."; \
+    tlmgr install \
+      collection-langgerman \
+      collection-langfrench \
+      collection-langspanish \
+      collection-langitalian \
+      collection-langportuguese \
+      babel-dutch \
+      hyphen-dutch; \
     chown -R www-data:www-data "$TLDIR"; \
     chown -R www-data:www-data /usr/local/texlive/texmf-local
 
