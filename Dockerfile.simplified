@@ -52,10 +52,41 @@ RUN mkdir -p /var/lib/mongodb /var/lib/redis /var/lib/texlive/texmf-local \
 # Configure TeX Live for on-demand package installation
 # Allow www-data (the CLSI process user) to install packages via tlmgr
 # -----------------------------------------------------
-RUN tlmgr option autobackup -- -1 \
-    && tlmgr option repository https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2025/tlnet-final/ \
-    && chown -R www-data:www-data /usr/local/texlive/2025 \
-    && chown -R www-data:www-data /usr/local/texlive/texmf-local
+# The base image tracks upstream and rolled TeX Live 2025 -> 2026, so the year
+# is detected rather than hardcoded.
+#
+# Repository choice matters: tlmgr refuses a repository whose TeX Live version
+# differs from the local install, and the ROLLING `tlnet` additionally refuses
+# to install anything once its tlmgr is newer than the local one ("tlmgr itself
+# needs to be updated"). Either failure makes auto-install silently fall back to
+# writing empty stub .sty files, so documents compile without the real package.
+# A frozen snapshot avoids both and keeps builds reproducible.
+# Verified against this image's tlmgr r78616 (2026-04-06).
+ARG TLNET_YEAR=2026
+ARG TLNET_REPO=https://www.texlive.info/tlnet-archive/2026/06/15/tlnet
+
+RUN set -eu; \
+    TLDIR="$(ls -1d /usr/local/texlive/[0-9][0-9][0-9][0-9] | sort -r | head -1)"; \
+    TLYEAR="$(basename "$TLDIR")"; \
+    if [ "$TLYEAR" = "$TLNET_YEAR" ]; then \
+      REPO="$TLNET_REPO"; \
+    else \
+      HIST="https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${TLYEAR}/tlnet-final/"; \
+      if curl -fsI -m 20 "$HIST" >/dev/null 2>&1; then REPO="$HIST"; \
+      else echo "WARNING: no pinned repo for TeX Live ${TLYEAR}; using rolling tlnet"; \
+           REPO="https://mirror.ctan.org/systems/texlive/tlnet"; fi; \
+    fi; \
+    echo "TeX Live ${TLYEAR}; tlmgr repository = ${REPO}"; \
+    mkdir -p /usr/local/texlive/texmf-local/tex/latex; \
+    tlmgr option autobackup -- -1; \
+    tlmgr option repository "$REPO"; \
+    echo "Verifying tlmgr can install from the repository..."; \
+    tlmgr install mathpartir || { \
+      echo "ERROR: tlmgr cannot install from ${REPO}."; \
+      echo "Auto-install would degrade to empty stub .sty files. Update TLNET_REPO."; \
+      exit 1; }; \
+    chown -R www-data:www-data "$TLDIR"; \
+    chown -R www-data:www-data /usr/local/texlive/texmf-local
 
 # Create install-tex-package helper script
 # -----------------------------------------
