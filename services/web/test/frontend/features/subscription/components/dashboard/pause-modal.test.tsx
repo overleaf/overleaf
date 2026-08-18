@@ -11,6 +11,7 @@ import {
 import { renderActiveSubscription } from '../../helpers/render-active-subscription'
 import { location } from '@/shared/components/location'
 import { MetaTag } from '@/utils/meta'
+import * as eventTracking from '@/infrastructure/event-tracking'
 
 const pauseSubscriptionSplitTestMeta: MetaTag[] = [
   { name: 'ol-splitTestVariants', value: { 'pause-subscription': 'enabled' } },
@@ -83,6 +84,32 @@ describe('<PauseSubscriptionModal />', function () {
     renderSubscriptionWithPauseSupport()
     clickCancelButton()
     await screen.findByText('Pause instead, to pick up where you left off')
+  })
+
+  it('sends the cancel event with the same segmentation as the dashboard', async function () {
+    const sendMBSpy = sinon.spy(eventTracking, 'sendMB')
+    try {
+      renderSubscriptionWithPauseSupport()
+      clickCancelButton()
+      await screen.findByText('Pause instead, to pick up where you left off')
+      sendMBSpy.resetHistory()
+
+      fireEvent.click(
+        screen.getByRole('button', { name: 'Cancel subscription' })
+      )
+
+      expect(sendMBSpy).to.be.calledOnceWith(
+        'subscription-page-cancel-button-click',
+        sinon.match({
+          plan_code: 'collaborator',
+          billing_cycle: 'monthly',
+          is_trial: false,
+          currency: 'USD',
+        })
+      )
+    } finally {
+      sendMBSpy.restore()
+    }
   })
 
   it('renders options for pause duration', async function () {

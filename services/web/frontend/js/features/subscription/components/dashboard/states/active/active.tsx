@@ -12,6 +12,7 @@ import { ChangeToGroupModal } from './change-plan/modals/change-to-group-modal'
 import { CancelAiAddOnModal } from '@/features/subscription/components/dashboard/states/active/change-plan/modals/cancel-ai-add-on-modal'
 import OLButton from '@/shared/components/ol/ol-button'
 import isInFreeTrial from '../../../../util/is-in-free-trial'
+import getSubscriptionEventSegmentation from '../../../../util/subscription-event-segmentation'
 import AddOns from '@/features/subscription/components/dashboard/states/active/add-ons'
 import {
   AI_ADD_ON_CODE,
@@ -75,7 +76,13 @@ export function ActiveSubscription({
     planName = subscription.plan.name
   }
 
-  const handlePlanChange = () => setModalIdShown('change-plan')
+  const handlePlanChange = () => {
+    sendMB(
+      'subscription-page-upgrade-button-click',
+      getSubscriptionEventSegmentation(subscription)
+    )
+    setModalIdShown('change-plan')
+  }
 
   const handleCancelClick = (addOnCode: string) => {
     if (

@@ -135,6 +135,38 @@ describe('<ActiveSubscription />', function () {
     )
   })
 
+  it('sends an event when the change plan button is clicked', function () {
+    renderActiveSubscription(monthlyActiveCollaborator)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Change plan' }))
+
+    expect(sendMBSpy).to.be.calledOnceWith(
+      'subscription-page-upgrade-button-click',
+      sinon.match({
+        plan_code: 'collaborator',
+        billing_cycle: 'monthly',
+        is_trial: false,
+        currency: 'USD',
+      })
+    )
+  })
+
+  it('sends the annual billing cycle when on an annual plan', function () {
+    renderActiveSubscription(annualActiveSubscriptionEuro)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Change plan' }))
+
+    expect(sendMBSpy).to.be.calledOnceWith(
+      'subscription-page-upgrade-button-click',
+      sinon.match({
+        plan_code: annualActiveSubscriptionEuro.planCode,
+        billing_cycle: 'annual',
+        is_trial: false,
+        currency: 'EUR',
+      })
+    )
+  })
+
   it('does not show "Change plan" option when past due', function () {
     // account is likely in expired state, but be sure to not show option if state is still active
     const activePastDueSubscription = cloneDeep(annualActiveSubscription)
@@ -329,11 +361,33 @@ describe('<ActiveSubscription />', function () {
       showConfirmCancelUI()
 
       expect(sendMBSpy).to.be.calledOnceWith(
-        'subscription-page-cancel-button-click'
+        'subscription-page-cancel-button-click',
+        sinon.match({
+          plan_code: annualActiveSubscription.planCode,
+          billing_cycle: 'annual',
+          is_trial: false,
+          currency: 'USD',
+        })
       )
 
       screen.getByText('We’d love you to stay')
       screen.getByRole('button', { name: 'Cancel my subscription' })
+    })
+
+    it('sends the cancel event with trial segmentation when in a trial', function () {
+      renderActiveSubscription(trialCollaboratorSubscription)
+
+      showConfirmCancelUI()
+
+      expect(sendMBSpy).to.be.calledOnceWith(
+        'subscription-page-cancel-button-click',
+        sinon.match({
+          plan_code: trialCollaboratorSubscription.planCode,
+          billing_cycle: 'monthly',
+          is_trial: true,
+          currency: trialCollaboratorSubscription.payment.currency,
+        })
+      )
     })
 
     it('cancels subscription and redirects page', async function () {

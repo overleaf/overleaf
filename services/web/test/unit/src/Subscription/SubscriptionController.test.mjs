@@ -7,6 +7,7 @@ import MockResponse from '../helpers/MockResponse.mjs'
 import SubscriptionErrors from '../../../../app/src/Features/Subscription/Errors.mjs'
 import { PaymentServiceResourceNotFoundError } from '../../../../modules/subscriptions/app/src/PaymentServiceErrors.mjs'
 import SubscriptionHelper from '../../../../app/src/Features/Subscription/SubscriptionHelper.mjs'
+import PlansLocator from '../../../../app/src/Features/Subscription/PlansLocator.mjs'
 import { AI_ADD_ON_CODE } from '../../../../app/src/Features/Subscription/AiHelper.mjs'
 
 const modulePath =
@@ -360,6 +361,7 @@ describe('SubscriptionController', function () {
 
     vi.doMock('../../../../app/src/Features/Subscription/PlansLocator', () => ({
       default: (ctx.PlansLocator = {
+        getPlanCadence: PlansLocator.getPlanCadence,
         findLocalPlanInSettings: sinon.stub().returns({
           annual: false,
         }),
@@ -608,6 +610,79 @@ describe('SubscriptionController', function () {
 
       it('should pass redirectedPaymentErrorCode to the view', function (ctx) {
         expect(ctx.data.redirectedPaymentErrorCode).to.equal('payment_failed')
+      })
+    })
+
+    describe('subscription-page-view event', function () {
+      const renderWithSubscription = async (ctx, personalSubscription) => {
+        ctx.AnalyticsManager.recordEventForSession.resetHistory()
+        ctx.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel.resolves(
+          { personalSubscription, memberGroupSubscriptions: [] }
+        )
+        await new Promise((resolve, reject) => {
+          ctx.res.render = () => resolve()
+          ctx.SubscriptionController.userSubscriptionPage(
+            ctx.req,
+            ctx.res,
+            ctx.rejectOnError(reject)
+          )
+        })
+        return ctx.AnalyticsManager.recordEventForSession.lastCall.args[2]
+      }
+
+      it('should segment a monthly subscription', async function (ctx) {
+        const segmentation = await renderWithSubscription(ctx, {
+          planCode: 'collaborator',
+          plan: { planCode: 'collaborator' },
+          payment: { currency: 'USD', trialEndsAt: null },
+        })
+        expect(segmentation).to.deep.include({
+          plan_code: 'collaborator',
+          billing_cycle: 'monthly',
+          is_trial: false,
+          currency: 'USD',
+        })
+      })
+
+      it('should segment an annual subscription', async function (ctx) {
+        const segmentation = await renderWithSubscription(ctx, {
+          planCode: 'collaborator-annual',
+          plan: { planCode: 'collaborator-annual', annual: true },
+          payment: { currency: 'EUR', trialEndsAt: null },
+        })
+        expect(segmentation).to.deep.include({
+          plan_code: 'collaborator-annual',
+          billing_cycle: 'annual',
+          is_trial: false,
+          currency: 'EUR',
+        })
+      })
+
+      it('should segment a subscription in trial', async function (ctx) {
+        const segmentation = await renderWithSubscription(ctx, {
+          planCode: 'collaborator_free_trial_7_days',
+          plan: { planCode: 'collaborator_free_trial_7_days' },
+          payment: {
+            currency: 'USD',
+            trialEndsAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+          },
+        })
+        expect(segmentation).to.deep.include({
+          plan_code: 'collaborator_free_trial_7_days',
+          billing_cycle: 'monthly',
+          is_trial: true,
+          currency: 'USD',
+        })
+      })
+
+      it('should omit the plan segmentation without a personal subscription', async function (ctx) {
+        const segmentation = await renderWithSubscription(ctx, undefined)
+        expect(segmentation).to.deep.include({
+          plan_code: undefined,
+          billing_cycle: null,
+          is_trial: false,
+          currency: undefined,
+        })
       })
     })
 

@@ -244,6 +244,10 @@ async function userSubscriptionPage(req, res) {
     req.session,
     'subscription-page-view',
     {
+      plan_code: personalSubscription?.planCode,
+      billing_cycle: PlansLocator.getPlanCadence(personalSubscription),
+      is_trial: isInTrial,
+      currency: personalSubscription?.payment?.currency,
       domain,
     }
   )

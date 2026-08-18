@@ -22,14 +22,7 @@ export interface CustomerSubscriptionUpdatedWebhookEvent
       cancel_at?: number | null // will only be present if the subscription was cancelled or reactivated
       items?: {
         // will be present if the subscription was downgraded, upgraded, or renewed
-        data: [
-          {
-            price: {
-              id: string
-            }
-            quantity: number
-          },
-        ]
+        data: Stripe.SubscriptionItem[]
       }
       status?: Stripe.Subscription.Status
       metadata?: Record<string, string>

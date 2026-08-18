@@ -166,6 +166,18 @@ function getPlanTypeAndPeriodFromRecurlyPlanCode(recurlyPlanCode) {
 }
 
 /**
+ * Prefer this over `getPlanTypeAndPeriodFromRecurlyPlanCode` when you have the
+ * plan: that map misses legacy plan codes and license-count group plan codes.
+ *
+ * @param {{ plan?: { annual?: boolean } } | null} [subscription] anything carrying a local plan
+ * @returns {'annual' | 'monthly' | null}
+ */
+function getPlanCadence(subscription) {
+  if (!subscription?.plan) return null
+  return subscription.plan.annual ? 'annual' : 'monthly'
+}
+
+/**
  * @param {string|null} [planCode]
  * @returns {Plan|null}
  */
@@ -219,6 +231,7 @@ export default {
   findLocalPlanInSettings,
   buildStripeLookupKey,
   getPlanTypeAndPeriodFromRecurlyPlanCode,
+  getPlanCadence,
   isGroupPlanCode,
   convertLegacyGroupPlanCodeToConsolidatedGroupPlanCodeIfNeeded,
   getVersionFromStripeLookupKey,

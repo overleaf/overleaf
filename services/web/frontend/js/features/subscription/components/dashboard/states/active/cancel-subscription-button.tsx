@@ -6,7 +6,7 @@ import { PaidSubscription } from '../../../../../../../../types/subscription/das
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useLocation } from '@/shared/hooks/use-location'
 import { stripHasSubscription } from '../../../../data/subscription-url'
-import isInFreeTrial from '../../../../util/is-in-free-trial'
+import getSubscriptionEventSegmentation from '../../../../util/subscription-event-segmentation'
 
 export function CancelSubscriptionButton() {
   const { t } = useTranslation()
@@ -19,7 +19,6 @@ export function CancelSubscriptionButton() {
   } = useSubscriptionDashboardContext()
 
   const subscription = personalSubscription as PaidSubscription
-  const isInTrial = isInFreeTrial(subscription?.payment.trialEndsAt)
   const hasPendingOrActivePause =
     subscription.payment.state === 'paused' ||
     (subscription.payment.state === 'active' &&
@@ -32,10 +31,10 @@ export function CancelSubscriptionButton() {
     planIsEligibleForPause
 
   function handleCancelSubscriptionClick() {
-    eventTracking.sendMB('subscription-page-cancel-button-click', {
-      plan_code: subscription?.planCode,
-      is_trial: isInTrial,
-    })
+    eventTracking.sendMB(
+      'subscription-page-cancel-button-click',
+      getSubscriptionEventSegmentation(subscription)
+    )
     const url = location.toString()
     if (url) {
       window.history.replaceState(null, '', stripHasSubscription(url))

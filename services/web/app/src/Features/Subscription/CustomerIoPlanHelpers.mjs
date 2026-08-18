@@ -2,6 +2,7 @@
 import Settings from '@overleaf/settings'
 import { AI_ADD_ON_CODE, isStandaloneAiAddOnPlanCode } from './AiHelper.mjs'
 import FeaturesHelper from './FeaturesHelper.mjs'
+import PlansLocator from './PlansLocator.mjs'
 
 /**
  * @typedef {InstanceType<typeof import('../../models/Subscription.mjs').Subscription>} MongoSubscription
@@ -120,9 +121,7 @@ function normalizePlanTypeFromPlanCode(planCode) {
   if (!planCode) {
     return ''
   }
-  const plan = /** @type {Plan[]} */ (Settings.plans).find(
-    candidate => candidate.planCode === planCode
-  )
+  const plan = PlansLocator.findLocalPlanInSettings(planCode)
   return normalizePlanType({
     plan: {
       planCode,
@@ -162,18 +161,6 @@ function getFriendlyPlanName(planType) {
 }
 
 /**
- * @param {Nullable<BestSubscription>} [bestSubscription]
- * @returns {'annual' | 'monthly' | null}
- */
-function getPlanCadence(bestSubscription) {
-  if (!bestSubscription?.plan) {
-    return null
-  }
-
-  return bestSubscription.plan.annual ? 'annual' : 'monthly'
-}
-
-/**
  * @param {Nullable<string>} [planCode]
  * @returns {'annual' | 'monthly' | null}
  */
@@ -182,11 +169,9 @@ function getPlanCadenceFromPlanCode(planCode) {
     return null
   }
 
-  const plan = /** @type {Plan[]} */ (Settings.plans).find(
-    candidate => candidate.planCode === planCode
-  )
+  const plan = PlansLocator.findLocalPlanInSettings(planCode)
   if (plan) {
-    return plan.annual ? 'annual' : 'monthly'
+    return PlansLocator.getPlanCadence({ plan })
   }
 
   if (planCode.includes('annual')) {
@@ -348,7 +333,7 @@ function getAiPlanCadence(
 
   if (aiPlan === 'ai-assist-add-on') {
     return (
-      getPlanCadence(bestSubscription) ||
+      PlansLocator.getPlanCadence(bestSubscription) ||
       getPlanCadenceFromPlanCode(individualSubscription?.planCode)
     )
   }
@@ -443,9 +428,7 @@ function getGroupSize(
   }
 
   return allGroupSubscriptions.reduce((largestGroupSize, subscription) => {
-    const plan = /** @type {Plan[]} */ (Settings.plans).find(
-      candidate => candidate.planCode === subscription.planCode
-    )
+    const plan = PlansLocator.findLocalPlanInSettings(subscription.planCode)
     const groupSize = subscription.membersLimit ?? plan?.membersLimit ?? 0
 
     return Math.max(largestGroupSize, groupSize)
@@ -595,7 +578,7 @@ function getPlanProperties({
 }) {
   const planType = normalizePlanType(bestSubscription)
   const displayPlanType = getFriendlyPlanName(planType)
-  const planTermLabel = getPlanCadence(bestSubscription)
+  const planTermLabel = PlansLocator.getPlanCadence(bestSubscription)
   const aiPlan = getAiPlanType(
     bestSubscription,
     individualSubscription,
