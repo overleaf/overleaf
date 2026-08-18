@@ -1,7 +1,6 @@
 import { zz } from '../../../zodHelpers'
 import { describe, expect, it } from 'vitest'
 import mongodb from 'mongodb'
-import SafePath from '../../../../../services/web/app/src/Features/Project/SafePath.mjs'
 
 const { ObjectId } = mongodb
 
@@ -426,7 +425,6 @@ describe('zodHelpers', () => {
       const inputPath = ''
       const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(false)
-      expect(SafePath.isCleanPath(inputPath)).toBe(false)
       expect(parsed.error?.issues).toMatchObject([
         expect.objectContaining({
           message: 'path is empty',
@@ -441,7 +439,6 @@ describe('zodHelpers', () => {
       const inputPath = '/output.pdf'
       const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(true)
-      expect(SafePath.isCleanPath(inputPath)).toBe(true)
       expect(parsed.data).toBe(inputPath)
     })
 
@@ -449,7 +446,6 @@ describe('zodHelpers', () => {
       const inputPath = 'foo/'
       const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(false)
-      expect(SafePath.isCleanPath(inputPath)).toBe(false)
       expect(parsed.error?.issues).toMatchObject([
         expect.objectContaining({
           message: 'path is a folder, not a file',
@@ -461,7 +457,6 @@ describe('zodHelpers', () => {
       const inputPath = '../output.pdf'
       const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(false)
-      expect(SafePath.isCleanPath(inputPath)).toBe(false)
       expect(parsed.error?.issues).toMatchObject([
         expect.objectContaining({
           message: 'path traversal detected',
@@ -476,7 +471,6 @@ describe('zodHelpers', () => {
       const inputPath = '.'
       const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(false)
-      expect(SafePath.isCleanPath(inputPath)).toBe(false)
       expect(parsed.error?.issues).toMatchObject([
         expect.objectContaining({
           message: 'path segment is "." or has leading/trailing whitespace',
@@ -488,7 +482,6 @@ describe('zodHelpers', () => {
       const inputPath = ' foobar.tex'
       const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(false)
-      expect(SafePath.isCleanPath(inputPath)).toBe(false)
       expect(parsed.error?.issues).toMatchObject([
         expect.objectContaining({
           message: 'path segment is "." or has leading/trailing whitespace',
@@ -500,7 +493,6 @@ describe('zodHelpers', () => {
       const inputPath = 'foobar.tex '
       const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(false)
-      expect(SafePath.isCleanPath(inputPath)).toBe(false)
       expect(parsed.error?.issues).toMatchObject([
         expect.objectContaining({
           message: 'path segment is "." or has leading/trailing whitespace',
@@ -512,7 +504,6 @@ describe('zodHelpers', () => {
       const inputPath = 'foo' + String.fromCharCode(0) + '.tex'
       const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(false)
-      expect(SafePath.isCleanPath(inputPath)).toBe(false)
       expect(parsed.error?.issues).toMatchObject([
         expect.objectContaining({
           message: 'path contains a disallowed character',
@@ -525,7 +516,6 @@ describe('zodHelpers', () => {
       const inputPath = 'foo' + String.fromCharCode(0x90) + '.tex'
       const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(false)
-      expect(SafePath.isCleanPath(inputPath)).toBe(false)
       expect(parsed.error?.issues).toMatchObject([
         expect.objectContaining({
           message: 'path contains a disallowed character',
@@ -538,7 +528,6 @@ describe('zodHelpers', () => {
       const inputPath = 'foo\uD800.tex'
       const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(false)
-      expect(SafePath.isCleanPath(inputPath)).toBe(false)
       expect(parsed.error?.issues).toMatchObject([
         expect.objectContaining({
           message: 'path contains a disallowed character',
@@ -550,7 +539,6 @@ describe('zodHelpers', () => {
       const inputPath = 'foo*.tex'
       const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(false)
-      expect(SafePath.isCleanPath(inputPath)).toBe(false)
       expect(parsed.error?.issues).toMatchObject([
         expect.objectContaining({
           message: 'path contains a disallowed character',
@@ -562,7 +550,6 @@ describe('zodHelpers', () => {
       const inputPath = 'foo\\bar.tex'
       const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(false)
-      expect(SafePath.isCleanPath(inputPath)).toBe(false)
       expect(parsed.error?.issues).toMatchObject([
         expect.objectContaining({
           message: 'path contains a disallowed character',
@@ -577,7 +564,6 @@ describe('zodHelpers', () => {
       const inputPath = '__proto__/output.pdf'
       const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(true)
-      expect(SafePath.isCleanPath(inputPath)).toBe(true)
       expect(parsed.data).toBe(inputPath)
     })
 
@@ -585,7 +571,6 @@ describe('zodHelpers', () => {
       const inputPath = 'constructor'
       const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(false)
-      expect(SafePath.isCleanPath(inputPath)).toBe(false)
       expect(parsed.error?.issues).toMatchObject([
         expect.objectContaining({
           message: 'path is an unsafe property name',
@@ -600,7 +585,6 @@ describe('zodHelpers', () => {
       const inputPath = 'foo/toString'
       const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(true)
-      expect(SafePath.isCleanPath(inputPath)).toBe(true)
       expect(parsed.data).toBe(inputPath)
     })
 
@@ -608,7 +592,6 @@ describe('zodHelpers', () => {
       const inputPath = 'hasOwnProperty'
       const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(false)
-      expect(SafePath.isCleanPath(inputPath)).toBe(false)
       expect(parsed.error?.issues).toMatchObject([
         expect.objectContaining({
           message: 'path is an unsafe property name',
@@ -620,7 +603,6 @@ describe('zodHelpers', () => {
       const inputPath = 'foo/output.pdf'
       const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(true)
-      expect(SafePath.isCleanPath(inputPath)).toBe(true)
       expect(parsed.data).toBe(inputPath)
     })
   })

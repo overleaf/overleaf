@@ -90,9 +90,9 @@ const zz = {
    * tree is already validated against at the point of origin -- this
    * closes the gap for services that receive that path secondhand (e.g.
    * forwarded into history-v1's archive/zip builder). Parity with
-   * isCleanPath is asserted directly in zodHelpers.test.ts, which imports
-   * SafePath.mjs and checks it against every safePath() test case; the only
-   * remaining difference from that reference is deliberate: BADCHAR_RX's
+   * isCleanPath is asserted in web's SafePath.test.mjs, which imports
+   * zz.safePath() and checks it against every isCleanPath test case; the
+   * only remaining difference from that reference is deliberate: BADCHAR_RX's
    * leading "/" is not ported here, since "/" is the segment separator,
    * not a disallowed character, so a traversal payload is still caught
    * (as "." or "..") per split segment below, just not via this character
