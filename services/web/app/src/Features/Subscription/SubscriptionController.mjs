@@ -32,6 +32,7 @@ import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
 import { PaymentProviderSubscriptionChange } from './PaymentProviderEntities.mjs'
 
 const { AddOnNotPresentError, MultiplePendingChangesError } = Errors
+const { AddressPendingReactivationError } = Errors
 
 const SUBSCRIPTION_PAUSED_REDIRECT_PATH =
   '/user/subscription?redirect-reason=subscription-paused'
@@ -827,6 +828,13 @@ function reactivateSubscription(req, res, next) {
   }
   SubscriptionHandler.reactivateSubscription(user, function (err) {
     if (err) {
+      if (err instanceof AddressPendingReactivationError) {
+        return res.status(422).json({
+          code: 'address_pending',
+          message:
+            'Please add a valid billing address to your account before reactivating your subscription.',
+        })
+      }
       OError.tag(err, 'something went wrong reactivating subscription', {
         user_id: user._id,
       })

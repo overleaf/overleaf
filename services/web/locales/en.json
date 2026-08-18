@@ -2092,6 +2092,7 @@
   "reactivate": "Reactivate",
   "reactivate_add_on_failed": "Something went wrong while reactivating your add-on. Please try again later.",
   "reactivate_subscription": "Reactivate your subscription",
+  "reactivate_subscription_valid_address_required": "Please <0>add a valid billing address to your account</0> before reactivating your subscription.",
   "reactivating": "Reactivating",
   "read_lines_from_path": "Read lines from __path__",
   "read_more": "Read more",

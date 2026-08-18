@@ -10,6 +10,7 @@ import LimitationsManager from './LimitationsManager.mjs'
 import EmailHandler from '../Email/EmailHandler.mjs'
 import { callbackify } from '@overleaf/promise-utils'
 import Modules from '../../infrastructure/Modules.mjs'
+import SubscriptionErrors from './Errors.mjs'
 import { AI_ADD_ON_CODE } from './AiHelper.mjs'
 import CustomerIoPlanHelpers from './CustomerIoPlanHelpers.mjs'
 import WorkbenchRateLimiter from '../../infrastructure/rate-limiters/WorkbenchRateLimiter.mjs'
@@ -197,6 +198,9 @@ async function reactivateSubscription(user) {
       )
     }
   } catch (err) {
+    if (err instanceof SubscriptionErrors.AddressPendingReactivationError) {
+      throw err
+    }
     logger.warn(
       { err, userId: user._id },
       'there was an error checking user v2 subscription'

@@ -134,6 +134,7 @@ export interface CustomerUpdatedWebhookEvent extends Stripe.EventBase {
       address?: Stripe.Address
       name?: string
       email?: string
+      tax?: Stripe.Customer.Tax
     }
   }
 }

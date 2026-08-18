@@ -756,6 +756,39 @@ describe('SubscriptionController', function () {
       })
     })
 
+    describe('when the subscription cannot be reactivated due to a pending address', function () {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
+          ctx.json = sinon.stub().callsFake(() => resolve())
+          ctx.res = {
+            status: sinon.stub().returns({ json: ctx.json }),
+          }
+          ctx.req.assertPermission = sinon.stub()
+          ctx.next = sinon.stub().callsFake(error => resolve(error))
+          ctx.SubscriptionHandler.reactivateSubscription = sinon
+            .stub()
+            .callsArgWith(
+              1,
+              new SubscriptionErrors.AddressPendingReactivationError()
+            )
+          ctx.SubscriptionController.reactivateSubscription(
+            ctx.req,
+            ctx.res,
+            ctx.next
+          )
+        })
+      })
+
+      it('should respond with a 422 and an address_pending code', async function (ctx) {
+        ctx.res.status.calledWith(422).should.equal(true)
+        ctx.json.firstCall.args[0].should.have.property(
+          'code',
+          'address_pending'
+        )
+        ctx.next.called.should.equal(false)
+      })
+    })
+
     describe('when the user does not have permission', function () {
       beforeEach(async function (ctx) {
         await new Promise(resolve => {
