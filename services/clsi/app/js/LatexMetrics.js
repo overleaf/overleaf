@@ -248,9 +248,12 @@ function addLatexMkMetrics(output, stats, timings) {
  * @param {object} stats - The compile stats object to be modified.
  */
 function enableLatexMkMetrics(stats) {
+  if (Object.getOwnPropertyDescriptor(stats, 'latexmk')) return
   Object.defineProperty(stats, 'latexmk', {
     value: {},
     enumerable: false,
+    configurable: true,
+    writable: true,
   })
 }
 
