@@ -82,8 +82,9 @@ describe('ProjectUploadController', function () {
       },
     }
 
-    vi.doMock('multer', () => ({
-      default: sinon.stub(),
+    vi.doMock('../../../../app/src/infrastructure/Multer.mjs', () => ({
+      multer: { MulterError: class MulterError extends Error {} },
+      multerUploadHandler: sinon.stub().returns({ single: sinon.stub() }),
     }))
 
     vi.doMock('@overleaf/settings', () => ({
@@ -905,12 +906,12 @@ describe('ProjectUploadController', function () {
       }
       ctx.MulterError = MulterError
 
-      const multerFn = sinon.stub().returns({
-        single: sinon.stub().returns(ctx.uploadSingleMiddleware),
-      })
-      multerFn.MulterError = MulterError
-
-      vi.doMock('multer', () => ({ default: multerFn }))
+      vi.doMock('../../../../app/src/infrastructure/Multer.mjs', () => ({
+        multer: { MulterError },
+        multerUploadHandler: sinon.stub().returns({
+          single: sinon.stub().returns(ctx.uploadSingleMiddleware),
+        }),
+      }))
       vi.doMock('@overleaf/settings', () => ({ default: { path: {} } }))
       vi.doMock('@overleaf/metrics', () => ({ default: ctx.metrics }))
       vi.doMock(

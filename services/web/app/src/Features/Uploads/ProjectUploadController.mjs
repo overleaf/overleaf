@@ -10,8 +10,6 @@ import EditorController from '../Editor/EditorController.mjs'
 import ProjectLocator from '../Project/ProjectLocator.mjs'
 import Settings from '@overleaf/settings'
 import { InvalidZipFileError } from './ArchiveErrors.mjs'
-import multer from 'multer'
-import lodash from 'lodash'
 import { expressify } from '@overleaf/promise-utils'
 import {
   DuplicateNameError,
@@ -22,9 +20,8 @@ import {
 import DocumentConversionManager from './DocumentConversionManager.mjs'
 import ProjectOptionsHandler from '../Project/ProjectOptionsHandler.mjs'
 import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
+import { multer, multerUploadHandler } from '../../infrastructure/Multer.mjs'
 import { parseReq, z, zz } from '../../infrastructure/Validation.mjs'
-
-const defaultsDeep = lodash.defaultsDeep
 
 const uploadMetaTypeSchema = z.string().optional()
 
@@ -72,17 +69,12 @@ const importDocumentSchema = z.object({
   file: zz.uploadedFile(),
 })
 
-const upload = multer(
-  defaultsDeep(
-    {
-      dest: Settings.path.uploadFolder,
-      limits: {
-        fileSize: Settings.maxUploadSize,
-      },
-    },
-    Settings.multerOptions
-  )
-)
+const upload = multerUploadHandler({
+  dest: Settings.path.uploadFolder,
+  limits: {
+    fileSize: Settings.maxUploadSize,
+  },
+})
 
 /**
  * @param {any} req
