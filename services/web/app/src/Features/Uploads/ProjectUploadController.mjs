@@ -136,6 +136,7 @@ async function uploadFile(req, res, next) {
   const timer = new metrics.Timer('file-upload')
   const { params, query, body, file } = parseReq(req, uploadFileSchema, {
     logOnly: true,
+    logFields: ['body.relativePath'],
   })
   const name = body.name
   const { path } = file

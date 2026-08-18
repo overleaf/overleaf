@@ -370,6 +370,119 @@ describe('parseReq log-only rollout', () => {
         })
       })
 
+      describe('logFields', () => {
+        it('omits failingValues when logFields is not set', () => {
+          const req = { body: { name: 1234 } } as Request
+          const schema = z.object({ body: z.object({ name: z.string() }) })
+
+          parseReq(req, schema, { logOnly: true })
+
+          const [ctx] = warnMock.mock.calls[0] as WarnCall
+          expect(ctx.failingValues).toBeUndefined()
+        })
+
+        it('includes the resolved value at each listed dotted path', () => {
+          const req = { body: { relativePath: '../../etc/passwd' } } as Request
+          const schema = z.object({
+            body: z.object({
+              relativePath: z.string().refine(s => !s.includes('..'), {
+                message: 'path traversal detected',
+              }),
+            }),
+          })
+
+          parseReq(req, schema, {
+            logOnly: true,
+            logFields: ['body.relativePath'],
+          })
+
+          const [ctx] = warnMock.mock.calls[0] as WarnCall
+          expect(ctx.failingValues).toEqual({
+            'body.relativePath': '../../etc/passwd',
+          })
+        })
+
+        it('resolves listed fields regardless of which field actually failed validation', () => {
+          const req = {
+            body: { name: 1234, relativePath: 'folder/main.tex' },
+          } as Request
+          const schema = z.object({
+            body: z.object({ name: z.string(), relativePath: z.string() }),
+          })
+
+          parseReq(req, schema, {
+            logOnly: true,
+            logFields: ['body.relativePath'],
+          })
+
+          const [ctx] = warnMock.mock.calls[0] as WarnCall
+          expect(ctx.failingValues).toEqual({
+            'body.relativePath': 'folder/main.tex',
+          })
+        })
+
+        it('resolves to undefined for a path missing from the input', () => {
+          const req = { body: { name: 1234 } } as Request
+          const schema = z.object({ body: z.object({ name: z.string() }) })
+
+          parseReq(req, schema, {
+            logOnly: true,
+            logFields: ['body.doesNotExist'],
+          })
+
+          const [ctx] = warnMock.mock.calls[0] as WarnCall
+          expect(ctx.failingValues['body.doesNotExist']).toBeUndefined()
+        })
+
+        it('truncates a >200-char string value to exactly 200 chars', () => {
+          const longValue = 'z'.repeat(250)
+          const req = { body: { name: longValue } } as Request
+          const schema = z.object({ body: z.object({ name: z.number() }) })
+
+          parseReq(req, schema, { logOnly: true, logFields: ['body.name'] })
+
+          const [ctx] = warnMock.mock.calls[0] as WarnCall
+          expect(ctx.failingValues['body.name']).toBe(longValue.slice(0, 200))
+        })
+
+        it('resolves the raw, unwrapped value when the request-input lockdown is installed', () => {
+          const req = lockedRequest({ body: { relativePath: 'a/../b' } })
+          const schema = z.object({
+            body: z.object({
+              relativePath: z.string().refine(s => !s.includes('..'), {
+                message: 'path traversal detected',
+              }),
+            }),
+          })
+
+          parseReq(req, schema, {
+            logOnly: true,
+            logFields: ['body.relativePath'],
+          })
+
+          const [ctx] = warnMock.mock.calls[0] as WarnCall
+          expect(ctx.failingValues).toEqual({
+            'body.relativePath': 'a/../b',
+          })
+        })
+
+        it('passes a non-string value through unsanitized, including whole objects', () => {
+          const req = {
+            body: { meta: { secret: 'NESTED_SECRET' }, name: 1234 },
+          } as Request
+          const schema = z.object({
+            body: z.object({ meta: z.unknown(), name: z.string() }),
+          })
+
+          parseReq(req, schema, { logOnly: true, logFields: ['body.meta'] })
+
+          const [ctx] = warnMock.mock.calls[0] as WarnCall
+          expect(ctx.failingValues).toEqual({
+            'body.meta': { secret: 'NESTED_SECRET' },
+          })
+        })
+      })
+
       describe('invalid_union sanitization', () => {
         it('recursively sanitizes nested union member issues without leaking sentinel values', () => {
           const req = {
