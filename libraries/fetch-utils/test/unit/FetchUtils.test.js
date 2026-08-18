@@ -7,7 +7,7 @@ import fs from 'node:fs'
 import { pipeline } from 'node:stream/promises'
 import { Readable } from 'node:stream'
 import { describe, beforeAll, beforeEach, afterAll, it } from 'vitest'
-import { AbortError, FetchError } from 'node-fetch'
+import { AbortError, FetchError, Headers } from 'node-fetch'
 import selfsigned from 'selfsigned'
 import { TestServer } from './helpers/TestServer.js'
 import {
@@ -128,6 +128,15 @@ describe('fetch-utils', function () {
       expect(json).to.deep.equal({ key: 'verysecret' })
     })
 
+    it('sets an Authorization header for basic auth', async function () {
+      await fetchJson(url('/json/basic-auth'), {
+        basicAuth: { user: 'user', password: 'pass' },
+      })
+      expect(server.lastReq.headers.authorization).to.equal(
+        'Basic ' + Buffer.from('user:pass').toString('base64')
+      )
+    })
+
     it("destroys the request body if it doesn't get consumed", async function () {
       const stream = Readable.from(infiniteIterator())
       await fetchJson(url('/json/ignore-request'), {
@@ -135,6 +144,55 @@ describe('fetch-utils', function () {
         body: stream,
       })
       expect(stream.destroyed).to.be.true
+    })
+
+    describe('headers', function () {
+      it('sets an Accept header of application/json by default', async function () {
+        await fetchJson(url('/json/hello'))
+        expect(server.lastReq.headers.accept).to.equal('application/json')
+      })
+
+      it('passes provided headers', async function () {
+        await fetchJson(url('/json/hello'), {
+          headers: { 'x-some-value': 'value' },
+        })
+        expect(server.lastReq.headers['x-some-value']).to.equal('value')
+      })
+
+      it('respects an explicitly provided Accept header', async function () {
+        await fetchJson(url('/json/hello'), {
+          headers: { Accept: 'application/vnd.api+json' },
+        })
+        expect(server.lastReq.headers.accept).to.equal(
+          'application/vnd.api+json'
+        )
+      })
+
+      it('sets the default Accept header when headers are provided as a Headers instance', async function () {
+        await fetchJson(url('/json/hello'), {
+          headers: new Headers({ 'X-Foo': 'bar' }),
+        })
+        expect(server.lastReq.headers.accept).to.equal('application/json')
+        expect(server.lastReq.headers['x-foo']).to.equal('bar')
+      })
+
+      it('sets the default Accept header when headers are provided as an array of tuples', async function () {
+        await fetchJson(url('/json/hello'), {
+          headers: [['X-Foo', 'bar']],
+        })
+        expect(server.lastReq.headers.accept).to.equal('application/json')
+        expect(server.lastReq.headers['x-foo']).to.equal('bar')
+      })
+
+      it('sets a Content-Type header of application/json when sending a JSON body', async function () {
+        await fetchJson(url('/json/add'), {
+          method: 'POST',
+          json: { a: 2, b: 3 },
+        })
+        expect(server.lastReq.headers['content-type']).to.equal(
+          'application/json'
+        )
+      })
     })
   })
 

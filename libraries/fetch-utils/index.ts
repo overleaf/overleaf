@@ -1,14 +1,30 @@
-import _ from 'lodash'
 import { Readable, Duplex } from 'node:stream'
 import OError from '@overleaf/o-error'
-import fetch from 'node-fetch'
-import type { Response } from 'node-fetch'
+import fetch, { Headers } from 'node-fetch'
+import type { RequestInit, Response } from 'node-fetch'
 import http from 'node:http'
 import https from 'node:https'
 import net from 'node:net'
 import tls from 'node:tls'
 
 let logger: { warn: (...args: any[]) => void } | undefined
+
+type BasicAuthOptions = {
+  user: string
+  password: string
+}
+
+type FetchRequestOptions = RequestInit & {
+  json?: unknown
+  basicAuth?: BasicAuthOptions
+}
+
+type ParsedFetchOptions = Omit<
+  FetchRequestOptions,
+  'json' | 'signal' | 'basicAuth'
+> & {
+  signal?: AbortSignal
+}
 
 function setLogger(loggerInstance: { warn: (...args: any[]) => void }) {
   logger = loggerInstance
@@ -19,15 +35,22 @@ function setLogger(loggerInstance: { warn: (...args: any[]) => void }) {
  *
  * @throws {RequestFailedError} if the response has a failure status code
  */
-async function fetchJson(url: string | URL, opts: any = {}) {
+async function fetchJson(url: string | URL, opts: FetchRequestOptions = {}) {
   const { json } = await fetchJsonWithResponse(url, opts)
   return json
 }
 
-async function fetchJsonWithResponse(url: string | URL, opts: any = {}) {
+async function fetchJsonWithResponse(
+  url: string | URL,
+  opts: FetchRequestOptions = {}
+) {
   const { fetchOpts, detachSignal } = parseOpts(opts, url)
-  fetchOpts.headers = fetchOpts.headers ?? {}
-  fetchOpts.headers.Accept = fetchOpts.headers.Accept ?? 'application/json'
+  if (!(fetchOpts.headers instanceof Headers)) {
+    fetchOpts.headers = new Headers(fetchOpts.headers)
+  }
+  if (!fetchOpts.headers.has('Accept')) {
+    fetchOpts.headers.set('Accept', 'application/json')
+  }
 
   const response = await performRequest(url, fetchOpts, detachSignal)
   if (!response.ok) {
@@ -46,12 +69,15 @@ async function fetchJsonWithResponse(url: string | URL, opts: any = {}) {
  *
  * @throws {RequestFailedError} if the response has a failure status code
  */
-async function fetchStream(url: string | URL, opts: any = {}) {
+async function fetchStream(url: string | URL, opts: FetchRequestOptions = {}) {
   const { stream } = await fetchStreamWithResponse(url, opts)
   return stream
 }
 
-async function fetchStreamWithResponse(url: string | URL, opts: any = {}) {
+async function fetchStreamWithResponse(
+  url: string | URL,
+  opts: FetchRequestOptions = {}
+) {
   const { fetchOpts, abortController, detachSignal } = parseOpts(opts, url)
   const response = await performRequest(url, fetchOpts, detachSignal)
 
@@ -71,7 +97,7 @@ async function fetchStreamWithResponse(url: string | URL, opts: any = {}) {
  *
  * @throws {RequestFailedError} if the response has a failure status code
  */
-async function fetchNothing(url: string | URL, opts: any = {}) {
+async function fetchNothing(url: string | URL, opts: FetchRequestOptions = {}) {
   const { fetchOpts, detachSignal } = parseOpts(opts, url)
   const response = await performRequest(url, fetchOpts, detachSignal)
   if (!response.ok) {
@@ -87,7 +113,10 @@ async function fetchNothing(url: string | URL, opts: any = {}) {
  *
  * @throws {RequestFailedError} if the response has a non redirect status code or missing Location header
  */
-async function fetchRedirect(url: string | URL, opts: any = {}) {
+async function fetchRedirect(
+  url: string | URL,
+  opts: FetchRequestOptions = {}
+) {
   const { location } = await fetchRedirectWithResponse(url, opts)
   return location
 }
@@ -97,7 +126,10 @@ async function fetchRedirect(url: string | URL, opts: any = {}) {
  *
  * @throws {RequestFailedError} if the response has a non redirect status code or missing Location header
  */
-async function fetchRedirectWithResponse(url: string | URL, opts: any = {}) {
+async function fetchRedirectWithResponse(
+  url: string | URL,
+  opts: FetchRequestOptions = {}
+) {
   const { fetchOpts, detachSignal } = parseOpts(opts, url)
   fetchOpts.redirect = 'manual'
   const response = await performRequest(url, fetchOpts, detachSignal)
@@ -123,12 +155,15 @@ async function fetchRedirectWithResponse(url: string | URL, opts: any = {}) {
  *
  * @throws {RequestFailedError} if the response has a failure status code
  */
-async function fetchString(url: string | URL, opts: any = {}) {
+async function fetchString(url: string | URL, opts: FetchRequestOptions = {}) {
   const { body } = await fetchStringWithResponse(url, opts)
   return body
 }
 
-async function fetchStringWithResponse(url: string | URL, opts: any = {}) {
+async function fetchStringWithResponse(
+  url: string | URL,
+  opts: FetchRequestOptions = {}
+) {
   const { fetchOpts, detachSignal } = parseOpts(opts, url)
   const response = await performRequest(url, fetchOpts, detachSignal)
   if (!response.ok) {
@@ -145,7 +180,7 @@ class RequestFailedError extends OError {
 
   constructor(
     url: string | URL,
-    opts: any,
+    opts: Pick<FetchRequestOptions, 'method'>,
     response: Response,
     body: string | null
   ) {
@@ -163,20 +198,21 @@ class RequestFailedError extends OError {
   }
 }
 
-function setupDefaultAgent(fetchOps: any) {
+function setupDefaultAgent(fetchOpts: ParsedFetchOptions) {
   // Provide a function to get the agent for each request as there may be
   // multiple requests with different protocols due to redirects.
-  fetchOps.agent = (url: URL) =>
+  fetchOpts.agent = (url: URL) =>
     url.protocol === 'https:' ? httpsAgent : httpAgent
 }
 
-function parseOpts(opts: any, url: string | URL) {
-  const fetchOpts = _.omit(opts, ['json', 'signal', 'basicAuth'])
-  if (opts.json) {
-    setupJsonBody(fetchOpts, opts.json)
+function parseOpts(opts: FetchRequestOptions, url: string | URL) {
+  const { json, signal, basicAuth, ...rawFetchOpts } = opts
+  const fetchOpts: ParsedFetchOptions = { ...rawFetchOpts }
+  if (json) {
+    setupJsonBody(fetchOpts, json)
   }
-  if (opts.basicAuth) {
-    setupBasicAuth(fetchOpts, opts.basicAuth)
+  if (basicAuth) {
+    setupBasicAuth(fetchOpts, basicAuth)
   }
   if (!fetchOpts.agent) {
     setupDefaultAgent(fetchOpts)
@@ -184,9 +220,9 @@ function parseOpts(opts: any, url: string | URL) {
 
   const abortController = new AbortController()
   fetchOpts.signal = abortController.signal
-  let detachSignal
-  if (opts.signal) {
-    detachSignal = abortOnSignal(abortController, opts.signal)
+  let detachSignal: () => void
+  if (signal) {
+    detachSignal = abortOnSignal(abortController, signal)
   } else {
     let overTimeoutStart: bigint | undefined
     const stack = new Error().stack
@@ -199,7 +235,7 @@ function parseOpts(opts: any, url: string | URL) {
         logger.warn(
           {
             url,
-            method: opts.method ?? 'GET',
+            method: fetchOpts.method ?? 'GET',
             overTimeoutMs:
               Number(process.hrtime.bigint() - overTimeoutStart) / 1e6,
             stack,
@@ -209,23 +245,32 @@ function parseOpts(opts: any, url: string | URL) {
       }
     }
   }
-  if (opts.body instanceof Readable) {
+  if (fetchOpts.body instanceof Readable) {
     abortOnDestroyedRequest(abortController, fetchOpts.body)
   }
   return { fetchOpts, abortController, detachSignal }
 }
 
-function setupJsonBody(fetchOpts: any, json: any) {
+function setupJsonBody(fetchOpts: ParsedFetchOptions, json: unknown) {
   fetchOpts.body = JSON.stringify(json)
-  fetchOpts.headers = fetchOpts.headers ?? {}
-  fetchOpts.headers['Content-Type'] = 'application/json'
+  if (!(fetchOpts.headers instanceof Headers)) {
+    fetchOpts.headers = new Headers(fetchOpts.headers)
+  }
+  fetchOpts.headers.set('Content-Type', 'application/json')
 }
 
-function setupBasicAuth(fetchOpts: any, basicAuth: any) {
-  fetchOpts.headers = fetchOpts.headers ?? {}
-  fetchOpts.headers.Authorization =
+function setupBasicAuth(
+  fetchOpts: ParsedFetchOptions,
+  basicAuth: BasicAuthOptions
+) {
+  if (!(fetchOpts.headers instanceof Headers)) {
+    fetchOpts.headers = new Headers(fetchOpts.headers)
+  }
+  fetchOpts.headers.set(
+    'Authorization',
     'Basic ' +
-    Buffer.from(`${basicAuth.user}:${basicAuth.password}`).toString('base64')
+      Buffer.from(`${basicAuth.user}:${basicAuth.password}`).toString('base64')
+  )
 }
 
 function abortOnSignal(abortController: AbortController, signal: AbortSignal) {
@@ -243,7 +288,7 @@ function abortOnSignal(abortController: AbortController, signal: AbortSignal) {
 
 function abortOnDestroyedRequest(
   abortController: AbortController,
-  stream: any
+  stream: Readable
 ) {
   stream.on('close', () => {
     if (!stream.readableEnded) {
@@ -265,7 +310,7 @@ function abortOnDestroyedResponse(
 
 async function performRequest(
   url: string | URL,
-  fetchOpts: any,
+  fetchOpts: ParsedFetchOptions,
   detachSignal: () => void
 ) {
   let response
@@ -283,9 +328,10 @@ async function performRequest(
   }
   response.body.on('close', detachSignal)
   if (fetchOpts.body instanceof Readable) {
+    const requestBodyStream = fetchOpts.body
     response.body.on('close', () => {
-      if (!fetchOpts.body.readableEnded) {
-        fetchOpts.body.destroy()
+      if (!requestBodyStream.readableEnded) {
+        requestBodyStream.destroy()
       }
     })
   }
