@@ -4128,6 +4128,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fidm/asn1@npm:^1.0.4":
+  version: 1.0.4
+  resolution: "@fidm/asn1@npm:1.0.4"
+  checksum: 10c0/e3d1d2ff02c0294ffc7d7f125eeab99dc0faef889db6cbef2b801c084bded0fac9f6a196edde846b45a9415415dd6429f36dcaaf1bf6acaf6de6a132bcecd069
+  languageName: node
+  linkType: hard
+
+"@fidm/x509@npm:^1.2.1":
+  version: 1.2.1
+  resolution: "@fidm/x509@npm:1.2.1"
+  dependencies:
+    "@fidm/asn1": "npm:^1.0.4"
+    tweetnacl: "npm:^1.0.1"
+  checksum: 10c0/7d82d6f92ef3f8b054ad5d27c9a6985ec5363e4c19522716736b85a61c96628236be16263595a8badb3abf111e261415fa91906145933d30de68a5e253d13333
+  languageName: node
+  linkType: hard
+
 "@figspec/components@npm:^2.0.1":
   version: 2.1.0
   resolution: "@figspec/components@npm:2.1.0"
@@ -16109,6 +16126,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"csv-generate@npm:^4.6.1":
+  version: 4.6.1
+  resolution: "csv-generate@npm:4.6.1"
+  checksum: 10c0/df4f7f1c2ad1585316b05e3c93fc6e684c451786c91be4dc9768618de325cd3cac62a1371b29d9703a025fe7c1e1d319c5b5ba82c7f13561114eab448ea4a9ec
+  languageName: node
+  linkType: hard
+
 "csv-parse@npm:^4.16.3":
   version: 4.16.3
   resolution: "csv-parse@npm:4.16.3"
@@ -16120,6 +16144,13 @@ __metadata:
   version: 6.2.1
   resolution: "csv-parse@npm:6.2.1"
   checksum: 10c0/8b6f14b244ca62476d4217aac721131ba0ada3e4ed7614e43ebc99203807564dcb054144d1de4ef22ee8b0c63b431640f75d46a0e1e0f72853a954b279ba1c61
+  languageName: node
+  linkType: hard
+
+"csv-parse@npm:^7.0.2":
+  version: 7.0.2
+  resolution: "csv-parse@npm:7.0.2"
+  checksum: 10c0/52ffaafbf7be37201ad782ec3eda37bc24ee0ec6e8967b5a68d5ad2973f10b4154fd11a5b90a002615ef98395c4cd699a13d13509b10067297795b9d3c9320e9
   languageName: node
   linkType: hard
 
@@ -16137,6 +16168,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"csv-stringify@npm:^6.8.3":
+  version: 6.8.3
+  resolution: "csv-stringify@npm:6.8.3"
+  checksum: 10c0/55f8978ea09ebf7c259c4cf27432d831ea4f39afcef4ac674ac59f0ca3d3f8ac3f198047dd6e577a0d8b6d554b05776e900416a22424916b94c871672e6184ee
+  languageName: node
+  linkType: hard
+
 "csv@npm:^5.4.0":
   version: 5.5.3
   resolution: "csv@npm:5.5.3"
@@ -16146,6 +16184,18 @@ __metadata:
     csv-stringify: "npm:^5.6.5"
     stream-transform: "npm:^2.1.3"
   checksum: 10c0/282720e1f9f1a332c0ff2c4d48d845eab2a60c23087c974eb6ffc4d907f40c053ae0f8458819d670ad2986ec25359e57dbccc0fa3370cd5d92e7d3143e345f95
+  languageName: node
+  linkType: hard
+
+"csv@npm:^6.2.10":
+  version: 6.6.3
+  resolution: "csv@npm:6.6.3"
+  dependencies:
+    csv-generate: "npm:^4.6.1"
+    csv-parse: "npm:^7.0.2"
+    csv-stringify: "npm:^6.8.3"
+    stream-transform: "npm:^3.5.1"
+  checksum: 10c0/575c799c4e1a735198e60859dbbc856fd7c75bb1c8f861493d8c0135ab59eb533d72bb683b06f4042d1844be26b06f8d423f1e787e8ab510c2eb824ba8ee1b2e
   languageName: node
   linkType: hard
 
@@ -28072,6 +28122,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"prices@workspace:services/web/scripts/plan-prices":
+  version: 0.0.0-use.local
+  resolution: "prices@workspace:services/web/scripts/plan-prices"
+  dependencies:
+    csv: "npm:^6.2.10"
+    minimist: "npm:^1.2.8"
+  languageName: unknown
+  linkType: soft
+
 "prismjs@npm:^1.30.0":
   version: 1.30.0
   resolution: "prismjs@npm:1.30.0"
@@ -31431,6 +31490,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"stream-transform@npm:^3.5.1":
+  version: 3.5.1
+  resolution: "stream-transform@npm:3.5.1"
+  checksum: 10c0/5c8330dcb350f4674899c4de0739f6e5b842872b7331ec47e53c379dc88eea37acc1934cd8a34f439d5525181fd5fa4efe4ad3f9efeb2aef5d51feb128cff819
+  languageName: node
+  linkType: hard
+
 "streamdown@npm:2.2.0":
   version: 2.2.0
   resolution: "streamdown@npm:2.2.0"
@@ -32931,6 +32997,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tweetnacl@npm:^1.0.1":
+  version: 1.0.3
+  resolution: "tweetnacl@npm:1.0.3"
+  checksum: 10c0/069d9df51e8ad4a89fbe6f9806c68e06c65be3c7d42f0701cc43dba5f0d6064686b238bbff206c5addef8854e3ce00c643bff59432ea2f2c639feab0ee1a93f9
+  languageName: node
+  linkType: hard
+
 "type-check@npm:^0.4.0, type-check@npm:~0.4.0":
   version: 0.4.0
   resolution: "type-check@npm:0.4.0"
@@ -33158,6 +33231,17 @@ __metadata:
   checksum: 10c0/0e74641ac7dadb02eadefc1ccdadba6010e007757bda824960de3c72bbe2b04e6d3af75648441f412148c4103261d54fcb60be45a2863beb76643a55fddba3bd
   languageName: node
   linkType: hard
+
+"ukamf-scripts@workspace:services/web/scripts/ukamf":
+  version: 0.0.0-use.local
+  resolution: "ukamf-scripts@workspace:services/web/scripts/ukamf"
+  dependencies:
+    "@fidm/x509": "npm:^1.2.1"
+    lodash: "npm:^4.18.1"
+    moment: "npm:^2.29.4"
+    xml2js: "npm:^0.6.2"
+  languageName: unknown
+  linkType: soft
 
 "umzug@npm:^2.3.0":
   version: 2.3.0
