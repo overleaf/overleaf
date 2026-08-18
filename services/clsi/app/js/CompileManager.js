@@ -67,6 +67,21 @@ const TIKZ_LIBRARY_PATTERN =
 const FATAL_PACKAGE_PATTERN =
   /^! Fatal Package (\w+) Error:/gm
 
+// Matches: ! Font T1/phv/m/n/10=phvr8t at 10.0pt not loadable: Metric (TFM)
+// file not found.  A missing font metric does NOT look like a missing .sty, so
+// without this the compile silently falls back to nullfont and every character
+// is dropped from the PDF.  The captured name (phvr8t) resolves as <name>.tfm.
+const MISSING_TFM_PATTERN =
+  /^! Font [^=]*=(\S+?)(?: at [\d.]+pt)? not loadable: Metric \(TFM\) file not found/gm
+
+// Files that belong to the author, not to TeX Live.  A missing figure or .bib
+// is the user's problem to fix by uploading it; sending it to tlmgr wastes a
+// two-minute timeout and risks stubbing something that was never a package.
+const NON_PACKAGE_EXTENSIONS = new Set([
+  '.png', '.jpg', '.jpeg', '.gif', '.svg', '.pdf', '.eps',
+  '.bib', '.csv', '.dat', '.txt', '.json', '.xlsx',
+])
+
 // Persistent stub directory in texmf-local (survives across compiles)
 const PERSISTENT_STUB_DIR = '/usr/local/texlive/texmf-local/tex/latex/auto-stubs'
 
@@ -347,6 +362,32 @@ async function _parseMissingPackages(compileDir) {
     }
   }
 
+  // Missing font metrics surface as a different error shape entirely, so they
+  // are collected here and expressed as <font>.tfm — that lets the existing
+  // resolve-and-install loop handle them via `tlmgr search --file /<font>.tfm`.
+  // nullfont is skipped: it is the fallback LaTeX substitutes *after* a font
+  // has already failed, so it is a symptom rather than a missing package.
+  MISSING_TFM_PATTERN.lastIndex = 0
+  let tfmMatch
+  while ((tfmMatch = MISSING_TFM_PATTERN.exec(logContent)) !== null) {
+    const font = tfmMatch[1]
+    if (font && font !== 'nullfont') {
+      missingFiles.add(`${font}.tfm`)
+    }
+  }
+
+  // Drop the author's own files before anything reaches tlmgr or the stub path.
+  for (const file of Array.from(missingFiles)) {
+    const ext = (file.match(/\.[^.]+$/) || [''])[0].toLowerCase()
+    if (NON_PACKAGE_EXTENSIONS.has(ext)) {
+      missingFiles.delete(file)
+      logger.info(
+        { file },
+        'auto-install: ignoring missing file, not a TeX package'
+      )
+    }
+  }
+
   const missingBabelLangs = new Set()
   BABEL_UNKNOWN_LANG_PATTERN.lastIndex = 0
   let match
@@ -500,21 +541,30 @@ async function _autoInstallPackages({ missingFiles, missingBabelLangs, missingTi
   }
 
   for (const lang of missingBabelLangs) {
-    const packageName = `babel-${lang}`
+    // The babel OPTION name is not the TeX Live PACKAGE name: ngerman and
+    // austrian both live in babel-german, brazilian in babel-portuges. Guessing
+    // babel-<option> therefore fails for most languages, so resolve the language
+    // definition file instead — the same lookup already used for .sty files.
+    const packageName =
+      (await _findTlmgrPackageName(`${lang}.ldf`)) || `babel-${lang}`
     try {
       logger.info({ lang, packageName, projectId }, 'auto-install: installing babel language')
       await execFilePromise('tlmgr', ['install', packageName], { timeout: 120000 })
       installed.push(packageName)
     } catch (err) {
       logger.warn({ err, lang, packageName, projectId }, 'auto-install: failed to install babel language')
+      continue
     }
-    // Also install hyphenation patterns for the language
-    const hyphenPkg = `hyphen-${lang}`
-    try {
-      await execFilePromise('tlmgr', ['install', hyphenPkg], { timeout: 120000 })
-      installed.push(hyphenPkg)
-    } catch {
-      // hyphenation package may not exist for all languages — non-critical
+    // Hyphenation patterns are named after the resolved language rather than the
+    // babel option: babel-german -> hyphen-german (never hyphen-ngerman).
+    const hyphenPkg = packageName.replace(/^babel-/, 'hyphen-')
+    if (hyphenPkg !== packageName) {
+      try {
+        await execFilePromise('tlmgr', ['install', hyphenPkg], { timeout: 120000 })
+        installed.push(hyphenPkg)
+      } catch {
+        // not every language ships a separate hyphenation package — non-critical
+      }
     }
   }
 
