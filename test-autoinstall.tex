@@ -1,0 +1,169 @@
+% =====================================================================
+%  Auto-install stress test for Overleaf CE (AUTO_INSTALL_PACKAGES=true)
+% =====================================================================
+%  Loads ~55 packages that are NOT in a reduced TeX Live scheme, plus a
+%  secondary babel language to exercise the language + hyphenation path.
+%
+%  Expected: first compile is slow (tlmgr fetches everything), then the
+%  PDF builds. Re-compiling afterwards should be fast.
+%
+%  To tell a REAL install from a silent stub, run inside the container:
+%     kpsewhich sudoku.sty
+%   .../texmf-dist/...      -> real package
+%   .../auto-stubs/...      -> stub, tlmgr install failed
+% =====================================================================
+\documentclass[11pt,a4paper]{article}
+
+% ---------- encoding + language (exercises babel + hyphen-* install) --
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman,english]{babel}
+
+% ---------- maths ----------------------------------------------------
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{mathpartir}
+\usepackage{siunitx}
+\usepackage{cancel}
+\usepackage{upgreek}
+\usepackage{bm}
+\usepackage{empheq}
+
+% ---------- tables ---------------------------------------------------
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage{threeparttable}
+\usepackage{colortbl}
+\usepackage{diagbox}
+
+% ---------- graphics / diagrams --------------------------------------
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,shapes.geometric}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{circuitikz}
+\usepackage{tikz-cd}
+\usepackage{forest}
+\usepackage{bytefield}
+\usepackage{smartdiagram}
+\usepackage{pgfgantt}
+\usepackage{tikzducks}
+
+% ---------- chemistry / science --------------------------------------
+\usepackage{chemfig}
+\usepackage[version=4]{mhchem}
+\usepackage{bohr}
+
+% ---------- code + algorithms ----------------------------------------
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{listings}
+\usepackage{listingsutf8}
+
+% ---------- page layout ----------------------------------------------
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage{enumitem}
+\usepackage{adjustbox}
+\usepackage{rotating}
+\usepackage{pdflscape}
+\usepackage{lastpage}
+\usepackage{todonotes}
+\usepackage{marginnote}
+
+% ---------- symbols ---------------------------------------------------
+\usepackage{fontawesome5}
+\usepackage{marvosym}
+\usepackage{bbding}
+\usepackage{pifont}
+\usepackage{textcomp}
+
+% ---------- text / refs / misc ---------------------------------------
+\usepackage{csquotes}
+\usepackage{nomencl}
+\usepackage{acro}
+\usepackage{environ}
+\usepackage{xifthen}
+\usepackage{xstring}
+\usepackage{etoolbox}
+\usepackage{datatool}
+\usepackage{csvsimple}
+\usepackage{pdfcomment}
+\usepackage{sudoku}
+
+% ---------- hyperref LAST, cleveref after it -------------------------
+\usepackage{hyperref}
+\usepackage{cleveref}
+
+\geometry{margin=2.5cm}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Auto-install test}
+\cfoot{Page \thepage\ of \pageref{LastPage}}
+
+\title{Auto-Install Stress Test}
+\author{Overleaf CE}
+
+\begin{document}
+\maketitle
+
+\section{Why this file exists}
+This document loads roughly 55 packages that a reduced \TeX{} Live scheme does
+not ship. If \texttt{AUTO\_INSTALL\_PACKAGES} is working, the first compile
+fetches them all via \texttt{tlmgr} and then succeeds.
+
+\section{Maths}
+\begin{align}
+  E &= mc^2, & \int_0^\infty e^{-x^2}\,\mathrm{d}x &= \frac{\sqrt{\uppi}}{2}.
+\end{align}
+A quantity with units: \SI{9.81}{\metre\per\second\squared}. A cancelled
+term: $\cancel{x}$, and a bold vector $\bm{v}$.
+
+\section{A table}
+\begin{tabular}{@{}lcr@{}}
+  \toprule
+  Package & Purpose & Size \
+  \midrule
+  siunitx & units & large \
+  booktabs & rules & small \
+  \bottomrule
+\end{tabular}
+
+\section{A plot}
+\begin{tikzpicture}
+  \begin{axis}[width=8cm,height=5cm,xlabel=$x$,ylabel=$\sin x$]
+    \addplot[domain=0:6.283,samples=60]{sin(deg(x))};
+  \end{axis}
+\end{tikzpicture}
+
+\section{Chemistry}
+Water is \ce{H2O}; combustion: \ce{CH4 + 2O2 -> CO2 + 2H2O}.
+
+\section{An algorithm}
+\begin{algorithm}[H]
+\caption{Trivial}
+\begin{algorithmic}[1]
+  \State $x \gets 0$
+  \While{$x < 10$} \State $x \gets x + 1$ \EndWhile
+\end{algorithmic}
+\end{algorithm}
+
+\section{Symbols and a duck}
+\faCoffee\quad\Coffeecup\quad\ding{72}\quad
+\begin{tikzpicture}[scale=0.4]\duck\end{tikzpicture}
+
+\section{German hyphenation}
+\begin{otherlanguage}{ngerman}
+Donaudampfschifffahrtsgesellschaftskapitaen und Rindfleischetikettierungs%
+ueberwachungsaufgabenuebertragungsgesetz.
+\end{otherlanguage}
+
+\end{document}
