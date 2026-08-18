@@ -3,9 +3,7 @@ import SessionManager from '../Authentication/SessionManager.mjs'
 import Errors from '../Errors/Errors.js'
 import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
 import { expressify } from '@overleaf/promise-utils'
-
-// mirrors the Tag model's own color validator (models/Tag.mjs)
-const COLOR_REGEX = /^#[a-fA-F0-9]{6}$/
+import { TAG_COLOR_REGEX } from '../../models/Tag.mjs'
 
 async function _getTags(userId, _req, res) {
   if (!userId) {
@@ -34,7 +32,7 @@ async function getAllTags(req, res) {
 const createTagSchema = z.object({
   body: z.strictObject({
     name: z.string().min(1),
-    color: z.string().regex(COLOR_REGEX).optional(),
+    color: z.string().regex(TAG_COLOR_REGEX).optional(),
   }),
 })
 // Rollout-temporary fallback (pre-refinement schema from main); delete
@@ -201,7 +199,7 @@ const editTagSchema = z.object({
   }),
   body: z.strictObject({
     name: z.string().min(1),
-    color: z.string().regex(COLOR_REGEX).optional(),
+    color: z.string().regex(TAG_COLOR_REGEX).optional(),
   }),
 })
 // Rollout-temporary fallback (pre-refinement schema from main); delete

@@ -105,7 +105,7 @@ export function EditTagModal({ id, tag, onEdit, onClose }: EditTagModalProps) {
 
       <OLModalBody>
         <OLForm onSubmit={handleSubmit}>
-          <OLFormGroup controlId="edit-tag-modal">
+          <OLFormGroup controlId="edit-tag-modal-form">
             <OLFormLabel>{t('edit_tag_name')}</OLFormLabel>
             <OLFormControl
               ref={autoFocusedRef}
