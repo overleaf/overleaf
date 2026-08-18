@@ -248,6 +248,24 @@ class MockStripeApi extends AbstractMockApi {
     // When rateLimited is set, every request is answered with a 429.
     this.rateLimited = false
     this.rateLimitedReason = null
+    // Requests received per endpoint, so tests can assert what web refetches.
+    this.requestCounts = {}
+  }
+
+  /**
+   * Counting runs before Express matches a route, so endpoints with path params
+   * are keyed by concrete path, e.g. 'GET /v1/prices/price_mock_1'.
+   *
+   * @param {string} endpoint
+   * @returns {number}
+   */
+  getRequestCount(endpoint) {
+    return this.requestCounts[endpoint] ?? 0
+  }
+
+  _countRequest(req) {
+    const endpoint = `${req.method} ${req.path}`
+    this.requestCounts[endpoint] = (this.requestCounts[endpoint] ?? 0) + 1
   }
 
   // Make every request fail with a 429, as Stripe does when we hit a rate-limit
@@ -402,6 +420,12 @@ class MockStripeApi extends AbstractMockApi {
   }
 
   applyRoutes() {
+    // before the rate-limit check, so 429s are still counted
+    this.app.use((req, res, next) => {
+      this._countRequest(req)
+      next()
+    })
+
     this.app.use((req, res, next) => {
       if (!this.rateLimited) return next()
       // Stripe-Should-Retry: false so the SDK fails fast instead of retrying.
