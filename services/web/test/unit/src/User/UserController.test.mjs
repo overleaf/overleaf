@@ -625,6 +625,21 @@ describe('UserController', function () {
       })
     })
 
+    it('should drop the _id from zotero groups', function (ctx) {
+      return new Promise(resolve => {
+        ctx.req.body = {
+          zotero: {
+            groups: [{ _id: 'abc123', id: '123' }],
+          },
+        }
+        ctx.res.sendStatus = code => {
+          ctx.user.ace.zotero.groups.should.deep.equal([{ id: '123' }])
+          resolve()
+        }
+        ctx.UserController.updateUserSettings(ctx.req, ctx.res)
+      })
+    })
+
     it('should set zotero settings with partial update', function (ctx) {
       return new Promise(resolve => {
         ctx.user.ace.zotero = {

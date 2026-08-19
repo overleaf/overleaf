@@ -12,6 +12,7 @@ const refProviderSettingsSchema = {
   groups: {
     type: [
       {
+        _id: false,
         id: { type: String },
       },
     ],

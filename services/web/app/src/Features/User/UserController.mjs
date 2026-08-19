@@ -364,7 +364,7 @@ async function unsubscribe(req, res, next) {
 const refProviderSettingsSchema = z
   .strictObject({
     enabled: z.boolean().optional(),
-    groups: z.array(z.strictObject({ id: z.string() })).optional(),
+    groups: z.array(z.object({ id: z.string() })).optional(),
     disablePersonalLibrary: z.boolean().optional(),
   })
   .optional()
