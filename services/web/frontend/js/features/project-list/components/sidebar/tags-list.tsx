@@ -13,9 +13,11 @@ import {
   OLDropdownMenu,
   OLDropdownToggle,
 } from '@/shared/components/ol/ol-dropdown-menu'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export default function TagsList() {
   const { t } = useTranslation()
+  const isSharedWorkspaceEnabled = useFeatureFlag('shared-workspace')
   const {
     tags,
     projectsPerTag,
@@ -40,7 +42,7 @@ export default function TagsList() {
         aria-hidden="true"
         data-testid="organize-projects"
       >
-        {t('organize_tags')}
+        {isSharedWorkspaceEnabled ? t('your_tags') : t('organize_tags')}
       </li>
       <li className="tag">
         <button type="button" className="tag-name" onClick={openCreateTagModal}>

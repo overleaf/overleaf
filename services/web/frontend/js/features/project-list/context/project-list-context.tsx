@@ -89,6 +89,7 @@ export type ProjectListContextValue = {
   tags: Tag[]
   untaggedProjectsCount: number
   projectsPerTag: Record<Tag['_id'], Project[]>
+  currentFilterProjectsCount: number
   filter: Filter
   selectFilter: (filter: Filter) => void
   selectedTagId?: string | undefined
@@ -378,6 +379,16 @@ export function ProjectListProvider({
     }, {})
   }, [tags, loadedProjects])
 
+  // How many projects the current filter matches, ignoring the search text.
+  // `visibleProjects` can't answer "is this view empty?" on its own, because it
+  // is also narrowed by the search text (which persists across filter changes)
+  // and by pagination. Callers need the distinction to tell an empty view apart
+  // from a search that matched nothing.
+  const currentFilterProjectsCount = useMemo(
+    () => arrayFilter(loadedProjects, filters[filter]).length,
+    [loadedProjects, filter]
+  )
+
   const selectFilter = useCallback(
     (filter: Filter) => {
       const url = getNavigationUrl({ type: 'filter', filter })
@@ -561,6 +572,7 @@ export function ProjectListProvider({
       updateProjectViewData,
       updateTag,
       projectsPerTag,
+      currentFilterProjectsCount,
       visibleProjects,
     }),
     [
@@ -600,6 +612,7 @@ export function ProjectListProvider({
       updateProjectViewData,
       updateTag,
       projectsPerTag,
+      currentFilterProjectsCount,
       visibleProjects,
     ]
   )

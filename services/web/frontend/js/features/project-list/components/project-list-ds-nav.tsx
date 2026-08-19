@@ -24,8 +24,10 @@ import SystemMessages from '@/shared/components/system-messages'
 import overleafLogo from '@/shared/svgs/overleaf-a-ds-solution-mallard.svg'
 import overleafLogoDark from '@/shared/svgs/overleaf-a-ds-solution-mallard-dark.svg'
 import CookieBanner from '@/shared/components/cookie-banner'
+import NoProjects from '@/features/project-list/components/no-projects'
 import { useActiveOverallTheme } from '@/shared/hooks/use-active-overall-theme'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export function ProjectListDsNav() {
   const navbarProps = getMeta('ol-navbar')
@@ -39,9 +41,11 @@ export function ProjectListDsNav() {
     filter,
     tags,
     selectedTagId,
+    currentFilterProjectsCount,
   } = useProjectListContext()
   const activeOverallTheme = useActiveOverallTheme()
   const isLibraryEnabled = isSplitTestEnabled('overleaf-library')
+  const isSharedWorkspaceEnabled = useFeatureFlag('shared-workspace')
 
   const selectedTag = tags.find(tag => tag._id === selectedTagId)
   const showTrashHeader = isLibraryEnabled && filter === 'trashed'
@@ -142,55 +146,75 @@ export function ProjectListDsNav() {
                   </div>
                 </div>
                 {showTrashHeader && <TrashPageTabs activeTab="projects" />}
-                <div className="project-ds-nav-project-list">
-                  <OLRow className="d-none d-md-flex align-items-center">
-                    <OLCol md={isLibraryEnabled ? 8 : undefined} lg={7}>
-                      <SearchForm
-                        inputValue={searchText}
-                        setInputValue={setSearchText}
-                        filter={filter}
-                        selectedTag={selectedTag}
-                      />
-                    </OLCol>
-                    {isLibraryEnabled && showNewProjectButton && (
-                      <OLCol className="ms-auto" xs="auto">
-                        <NewProjectButton
-                          id="new-project-button-projects-table"
-                          showAddAffiliationWidget
-                          align="end"
+                {isSharedWorkspaceEnabled &&
+                selectedTagId === undefined &&
+                currentFilterProjectsCount === 0 ? (
+                  <>
+                    <ProjectsToolbarMobile />
+                    <NoProjects
+                      activeSection={filter}
+                      showNewProjectButton={showNewProjectButton}
+                    />
+                  </>
+                ) : (
+                  <div className="project-ds-nav-project-list">
+                    <OLRow className="d-none d-md-flex align-items-center">
+                      <OLCol md={isLibraryEnabled ? 8 : undefined} lg={7}>
+                        <SearchForm
+                          inputValue={searchText}
+                          setInputValue={setSearchText}
+                          filter={filter}
+                          selectedTag={selectedTag}
                         />
                       </OLCol>
-                    )}
-                  </OLRow>
-                  <div className="project-list-sidebar-survey-wrapper d-md-none">
-                    {/* Omit the survey card in mobile view for now */}
-                  </div>
-                  <div className="mt-1 d-md-none">
-                    <div
-                      role="toolbar"
-                      className="projects-toolbar"
-                      aria-label={t('projects')}
-                    >
-                      <NavigationDropdown activePage="projects" />
-                      <SortByDropdown />
+                      {isLibraryEnabled && showNewProjectButton && (
+                        <OLCol className="ms-auto" xs="auto">
+                          <NewProjectButton
+                            id="new-project-button-projects-table"
+                            showAddAffiliationWidget
+                            align="end"
+                          />
+                        </OLCol>
+                      )}
+                    </OLRow>
+                    <div className="project-list-sidebar-survey-wrapper d-md-none">
+                      {/* Omit the survey card in mobile view for now */}
+                    </div>
+                    <ProjectsToolbarMobile />
+                    <div className="mt-3">
+                      <TableContainer bordered>
+                        {tableTopArea}
+                        <ProjectListTable />
+                      </TableContainer>
+                    </div>
+                    <div className="mt-3">
+                      <LoadMore />
                     </div>
                   </div>
-                  <div className="mt-3">
-                    <TableContainer bordered>
-                      {tableTopArea}
-                      <ProjectListTable />
-                    </TableContainer>
-                  </div>
-                  <div className="mt-3">
-                    <LoadMore />
-                  </div>
-                </div>
+                )}
               </main>
             </div>
             <Footer {...footerProps} />
           </div>
           <CookieBanner />
         </div>
+      </div>
+    </div>
+  )
+}
+
+function ProjectsToolbarMobile() {
+  const { t } = useTranslation()
+
+  return (
+    <div className="mt-1 d-md-none">
+      <div
+        role="toolbar"
+        className="projects-toolbar"
+        aria-label={t('projects')}
+      >
+        <NavigationDropdown activePage="projects" />
+        <SortByDropdown />
       </div>
     </div>
   )

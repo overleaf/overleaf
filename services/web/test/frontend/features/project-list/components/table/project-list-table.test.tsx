@@ -1,6 +1,8 @@
 import { screen, within, fireEvent, waitFor } from '@testing-library/react'
 import { expect } from 'chai'
+import { useEffect } from 'react'
 import ProjectListTable from '../../../../../../frontend/js/features/project-list/components/table/project-list-table'
+import { useProjectListContext } from '@/features/project-list/context/project-list-context'
 import { currentProjects } from '../../fixtures/projects-data'
 import fetchMock from 'fetch-mock'
 import { renderWithProjectListContext } from '../../helpers/render-with-context'
@@ -235,5 +237,57 @@ describe('<ProjectListTable />', function () {
     expect(allCheckboxes.length).to.equal(currentProjects.length + 1)
     const allCheckboxesChecked = allCheckboxes.filter(c => c.checked)
     expect(allCheckboxesChecked.length).to.equal(1)
+  })
+
+  describe('when no projects are visible', function () {
+    function SetSearchText({ value }: { value: string }) {
+      const { setSearchText } = useProjectListContext()
+      useEffect(() => {
+        setSearchText(value)
+      }, [setSearchText, value])
+      return null
+    }
+
+    const renderWithSearchText = (
+      value: string,
+      options?: { projects?: typeof currentProjects }
+    ) =>
+      renderWithProjectListContext(
+        <>
+          <SetSearchText value={value} />
+          <ProjectListTable />
+        </>,
+        options
+      )
+
+    it('names the search query when the shared-workspace split test is enabled', async function () {
+      window.metaAttributesCache.set('ol-splitTestVariants', {
+        'shared-workspace': 'enabled',
+      })
+      renderWithSearchText('Literature review')
+      await fetchMock.callHistory.flush(true)
+
+      await screen.findByText('No projects match “Literature review”')
+    })
+
+    it('does not name the search query when the split test is disabled', async function () {
+      window.metaAttributesCache.set('ol-splitTestVariants', {})
+      renderWithSearchText('Literature review')
+      await fetchMock.callHistory.flush(true)
+
+      await screen.findByText('No projects')
+      expect(screen.queryByText('No projects match “Literature review”')).to.be
+        .null
+    })
+
+    it('shows the generic message when there is no search query', async function () {
+      window.metaAttributesCache.set('ol-splitTestVariants', {
+        'shared-workspace': 'enabled',
+      })
+      renderWithSearchText('', { projects: [] })
+      await fetchMock.callHistory.flush(true)
+
+      await screen.findByText('No projects')
+    })
   })
 })

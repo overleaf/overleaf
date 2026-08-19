@@ -2,6 +2,7 @@
   --ds-nav-active-bg: var(--bg-accent-03);
   --ds-nav-active-color: var(--green-60);
   --theme-toggle-selected-background: var(--green-20);
+  --ds-nav-content-bg-primary: var(--bg-light-primary);
   --ds-nav-content-bg-secondary: var(--bg-light-secondary);
   --table-icon-bg-hover: 27 34 44;
   --themed-dashboard-popover-bg: var(--bg-dark-primary);
@@ -15,6 +16,7 @@
     --ds-nav-active-bg: var(--green-70);
     --ds-nav-active-color: var(--green-10);
     --theme-toggle-selected-background: var(--green-70);
+    --ds-nav-content-bg-primary: var(--bg-dark-primary);
     --ds-nav-content-bg-secondary: var(--bg-dark-secondary);
     --table-icon-bg-hover: 255 255 255;
     --themed-dashboard-popover-bg: var(--bg-light-primary);
@@ -404,11 +406,69 @@ body {
     }
 
     .project-ds-nav-main {
+      display: flex;
+      flex-direction: column;
       min-height: 100%;
       padding: var(--spacing-08) var(--spacing-06);
 
       @include media-breakpoint-up(md) {
         padding: var(--spacing-08);
+      }
+
+      main {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+      }
+
+      .project-ds-empty-project-list {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        flex: 1;
+        padding: var(--spacing-09);
+        background: var(--ds-nav-content-bg-primary);
+        border-radius: var(--border-radius-base);
+
+        @include media-breakpoint-down(md) {
+          margin-top: var(--spacing-06);
+        }
+
+        .project-ds-empty-project-list-inner {
+          display: flex;
+          flex-direction: column;
+          gap: var(--spacing-06);
+          max-width: 560px;
+
+          .project-ds-empty-project-list-icon {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto;
+            height: 80px;
+            width: 80px;
+            padding: var(--spacing-08);
+            border-radius: 50%;
+            background-color: var(--bg-secondary-themed);
+            color: var(--content-secondary-themed);
+
+            .material-symbols {
+              font-size: var(--font-size-08);
+            }
+          }
+
+          .project-ds-empty-project-list-title {
+            @include heading-sm;
+
+            text-align: center;
+            font-weight: 600;
+          }
+
+          .project-ds-empty-project-list-description {
+            text-align: center;
+          }
+        }
       }
     }
 

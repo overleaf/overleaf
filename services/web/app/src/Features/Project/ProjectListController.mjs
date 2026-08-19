@@ -577,6 +577,7 @@ async function projectListPage(req, res, next) {
     'overleaf-library',
     'import-markdown',
     'themed-modals',
+    'shared-workspace',
   ].filter(Boolean)
 
   await Promise.all(

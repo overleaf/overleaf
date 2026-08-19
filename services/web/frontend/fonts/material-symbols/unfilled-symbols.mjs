@@ -5,6 +5,7 @@
 
 export default /** @type {const} */ ([
   'account_balance',
+  'archive',
   'arrow_back_ios_new',
   'arrow_circle_up',
   'auto_delete',
@@ -30,6 +31,7 @@ export default /** @type {const} */ ([
   'edit_square',
   'error',
   'experiment',
+  'find_in_page',
   'find_replace',
   'format_strikethrough',
   'forum',
