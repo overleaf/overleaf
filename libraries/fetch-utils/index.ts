@@ -19,10 +19,13 @@ type FetchRequestOptions = RequestInit & {
   basicAuth?: BasicAuthOptions
 }
 
+type FetchHeaders = NonNullable<RequestInit['headers']>
+
 type ParsedFetchOptions = Omit<
   FetchRequestOptions,
-  'json' | 'signal' | 'basicAuth'
+  'json' | 'signal' | 'basicAuth' | 'headers'
 > & {
+  headers: Headers
   signal?: AbortSignal
 }
 
@@ -45,9 +48,6 @@ async function fetchJsonWithResponse(
   opts: FetchRequestOptions = {}
 ) {
   const { fetchOpts, detachSignal } = parseOpts(opts, url)
-  if (!(fetchOpts.headers instanceof Headers)) {
-    fetchOpts.headers = new Headers(fetchOpts.headers)
-  }
   if (!fetchOpts.headers.has('Accept')) {
     fetchOpts.headers.set('Accept', 'application/json')
   }
@@ -205,9 +205,43 @@ function setupDefaultAgent(fetchOpts: ParsedFetchOptions) {
     url.protocol === 'https:' ? httpsAgent : httpAgent
 }
 
+/**
+ * Normalise the headers option into a Headers instance, which is what
+ * node-fetch builds from it anyway.
+ *
+ * Headers with an unset value are dropped: header values are stringified, so
+ * they would otherwise be sent as the literal string `undefined`.
+ */
+function parseHeaders(headers: FetchHeaders): Headers {
+  // A Headers instance can't hold unset values. Pass it through rather than
+  // iterate it, which would collapse repeated headers into a single
+  // comma-separated value.
+  if (headers instanceof Headers) {
+    return headers
+  }
+  // Not in the TS type, but node-fetch accepts any iterable of entries, such as
+  // a Map or a global Headers instance. Those expose no own enumerable
+  // properties, so they have to be iterated rather than passed to
+  // Object.entries().
+  const entries: Iterable<[string, unknown]> =
+    Symbol.iterator in headers
+      ? (headers as Iterable<[string, unknown]>)
+      : Object.entries(headers)
+  const parsedHeaders = new Headers()
+  for (const [name, value] of entries) {
+    if (value != null) {
+      parsedHeaders.append(name, String(value))
+    }
+  }
+  return parsedHeaders
+}
+
 function parseOpts(opts: FetchRequestOptions, url: string | URL) {
-  const { json, signal, basicAuth, ...rawFetchOpts } = opts
-  const fetchOpts: ParsedFetchOptions = { ...rawFetchOpts }
+  const { json, signal, basicAuth, headers, ...rawFetchOpts } = opts
+  const fetchOpts: ParsedFetchOptions = {
+    ...rawFetchOpts,
+    headers: parseHeaders(headers ?? {}),
+  }
   if (json) {
     setupJsonBody(fetchOpts, json)
   }
@@ -253,9 +287,6 @@ function parseOpts(opts: FetchRequestOptions, url: string | URL) {
 
 function setupJsonBody(fetchOpts: ParsedFetchOptions, json: unknown) {
   fetchOpts.body = JSON.stringify(json)
-  if (!(fetchOpts.headers instanceof Headers)) {
-    fetchOpts.headers = new Headers(fetchOpts.headers)
-  }
   fetchOpts.headers.set('Content-Type', 'application/json')
 }
 
@@ -263,9 +294,6 @@ function setupBasicAuth(
   fetchOpts: ParsedFetchOptions,
   basicAuth: BasicAuthOptions
 ) {
-  if (!(fetchOpts.headers instanceof Headers)) {
-    fetchOpts.headers = new Headers(fetchOpts.headers)
-  }
   fetchOpts.headers.set(
     'Authorization',
     'Basic ' +

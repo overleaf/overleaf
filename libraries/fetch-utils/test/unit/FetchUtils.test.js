@@ -184,6 +184,52 @@ describe('fetch-utils', function () {
         expect(server.lastReq.headers['x-foo']).to.equal('bar')
       })
 
+      it('treats an unset Accept header as absent and applies the default', async function () {
+        await fetchJson(url('/json/hello'), {
+          headers: { Accept: undefined },
+        })
+        expect(server.lastReq.headers.accept).to.equal('application/json')
+      })
+
+      it('omits headers with unset values rather than sending "undefined"', async function () {
+        await fetchJson(url('/json/hello'), {
+          headers: { 'x-some-value': undefined, 'x-other-value': null },
+        })
+        expect(server.lastReq.headers).to.not.have.property('x-some-value')
+        expect(server.lastReq.headers).to.not.have.property('x-other-value')
+      })
+
+      it('omits headers with unset values provided as an array of tuples', async function () {
+        await fetchJson(url('/json/hello'), {
+          headers: [
+            ['X-Foo', 'bar'],
+            ['X-Unset', undefined],
+          ],
+        })
+        expect(server.lastReq.headers['x-foo']).to.equal('bar')
+        expect(server.lastReq.headers).to.not.have.property('x-unset')
+      })
+
+      it('omits headers with unset values provided as a Map', async function () {
+        await fetchJson(url('/json/hello'), {
+          headers: new Map([
+            ['X-Foo', 'bar'],
+            ['X-Unset', undefined],
+          ]),
+        })
+        expect(server.lastReq.headers['x-foo']).to.equal('bar')
+        expect(server.lastReq.headers).to.not.have.property('x-unset')
+      })
+
+      it('keeps headers provided as a global Headers instance', async function () {
+        // Not an instance of node-fetch's Headers: it exposes no own
+        // enumerable properties to iterate over.
+        await fetchJson(url('/json/hello'), {
+          headers: new globalThis.Headers({ 'X-Foo': 'bar' }),
+        })
+        expect(server.lastReq.headers['x-foo']).to.equal('bar')
+      })
+
       it('sets a Content-Type header of application/json when sending a JSON body', async function () {
         await fetchJson(url('/json/add'), {
           method: 'POST',
