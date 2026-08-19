@@ -64,7 +64,8 @@
       @include light-buttons;
     }
 
-    .project-ds-nav-page {
+    .project-ds-nav-page,
+    .modal-themed {
       .notification {
         @include dark-notification;
         @include dark-bg;
