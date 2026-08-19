@@ -32,8 +32,7 @@ import { debugConsole } from '@/utils/debugging'
 import { formatCurrency } from '@/shared/utils/currency'
 import { ManagedInstitution } from '../../../../../types/subscription/dashboard/managed-institution'
 import { Publisher } from '../../../../../types/subscription/dashboard/publisher'
-import { formatTime } from '@/features/utils/format-date'
-import { formatPaymentDateTime } from '../util/payment-dates'
+import { formatPaymentDate, formatPaymentDateTime } from '../util/payment-dates'
 
 type SubscriptionDashboardContextValue = {
   groupPlanToChangeToCode: string
@@ -154,10 +153,11 @@ export function SubscriptionDashboardProvider({
       return formatPaymentDateTime(personalSubscription.payment.periodEnd)!
     }
     const pausedDate = new Date(personalSubscription.payment.pausedAt)
-    pausedDate.setMonth(
-      pausedDate.getMonth() + personalSubscription.payment.remainingPauseCycles
+    pausedDate.setUTCMonth(
+      pausedDate.getUTCMonth() +
+        personalSubscription.payment.remainingPauseCycles
     )
-    return formatTime(pausedDate, 'MMMM Do, YYYY')
+    return formatPaymentDate(pausedDate.toISOString())!
   }, [personalSubscription])
 
   useEffect(() => {
