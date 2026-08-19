@@ -198,6 +198,10 @@ describe('ClsiManager', function () {
       clsiCookie: { key: 'clsiserver' },
       safeCompilers: ['pdflatex', 'latex', 'xelatex', 'lualatex'],
       defaultLatexCompiler: 'pdflatex',
+      allowedImageNames: [
+        { imageName: 'mock-image-name', hasCheckpointing: true },
+        { imageName: 'mock-image-name-no-checkpointing' },
+      ],
     }
     ctx.ClsiCacheHandler = {
       clearCache: sinon.stub().resolves(),
@@ -1112,6 +1116,152 @@ describe('ClsiManager', function () {
           sinon.match.any,
           sinon.match({
             json: { compile: { options: { draft: true } } },
+          })
+        )
+      })
+    })
+
+    describe('with the checkpointing option', function () {
+      it('should ask the clsi to enable checkpointing, leaving the image alone', async function (ctx) {
+        await ctx.ClsiManager.promises.sendRequest(
+          null,
+          ctx.project._id,
+          ctx.user_id,
+          {
+            timeout: 100,
+            compileGroup: 'priority',
+            checkpointing: true,
+          }
+        )
+
+        expect(ctx.FetchUtils.fetchStringWithResponse).to.have.been.calledWith(
+          sinon.match.any,
+          sinon.match({
+            json: {
+              compile: {
+                options: {
+                  imageName: ctx.project.imageName,
+                  enableCheckpoint: true,
+                },
+              },
+            },
+          })
+        )
+      })
+
+      it('should not enable checkpointing for a standard compileGroup', async function (ctx) {
+        await ctx.ClsiManager.promises.sendRequest(
+          null,
+          ctx.project._id,
+          ctx.user_id,
+          {
+            timeout: 100,
+            compileGroup: 'standard',
+            checkpointing: true,
+          }
+        )
+
+        expect(ctx.FetchUtils.fetchStringWithResponse).to.have.been.calledWith(
+          sinon.match.any,
+          sinon.match({
+            json: {
+              compile: { options: { enableCheckpoint: false } },
+            },
+          })
+        )
+      })
+
+      it('should not enable checkpointing without the option', async function (ctx) {
+        await ctx.ClsiManager.promises.sendRequest(
+          null,
+          ctx.project._id,
+          ctx.user_id,
+          {
+            timeout: 100,
+            compileGroup: 'priority',
+          }
+        )
+
+        expect(ctx.FetchUtils.fetchStringWithResponse).to.have.been.calledWith(
+          sinon.match.any,
+          sinon.match({
+            json: {
+              compile: {
+                options: {
+                  imageName: ctx.project.imageName,
+                  enableCheckpoint: false,
+                },
+              },
+            },
+          })
+        )
+      })
+
+      it('should not enable checkpointing when the image has no checkpointing build', async function (ctx) {
+        ctx.project.imageName = 'mock-image-name-no-checkpointing'
+        await ctx.ClsiManager.promises.sendRequest(
+          null,
+          ctx.project._id,
+          ctx.user_id,
+          {
+            timeout: 100,
+            compileGroup: 'priority',
+            checkpointing: true,
+          }
+        )
+
+        expect(ctx.FetchUtils.fetchStringWithResponse).to.have.been.calledWith(
+          sinon.match.any,
+          sinon.match({
+            json: {
+              compile: { options: { enableCheckpoint: false } },
+            },
+          })
+        )
+      })
+
+      it('should not enable checkpointing when the project has no image', async function (ctx) {
+        delete ctx.project.imageName
+        await ctx.ClsiManager.promises.sendRequest(
+          null,
+          ctx.project._id,
+          ctx.user_id,
+          {
+            timeout: 100,
+            compileGroup: 'priority',
+            checkpointing: true,
+          }
+        )
+
+        expect(ctx.FetchUtils.fetchStringWithResponse).to.have.been.calledWith(
+          sinon.match.any,
+          sinon.match({
+            json: {
+              compile: { options: { enableCheckpoint: false } },
+            },
+          })
+        )
+      })
+
+      it('should look up the image ignoring the registry host', async function (ctx) {
+        ctx.project.imageName = 'quay.io/sharelatex/mock-image-name'
+        await ctx.ClsiManager.promises.sendRequest(
+          null,
+          ctx.project._id,
+          ctx.user_id,
+          {
+            timeout: 100,
+            compileGroup: 'priority',
+            checkpointing: true,
+          }
+        )
+
+        expect(ctx.FetchUtils.fetchStringWithResponse).to.have.been.calledWith(
+          sinon.match.any,
+          sinon.match({
+            json: {
+              compile: { options: { enableCheckpoint: true } },
+            },
           })
         )
       })

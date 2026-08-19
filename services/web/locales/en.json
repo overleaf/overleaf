@@ -1285,6 +1285,8 @@
   "increased_ai_allowance": "Increased AI allowance",
   "increased_ai_allowance_tooltip": "10 AI uses per day across all AI tools.",
   "increased_compile_timeout": "Increased compile timeout",
+  "incremental_compiles_are_on": "Faster recompiles are on",
+  "incremental_compiles_reusing_last_compile": "We’re reusing part of your last compile to speed things up. It’s experimental, so if your PDF or logs look wrong, turn it off by <0>leaving the Labs experiment</0>, then recompile.",
   "individuals": "Individuals",
   "info": "Info",
   "initiator": "Initiator",

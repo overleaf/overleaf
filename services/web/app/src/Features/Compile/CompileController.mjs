@@ -81,13 +81,6 @@ async function _getSplitTestOptions(req, res) {
         { enablePdfCaching: false }
       : { enablePdfCaching, pdfCachingMinChunkSize }
 
-  const enableCheckpoint = await SplitTestHandler.promises.featureFlagEnabled(
-    req,
-    res,
-    'compile-with-checkpoint',
-    { includeReferer: true }
-  )
-
   const enablePng2Pdf = await SplitTestHandler.promises.featureFlagEnabled(
     req,
     res,
@@ -100,12 +93,24 @@ async function _getSplitTestOptions(req, res) {
       ? { enablePng2Pdf: false }
       : { enablePng2Pdf }
 
+  const checkpointingEnabled =
+    await SplitTestHandler.promises.featureFlagEnabled(
+      req,
+      res,
+      'compile-with-checkpoint',
+      { includeReferer: true }
+    )
+
+  const checkpointCompilesOptions = {
+    enableCheckpointCompiles: checkpointingEnabled,
+  }
+
   return {
     compileFromHistory,
     pdfDownloadDomain,
     ...pdfCachingOptions,
-    enableCheckpoint,
     ...png2PdfOptions,
+    ...checkpointCompilesOptions,
   }
 }
 
@@ -454,18 +459,18 @@ const _CompileController = {
       pdfCachingMinChunkSize,
       pdfDownloadDomain,
       compileFromHistory,
-      enableCheckpoint,
       enablePng2Pdf,
+      enableCheckpointCompiles,
     } = await _getSplitTestOptions(req, res)
     if (Features.hasFeature('saas')) {
       options.compileFromClsiCache = true
       options.populateClsiCache = true
       options.compileFromHistory = compileFromHistory
-      if (enableCheckpoint) {
-        options.enableCheckpoint = enableCheckpoint
-      }
       if (enablePng2Pdf) {
         options.png2pdf = enablePng2Pdf
+      }
+      if (enableCheckpointCompiles) {
+        options.checkpointing = true
       }
     }
     options.enablePdfCaching = enablePdfCaching

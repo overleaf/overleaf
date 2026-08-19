@@ -1013,6 +1013,8 @@
   "increase_indent": "",
   "increased_ai_allowance": "",
   "increased_compile_timeout": "",
+  "incremental_compiles_are_on": "",
+  "incremental_compiles_reusing_last_compile": "",
   "info": "",
   "inline": "",
   "inline_math": "",

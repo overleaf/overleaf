@@ -189,13 +189,13 @@ function _imageAllowed(
 }
 
 async function getAllowedImagesForUser(req, res, user) {
-  let images = Settings.allowedImageNames || []
+  const images = Settings.allowedImageNames || []
 
   const alphaImagesAllowed = Boolean(user?.alphaProgram)
   const monthlyExperimentalImagesAllowed =
     await _monthlyExperimentalImageAllowed(req, res)
 
-  images = images.map(image => {
+  return images.map(image => {
     return {
       ...image,
       allowed: _imageAllowed(
@@ -206,6 +206,4 @@ async function getAllowedImagesForUser(req, res, user) {
       rolling: image.monthlyExperimental,
     }
   })
-
-  return images
 }

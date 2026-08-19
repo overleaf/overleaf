@@ -170,7 +170,7 @@ async function doCompile(request, stats, timings) {
   )
 
   // set up environment variables for chktex
-  const env = {
+  let env = {
     OVERLEAF_PROJECT_ID: request.project_id,
   }
   if (Settings.texliveOpenoutAny && Settings.texliveOpenoutAny !== '') {
@@ -194,10 +194,11 @@ async function doCompile(request, stats, timings) {
     }
   }
 
-  // Pass through checkpoint setting
-  if (request.enableCheckpoint) {
-    env.ENABLE_CHECKPOINT = '1'
-  }
+  // the requested compile options may need a variant of the requested image,
+  // which brings its own environment
+  const imageVariantSettings = _getImageVariantSettings(request)
+  request.imageName = imageVariantSettings.imageName
+  env = { ...env, ...imageVariantSettings.env }
 
   const compileStart = Date.now()
 
@@ -769,10 +770,45 @@ function _parseWordcountFromOutput(output) {
   return results
 }
 
+function _getAllowedImages() {
+  return Settings.clsi?.docker?.allowedImages
+}
+
 function _isImageNameAllowed(imageName) {
-  const ALLOWED_IMAGES =
-    Settings.clsi && Settings.clsi.docker && Settings.clsi.docker.allowedImages
-  return !ALLOWED_IMAGES || ALLOWED_IMAGES.includes(imageName)
+  const allowedImages = _getAllowedImages()
+  return !allowedImages || allowedImages.includes(imageName)
+}
+
+// Variants are images built on top of a base image, tagged with a suffix, eg
+// texlive-full:2026.1.checkpointing is the checkpointing variant of
+// texlive-full:2026.1. Returns the settings needed to compile the request on
+// the variant its options call for: the image to run and the environment that
+// image needs. Falls back to the requested image when no variant applies, or
+// when the variant is not available on this host.
+function _getImageVariantSettings(request) {
+  const { imageName } = request
+
+  // checkpointing compiles run on the checkpointing variant of the image
+  if (request.enableCheckpoint) {
+    const checkpointingImageName = `${imageName}.checkpointing`
+    if (imageName && _getAllowedImages()?.includes(checkpointingImageName)) {
+      return {
+        imageName: checkpointingImageName,
+        env: { ENABLE_CHECKPOINT: '1' },
+      }
+    }
+    // variant either doesnt exist when it should, or user was able to make a request they shouldnt be able to
+    logger.error(
+      {
+        projectId: request.project_id,
+        userId: request.user_id,
+        imageName,
+      },
+      'no checkpointing variant available for image, compiling without it'
+    )
+  }
+
+  return { imageName, env: {} }
 }
 
 function _emitMetrics(request, status, stats, timings) {

@@ -1,3 +1,4 @@
+import Path from 'node:path'
 import { callbackify } from 'node:util'
 import { callbackifyMultiResult } from '@overleaf/promise-utils'
 import {
@@ -1184,7 +1185,6 @@ function _finaliseRequest(projectId, options, project, docs, files) {
   const hasPremiumCompiles = ['alpha', 'priority'].includes(
     options.compileGroup
   )
-
   return {
     compile: {
       options: {
@@ -1197,6 +1197,11 @@ function _finaliseRequest(projectId, options, project, docs, files) {
         draft: Boolean(options.draft),
         // enable for premium compiles only
         png2pdf: Boolean(options.png2pdf) && hasPremiumCompiles,
+        // enable for premium compiles on an image that has a checkpointing build
+        enableCheckpoint:
+          Boolean(options.checkpointing) &&
+          hasPremiumCompiles &&
+          _imageHasCheckpointing(project.imageName),
         stopOnFirstError: Boolean(options.stopOnFirstError),
         check: options.check,
         syncType: options.syncType,
@@ -1213,7 +1218,6 @@ function _finaliseRequest(projectId, options, project, docs, files) {
         enablePdfCaching:
           (Settings.enablePdfCaching && options.enablePdfCaching) || false,
         pdfCachingMinChunkSize: options.pdfCachingMinChunkSize,
-        enableCheckpoint: Boolean(options.enableCheckpoint),
         flags,
         metricsMethod: options.compileGroup,
         metricsPath: options.metricsPath,
@@ -1226,6 +1230,21 @@ function _finaliseRequest(projectId, options, project, docs, files) {
       resources,
     },
   }
+}
+
+// checkpointing compiles run on a checkpointing build of the project's image,
+// which is only available for some TeX Live years
+function _imageHasCheckpointing(imageName) {
+  if (!imageName) {
+    return false
+  }
+  // allowedImageNames holds bare image names, so drop the hosting URL first
+  const bareImageName = Path.basename(imageName)
+  return Boolean(
+    Settings.allowedImageNames?.find(
+      allowedImage => allowedImage.imageName === bareImageName
+    )?.hasCheckpointing
+  )
 }
 
 async function buildDocumentConversionRequest(projectId, userId, options) {

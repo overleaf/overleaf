@@ -38,7 +38,9 @@ function PdfPreviewHybridToolbar() {
 
 function PdfPreviewHybridToolbarInner() {
   const { focusMode } = useLayoutContext()
-  const showCompileTimer = useFeatureFlag('compile-with-checkpoint')
+  const debugTimer =
+    new URLSearchParams(window.location.search).get('compile-timer') === 'true'
+  const showCompileTimer = useFeatureFlag('show-compile-timer') || debugTimer
 
   return (
     <>
