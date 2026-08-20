@@ -29,7 +29,7 @@ const uploadProjectSchema = z.object({
   body: z.strictObject({
     name: z.string().nonempty(),
     type: uploadMetaTypeSchema,
-    relativePath: zz.filepath().optional(),
+    relativePath: zz.filepath().or(z.literal('')).optional(),
   }),
   file: zz.uploadedFile(),
 })
@@ -47,7 +47,7 @@ const uploadFileSchema = z.object({
     // {success:false, error:'invalid_filename'} response instead of a
     // generic validation error
     name: z.string().optional(),
-    relativePath: zz.filepath().optional(),
+    relativePath: zz.filepath().or(z.literal('')).optional(),
     type: uploadMetaTypeSchema,
     targetFolderId: zz.objectId().optional(),
   }),
@@ -63,7 +63,7 @@ const importDocumentSchema = z.object({
   }),
   body: z.strictObject({
     name: z.string().nonempty(),
-    relativePath: zz.filepath().optional(),
+    relativePath: zz.filepath().or(z.literal('')).optional(),
     type: uploadMetaTypeSchema,
   }),
   file: zz.uploadedFile(),
