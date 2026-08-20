@@ -111,6 +111,18 @@ function compareFeatures(currentFeatures, expectedFeatures) {
   return mismatchReasons
 }
 
+// Compile groups that count as having premium compiles available.
+const PREMIUM_COMPILE_GROUPS = ['alpha', 'priority']
+
+/**
+ * Whether a feature set (or a resolved set of compile limits) has premium
+ * compiles available. Takes anything with a `compileGroup`, so it works for
+ * both a user's features and the limits resolved for a compile.
+ */
+function hasPremiumCompiles(features) {
+  return PREMIUM_COMPILE_GROUPS.includes(features?.compileGroup)
+}
+
 function getMatchedFeatureSet(features) {
   for (const [name, featureSet] of Object.entries(Settings.features)) {
     if (_.isEqual(features, featureSet)) {
@@ -125,5 +137,6 @@ export default {
   computeFeatureSet,
   isFeatureSetBetter,
   compareFeatures,
+  hasPremiumCompiles,
   getMatchedFeatureSet,
 }

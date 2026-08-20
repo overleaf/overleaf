@@ -150,4 +150,26 @@ describe('FeaturesHelper', function () {
       expect(result3).to.be.true
     })
   })
+
+  describe('hasPremiumCompiles', function () {
+    it('should be true for premium compile groups', function (ctx) {
+      expect(
+        ctx.FeaturesHelper.hasPremiumCompiles({ compileGroup: 'priority' })
+      ).to.be.true
+      expect(ctx.FeaturesHelper.hasPremiumCompiles({ compileGroup: 'alpha' }))
+        .to.be.true
+    })
+
+    it('should be false for the standard compile group', function (ctx) {
+      expect(
+        ctx.FeaturesHelper.hasPremiumCompiles({ compileGroup: 'standard' })
+      ).to.be.false
+    })
+
+    it('should be false when the compile group is missing', function (ctx) {
+      expect(ctx.FeaturesHelper.hasPremiumCompiles({})).to.be.false
+      expect(ctx.FeaturesHelper.hasPremiumCompiles(undefined)).to.be.false
+      expect(ctx.FeaturesHelper.hasPremiumCompiles(null)).to.be.false
+    })
+  })
 })

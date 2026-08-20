@@ -98,6 +98,9 @@ async function createSplitTest(
     labsDescription: labsInfo.description,
     labsIcon: labsInfo.icon,
     labsSuccessNotification: labsInfo.successNotification,
+    labsRequirePremiumCompiles: labsInfo.requirePremiumCompiles
+      ? true
+      : undefined,
     versions: [
       {
         versionNumber: 1,
@@ -177,6 +180,11 @@ async function updateSplitTestInfo(name, info, labsInfo) {
     splitTest.labsDescription = labsInfo.description
     splitTest.labsIcon = labsInfo.icon
     splitTest.labsSuccessNotification = labsInfo.successNotification
+    // unset rather than stored as false, so turning the requirement back off
+    // leaves the split test as it was before it was ever set
+    splitTest.labsRequirePremiumCompiles = labsInfo.requirePremiumCompiles
+      ? true
+      : undefined
   }
   return _saveSplitTest(splitTest)
 }

@@ -9,6 +9,7 @@ import SplitTestCache from './SplitTestCache.mjs'
 import { SplitTest } from '../../models/SplitTest.mjs'
 import UserAnalyticsDataCache from '../Analytics/UserAnalyticsDataCache.mjs'
 import Features from '../../infrastructure/Features.mjs'
+import Modules from '../../infrastructure/Modules.mjs'
 import SplitTestUtils from './SplitTestUtils.mjs'
 import Settings from '@overleaf/settings'
 import SessionManager from '../Authentication/SessionManager.mjs'
@@ -923,7 +924,10 @@ async function _loadSplitTestInfoInLocals(locals, splitTestName, session) {
       badgeInfo: splitTest.badgeInfo?.[phase],
     }
 
-    if (phase === 'labs') {
+    if (
+      phase === 'labs' &&
+      (await _userMeetsLabsRequirements(splitTest, session))
+    ) {
       const variant = currentVersion.variants?.[0]
       info.labsDetails = {
         title: splitTest.labsTitle || '',
@@ -956,6 +960,38 @@ async function _loadSplitTestInfoInLocals(locals, splitTestName, session) {
     LocalsHelper.setSplitTestInfo(locals, splitTestName, {
       missing: true,
     })
+  }
+}
+
+/**
+ * Whether the user meets the requirements a labs experiment declares, e.g.
+ * having premium compiles available.
+ *
+ * The check lives in the labs module, which owns both the list of requirements
+ * and the user lookup they need, so this is a no-op when that module is not
+ * loaded. Experiments the user does not qualify for are left out of the labs
+ * details, and so never reach the frontend.
+ *
+ * @param {object} splitTest a labs-phase split test
+ * @param {object} session the request session
+ * @returns {Promise<boolean>}
+ */
+async function _userMeetsLabsRequirements(splitTest, session) {
+  try {
+    const results = await Modules.promises.hooks.fire(
+      'userMeetsLabsExperimentRequirements',
+      session,
+      splitTest
+    )
+    return results.every(result => result !== false)
+  } catch (error) {
+    // leave the experiment out rather than advertise one the user may not be
+    // able to opt into. The opt-in endpoint enforces the same requirements.
+    logger.warn(
+      { err: error, splitTestName: splitTest.name },
+      'failed to check labs experiment requirements'
+    )
+    return false
   }
 }
 
