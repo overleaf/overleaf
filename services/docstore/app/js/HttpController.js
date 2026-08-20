@@ -6,7 +6,7 @@ import Errors from './Errors.js'
 import Settings from '@overleaf/settings'
 import { expressify } from '@overleaf/promise-utils'
 import { parseReq, z, zz } from '@overleaf/validation-tools'
-import * as schemas from './schemas.js'
+import rangesSchemas from '@overleaf/ranges-tracker/schemas.js'
 
 const projectParamsSchema = z.object({
   params: z.strictObject({
@@ -73,7 +73,7 @@ const updateDocSchema = z.object({
   body: z.strictObject({
     lines: z.array(z.string()),
     version: z.number(),
-    ranges: schemas.ranges,
+    ranges: rangesSchemas.ranges,
   }),
 })
 

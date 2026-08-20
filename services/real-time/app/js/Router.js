@@ -40,7 +40,10 @@ const applyOtUpdateSchema = z.strictObject({
     lastV: z.number().optional(),
     meta: z
       .strictObject({
-        tc: z.string().optional(),
+        // the seed RangesTracker builds tracked-change ids from: the first 18
+        // characters of an ObjectId, leaving 6 for the increment part, see
+        // RangesTracker.generateIdSeed
+        tc: zz.hex().length(18).optional(),
       })
       .optional(),
     op: z
@@ -62,10 +65,7 @@ const applyOtUpdateSchema = z.strictObject({
             z.strictObject({
               c: z.string(),
               p: z.number().int().min(0),
-              // comment thread ids are usually ObjectIds, but legacy
-              // documents carry arbitrary strings (see docstore's ranges
-              // schema for the same caveat) -- kept as a plain string
-              t: z.string(),
+              t: zz.objectId(),
               u: z.boolean().optional(),
             })
           )

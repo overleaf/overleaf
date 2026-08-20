@@ -11,7 +11,7 @@ const {
   zz,
 } = require('@overleaf/validation-tools')
 const { rawStringFileData } = require('overleaf-editor-core/lib/schemas')
-const schemas = require('../../../../app/js/schemas')
+const schemas = require('@overleaf/ranges-tracker/schemas')
 const app = express()
 const MAX_REQUEST_SIZE = 2 * (2 * 1024 * 1024 + 64 * 1024)
 

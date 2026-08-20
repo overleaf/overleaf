@@ -1,46 +1,7 @@
 import { db, ObjectId } from '../../../../app/src/infrastructure/mongodb.mjs'
 import AbstractMockApi from './AbstractMockApi.mjs'
 import { parseReq, z, zz } from '@overleaf/validation-tools'
-
-// Mirrors services/docstore/app/js/schemas.js (this mock stands in for
-// docstore's own API in web's acceptance tests).
-const insertOp = z.strictObject({
-  i: z.string(),
-  p: z.number().int().min(0),
-  u: z.boolean().optional(),
-  fixedRemoveChange: z.boolean().optional(),
-})
-const deleteOp = z.strictObject({
-  d: z.string(),
-  p: z.number().int().min(0),
-  u: z.boolean().optional(),
-  fixedRemoveChange: z.boolean().optional(),
-})
-const commentOp = z.strictObject({
-  c: z.string().optional(),
-  p: z.number().int().min(0).optional(),
-  t: z.string().optional(),
-  u: z.boolean().optional(),
-  resolved: z.boolean().optional(),
-})
-const rangeMetadata = z.strictObject({
-  user_id: z.string().optional(),
-  ts: z.string().optional(),
-})
-const comment = z.strictObject({
-  id: z.string().optional(),
-  op: commentOp,
-  metadata: rangeMetadata.optional(),
-})
-const trackedChange = z.strictObject({
-  id: z.string().optional(),
-  op: insertOp.or(deleteOp).optional(),
-  metadata: rangeMetadata.optional(),
-})
-const rangesSchema = z.strictObject({
-  comments: z.array(comment).optional(),
-  changes: z.array(trackedChange).optional(),
-})
+import rangesSchemas from '@overleaf/ranges-tracker/schemas.js'
 
 const docParamsSchema = z.strictObject({
   projectId: zz.objectId(),
@@ -52,7 +13,7 @@ const updateDocSchema = z.object({
   body: z.strictObject({
     lines: z.array(z.string()),
     version: z.number(),
-    ranges: rangesSchema,
+    ranges: rangesSchemas.ranges,
   }),
 })
 

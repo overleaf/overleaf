@@ -7158,6 +7158,7 @@ __metadata:
     "@overleaf/o-error": "workspace:*"
     "@overleaf/object-persistor": "workspace:*"
     "@overleaf/promise-utils": "workspace:*"
+    "@overleaf/ranges-tracker": "workspace:*"
     "@overleaf/settings": "workspace:*"
     "@overleaf/stream-utils": "npm:^0.1.0"
     "@overleaf/validation-tools": "workspace:*"
@@ -7619,6 +7620,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@overleaf/ranges-tracker@workspace:libraries/ranges-tracker"
   dependencies:
+    "@overleaf/validation-tools": "workspace:*"
     "@types/node": "npm:^24.5.2"
     chai: "npm:^4.3.6"
     core-js: "npm:~3.46.0"

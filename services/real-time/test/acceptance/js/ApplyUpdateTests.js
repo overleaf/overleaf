@@ -340,7 +340,7 @@ describe('applyOtUpdate', function () {
   describe('when authorized to read-only with a comment update', function () {
     before(function (done) {
       this.comment_update = {
-        op: [{ c: 'foo', p: 42, t: '1234' }],
+        op: [{ c: 'foo', p: 42, t: FixturesManager.getRandomId() }],
         v: 42,
       }
       return async.series(
@@ -860,6 +860,201 @@ describe('applyOtUpdate', function () {
             return FixturesManager.setUpProject(
               {
                 privilegeLevel: 'readOnly',
+              },
+              (e, { project_id: projectId, user_id: userId }) => {
+                this.project_id = projectId
+                this.user_id = userId
+                return cb(e)
+              }
+            )
+          },
+
+          cb => {
+            return FixturesManager.setUpDoc(
+              this.project_id,
+              { lines: this.lines, version: this.version, ops: this.ops },
+              (e, { doc_id: docId }) => {
+                this.doc_id = docId
+                return cb(e)
+              }
+            )
+          },
+
+          cb => {
+            this.client = RealTimeClient.connect(this.project_id, cb)
+          },
+
+          cb => {
+            return this.client.emit('joinDoc', this.doc_id, cb)
+          },
+
+          cb => {
+            return this.client.emit(
+              'applyOtUpdate',
+              this.doc_id,
+              this.update,
+              error => {
+                this.error = error
+                return cb()
+              }
+            )
+          },
+        ],
+        done
+      )
+    })
+
+    it('should return an error', function () {
+      return expect(this.error).to.exist
+    })
+
+    it('should disconnect the client', function (done) {
+      return setTimeout(() => {
+        this.client.socket.connected.should.equal(false)
+        return done()
+      }, 300)
+    })
+
+    return it('should not put the update in redis', function (done) {
+      rclient.llen(
+        redisSettings.documentupdater.key_schema.pendingProjectUpdates({
+          project_id: this.project_id,
+        }),
+        (error, len) => {
+          if (error) return done(error)
+          len.should.equal(0)
+          return done()
+        }
+      )
+      return null
+    })
+  })
+
+  describe('when authorized with a tracked change id seed', function () {
+    before(function (done) {
+      // RangesTracker seeds are the first 18 characters of an ObjectId
+      this.id_seed = FixturesManager.getRandomId().slice(0, 18)
+      this.update = {
+        op: [{ i: 'foo', p: 42 }],
+        v: 42,
+        meta: { tc: this.id_seed },
+      }
+      return async.series(
+        [
+          cb => {
+            return FixturesManager.setUpProject(
+              {
+                privilegeLevel: 'readAndWrite',
+              },
+              (e, { project_id: projectId, user_id: userId }) => {
+                this.project_id = projectId
+                this.user_id = userId
+                return cb(e)
+              }
+            )
+          },
+
+          cb => {
+            return FixturesManager.setUpDoc(
+              this.project_id,
+              { lines: this.lines, version: this.version, ops: this.ops },
+              (e, { doc_id: docId }) => {
+                this.doc_id = docId
+                return cb(e)
+              }
+            )
+          },
+
+          cb => {
+            this.client = RealTimeClient.connect(this.project_id, cb)
+          },
+
+          cb => {
+            return this.client.emit('joinDoc', this.doc_id, cb)
+          },
+
+          cb => {
+            return this.client.emit(
+              'applyOtUpdate',
+              this.doc_id,
+              this.update,
+              cb
+            )
+          },
+        ],
+        done
+      )
+    })
+
+    it('should push the project into the pending updates list', function (done) {
+      getPendingUpdatesList((error, ...rest) => {
+        if (error) return done(error)
+        const [projectId] = Array.from(rest[0])
+        projectId.should.equal(this.project_id)
+        return done()
+      })
+      return null
+    })
+
+    it('should push the update into redis with the id seed', function (done) {
+      rclient.lrange(
+        redisSettings.documentupdater.key_schema.pendingProjectUpdates({
+          project_id: this.project_id,
+        }),
+        0,
+        -1,
+        (error, ...rest) => {
+          if (error) return done(error)
+          let [update] = Array.from(rest[0])
+          update = JSON.parse(update)
+          update.op.should.deep.equal(this.update.op)
+          update.meta.should.include({
+            source: this.client.publicId,
+            user_id: this.user_id,
+            tc: this.id_seed,
+          })
+          return done()
+        }
+      )
+      return null
+    })
+
+    return after(function (done) {
+      return async.series(
+        [
+          cb => clearPendingUpdatesList(cb),
+          cb =>
+            rclient.del(
+              'DocsWithPendingUpdates',
+              `${this.project_id}:${this.doc_id}`,
+              cb
+            ),
+          cb =>
+            rclient.del(
+              redisSettings.documentupdater.key_schema.pendingProjectUpdates({
+                project_id: this.project_id,
+              }),
+              cb
+            ),
+        ],
+        done
+      )
+    })
+  })
+
+  describe('when authorized with a malformed tracked change id seed', function () {
+    before(function (done) {
+      this.update = {
+        op: [{ i: 'foo', p: 42 }],
+        v: 42,
+        meta: { tc: 'not-an-id-seed' },
+      }
+      return async.series(
+        [
+          cb => {
+            return FixturesManager.setUpProject(
+              {
+                privilegeLevel: 'readAndWrite',
               },
               (e, { project_id: projectId, user_id: userId }) => {
                 this.project_id = projectId

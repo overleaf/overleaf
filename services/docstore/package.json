@@ -23,6 +23,7 @@
     "@overleaf/o-error": "workspace:*",
     "@overleaf/object-persistor": "workspace:*",
     "@overleaf/promise-utils": "workspace:*",
+    "@overleaf/ranges-tracker": "workspace:*",
     "@overleaf/settings": "workspace:*",
     "@overleaf/stream-utils": "^0.1.0",
     "@overleaf/validation-tools": "workspace:*",

@@ -22,6 +22,7 @@
       "@overleaf/piece-table": ["./libraries/piece-table"],
       "@overleaf/promise-utils": ["./libraries/promise-utils"],
       "@overleaf/ranges-tracker": ["./libraries/ranges-tracker"],
+      "@overleaf/ranges-tracker/*": ["./libraries/ranges-tracker/*"],
       "@overleaf/redis-wrapper": ["./libraries/redis-wrapper"],
       "@overleaf/settings": ["./libraries/settings"],
       "@overleaf/stream-utils": ["./libraries/stream-utils"],

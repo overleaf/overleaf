@@ -4,7 +4,7 @@ import {
   RawEditOperation,
 } from 'overleaf-editor-core/lib/types'
 import type { z } from '@overleaf/validation-tools'
-import type * as schemas from './schemas'
+import type rangesSchemas from '@overleaf/ranges-tracker/schemas'
 
 export type OTType = 'sharejs-text-ot' | 'history-ot'
 
@@ -32,25 +32,25 @@ export type HistoryOTEditOperationUpdate = Omit<Update, 'op'> & {
 
 export type Op = InsertOp | DeleteOp | CommentOp | RetainOp
 
-export type InsertOp = z.infer<typeof schemas.insertOp>
+export type InsertOp = z.infer<typeof rangesSchemas.insertOp>
 
 export type RetainOp = {
   r: string
   p: number
 }
 
-export type DeleteOp = z.infer<typeof schemas.deleteOp>
+export type DeleteOp = z.infer<typeof rangesSchemas.deleteOp>
 
-export type CommentOp = z.infer<typeof schemas.commentOp>
+export type CommentOp = z.infer<typeof rangesSchemas.commentOp>
 
 /**
  * Ranges record on a document
  */
-export type Ranges = z.infer<typeof schemas.ranges>
+export type Ranges = z.infer<typeof rangesSchemas.ranges>
 
-export type Comment = z.infer<typeof schemas.comment>
+export type Comment = z.infer<typeof rangesSchemas.comment>
 
-export type TrackedChange = z.infer<typeof schemas.trackedChange>
+export type TrackedChange = z.infer<typeof rangesSchemas.trackedChange>
 
 /**
  * Updates sent to project-history

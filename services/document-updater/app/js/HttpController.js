@@ -1,7 +1,7 @@
 const { expressify } = require('@overleaf/promise-utils')
 const { parseReq, z, zz } = require('@overleaf/validation-tools')
 const editorCoreSchemas = require('overleaf-editor-core/lib/schemas')
-const schemas = require('./schemas')
+const rangesSchemas = require('@overleaf/ranges-tracker/schemas')
 const DocumentManager = require('./DocumentManager')
 const HistoryManager = require('./HistoryManager')
 const ProjectManager = require('./ProjectManager')
@@ -487,15 +487,14 @@ async function deleteMultipleProjects(req, res) {
   res.sendStatus(204) // No Content
 }
 
-// tracked-change ids are RangesTracker ids (seed + increment), not ObjectIds
 const acceptChangesSchema = z.object({
   params: z.strictObject({
     project_id: zz.objectId(),
     doc_id: zz.objectId(),
-    change_id: z.string().min(1).optional(),
+    change_id: zz.objectId().optional(),
   }),
   body: z.strictObject({
-    change_ids: z.array(z.string().min(1)).optional(),
+    change_ids: z.array(zz.objectId()).optional(),
   }),
 })
 
@@ -610,7 +609,7 @@ const addUpdateSchema = z.strictObject({
   id: zz.objectId(),
   pathname: zz.safePath(),
   docLines: z.string().optional(),
-  ranges: schemas.ranges.optional(),
+  ranges: rangesSchemas.ranges.optional(),
   historyRangesSupport: z.boolean().optional(),
   // legacy filestore url for files without a created blob
   url: z.string().nullish(),

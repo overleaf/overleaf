@@ -307,9 +307,9 @@ describe('Ranges', function () {
         historyRangesSupport: true,
       })
       await DocUpdaterClient.preloadDoc(this.project_id, this.doc.id)
-      this.id_seed_1 = 'tc_1'
-      this.id_seed_2 = 'tc_2'
-      this.id_seed_3 = 'tc_3'
+      this.id_seed_1 = '587357bd35e64f6151'
+      this.id_seed_2 = '587357bd35e64f6152'
+      this.id_seed_3 = '587357bd35e64f6153'
 
       this.updates = [
         {
@@ -718,7 +718,7 @@ describe('Ranges', function () {
     before(async function () {
       this.project_id = DocUpdaterClient.randomId()
       this.user_id = DocUpdaterClient.randomId()
-      this.id_seed = DocUpdaterClient.randomId()
+      this.id_seed = '587357bd35e64f6157'
       this.doc = {
         id: DocUpdaterClient.randomId(),
         lines: ['aaa'],

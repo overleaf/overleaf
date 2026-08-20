@@ -15,22 +15,24 @@ describe('DocumentController', function () {
     ctx.doc = { _id: '5c9a5d5b0000000000000002' }
     ctx.doc_lines = ['one', 'two', 'three']
     ctx.version = 42
+    ctx.threadId1 = '5c9a5d5b0000000000000011'
+    ctx.threadId2 = '5c9a5d5b0000000000000012'
     ctx.ranges = {
       comments: [
         {
-          id: 'comment1',
+          id: ctx.threadId1,
           op: {
             c: 'foo',
             p: 123,
-            t: 'comment1',
+            t: ctx.threadId1,
           },
         },
         {
-          id: 'comment2',
+          id: ctx.threadId2,
           op: {
             c: 'bar',
             p: 456,
-            t: 'comment2',
+            t: ctx.threadId2,
           },
         },
       ],
@@ -53,8 +55,8 @@ describe('DocumentController', function () {
       },
     }
     ctx.resolvedThreadIds = [
-      'comment2',
-      'comment4', // Comment in project but not in doc
+      ctx.threadId2,
+      '5c9a5d5b0000000000000014', // Comment in project but not in doc
     ]
 
     ctx.ProjectGetter = {
@@ -159,7 +161,7 @@ describe('DocumentController', function () {
           pathname: ctx.pathname,
           projectHistoryId: ctx.project.overleaf.history.id,
           projectHistoryType: 'project-history',
-          resolvedCommentIds: ['comment2'],
+          resolvedCommentIds: [ctx.threadId2],
           historyRangesSupport: false,
           otMigrationStage: 0,
         })

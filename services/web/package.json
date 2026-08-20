@@ -100,6 +100,7 @@
     "@overleaf/o-error": "workspace:*",
     "@overleaf/object-persistor": "workspace:*",
     "@overleaf/promise-utils": "workspace:*",
+    "@overleaf/ranges-tracker": "workspace:*",
     "@overleaf/redis-wrapper": "workspace:*",
     "@overleaf/settings": "workspace:*",
     "@overleaf/stream-utils": "workspace:*",

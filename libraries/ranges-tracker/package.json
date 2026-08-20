@@ -4,6 +4,7 @@
   "main": "index.cjs",
   "files": [
     "index.cjs",
+    "schemas.js",
     "types"
   ],
   "author": "Overleaf (https://www.overleaf.com)",
@@ -15,6 +16,9 @@
     "test:ci": "yarn run test:unit",
     "test:unit": "mocha --exit test/**/*.{js,cjs}",
     "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@overleaf/validation-tools": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.5.2",

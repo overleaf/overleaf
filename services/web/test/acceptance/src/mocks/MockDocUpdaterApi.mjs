@@ -1,6 +1,7 @@
 import AbstractMockApi from './AbstractMockApi.mjs'
 import { parseReq, z, zz } from '@overleaf/validation-tools'
 import editorCoreSchemas from 'overleaf-editor-core/lib/schemas.js'
+import rangesSchemas from '@overleaf/ranges-tracker/schemas.js'
 
 const docParamsSchema = z.strictObject({
   projectId: zz.objectId(),
@@ -26,48 +27,6 @@ const setDocSchema = z.object({
   }),
 })
 
-// Ranges data as document-updater persists it (RangesTracker format) --
-// mirrors services/document-updater/app/js/schemas.js's `ranges` export
-// (this mock stands in for document-updater's own API in web's acceptance
-// tests).
-const insertOp = z.strictObject({
-  i: z.string(),
-  p: z.number().int().min(0),
-  u: z.boolean().optional(),
-  fixedRemoveChange: z.boolean().optional(),
-})
-const deleteOp = z.strictObject({
-  d: z.string(),
-  p: z.number().int().min(0),
-  u: z.boolean().optional(),
-  fixedRemoveChange: z.boolean().optional(),
-})
-const commentOp = z.strictObject({
-  c: z.string(),
-  p: z.number().int().min(0),
-  t: zz.objectId().optional(),
-  u: z.boolean().optional(),
-  resolved: z.boolean().optional(),
-})
-const rangeMetadata = z.strictObject({
-  user_id: z.string(),
-  ts: z.string(),
-})
-const comment = z.strictObject({
-  id: zz.objectId().optional(),
-  op: commentOp,
-  metadata: rangeMetadata.optional(),
-})
-const trackedChange = z.strictObject({
-  id: z.string().optional(),
-  op: insertOp.or(deleteOp),
-  metadata: rangeMetadata,
-})
-const rangesSchema = z.strictObject({
-  comments: z.array(comment).optional(),
-  changes: z.array(trackedChange).optional(),
-})
-
 // Mirrors services/document-updater/app/js/HttpController.js's
 // updateProjectSchema (renameUpdateSchema/addUpdateSchema) -- this mock's
 // own routes use :projectId/:docId casing rather than document-updater's
@@ -85,7 +44,7 @@ const addUpdateSchema = z.strictObject({
   id: zz.objectId(),
   pathname: zz.safePath(),
   docLines: z.string().optional(),
-  ranges: rangesSchema.optional(),
+  ranges: rangesSchemas.ranges.optional(),
   historyRangesSupport: z.boolean().optional(),
   // legacy filestore url for files without a created blob
   url: z.string().nullish(),

@@ -9,64 +9,7 @@ import { plainTextResponse } from '../../infrastructure/Response.mjs'
 import { expressify } from '@overleaf/promise-utils'
 import Modules from '../../infrastructure/Modules.mjs'
 import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
-
-// Zod schemas for the sharejs-text-ot ranges data (RangesTracker format)
-// that document-updater flushes to this endpoint -- NOT the unrelated
-// overleaf-editor-core StringFileData rawComment/rawTrackedChange shape
-// (that's the canonical history-ot representation, a different shape used
-// elsewhere for linked-file/history payloads).
-//
-// This mirrors document-updater's own app/js/schemas.js (the sender) and
-// docstore's app/js/schemas.js (the next hop, which this data is forwarded
-// to untouched via DocstoreManager) -- see those files' comments for why the
-// fields are this permissive: ids aren't always ObjectIds (RangesTracker ids
-// are seed+increment strings; legacy documents carry arbitrary string thread
-// ids), and history restores send id-less changes/detached comments plus a
-// `resolved` flag.
-const insertOp = z.strictObject({
-  i: z.string(),
-  p: z.number().int().min(0),
-  u: z.boolean().optional(),
-  fixedRemoveChange: z.boolean().optional(),
-})
-
-const deleteOp = z.strictObject({
-  d: z.string(),
-  p: z.number().int().min(0),
-  u: z.boolean().optional(),
-  fixedRemoveChange: z.boolean().optional(),
-})
-
-const commentOp = z.strictObject({
-  c: z.string().optional(),
-  p: z.number().int().min(0).optional(),
-  t: z.string().optional(),
-  u: z.boolean().optional(),
-  // sent by history restores; removed again by RangesManager
-  resolved: z.boolean().optional(),
-})
-
-const rangeMetadata = z.strictObject({
-  user_id: z.string().optional(),
-  ts: z.string().optional(),
-})
-
-const comment = z.strictObject({
-  id: z.string().optional(),
-  op: commentOp,
-  metadata: rangeMetadata.optional(),
-})
-
-const trackedChange = z.strictObject({
-  id: z.string().optional(),
-  op: insertOp.or(deleteOp).optional(),
-  metadata: rangeMetadata.optional(),
-})
-
-const rangesSchema = z.strictObject({
-  comments: z.array(comment).optional(),
-  changes: z.array(trackedChange).optional(),
-})
+import rangesSchemas from '@overleaf/ranges-tracker/schemas.js'
 
 const getDocumentSchema = z.object({
   params: z.strictObject({
@@ -177,7 +120,7 @@ const setDocumentSchema = z.object({
     // history-ot docs) -- never the raw StringFileData shape.
     lines: z.array(z.string()),
     version: z.number().int(),
-    ranges: rangesSchema,
+    ranges: rangesSchemas.ranges,
     lastUpdatedAt: z.coerce.number().int().positive().nullish(),
     lastUpdatedBy: zz.objectId().nullish(),
   }),

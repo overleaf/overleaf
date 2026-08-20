@@ -17,12 +17,23 @@ describe('Getting all docs', function () {
         lines: ['one', 'two', 'three'],
         ranges: {
           comments: [
-            { id: new ObjectId().toString(), op: { t: this.threadId1 } },
+            {
+              id: new ObjectId().toString(),
+              op: {
+                c: 'c',
+                p: 0,
+                t: this.threadId1,
+              },
+            },
           ],
           changes: [
             {
               id: new ObjectId().toString(),
-              metadata: { user_id: 'user-id-1' },
+              op: { d: 'd', p: 1 },
+              metadata: {
+                user_id: 'user-id-1',
+                ts: new Date().toJSON(),
+              },
             },
           ],
         },
@@ -35,7 +46,11 @@ describe('Getting all docs', function () {
           changes: [
             {
               id: new ObjectId().toString(),
-              metadata: { user_id: 'user-id-2' },
+              op: { i: 'd', p: 1 },
+              metadata: {
+                user_id: 'user-id-2',
+                ts: new Date().toJSON(),
+              },
             },
           ],
         },
@@ -46,12 +61,19 @@ describe('Getting all docs', function () {
         lines: ['111', '222', '333'],
         ranges: {
           comments: [
-            { id: new ObjectId().toString(), op: { t: this.threadId2 } },
+            {
+              id: new ObjectId().toString(),
+              op: { c: 'c', p: 1, t: this.threadId2 },
+            },
           ],
           changes: [
             {
               id: new ObjectId().toString(),
-              metadata: { user_id: 'anonymous-user' },
+              op: { d: 'x', p: 1 },
+              metadata: {
+                user_id: 'anonymous-user',
+                ts: new Date().toJSON(),
+              },
             },
           ],
         },
@@ -71,9 +93,21 @@ describe('Getting all docs', function () {
       _id: new ObjectId(),
       lines: ['deleted'],
       ranges: {
-        comments: [{ id: new ObjectId().toString(), op: { t: 'thread-id-3' } }],
+        comments: [
+          {
+            id: new ObjectId().toString(),
+            op: { c: 'c', p: 1, t: new ObjectId().toString() },
+          },
+        ],
         changes: [
-          { id: new ObjectId().toString(), metadata: { user_id: 'user-id-3' } },
+          {
+            id: new ObjectId().toString(),
+            op: { d: 'd', p: 0 },
+            metadata: {
+              user_id: 'user-id-3',
+              ts: new Date().toJSON(),
+            },
+          },
         ],
       },
       rev: 8,
