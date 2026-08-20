@@ -73,7 +73,15 @@ export const ReviewPanelMessage: FC<{
         <div>
           <ReviewPanelEntryUser user={message.user} />
           <div className="review-panel-entry-time">
-            <FormatTimeBasedOnYear date={message.timestamp} />
+            <FormatTimeBasedOnYear
+              date={message.edited_at ?? message.timestamp}
+            />
+            {message.edited_at ? (
+              <>
+                {' '}
+                <span className="message-edited">({t('edited')})</span>
+              </>
+            ) : null}
           </div>
         </div>
 
