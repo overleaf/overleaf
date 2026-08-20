@@ -1232,7 +1232,8 @@ describe('SubscriptionViewModelBuilder', function () {
       const { plans } =
         ctx.SubscriptionViewModelBuilder.buildPlansListForSubscriptionDash(
           undefined,
-          false
+          false,
+          {}
         )
       assert.isTrue(plans.every(plan => plan.listPrice === undefined))
     })

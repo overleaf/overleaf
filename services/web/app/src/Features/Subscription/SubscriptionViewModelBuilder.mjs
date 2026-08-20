@@ -2,7 +2,7 @@
 import Settings from '@overleaf/settings'
 
 import PlansLocator from './PlansLocator.mjs'
-import { getLocalizedPlanPricing } from './PriceVersions.mjs'
+import { getLocalizedPlanPricing, getRoundedTwelfth } from './PriceVersions.mjs'
 import { isStandaloneAiAddOnPlanCode } from './AiHelper.mjs'
 import PaymentProviderEntities from './PaymentProviderEntities.mjs'
 import SubscriptionLocator from './SubscriptionLocator.mjs'
@@ -601,7 +601,7 @@ function buildGroupSubscriptionForView(groupSubscription) {
 /**
  * @param {any} currentPlan
  * @param {boolean} isInTrial
- * @param {object} [options]
+ * @param {object} options
  * @param {string} [options.currency] - the subscription's currency
  * @param {import('../../../../types/subscription/plan').StripeLookupKeyVersion} [options.priceVersion]
  * @param {string} [options.subscriptionPlanCode] - the plan code of the user's
@@ -613,25 +613,33 @@ function buildGroupSubscriptionForView(groupSubscription) {
 function buildPlansListForSubscriptionDash(
   currentPlan,
   isInTrial,
-  { currency, priceVersion, subscriptionPlanCode, subscriptionPlanPrice } = {}
+  { currency, priceVersion, subscriptionPlanCode, subscriptionPlanPrice }
 ) {
   const { allPlans, planCodesChangingAtTermEnd } = buildPlansList(
     currentPlan,
     isInTrial
   )
   const currentPlanCode = subscriptionPlanCode?.split('_')[0]
+  const roundedTwelfth = getRoundedTwelfth(priceVersion)
   const plans = CHANGE_PLAN_MODAL_PLAN_CODES.map(code => allPlans[code])
     .filter(Boolean)
     // shallow copy: these are the shared Settings.plans objects
-    .map(plan => ({
-      ...plan,
-      listPrice:
+    .map(plan => {
+      const listPrice =
         plan.planCode === currentPlanCode && subscriptionPlanPrice != null
           ? subscriptionPlanPrice
           : currency && priceVersion
             ? _getListPriceForPlanChange(plan.planCode, currency, priceVersion)
-            : undefined,
-    }))
+            : undefined
+      const monthlyEquivalentListPrice =
+        plan.annual && listPrice ? roundedTwelfth(listPrice) : undefined
+
+      return {
+        ...plan,
+        listPrice,
+        monthlyEquivalentListPrice,
+      }
+    })
   return {
     plans,
     planCodesChangingAtTermEnd,

@@ -57,6 +57,9 @@ export type Plan = {
   // list price excluding tax, in the subscription's currency, resolved from the
   // user's assigned price version. Only set for the change plan modal.
   listPrice?: number
+  // per-month equivalent of the annual list price, rounded per the price
+  // version's rounding rules. Only set for annual plans in the change plan modal.
+  monthlyEquivalentListPrice?: number
   featureDescription?: Record<string, unknown>[]
   addOns?: AddOn[]
   features?: Features
