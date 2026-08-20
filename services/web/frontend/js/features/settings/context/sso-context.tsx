@@ -56,10 +56,7 @@ export function SSOProvider({ children }: SSOProviderProps) {
       if (!subscriptions[providerId].linked) {
         return Promise.resolve()
       }
-      const body = {
-        link: false,
-        providerId,
-      }
+      const body = { providerId }
 
       return postJSON('/user/oauth-unlink', { body, signal }).then(() => {
         if (isMounted.current) {
