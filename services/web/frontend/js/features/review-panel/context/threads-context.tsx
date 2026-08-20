@@ -38,6 +38,48 @@ import { useReviewPanelViewContext } from './review-panel-view-context'
 
 export type Threads = Record<ThreadId, ReviewPanelCommentThread>
 
+type ThreadMessagePayload = ReviewPanelCommentThreadMessage & {
+  timestamp: number | string | Date
+  edited_at?: number | string | Date
+}
+
+function parseThreadMessage(
+  message: ThreadMessagePayload
+): ReviewPanelCommentThreadMessage {
+  return {
+    ...message,
+    timestamp: new Date(message.timestamp),
+    ...(message.edited_at != null
+      ? { edited_at: new Date(message.edited_at) }
+      : {}),
+  }
+}
+
+function applyMessageEdit(
+  threads: Threads | undefined,
+  threadId: ThreadId,
+  commentId: CommentId,
+  content: string
+): Threads | undefined {
+  if (!threads) {
+    return threads
+  }
+
+  const thread = threads[threadId] ?? { messages: [] }
+
+  return {
+    ...threads,
+    [threadId]: {
+      ...thread,
+      messages: thread.messages.map(message =>
+        message.id === commentId
+          ? { ...message, content, edited_at: new Date() }
+          : message
+      ),
+    },
+  }
+}
+
 export const ThreadsContext = createContext<Threads | undefined>(undefined)
 
 type ThreadsActions = {
@@ -84,7 +126,14 @@ export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
       signal: abortController.signal,
     })
       .then(data => {
-        setData(data)
+        const parsed: Threads = {}
+        for (const [threadId, thread] of Object.entries(data as Threads)) {
+          parsed[threadId as ThreadId] = {
+            ...thread,
+            messages: thread.messages.map(parseThreadMessage),
+          }
+        }
+        setData(parsed)
       })
       .catch(error => {
         debugConsole.error(error)
@@ -115,11 +164,10 @@ export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
                 ...thread,
                 messages: [
                   ...thread.messages,
-                  {
+                  parseThreadMessage({
                     ...comment,
                     user: comment.user, // TODO
-                    timestamp: new Date(comment.timestamp),
-                  },
+                  }),
                 ],
               },
             }
@@ -134,21 +182,7 @@ export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
     socket,
     'edit-message',
     useCallback((threadId: ThreadId, commentId: CommentId, content: string) => {
-      setData(value => {
-        if (value) {
-          const thread = value[threadId] ?? { messages: [] }
-
-          return {
-            ...value,
-            [threadId]: {
-              ...thread,
-              messages: thread.messages.map(message =>
-                message.id === commentId ? { ...message, content } : message
-              ),
-            },
-          }
-        }
-      })
+      setData(value => applyMessageEdit(value, threadId, commentId, content))
     }, [])
   )
 
@@ -254,10 +288,7 @@ export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
             resolved_by_user: thread.resolved_by_user,
           }
           for (const message of thread.messages) {
-            newThreadData.messages.push({
-              ...message,
-              timestamp: new Date(message.timestamp),
-            })
+            newThreadData.messages.push(parseThreadMessage(message))
           }
           newThreads[threadId as ThreadId] = newThreadData
         }
@@ -328,6 +359,7 @@ export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
           `/project/${projectId}/thread/${threadId}/messages/${commentId}/edit`,
           { body: { content } }
         )
+        setData(value => applyMessageEdit(value, threadId, commentId, content))
       },
       async deleteMessage(threadId: ThreadId, commentId: CommentId) {
         await deleteJSON(
