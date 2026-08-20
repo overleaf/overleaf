@@ -31,7 +31,7 @@
     "typescript": "^5.9.3"
   },
   "engines": {
-    "node": ">=20.19.0"
+    "node": ">=24.18.1"
   },
   "resolutions": {
     "@xmldom/xmldom": "0.8.13",
