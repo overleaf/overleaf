@@ -167,14 +167,6 @@ const compileSchema = z.object({
     editorId: z.uuid().optional(),
     rootResourcePath: zz.filepath().optional(),
     rootDoc_id: zz.objectId().nullish(),
-    // legacy nested duplicate of rootDoc_id, only sent by old cached
-    // frontend bundles during a deploy transition -- can be removed once
-    // that's no longer a concern. Deliberately non-strict: this object's
-    // shape before that cleanup isn't fully known here, and the only field
-    // ever read from it is rootDoc_id.
-    settingsOverride: z
-      .object({ rootDoc_id: zz.objectId().nullish() })
-      .optional(),
     compiler: z.string().optional(),
     draft: z.boolean().optional(),
     png2pdf: z.boolean().optional(),
@@ -437,9 +429,6 @@ const _CompileController = {
 
     if (body.rootDoc_id) {
       options.rootDoc_id = body.rootDoc_id
-    } else if (body.settingsOverride && body.settingsOverride.rootDoc_id) {
-      // Can be removed after deploy
-      options.rootDoc_id = body.settingsOverride.rootDoc_id
     }
     if (body.compiler) {
       options.compiler = body.compiler
