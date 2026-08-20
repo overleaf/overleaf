@@ -50,6 +50,7 @@ const commonDomains = [
   'yeah',
   'web',
   'foxmail',
+  'passmail',
 ] as const
 
 for (const domain of commonDomains) {
