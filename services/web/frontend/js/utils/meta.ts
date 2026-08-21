@@ -177,6 +177,7 @@ export interface Meta {
     nBinaryBlobs: number
     owned?: boolean
   }[]
+  'ol-homepageAnimatedWords': string[]
   'ol-i18n': { currentLangCode: string }
   'ol-imageNames': ImageName[]
   'ol-inactiveTutorials': string[]
