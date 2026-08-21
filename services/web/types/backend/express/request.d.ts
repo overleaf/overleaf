@@ -1,6 +1,7 @@
 import 'express'
 import OAuth2Server from '@node-oauth/oauth2-server'
 import type SessionData from 'express-session'
+import type { Capability } from '../../capabilities'
 
 // Request-scoped logger attached by @overleaf/metrics http.monitor() middleware.
 // See libraries/metrics/http.js RequestLogger class.
@@ -20,11 +21,17 @@ declare module 'express' {
     oauth_user?: OAuth2Server.User
     logger: RequestLogger
     i18n: {
+      language: string
       translate(
         key: string,
         vars?: Record<string, any>,
         components?: any
       ): string
     }
+    // Set by PermissionMiddleware
+    managedBy?: any
+    isManagedGroupAdmin?: boolean
+    capabilitySet?: Set<Capability>
+    assertPermission(capability: string): void
   }
 }

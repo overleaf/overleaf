@@ -41,6 +41,9 @@ const SUBSCRIPTION_PAUSED_REDIRECT_PATH =
  * @typedef {import('../../../../types/subscription/currency').CurrencyCode} CurrencyCode
  * @typedef {import('./PaymentProviderEntities.mjs').PaymentProviderSubscription} PaymentProviderSubscription
  * @typedef {import('../../../../types/subscription/plan').Plan} Plan
+ * @typedef {import('express').Request} Request
+ * @typedef {import('express').Response} Response
+ * @typedef {import('express').NextFunction} NextFunction
  */
 
 /**
@@ -161,8 +164,8 @@ const userSubscriptionPageSchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
+ * @param {Request} req
+ * @param {Response} res
  */
 async function userSubscriptionPage(req, res) {
   const { query } = parseReq(req, userSubscriptionPageSchema, {
@@ -378,8 +381,8 @@ const successfulSubscriptionFallbackSchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
+ * @param {Request} req
+ * @param {Response} res
  */
 async function successfulSubscription(req, res) {
   const { query } = parseReq(req, successfulSubscriptionSchema, {
@@ -431,9 +434,9 @@ const pauseSubscriptionSchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 async function pauseSubscription(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
@@ -487,9 +490,9 @@ async function pauseSubscription(req, res, next) {
 }
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 async function resumeSubscription(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
@@ -508,9 +511,9 @@ async function resumeSubscription(req, res, next) {
 }
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 async function cancelSubscription(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
@@ -527,12 +530,10 @@ async function cancelSubscription(req, res, next) {
 }
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
- * @returns {Promise<void>}
+ * @param {Request} req
+ * @param {Response} res
  */
-async function canceledSubscription(req, res, next) {
+async function canceledSubscription(req, res) {
   return res.render('subscriptions/canceled-subscription-react', {
     title: 'subscription_canceled',
     user: sanitizeSessionUserForFrontEnd(
@@ -542,9 +543,9 @@ async function canceledSubscription(req, res, next) {
 }
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 function cancelV1Subscription(req, res, next) {
   const userId = SessionManager.getLoggedInUserId(req.session)
@@ -570,8 +571,8 @@ const previewAddonPurchaseSchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
+ * @param {Request} req
+ * @param {Response} res
  */
 async function previewAddonPurchase(req, res) {
   const { params } = parseReq(req, previewAddonPurchaseSchema, {
@@ -589,11 +590,10 @@ async function previewAddonPurchase(req, res) {
 }
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
  */
-async function purchaseAddon(req, res, next) {
+async function purchaseAddon(req, res) {
   return res.sendStatus(404)
 }
 
@@ -604,9 +604,9 @@ const removeAddonSchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 async function removeAddon(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
@@ -662,8 +662,8 @@ const reactivateAddonSchema = z.object({
  * Reactivate an add-on pending cancellation
  *
  * This "cancels" the cancellation.
- * @param {any} req
- * @param {any} res
+ * @param {Request} req
+ * @param {Response} res
  */
 async function reactivateAddon(req, res) {
   const user = SessionManager.getSessionUser(req.session)
@@ -701,11 +701,10 @@ const previewSubscriptionSchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
  */
-async function previewSubscription(req, res, next) {
+async function previewSubscription(req, res) {
   const { query } = parseReq(req, previewSubscriptionSchema, {
     logOnly: true,
   })
@@ -768,9 +767,9 @@ async function previewSubscription(req, res, next) {
 }
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 function cancelPendingSubscriptionChange(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
@@ -794,9 +793,9 @@ function cancelPendingSubscriptionChange(req, res, next) {
 }
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 async function updateAccountEmailAddress(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
@@ -813,9 +812,9 @@ async function updateAccountEmailAddress(req, res, next) {
 }
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 function reactivateSubscription(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
@@ -859,9 +858,9 @@ const recurlyCallbackSchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 function recurlyCallback(req, res, next) {
   const { body } = parseReq(req, recurlyCallbackSchema, { logOnly: true })
@@ -914,8 +913,8 @@ function recurlyCallback(req, res, next) {
 }
 
 /**
- * @param {any} req
- * @param {any} res
+ * @param {Request} req
+ * @param {Response} res
  */
 async function extendTrial(req, res) {
   const user = SessionManager.getSessionUser(req.session)
@@ -943,9 +942,9 @@ async function extendTrial(req, res) {
 }
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 function recurlyNotificationParser(req, res, next) {
   let xml = ''
@@ -975,8 +974,8 @@ const refreshUserFeaturesSchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
+ * @param {Request} req
+ * @param {Response} res
  */
 async function refreshUserFeatures(req, res) {
   const { params } = parseReq(req, refreshUserFeaturesSchema, {
@@ -1003,8 +1002,8 @@ const getRecommendedCurrencySchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
+ * @param {Request} req
+ * @param {Response} res
  * @returns {Promise<{currency: CurrencyCode, recommendedCurrency: CurrencyCode, countryCode: string|undefined}>}
  */
 async function getRecommendedCurrency(req, res) {
@@ -1049,8 +1048,8 @@ const getLatamCountryBannerDetailsSchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
+ * @param {Request} req
+ * @param {Response} res
  */
 async function getLatamCountryBannerDetails(req, res) {
   const { query } = parseReq(req, getLatamCountryBannerDetailsSchema, {

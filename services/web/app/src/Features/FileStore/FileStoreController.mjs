@@ -10,6 +10,12 @@ import Errors from '../Errors/Errors.js'
 import { preparePlainTextResponse } from '../../infrastructure/Response.mjs'
 import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
 
+/**
+ * @typedef {import('express').Request} Request
+ * @typedef {import('express').Response} Response
+ * @typedef {import('express').NextFunction} NextFunction
+ */
+
 const getFileSchema = z.object({
   params: z.strictObject({
     Project_id: zz.objectId(),
@@ -28,8 +34,8 @@ const getFileHeadSchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
+ * @param {Request} req
+ * @param {Response} res
  */
 async function getFile(req, res) {
   const { params, query } = parseReq(req, getFileSchema, { logOnly: true })
@@ -125,8 +131,8 @@ async function getFile(req, res) {
 }
 
 /**
- * @param {any} req
- * @param {any} res
+ * @param {Request} req
+ * @param {Response} res
  */
 async function getFileHead(req, res) {
   const { params } = parseReq(req, getFileHeadSchema, { logOnly: true })

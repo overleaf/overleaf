@@ -35,6 +35,12 @@ import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
 /** @type {any} */
 import ProjectAuditLogHandler from '../Project/ProjectAuditLogHandler.mjs'
 
+/**
+ * @typedef {import('express').Request} Request
+ * @typedef {import('express').Response} Response
+ * @typedef {import('express').NextFunction} NextFunction
+ */
+
 // Number of seconds after which the browser should send a request to revalidate
 // blobs
 const REVALIDATE_BLOB_AFTER_SECONDS = 86400 // 1 day
@@ -46,16 +52,16 @@ const STALE_WHILE_REVALIDATE_SECONDS = 365 * 86400 // 1 year
 const MAX_HISTORY_ZIP_ATTEMPTS = 40
 
 /**
- * @param {any} req
- * @param {any} res
+ * @param {Request} req
+ * @param {Response} res
  */
 async function getBlob(req, res) {
   await requestBlob('GET', req, res)
 }
 
 /**
- * @param {any} req
- * @param {any} res
+ * @param {Request} req
+ * @param {Response} res
  */
 async function headBlob(req, res) {
   await requestBlob('HEAD', req, res)
@@ -73,8 +79,8 @@ const requestBlobSchema = z.object({
 
 /**
  * @param {any} method
- * @param {any} req
- * @param {any} res
+ * @param {Request} req
+ * @param {Response} res
  */
 async function requestBlob(method, req, res) {
   const { params } = parseReq(req, requestBlobSchema)
@@ -124,7 +130,7 @@ async function requestBlob(method, req, res) {
 }
 
 /**
- * @param {any} res
+ * @param {Response} res
  * @param {any} etag
  */
 function setBlobCacheHeaders(res, etag) {
@@ -159,9 +165,9 @@ const proxyToHistoryApiFallbackSchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 async function proxyToHistoryApi(req, res, next) {
   parseReq(req, proxyToHistoryApiSchema, {
@@ -210,9 +216,9 @@ const proxyToHistoryApiAndInjectUserDetailsFallbackSchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 async function proxyToHistoryApiAndInjectUserDetails(req, res, next) {
   parseReq(req, proxyToHistoryApiAndInjectUserDetailsSchema, {
@@ -251,9 +257,9 @@ const resyncProjectHistoryFallbackSchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 async function resyncProjectHistory(req, res, next) {
   // increase timeout to 6 minutes
@@ -306,9 +312,9 @@ const restoreFileFromV2FallbackSchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 async function restoreFileFromV2(req, res, next) {
   const { params, body } = parseReq(req, restoreFileFromV2Schema, {
@@ -367,9 +373,9 @@ const revertFileFallbackSchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 async function revertFile(req, res, next) {
   const { params, body } = parseReq(req, revertFileSchema, {
@@ -427,9 +433,9 @@ const revertProjectFallbackSchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 async function revertProject(req, res, next) {
   const { params, body } = parseReq(req, revertProjectSchema, {
@@ -475,9 +481,9 @@ const getLabelsFallbackSchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 async function getLabels(req, res, next) {
   const { params } = parseReq(req, getLabelsSchema, {
@@ -516,9 +522,9 @@ const createLabelFallbackSchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 async function createLabel(req, res, next) {
   const { params, body } = parseReq(req, createLabelSchema, {
@@ -636,9 +642,9 @@ const deleteLabelFallbackSchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 async function deleteLabel(req, res, next) {
   const { params } = parseReq(req, deleteLabelSchema, {
@@ -672,9 +678,9 @@ const downloadZipOfVersionSchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 async function downloadZipOfVersion(req, res, next) {
   const { params } = parseReq(req, downloadZipOfVersionSchema)
@@ -718,8 +724,8 @@ async function downloadZipOfVersion(req, res, next) {
  * @param {any} v1ProjectId
  * @param {any} version
  * @param {any} name
- * @param {any} req
- * @param {any} res
+ * @param {Request} req
+ * @param {Response} res
  */
 async function _pipeHistoryZipToResponse(v1ProjectId, version, name, req, res) {
   if (req.destroyed) {
@@ -837,9 +843,9 @@ const getLatestHistorySchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 async function getLatestHistory(req, res, next) {
   const { params } = parseReq(req, getLatestHistorySchema)
@@ -859,9 +865,9 @@ const getChangesSchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 async function getChanges(req, res, next) {
   const { params, query } = parseReq(req, getChangesSchema)

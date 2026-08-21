@@ -4,6 +4,12 @@ import SessionManager from '../Authentication/SessionManager.mjs'
 import LearnedWordsManager from './LearnedWordsManager.mjs'
 import { z, parseReq } from '../../infrastructure/Validation.mjs'
 
+/**
+ * @typedef {import('express').Request} Request
+ * @typedef {import('express').Response} Response
+ * @typedef {import('express').NextFunction} NextFunction
+ */
+
 const learnSchema = z.object({
   body: z.strictObject({
     word: z.string().min(1),
@@ -32,9 +38,9 @@ const unlearnFallbackSchema = z.object({
 
 export default {
   /**
-   * @param {any} req
-   * @param {any} res
-   * @param {any} next
+   * @param {Request} req
+   * @param {Response} res
+   * @param {NextFunction} next
    */
   learn(req, res, next) {
     const { body } = parseReq(req, learnSchema, {
@@ -53,9 +59,9 @@ export default {
   },
 
   /**
-   * @param {any} req
-   * @param {any} res
-   * @param {any} next
+   * @param {Request} req
+   * @param {Response} res
+   * @param {NextFunction} next
    */
   unlearn(req, res, next) {
     const { body } = parseReq(req, unlearnSchema, {

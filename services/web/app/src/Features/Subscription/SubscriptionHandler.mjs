@@ -236,7 +236,7 @@ async function syncSubscription(recurlySubscription, requesterData) {
 /**
  * attempt to collect past due invoice for customer. Only do that when a) the
  * customer is using Paypal and b) there is only one past due invoice.
- * This is used because Recurly doesn't always attempt collection of paast due
+ * This is used because Recurly doesn't always attempt collection of past due
  * invoices after Paypal billing info were updated.
  *
  * @param {any} recurlyAccountCode

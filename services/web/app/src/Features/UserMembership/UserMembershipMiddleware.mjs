@@ -17,6 +17,12 @@ import {
 } from '../../infrastructure/Validation.mjs'
 import AdminAuthorizationHelper from '../Helpers/AdminAuthorizationHelper.mjs'
 
+/**
+ * @typedef {import('express').Request} Request
+ * @typedef {import('express').Response} Response
+ * @typedef {import('express').NextFunction} NextFunction
+ */
+
 const { useAdminCapabilities, useNonAdminDomainCapabilities } =
   AdminAuthorizationHelper
 // set of middleware arrays or functions that checks user access to an entity
@@ -310,9 +316,9 @@ const requireGraphAccessSchema = z.object({
 // - the entity name is in `req.query.resource_type` and is used to find the
 // require middleware depending on the entity name
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 function requireGraphAccess(req, res, next) {
   const { query, params } = parseReq(req, requireGraphAccessSchema, {

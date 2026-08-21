@@ -23,6 +23,12 @@ import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
 import { multer, multerUploadHandler } from '../../infrastructure/Multer.mjs'
 import { parseReq, z, zz } from '../../infrastructure/Validation.mjs'
 
+/**
+ * @typedef {import('express').Request} Request
+ * @typedef {import('express').Response} Response
+ * @typedef {import('express').NextFunction} NextFunction
+ */
+
 const uploadMetaTypeSchema = z.string().optional()
 
 const uploadProjectSchema = z.object({
@@ -77,11 +83,10 @@ const upload = multerUploadHandler({
 })
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
  */
-function uploadProject(req, res, next) {
+function uploadProject(req, res) {
   const timer = new metrics.Timer('project-upload')
   const userId = SessionManager.getLoggedInUserId(req.session)
   const { body, file } = parseReq(req, uploadProjectSchema, {
@@ -120,11 +125,10 @@ function uploadProject(req, res, next) {
 }
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
  */
-async function uploadFile(req, res, next) {
+async function uploadFile(req, res) {
   const timer = new metrics.Timer('file-upload')
   const { params, query, body, file } = parseReq(req, uploadFileSchema, {
     logOnly: true,
@@ -226,11 +230,10 @@ async function uploadFile(req, res, next) {
 }
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
  */
-async function importDocument(req, res, next) {
+async function importDocument(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   const { query, body, file } = parseReq(req, importDocumentSchema, {
     logOnly: true,
@@ -313,9 +316,9 @@ async function importDocument(req, res, next) {
 }
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 function multerMiddleware(req, res, next) {
   if (upload == null) {

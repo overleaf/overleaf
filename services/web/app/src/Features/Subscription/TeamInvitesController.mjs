@@ -19,6 +19,12 @@ import UserAuditLogHandler from '../User/UserAuditLogHandler.mjs'
 import { sanitizeSessionUserForFrontEnd } from '../../infrastructure/FrontEndUser.mjs'
 import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
 
+/**
+ * @typedef {import('express').Request} Request
+ * @typedef {import('express').Response} Response
+ * @typedef {import('express').NextFunction} NextFunction
+ */
+
 const rateLimiters = {
   resendGroupInvite: new RateLimiter('resend-group-invite', {
     points: 1,
@@ -33,9 +39,9 @@ const createInviteSchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 async function createInvite(req, res, next) {
   const { body } = parseReq(req, createInviteSchema, { logOnly: true })
@@ -96,9 +102,9 @@ const viewInviteSchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 async function viewInvite(req, res, next) {
   const { params, query } = parseReq(req, viewInviteSchema, {
@@ -220,9 +226,9 @@ async function viewInvite(req, res, next) {
 }
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 async function viewInvites(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
@@ -246,9 +252,9 @@ const acceptInviteSchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 async function acceptInvite(req, res, next) {
   const { params } = parseReq(req, acceptInviteSchema, { logOnly: true })
@@ -294,9 +300,9 @@ const revokeInviteSchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 function revokeInvite(req, res, next) {
   const { params } = parseReq(req, revokeInviteSchema, { logOnly: true })
@@ -331,9 +337,9 @@ const resendInviteSchema = z.object({
 })
 
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 async function resendInvite(req, res, next) {
   const { body } = parseReq(req, resendInviteSchema, { logOnly: true })

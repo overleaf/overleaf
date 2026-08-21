@@ -131,7 +131,7 @@ const _buildPortalTemplatesList = affiliations => {
 }
 
 /**
- * @param {any} req
+ * @param {import("express").Request} req
  */
 function cleanupSession(req) {
   // cleanup redirects at the end of the redirect chain
