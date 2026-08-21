@@ -56,6 +56,11 @@ const blobParamsSchema = z.object({
   }),
 })
 
+// matches history-v1's getLatestHistory
+const latestHistoryParamsSchema = z.object({
+  params: z.strictObject({ project_id: zz.projectHistoryId() }),
+})
+
 // matches history-v1's copyProjectBlob query (params aren't read by this
 // mock's handler, so they're left out of the schema)
 const copyProjectBlobSchema = z.object({
@@ -72,6 +77,18 @@ class MockV1HistoryApi extends AbstractMockApi {
     this.sentChunks = 0
     this.events = new EventEmitter()
     this.blobs = {}
+    this.chunks = {}
+  }
+
+  addBlob(historyId, hash, content) {
+    if (!this.blobs[historyId]) {
+      this.blobs[historyId] = {}
+    }
+    this.blobs[historyId][hash] = Buffer.from(content)
+  }
+
+  addChunk(historyId, chunk) {
+    this.chunks[historyId] = chunk
   }
 
   computeBlobStats(historyId, blobHashes) {
@@ -243,6 +260,16 @@ class MockV1HistoryApi extends AbstractMockApi {
       parseReq(req, copyProjectBlobSchema)
       res.sendStatus(204)
     })
+
+    this.app.get(
+      '/api/projects/:project_id/latest/history',
+      (req, res, next) => {
+        const { params } = parseReq(req, latestHistoryParamsSchema)
+        const chunk = this.chunks[params.project_id]
+        if (!chunk) return res.sendStatus(404)
+        res.json({ chunk })
+      }
+    )
   }
 }
 

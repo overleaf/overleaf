@@ -54,6 +54,16 @@ describe('LinkedFilesController', function () {
       error: sinon.stub(),
     }
     ctx.settings = { enabledLinkedFileTypes: [] }
+    ctx.SplitTestHandler = {
+      promises: { featureFlagEnabled: sinon.stub().resolves(false) },
+    }
+
+    vi.doMock(
+      '../../../../app/src/Features/SplitTests/SplitTestHandler',
+      () => ({
+        default: ctx.SplitTestHandler,
+      })
+    )
 
     vi.doMock(
       '../../../../app/src/Features/Authentication/SessionManager',
@@ -153,8 +163,37 @@ describe('LinkedFilesController', function () {
               },
               ctx.fileName,
               ctx.parentFolderId,
-              ctx.userId
+              ctx.userId,
+              false
             )
+            resolve()
+          },
+        }
+        ctx.LinkedFilesController.createLinkedFile(ctx.req, ctx.res, ctx.next)
+      })
+    })
+
+    it('passes on the linked-file-from-history assignment', async function (ctx) {
+      ctx.SplitTestHandler.promises.featureFlagEnabled.resolves(true)
+      await new Promise((resolve, reject) => {
+        ctx.next = sinon
+          .stub()
+          .callsFake(err =>
+            reject(err || new Error('next called unexpectedly'))
+          )
+        ctx.res = {
+          json: () => {
+            expect(
+              ctx.SplitTestHandler.promises.featureFlagEnabled
+            ).to.have.been.calledWith(
+              ctx.req,
+              ctx.res,
+              'linked-file-from-history',
+              { includeReferer: true }
+            )
+            expect(
+              ctx.Agent.promises.createLinkedFile.firstCall.args[5]
+            ).to.equal(true)
             resolve()
           },
         }
@@ -245,7 +284,8 @@ describe('LinkedFilesController', function () {
               },
               ctx.fileName,
               'parent-folder-id',
-              ctx.userId
+              ctx.userId,
+              false
             )
             resolve()
           },

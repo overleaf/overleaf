@@ -22,6 +22,7 @@ import {
   TooManyFilesError,
 } from '../Errors/Errors.js'
 import Modules from '../../infrastructure/Modules.mjs'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 import { plainTextResponse } from '../../infrastructure/Response.mjs'
 import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
 import EditorRealTimeController from '../Editor/EditorRealTimeController.mjs'
@@ -177,13 +178,21 @@ async function createLinkedFile(req, res, next) {
   data.provider = provider
   data.importedAt = new Date().toISOString()
 
+  const historySource = await SplitTestHandler.promises.featureFlagEnabled(
+    req,
+    res,
+    'linked-file-from-history',
+    { includeReferer: true }
+  )
+
   try {
     const newFileId = await Agent.promises.createLinkedFile(
       projectId,
       data,
       name,
       parentFolderId,
-      userId
+      userId,
+      historySource
     )
     if (name.endsWith('.bib')) {
       AnalyticsManager.recordEventForSession(req.session, 'linked-bib-file', {
@@ -229,6 +238,14 @@ async function refreshLinkedFile(req, res, next) {
   }
 
   linkedFileData.importedAt = new Date().toISOString()
+
+  const historySource = await SplitTestHandler.promises.featureFlagEnabled(
+    req,
+    res,
+    'linked-file-from-history',
+    { includeReferer: true }
+  )
+
   let newFileId
   try {
     newFileId = await Agent.promises.refreshLinkedFile(
@@ -236,7 +253,8 @@ async function refreshLinkedFile(req, res, next) {
       linkedFileData,
       name,
       parentFolderId,
-      userId
+      userId,
+      historySource
     )
   } catch (err) {
     return LinkedFilesController.handleError(err, req, res, next)

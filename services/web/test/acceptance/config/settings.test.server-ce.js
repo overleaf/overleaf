@@ -8,6 +8,7 @@ module.exports = base.mergeWith({
 
   splitTestOverrides: {
     'sharing-updates-new-link': 'enabled', // routes in acceptance tests
+    'linked-file-from-history': 'enabled', // read linked project files from history
   },
 })
 

@@ -32,6 +32,7 @@ function createLinkedFile(
   name,
   parentFolderId,
   userId,
+  _historySource,
   callback
 ) {
   if (!ProjectFileAgent._canCreate(linkedFileData)) {
@@ -70,6 +71,7 @@ function refreshLinkedFile(
   name,
   parentFolderId,
   userId,
+  _historySource,
   callback
 ) {
   _prepare(projectId, linkedFileData, userId, (err, linkedFileData) => {

@@ -71,6 +71,7 @@ class MockProjectHistoryApi extends AbstractMockApi {
     this.labels = {}
     this.projectSnapshots = {}
     this.projectHistoryId = 1
+    this.flushedProjects = []
   }
 
   addOldFile(projectId, version, pathname, content) {
@@ -208,6 +209,8 @@ class MockProjectHistoryApi extends AbstractMockApi {
     })
 
     this.app.post('/project/:projectId/flush', (req, res) => {
+      const { params } = parseReq(req, projectParamsSchema)
+      this.flushedProjects.push(params.projectId.toString())
       res.sendStatus(200)
     })
   }
