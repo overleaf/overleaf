@@ -111,6 +111,17 @@ describe('schemas', function () {
       expect(result.success).to.equal(true)
     })
 
+    it('accepts a project_file provider with a legacy display name', function () {
+      const result = rawLinkedFileData.safeParse({
+        provider: 'project_file',
+        v1_source_doc_id: 1234,
+        source_entity_path: '/main.tex',
+        source_project_display_name: 'My linked project',
+        importedAt: '2017-05-04T00:00:00.000Z',
+      })
+      expect(result.success).to.equal(true)
+    })
+
     it('rejects a project_file provider with a malformed source_project_id', function () {
       const result = rawLinkedFileData.safeParse({
         provider: 'project_file',

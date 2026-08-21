@@ -105,6 +105,10 @@ const rawLinkedFileData = z.discriminatedUnion('provider', [
     source_project_id: zz.objectId().optional(),
     v1_source_doc_id: z.number().optional(),
     source_entity_path: z.string(),
+    // written by the linked-file agents until 2018 (removed in ebe828aa625)
+    // and never since; still present in the history of projects that linked a
+    // file before then, so it has to be tolerated when replaying changes.
+    source_project_display_name: z.string().optional(),
     importedAt: z.iso.datetime().optional(),
   }),
   z.strictObject({
