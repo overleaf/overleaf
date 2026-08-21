@@ -159,12 +159,6 @@ describe('ReferencesController', function () {
         ;(() =>
           ctx.controller.indexAll(ctx.req, ctx.res, ctx.next)).should.throw()
       })
-
-      it('should reject an unrecognized body field', function (ctx) {
-        ctx.req.body.unexpectedField = 'nope'
-        ;(() =>
-          ctx.controller.indexAll(ctx.req, ctx.res, ctx.next)).should.throw()
-      })
     })
   })
 })

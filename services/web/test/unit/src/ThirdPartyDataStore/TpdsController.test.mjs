@@ -1,14 +1,11 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import mongodb from 'mongodb-legacy'
 import sinon from 'sinon'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
 import MockResponse from '../helpers/MockResponse.mjs'
 import MockRequest from '../helpers/MockRequest.mjs'
 import { asZodError } from '@overleaf/validation-tools/testUtils.js'
-import {
-  getRawReqInput,
-  setReqValidationModeForTests,
-} from '@overleaf/validation-tools'
+import { getRawReqInput } from '@overleaf/validation-tools'
 
 const ObjectId = mongodb.ObjectId
 
@@ -169,10 +166,6 @@ describe('TpdsController', function () {
       }
     })
 
-    afterEach(function () {
-      setReqValidationModeForTests(null)
-    })
-
     it('should throw without any input', async function (ctx) {
       const next = sinon.stub()
       await ctx.TpdsController.resolveProject(ctx.req, {}, next)
@@ -202,6 +195,17 @@ describe('TpdsController', function () {
           message: 'Invalid input',
         }),
       })
+    })
+
+    it('should throw when a malformed projectId is sent with a projectName', async function (ctx) {
+      const next = sinon.stub()
+      ctx.req.body = { projectId: 'not-an-object-id', projectName: 'a name' }
+      await ctx.TpdsController.resolveProject(ctx.req, {}, next)
+      expect(next).to.have.been.calledWithMatch({
+        name: 'InvalidRequestError',
+      })
+      expect(ctx.TpdsUpdateHandler.promises.getOrCreateProject).to.not.have.been
+        .called
     })
 
     it('should resolve by name', async function (ctx) {
@@ -284,41 +288,6 @@ describe('TpdsController', function () {
           },
         }
         ctx.TpdsController.resolveProject(ctx.req, res)
-      })
-    })
-
-    it('should still resolve a body with an unrecognized field in log mode', async function (ctx) {
-      setReqValidationModeForTests('log')
-      await new Promise(resolve => {
-        ctx.req.body = { projectName: 'projectName', extra: 'nope' }
-        const res = {
-          json: payload => {
-            expect(payload).to.deep.equal({
-              status: 'success',
-              projectId: ctx.resolvedProject._id.toString(),
-              historyId: 42,
-              otMigrationStage: 1,
-            })
-            resolve()
-          },
-        }
-        ctx.TpdsController.resolveProject(ctx.req, res)
-      })
-    })
-
-    describe('when enforced', function () {
-      afterEach(function () {
-        setReqValidationModeForTests(null)
-      })
-
-      it('should reject a body with an unrecognized field', async function (ctx) {
-        setReqValidationModeForTests('enforce')
-        ctx.req.body = { projectName: 'projectName', extra: 'nope' }
-        const next = sinon.stub()
-        await ctx.TpdsController.resolveProject(ctx.req, {}, next)
-        expect(next).to.have.been.calledWithMatch({
-          name: 'InvalidRequestError',
-        })
       })
     })
   })

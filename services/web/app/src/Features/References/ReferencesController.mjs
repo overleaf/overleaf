@@ -2,10 +2,10 @@ import EditorRealTimeController from '../Editor/EditorRealTimeController.mjs'
 import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
 
 const indexAllSchema = z.object({
-  params: z.strictObject({
+  params: z.object({
     Project_id: zz.objectId(),
   }),
-  body: z.strictObject({
+  body: z.object({
     shouldBroadcast: z.boolean().optional(),
     clientId: z.string().optional(),
   }),

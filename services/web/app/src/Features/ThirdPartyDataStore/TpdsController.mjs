@@ -21,10 +21,10 @@ import { parseReq, z, zz } from '@overleaf/validation-tools'
 const optionalProjectId = zz.objectId().or(z.literal('')).optional()
 
 const createProjectSchema = z.object({
-  params: z.strictObject({
+  params: z.object({
     user_id: zz.objectId(),
   }),
-  body: z.strictObject({
+  body: z.object({
     projectName: z.string().optional(),
   }),
 })
@@ -50,8 +50,11 @@ async function createProject(req, res) {
   })
 }
 
+// Strict: with non-strict branches, `{projectId: <malformed>, projectName}`
+// would fall through to the name branch and create a blank project instead of
+// failing the request
 const resolveProjectSchema = z.object({
-  params: z.strictObject({
+  params: z.object({
     user_id: zz.objectId(),
   }),
   body: z
@@ -65,23 +68,6 @@ const resolveProjectSchema = z.object({
     ),
 })
 
-// Rollout-temporary fallback (pre-refinement schema from main); delete
-// when this route's REQ_VALIDATION_MODE instrumentation is removed.
-const resolveProjectFallbackSchema = z.object({
-  params: z.object({
-    user_id: zz.objectId(),
-  }),
-  body: z
-    .object({
-      projectId: zz.objectId(),
-    })
-    .or(
-      z.object({
-        projectName: z.string().min(1),
-      })
-    ),
-})
-
 // Resolve a project name (or id) to a project id, using the same
 // get-or-create semantics as mergeUpdate: a blank project is created when no
 // project matches the name, and duplicate names trigger the duplicate-name
@@ -90,9 +76,7 @@ async function resolveProject(req, res) {
   const {
     params: { user_id: userId },
     body: { projectId, projectName },
-  } = parseReq(req, resolveProjectSchema, {
-    fallbackSchema: resolveProjectFallbackSchema,
-  })
+  } = parseReq(req, resolveProjectSchema)
   const project = await TpdsUpdateHandler.promises.getOrCreateProject(
     userId,
     projectId,
@@ -178,7 +162,7 @@ async function deleteUpdate(req, res) {
 }
 
 const updateFolderSchema = z.object({
-  body: z.strictObject({
+  body: z.object({
     userId: zz.objectId(),
     projectId: optionalProjectId,
     path: z.string(),
@@ -221,7 +205,7 @@ async function updateFolder(req, res) {
 // they want in git.
 
 const projectContentsParamsSchema = z.object({
-  params: z.strictObject({
+  params: z.object({
     project_id: zz.objectId(),
     // GitHub-sync repo file path; reaches UpdateMerger without any
     // Path.join() normalization first, so it needs its own hardening.
@@ -284,7 +268,7 @@ async function getQueues(req, res) {
 }
 
 const wildcardUpdateParamsSchema = z.object({
-  params: z.strictObject({
+  params: z.object({
     user_id: zz.objectId(),
     project_id: optionalProjectId,
     // Dropbox-supplied path (projectName/.../file, split up below). A path

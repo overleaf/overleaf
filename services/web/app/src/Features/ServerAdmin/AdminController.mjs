@@ -40,13 +40,13 @@ const disconnectAllUsersFallbackSchema = z.object({
 })
 
 const flushProjectToTpdsSchema = z.object({
-  body: z.strictObject({
+  body: z.object({
     project_id: zz.objectId(),
   }),
 })
 
 const pollDropboxForUserSchema = z.object({
-  body: z.strictObject({
+  body: z.object({
     user_id: zz.objectId(),
   }),
 })
