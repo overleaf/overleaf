@@ -4,6 +4,7 @@ import ProjectLocator from '../Project/ProjectLocator.mjs'
 import ProjectEntityHandler from '../Project/ProjectEntityHandler.mjs'
 import ProjectEntityUpdateHandler from '../Project/ProjectEntityUpdateHandler.mjs'
 import logger from '@overleaf/logger'
+import Metrics from '@overleaf/metrics'
 import _ from 'lodash'
 import { plainTextResponse } from '../../infrastructure/Response.mjs'
 import { expressify } from '@overleaf/promise-utils'
@@ -179,7 +180,9 @@ const trackChangesRejectedSchema = z.object({
   }),
   body: z.strictObject({
     rejectedChangeAuthorIds: z.array(zz.objectId()),
-    userId: zz.objectId().optional(),
+    // github sync at TpdsController.updateProjectContents can write updates as a null (system) user
+    //  causing null userId when the sync overwrited a tracked change.
+    userId: zz.objectId().nullish(),
     previews: z.array(changePreview).optional(),
   }),
 })
@@ -190,6 +193,20 @@ async function trackChangesRejected(req, res) {
   })
   const { Project_id: projectId, doc_id: docId } = params
   const { rejectedChangeAuthorIds, userId, previews } = body
+
+  // gh-sync can overwrite changes during pull, overwriting tracked changes
+  //  these are counted as system operations, and have no associated user_id
+  //  prevent these system writes from showing as notifs, until we can better process/ explain them in email content
+  // todo #36800 re-enable notifications for track change rejections done by GH-sync
+  if (!userId) {
+    Metrics.inc('track-changes-rejected-without-user')
+    logger.debug(
+      { projectId, docId, rejectedChangeAuthorIds },
+      'skipping rejection notification: no acting user on the update'
+    )
+    return res.sendStatus(204)
+  }
+
   await Modules.promises.hooks.fire(
     'trackChangesRejected',
     projectId,
