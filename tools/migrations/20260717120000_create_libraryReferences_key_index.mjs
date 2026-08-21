@@ -1,6 +1,6 @@
 import Helpers from './lib/helpers.mjs'
 
-const tags = ['saas', 'auxiliary', 'nonblocking']
+const tags = ['saas', 'auxiliary']
 
 // Backs an exact/prefix-range lookup on the raw citation key, used to suggest
 // a unique citation key when auto-generating one from author/year.

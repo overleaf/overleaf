@@ -1,6 +1,6 @@
 import Helpers from './lib/helpers.mjs'
 
-const tags = ['auxiliary']
+const tags = ['saas', 'auxiliary']
 
 // Two partial indexes (docs without trashedAt are not indexed) supporting the
 // soft-delete (trash) feature
