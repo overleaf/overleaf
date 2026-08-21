@@ -648,6 +648,7 @@ const _ProjectController = {
       'themed-modals',
       'intermittent-connection-improvements',
       'symbol-recognition',
+      'ai-assistant-pointer',
     ].filter(Boolean)
 
     const getUserValues = async userId =>
