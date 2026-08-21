@@ -11,6 +11,14 @@ const compileParamsSchema = z.object({
   }),
 })
 
+// The wordcount request carries the same {compile: {...}} payload as a compile
+// request; the tests only assert on the resources web sent, so keep the body
+// loose here and let clsi's own schema be the strict one.
+const wordcountSchema = z.object({
+  params: compileParamsSchema.shape.params,
+  body: z.object({ compile: z.looseObject({}) }),
+})
+
 // Mirrors services/clsi/app/js/OutputController.js's createOutputZipSchema
 // (this mock stands in for clsi's own output.zip archive generation, as
 // opposed to clsi-nginx's static file serving handled by
@@ -48,6 +56,25 @@ class MockClsiApi extends AbstractMockApi {
     })
   }
 
+  static wordcount(req, res) {
+    const { body } = parseReq(req, wordcountSchema)
+    MockClsiApi.instance().lastWordcountRequestBody = body
+    res.json({
+      texcount: {
+        encode: 'utf8',
+        textWords: 12,
+        headWords: 1,
+        outside: 0,
+        headers: 1,
+        elements: 0,
+        mathInline: 0,
+        mathDisplay: 0,
+        errors: 0,
+        messages: '',
+      },
+    })
+  }
+
   static outputZip(req, res) {
     const { params } = parseReq(req, outputZipParamsSchema)
     zipAttachment(res, `mock-zip: ${params.build_id}`, 'output.zip')
@@ -58,6 +85,12 @@ class MockClsiApi extends AbstractMockApi {
     this.app.post(
       '/project/:project_id/user/:user_id/compile',
       MockClsiApi.compile
+    )
+
+    this.app.post('/project/:project_id/wordcount', MockClsiApi.wordcount)
+    this.app.post(
+      '/project/:project_id/user/:user_id/wordcount',
+      MockClsiApi.wordcount
     )
 
     this.app.get('/project/:project_id/status', (req, res) => {

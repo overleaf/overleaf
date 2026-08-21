@@ -186,7 +186,13 @@ async function _getUserCompileLimits(userId) {
   return limits
 }
 
-async function wordCount(projectId, userId, file, clsiserverid) {
+async function wordCount(
+  projectId,
+  userId,
+  file,
+  clsiserverid,
+  rootResourcePath
+) {
   const limits =
     await CompileManager.promises.getProjectCompileLimits(projectId)
   return await ClsiManager.promises.wordCount(
@@ -194,7 +200,8 @@ async function wordCount(projectId, userId, file, clsiserverid) {
     userId,
     file,
     limits,
-    clsiserverid
+    clsiserverid,
+    { rootResourcePath }
   )
 }
 

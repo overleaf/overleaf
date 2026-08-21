@@ -913,5 +913,139 @@ describe('CompileManager', () => {
         messages: '',
       })
     })
+
+    it('should not sync resources without a request', async ctx => {
+      expect(ctx.ResourceWriter.promises.syncResourcesToDisk).not.to.have.been
+        .called
+      expect(ctx.LockManager.acquire).not.to.have.been.called
+    })
+  })
+
+  describe('wordcount with a request', () => {
+    beforeEach(ctx => {
+      ctx.filename = 'main.tex'
+      ctx.image = 'example.com/image'
+      ctx.filePath = Path.join(ctx.compileDir, ctx.filename)
+      ctx.request = { project_id: ctx.projectId, resources: ctx.resources }
+    })
+
+    describe('normally', () => {
+      beforeEach(async ctx => {
+        await ctx.CompileManager.promises.wordcount(
+          ctx.projectId,
+          ctx.userId,
+          ctx.filename,
+          ctx.image,
+          ctx.request
+        )
+      })
+
+      it('should sync the resources to the compile dir', ctx => {
+        expect(
+          ctx.ResourceWriter.promises.syncResourcesToDisk
+        ).to.have.been.calledWith(ctx.request, ctx.compileDir)
+      })
+
+      it('should hold the compile dir lock while syncing', ctx => {
+        expect(ctx.LockManager.acquire).to.have.been.calledWith(ctx.compileDir)
+        expect(ctx.lock.release).to.have.been.called
+      })
+
+      it('should run the texcount command afterwards', ctx => {
+        expect(ctx.CommandRunner.promises.run).to.have.been.called
+      })
+
+      it('should not restore the clsi cache for an existing compile dir', ctx => {
+        expect(ctx.CLSICacheHandler.downloadLatestCompileCache).not.to.have.been
+          .called
+      })
+    })
+
+    describe('when this request creates the compile dir', () => {
+      beforeEach(async ctx => {
+        // fsPromises.mkdir resolves the path only when it created the directory
+        ctx.fsPromises.mkdir.withArgs(ctx.compileDir).resolves(ctx.compileDir)
+        ctx.request.compileFromClsiCache = true
+
+        await ctx.CompileManager.promises.wordcount(
+          ctx.projectId,
+          ctx.userId,
+          ctx.filename,
+          ctx.image,
+          ctx.request
+        )
+      })
+
+      it('should restore the cached outputs before syncing', ctx => {
+        expect(
+          ctx.CLSICacheHandler.downloadLatestCompileCache
+        ).to.have.been.calledWith(ctx.projectId, ctx.userId, ctx.compileDir)
+        expect(
+          ctx.CLSICacheHandler.downloadLatestCompileCache
+        ).to.have.been.calledBefore(
+          ctx.ResourceWriter.promises.syncResourcesToDisk
+        )
+      })
+
+      it('should still count when the cache restore fails', async ctx => {
+        ctx.CLSICacheHandler.downloadLatestCompileCache.rejects(
+          new Error('clsi-cache is down')
+        )
+        await ctx.CompileManager.promises.wordcount(
+          ctx.projectId,
+          ctx.userId,
+          ctx.filename,
+          ctx.image,
+          ctx.request
+        )
+        expect(ctx.CommandRunner.promises.run).to.have.been.called
+      })
+    })
+
+    describe('when the request is a compile from history', () => {
+      beforeEach(async ctx => {
+        ctx.request.isCompileFromHistory = true
+
+        await ctx.CompileManager.promises.wordcount(
+          ctx.projectId,
+          ctx.userId,
+          ctx.filename,
+          ctx.image,
+          ctx.request
+        )
+      })
+
+      it('should sync via the history resource writer', ctx => {
+        expect(
+          ctx.HistoryResourceWriter.syncResourcesToDisk
+        ).to.have.been.calledWith(
+          ctx.projectId,
+          ctx.userId,
+          ctx.request,
+          ctx.compileDir
+        )
+        expect(ctx.ResourceWriter.promises.syncResourcesToDisk).not.to.have.been
+          .called
+      })
+    })
+
+    describe('when a compile is in progress', () => {
+      beforeEach(ctx => {
+        ctx.LockManager.acquire.throws(new Error('compile in progress'))
+      })
+
+      it('should not run the texcount command', async ctx => {
+        await expect(
+          ctx.CompileManager.promises.wordcount(
+            ctx.projectId,
+            ctx.userId,
+            ctx.filename,
+            ctx.image,
+            ctx.request
+          )
+        ).to.be.rejectedWith('compile in progress')
+        expect(ctx.CommandRunner.promises.run).not.to.have.been.called
+      })
+    })
   })
 })

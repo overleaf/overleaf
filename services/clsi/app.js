@@ -57,6 +57,11 @@ app.delete('/project/:project_id', CompileController.clearCache)
 app.get('/project/:project_id/sync/code', CompileController.syncFromCode)
 app.get('/project/:project_id/sync/pdf', CompileController.syncFromPdf)
 app.get('/project/:project_id/wordcount', CompileController.wordcount)
+app.post(
+  '/project/:project_id/wordcount',
+  express.json({ limit: Settings.compileSizeLimit }),
+  CompileController.wordcountWithSync
+)
 app.get('/project/:project_id/status', CompileController.status)
 app.post('/project/:project_id/status', CompileController.status)
 
@@ -83,6 +88,11 @@ app.get(
 app.get(
   '/project/:project_id/user/:user_id/wordcount',
   CompileController.wordcount
+)
+app.post(
+  '/project/:project_id/user/:user_id/wordcount',
+  express.json({ limit: Settings.compileSizeLimit }),
+  CompileController.wordcountWithSync
 )
 
 // This needs to be before GET /project/:project_id/build/:build_id/output/*

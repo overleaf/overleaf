@@ -77,6 +77,9 @@ class MockV1HistoryApi extends AbstractMockApi {
     this.sentChunks = 0
     this.events = new EventEmitter()
     this.blobs = {}
+    // when true, /latest/history 404s, so compile-from-history requests cannot
+    // be composed and web falls back to building them from mongo
+    this.latestHistoryUnavailable = false
     this.chunks = {}
   }
 
@@ -265,8 +268,13 @@ class MockV1HistoryApi extends AbstractMockApi {
       '/api/projects/:project_id/latest/history',
       (req, res, next) => {
         const { params } = parseReq(req, latestHistoryParamsSchema)
-        const chunk = this.chunks[params.project_id]
-        if (!chunk) return res.sendStatus(404)
+        if (this.latestHistoryUnavailable) {
+          return res.sendStatus(404)
+        }
+        const chunk = this.chunks[params.project_id] || {
+          history: { snapshot: { files: {} }, changes: [] },
+          startVersion: 0,
+        }
         res.json({ chunk })
       }
     )

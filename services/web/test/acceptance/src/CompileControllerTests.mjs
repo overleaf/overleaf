@@ -2,6 +2,8 @@ import { expect } from 'chai'
 import UserHelper from './helpers/User.mjs'
 import request from './helpers/request.js'
 import settings from '@overleaf/settings'
+import MockClsiApi from './mocks/MockClsiApi.mjs'
+import MockV1HistoryApi from './mocks/MockV1HistoryApi.mjs'
 import { expectValidationErrorRaw } from '@overleaf/validation-tools/testUtils.js'
 
 const User = UserHelper.promises
@@ -91,6 +93,33 @@ describe('CompileController', function () {
         { statusCode: response.statusCode, body },
         404,
         'Project_id'
+      )
+    })
+
+    async function requestWordCount() {
+      const { response, body } = await owner.doRequest('get', {
+        url: `/project/${projectId}/wordcount?rootResourcePath=main.tex`,
+        json: true,
+      })
+      expect(response.statusCode).to.equal(200)
+      expect(body.texcount.textWords).to.equal(12)
+      return MockClsiApi.instance().lastWordcountRequestBody || {}
+    }
+
+    it('should send the project history snapshot to the clsi', async function () {
+      const clsiRequestBody = await requestWordCount()
+      expect(clsiRequestBody.compile.rootResourcePath).to.equal('main.tex')
+      expect(clsiRequestBody.compile.options.syncType).to.equal('history-full')
+      expect(clsiRequestBody.compile.rawSnapshot).to.exist
+    })
+
+    it('should fall back to the resource list when history is unavailable', async function () {
+      MockV1HistoryApi.instance().latestHistoryUnavailable = true
+      const clsiRequestBody = await requestWordCount()
+      expect(clsiRequestBody.compile.rootResourcePath).to.equal('main.tex')
+      expect(clsiRequestBody.compile.rawSnapshot).not.to.exist
+      expect(clsiRequestBody.compile.resources.map(r => r.path)).to.include(
+        'main.tex'
       )
     })
   })

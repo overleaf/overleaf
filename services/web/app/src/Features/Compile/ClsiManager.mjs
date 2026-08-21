@@ -1257,9 +1257,29 @@ async function buildDocumentConversionRequest(projectId, userId, options) {
   })
 }
 
-async function wordCount(projectId, userId, file, limits, clsiserverid) {
+async function wordCount(
+  projectId,
+  userId,
+  file,
+  limits,
+  clsiserverid,
+  { rootResourcePath, baseHistoryVersion } = {}
+) {
   const { compileBackendClass, compileGroup } = limits
-  const req = await _buildRequest(null, projectId, userId, limits)
+  // texcount reads the sources from the compile dir on the clsi, which only a
+  // previous compile on that same clsi populates. Send the project state along
+  // with the request so the clsi can write it out itself when it has none --
+  // e.g. when the editor served the PDF from clsi-cache without compiling.
+  const req = await _buildRequest(null, projectId, userId, {
+    ...limits,
+    compileFromHistory: true,
+    // let the clsi restore the cached outputs when this request is what
+    // bootstraps the compile dir, so the next compile is not slower for it
+    compileFromClsiCache: true,
+    rootResourcePath,
+    baseHistoryVersion,
+    metricsPath: 'wordcount',
+  })
   const filename = file || req.compile.rootResourcePath
   const url = _getCompilerUrl(
     compileBackendClass,
@@ -1271,19 +1291,46 @@ async function wordCount(projectId, userId, file, limits, clsiserverid) {
   url.searchParams.set('file', filename)
   url.searchParams.set('image', req.compile.options.imageName)
 
-  const opts = {
-    method: 'GET',
+  const requestWordCount = async opts => {
+    const { body } = await _makeRequestWithClsiServerId(
+      projectId,
+      userId,
+      compileGroup,
+      compileBackendClass,
+      url,
+      opts,
+      clsiserverid
+    )
+    return body
   }
-  const { body } = await _makeRequestWithClsiServerId(
-    projectId,
-    userId,
-    compileGroup,
-    compileBackendClass,
-    url,
-    opts,
-    clsiserverid
-  )
-  return body
+
+  try {
+    return await requestWordCount({ method: 'POST', json: req })
+  } catch (err) {
+    if (!(err instanceof RequestFailedError)) throw err
+    const { status } = err.response
+    if (status === 409 && baseHistoryVersion === undefined) {
+      // The clsi could not apply the history changes onto the snapshot it
+      // holds. Retry once from the version it asked for.
+      let retryFrom = -1
+      try {
+        ;({ baseHistoryVersion: retryFrom } = JSON.parse(err.body))
+      } catch {}
+      return await wordCount(projectId, userId, file, limits, clsiserverid, {
+        rootResourcePath,
+        baseHistoryVersion: retryFrom,
+      })
+    }
+    if (status === 404 || status === 413 || status === 423) {
+      // 404: the clsi predates the POST route (deploy or rollback window).
+      // 413: the project is over the clsi's compileSizeLimit.
+      // 423: a compile holds the compile dir lock. Compiles can run for a
+      //      while, so count what is on disk rather than failing the request.
+      Metrics.inc('clsi_wordcount_get_fallback', 1, { status })
+      return await requestWordCount({ method: 'GET' })
+    }
+    throw err
+  }
 }
 
 async function syncTeX(

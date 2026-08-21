@@ -401,6 +401,7 @@ function wordcount(req, res, next) {
     userId,
     file,
     image,
+    null,
     function (error, result) {
       if (error) {
         return next(error)
@@ -410,6 +411,67 @@ function wordcount(req, res, next) {
       })
     }
   )
+}
+
+const wordcountWithSyncSchema = z.object({
+  params: projectOrUserParamsSchema,
+  query: wordcountSchema.shape.query,
+  body: compileRequestBodySchema,
+})
+
+// Same as wordcount, but carrying the project state as a compile request body.
+// texcount reads the sources from the compile dir, which only a previous
+// compile on this clsi populates -- and there may not have been one, e.g. when
+// the editor served the PDF from clsi-cache, which stores output files only.
+function wordcountWithSync(req, res, next) {
+  const { params, query, body } = parseReq(req, wordcountWithSyncSchema)
+  const { file, image } = query
+  const { project_id: projectId, user_id: userId } = params
+  logger.debug({ image, file, projectId }, 'word count request with sync')
+
+  RequestParser.parse(body, function (error, request) {
+    if (error) {
+      return next(error)
+    }
+    request.project_id = projectId
+    if (userId != null) {
+      request.user_id = userId
+    }
+    ProjectPersistenceManager.markProjectAsJustAccessed(
+      projectId,
+      function (error) {
+        if (error) {
+          return next(error)
+        }
+        CompileManager.wordcount(
+          projectId,
+          userId,
+          file,
+          image,
+          request,
+          function (error, result) {
+            if (error instanceof Errors.MissingUpdatesError) {
+              return res.status(409).json({
+                baseHistoryVersion: error.info.baseHistoryVersion,
+              })
+            }
+            if (error instanceof Errors.AlreadyCompilingError) {
+              return res.status(423).send('compile in progress') // Http 423 Locked
+            }
+            if (error instanceof Errors.TooManyCompileRequestsError) {
+              return res.status(503).send('too many concurrent requests')
+            }
+            if (error) {
+              return next(error)
+            }
+            res.json({
+              texcount: result,
+            })
+          }
+        )
+      }
+    )
+  })
 }
 
 function status(req, res, next) {
@@ -423,6 +485,7 @@ export default {
   syncFromCode,
   syncFromPdf,
   wordcount,
+  wordcountWithSync,
   status,
   timeSinceLastSuccessfulCompile,
 }

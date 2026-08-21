@@ -1797,7 +1797,8 @@ describe('ClsiManager', function () {
           ctx.user_id,
           false,
           { compileBackendClass: 'free', compileGroup: 'standard' },
-          'node-1'
+          'node-1',
+          { rootResourcePath: 'main.tex' }
         )
       })
 
@@ -1811,9 +1812,80 @@ describe('ClsiManager', function () {
         )
       })
 
+      it('should post the project state as a history payload', function (ctx) {
+        expect(ctx.FetchUtils.fetchString).to.have.been.calledWith(
+          sinon.match.any,
+          sinon.match(
+            opts =>
+              opts.method === 'POST' &&
+              opts.json.compile.rawSnapshot != null &&
+              opts.json.compile.options.syncType === 'history-full'
+          )
+        )
+      })
+
       it('should not persist a cookie on response', function (ctx) {
         expect(ctx.ClsiCookieManager.promises.setServerId).not.to.have.been
           .called
+      })
+    })
+
+    describe('when the clsi does not support the POST route', function () {
+      beforeEach(async function (ctx) {
+        ctx.FetchUtils.fetchString
+          .onFirstCall()
+          .rejects(
+            new RequestFailedError(
+              'http://clsi.example.com',
+              { method: 'POST' },
+              { status: 404 }
+            )
+          )
+        await ctx.ClsiManager.promises.wordCount(
+          ctx.project._id,
+          ctx.user_id,
+          false,
+          { compileBackendClass: 'free', compileGroup: 'standard' },
+          'node-1',
+          { rootResourcePath: 'main.tex' }
+        )
+      })
+
+      it('should retry with a GET', function (ctx) {
+        expect(ctx.FetchUtils.fetchString).to.have.been.calledTwice
+        expect(ctx.FetchUtils.fetchString.secondCall.args[1]).to.deep.equal({
+          method: 'GET',
+        })
+      })
+    })
+
+    describe('when a compile holds the compile dir lock', function () {
+      beforeEach(async function (ctx) {
+        ctx.FetchUtils.fetchString
+          .onFirstCall()
+          .rejects(
+            new RequestFailedError(
+              'http://clsi.example.com',
+              { method: 'POST' },
+              { status: 423 }
+            )
+          )
+        ctx.result = await ctx.ClsiManager.promises.wordCount(
+          ctx.project._id,
+          ctx.user_id,
+          false,
+          { compileBackendClass: 'free', compileGroup: 'standard' },
+          'node-1',
+          { rootResourcePath: 'main.tex' }
+        )
+      })
+
+      it('should count what is on disk rather than failing', function (ctx) {
+        expect(ctx.FetchUtils.fetchString).to.have.been.calledTwice
+        expect(ctx.FetchUtils.fetchString.secondCall.args[1]).to.deep.equal({
+          method: 'GET',
+        })
+        expect(ctx.result).to.exist
       })
     })
 
@@ -1824,7 +1896,8 @@ describe('ClsiManager', function () {
           ctx.user_id,
           'other.tex',
           { compileBackendClass: 'free', compileGroup: 'standard' },
-          'node-2'
+          'node-2',
+          { rootResourcePath: 'main.tex' }
         )
       })
 
@@ -1858,7 +1931,8 @@ describe('ClsiManager', function () {
           ctx.user_id,
           false,
           { compileBackendClass: 'premium', compileGroup: 'priority' },
-          'node-1'
+          'node-1',
+          { rootResourcePath: 'main.tex' }
         )
         // wait for the background task to finish
         await setTimeout(0)

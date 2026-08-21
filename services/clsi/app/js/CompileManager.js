@@ -4,6 +4,7 @@ import Path from 'node:path'
 import { callbackify } from 'node:util'
 import Settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
+import Metrics from '@overleaf/metrics'
 import OError from '@overleaf/o-error'
 import ResourceWriter from './ResourceWriter.js'
 import LatexRunner from './LatexRunner.js'
@@ -569,6 +570,7 @@ async function _checkFileExists(dir, filename) {
     if (error.code === 'ENOENT') {
       throw new Errors.NotFoundError('no output file')
     }
+    throw error
   }
   if (!stats.isFile()) {
     throw new Error('not a file')
@@ -669,7 +671,43 @@ async function _runSynctex(projectId, userId, command, opts) {
   )
 }
 
-async function wordcount(projectId, userId, filename, image) {
+async function _syncResourcesForWordcount(
+  projectId,
+  userId,
+  filename,
+  compileDir,
+  request
+) {
+  // Always write, rather than skipping when the root file is already there:
+  // texcount reads every included file, so they all have to be current.
+  const lock = LockManager.acquire(compileDir)
+  try {
+    Metrics.inc('wordcount_sync_resources')
+    if (request.isCompileFromHistory) {
+      await HistoryResourceWriter.syncResourcesToDisk(
+        projectId,
+        userId,
+        request,
+        compileDir,
+        {}, // timings
+        {} // stats
+      )
+    } else {
+      await ResourceWriter.promises.syncResourcesToDisk(request, compileDir)
+    }
+  } catch (err) {
+    if (err instanceof Errors.MissingUpdatesError) throw err
+    throw OError.tag(err, 'error syncing resources for wordcount', {
+      projectId,
+      userId,
+      filename,
+    })
+  } finally {
+    lock.release()
+  }
+}
+
+async function wordcount(projectId, userId, filename, image, request) {
   logger.debug({ projectId, userId, filename, image }, 'running wordcount')
   const filePath = `$COMPILE_DIR/${filename}`
   const command = ['texcount', '-nocol', '-inc', filePath]
@@ -682,14 +720,39 @@ async function wordcount(projectId, userId, filename, image) {
     throw new Errors.InvalidParameter('invalid image')
   }
 
+  let isNewCompileDir
   try {
-    await fsPromises.mkdir(compileDir, { recursive: true })
+    isNewCompileDir =
+      (await fsPromises.mkdir(compileDir, { recursive: true })) === compileDir
   } catch (err) {
     throw OError.tag(err, 'error ensuring dir for wordcount', {
       projectId,
       userId,
       filename,
     })
+  }
+
+  if (isNewCompileDir && request?.compileFromClsiCache) {
+    // We are bootstrapping the compile dir on this clsi. Restore the cached
+    // outputs too, so the next compile does not start from scratch.
+    try {
+      await downloadLatestCompileCache(projectId, userId, compileDir)
+    } catch (err) {
+      logger.warn(
+        { err, projectId, userId },
+        'failed to populate compile dir from cache'
+      )
+    }
+  }
+
+  if (request) {
+    await _syncResourcesForWordcount(
+      projectId,
+      userId,
+      filename,
+      compileDir,
+      request
+    )
   }
 
   try {

@@ -226,6 +226,7 @@ const wordCountSchema = z.object({
   query: z.object({
     clsiserverid: zz.clsiServerId().optional(),
     file: z.string().optional(),
+    rootResourcePath: zz.filepath().optional(),
   }),
 })
 
@@ -238,6 +239,7 @@ const wordCountFallbackSchema = z.object({
   query: z.object({
     clsiserverid: zz.clsiServerId().optional(),
     file: z.string().optional(),
+    rootResourcePath: z.string().optional(),
   }),
 })
 
@@ -901,14 +903,15 @@ const _CompileController = {
     })
     const projectId = params.Project_id
     const file = query.file || false
-    const { clsiserverid } = query
+    const { clsiserverid, rootResourcePath } = query
     const userId = CompileController._getUserIdForCompile(req)
 
     const body = await CompileManager.promises.wordCount(
       projectId,
       userId,
       file,
-      clsiserverid
+      clsiserverid,
+      rootResourcePath
     )
     res.json(body)
   },

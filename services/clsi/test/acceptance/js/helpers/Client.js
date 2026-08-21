@@ -169,18 +169,24 @@ function syncFromPdfWithImage(projectId, page, h, v, imageName) {
   return fetchJson(url)
 }
 
-function wordcount(projectId, file) {
+function wordcount(projectId, file, compileRequest) {
   const image = undefined
-  return wordcountWithImage(projectId, file, image)
+  return wordcountWithImage(projectId, file, image, compileRequest)
 }
 
-async function wordcountWithImage(projectId, file, image) {
+async function wordcountWithImage(projectId, file, image, compileRequest) {
   const url = new URL(`${host}/project/${projectId}/wordcount`)
   if (image) {
     url.searchParams.append('image', image)
   }
   url.searchParams.append('file', file)
-  return await fetchJson(url)
+  if (!compileRequest) {
+    return await fetchJson(url)
+  }
+  return await fetchJson(url, {
+    method: 'POST',
+    json: { compile: compileRequest },
+  })
 }
 
 async function compileDirectory(projectId, baseDirectory, directory) {
