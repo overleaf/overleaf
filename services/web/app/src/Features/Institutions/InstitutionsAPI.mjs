@@ -9,14 +9,19 @@ import {
   V1ConnectionError,
   InvalidInstitutionalEmailError,
 } from '../Errors/Errors.js'
-import { fetchJson, fetchNothing } from '@overleaf/fetch-utils'
+import {
+  fetchJson,
+  fetchNothing,
+  RequestFailedError,
+} from '@overleaf/fetch-utils'
 import Modules from '../../infrastructure/Modules.mjs'
 
 function _makeRequestOptions(options) {
+  const timeout = options.timeout || settings.apis.v1.timeout
   const requestOptions = {
     method: options.method,
     basicAuth: { user: settings.apis.v1.user, password: settings.apis.v1.pass },
-    signal: AbortSignal.timeout(settings.apis.v1.timeout),
+    signal: AbortSignal.timeout(timeout),
   }
 
   if (options.body) {
@@ -27,6 +32,22 @@ function _makeRequestOptions(options) {
 }
 
 function _responseErrorHandling(options, error) {
+  if (!(error instanceof RequestFailedError)) {
+    // The error is not an HTTP failure status from v1, so there is no response
+    // to inspect: e.g. a client-side timeout/abort, DNS failure or connection
+    // error. Log the underlying error for diagnosis before wrapping it, since
+    // it otherwise gets swallowed by the generic V1ConnectionError message
+    // below.
+    logger.warn(
+      { err: error, path: options.path },
+      `${options.defaultErrorMessage}: request to v1 failed without a response`
+    )
+    throw new V1ConnectionError({
+      message: 'error getting affiliations from v1',
+      info: { path: options.path },
+    }).withCause(error)
+  }
+
   const status = error.response.status
 
   if (status >= 500) {
@@ -196,6 +217,10 @@ async function getUsersNeedingReconfirmationsLapsedProcessed() {
     path: '/api/v2/institutions/need_reconfirmation_lapsed_processed',
     defaultErrorMessage:
       'Could not get users that need reconfirmations lapsed processed',
+    // The underlying v1 query can be slow and is bounded by a 55s Postgres
+    // statement_timeout; give it more room than the default client timeout
+    // so v1 has a chance to return a clean error before we give up on it.
+    timeout: 60_000,
   })
 }
 
