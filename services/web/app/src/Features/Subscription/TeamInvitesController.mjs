@@ -32,8 +32,10 @@ const rateLimiters = {
   }),
 }
 
+// non-strict: evidence of scripts interacting with this that harmlessly send
+// extra, ignored fields, see https://github.com/overleaf/internal/issues/36577
 const createInviteSchema = z.object({
-  body: z.strictObject({
+  body: z.object({
     email: z.string(),
   }),
 })

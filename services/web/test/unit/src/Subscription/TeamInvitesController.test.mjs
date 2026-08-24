@@ -379,8 +379,8 @@ describe('TeamInvitesController', function () {
       setReqValidationModeForTests('enforce')
     })
 
-    it('createInvite rejects an unrecognized field in the body', async function (ctx) {
-      ctx.req.body = { email: 'invited@example.com', notAField: 'nope' }
+    it('createInvite rejects a request missing the email', async function (ctx) {
+      ctx.req.body = {}
       await new Promise(resolve => {
         ctx.Controller.createInvite(ctx.req, new MockResponse(vi), err => {
           expect(err).to.be.instanceof(InvalidRequestError)
