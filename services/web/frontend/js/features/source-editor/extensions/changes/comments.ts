@@ -1,9 +1,11 @@
-import { Range, RangeSet, RangeValue, Transaction } from '@codemirror/state'
 import {
-  AnyOperation,
-  Change,
-  CommentOperation,
-} from '../../../../../../types/change'
+  Range,
+  RangeSet,
+  RangeValue,
+  StateEffect,
+  Transaction,
+} from '@codemirror/state'
+import { AnyOperation, CommentOperation } from '../../../../../../types/change'
 import { ThreadId } from '../../../../../../types/review-panel/review-panel'
 import { DocumentContainer } from '@/features/ide-react/editor/document-container'
 
@@ -12,9 +14,27 @@ export type StoredComment = {
   comments: {
     offset: number
     text: string
-    comment: Change<CommentOperation>
+    comment: { id: string }
   }[]
 }
+
+/**
+ * Comments to re-attach when a deletion is undone, keyed by CM position so the
+ * undo can confirm the text came back to the same place.
+ */
+export const restoreDetachedCommentsEffect = StateEffect.define<
+  RangeSet<CommentRangeValue>
+>({
+  map: (value, mapping) => {
+    return value
+      .update({
+        filter: (from, to) => {
+          return from <= mapping.length && to <= mapping.length
+        },
+      })
+      .map(mapping)
+  },
+})
 
 /**
  * Find tracked comments within the range of the current transaction's changes
@@ -80,10 +100,10 @@ export const findCommentsInPaste = (
   return ops
 }
 
-class CommentRangeValue extends RangeValue {
+export class CommentRangeValue extends RangeValue {
   constructor(
     public content: string,
-    public comment: Change<CommentOperation>
+    public comment: { id: string }
   ) {
     super()
   }
@@ -165,17 +185,14 @@ export const restoreCommentsOnPaste = (
   transaction: Transaction,
   storedComments: StoredComment[]
 ) => {
-  if (storedComments.length) {
-    const ops = findCommentsInPaste(storedComments, transaction)
+  if (!storedComments.length) {
+    return
+  }
 
-    if (ops.length) {
-      submitOpsAfterEvent(
-        currentDoc,
-        'ranges:dirty.paste-cm6',
-        ops,
-        transaction
-      )
-    }
+  const ops = findCommentsInPaste(storedComments, transaction)
+
+  if (ops.length) {
+    submitOpsAfterEvent(currentDoc, 'ranges:dirty.paste-cm6', ops, transaction)
   }
 }
 
