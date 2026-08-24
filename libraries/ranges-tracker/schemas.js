@@ -62,13 +62,13 @@ const trackedChangeMetadata = z.strictObject({
 })
 
 const comment = z.strictObject({
-  id: zz.objectId().optional(),
+  id: z.string().optional(),
   op: commentOp,
   metadata: commentMetadata.optional(),
 })
 
 const trackedChange = z.strictObject({
-  id: zz.objectId().optional(),
+  id: z.string().optional(),
   op: insertOp.or(deleteOp),
   metadata: trackedChangeMetadata,
 })

@@ -494,7 +494,7 @@ const acceptChangesSchema = z.object({
     change_id: zz.objectId().optional(),
   }),
   body: z.strictObject({
-    change_ids: z.array(zz.objectId()).optional(),
+    change_ids: z.array(z.string()).optional(),
   }),
 })
 
