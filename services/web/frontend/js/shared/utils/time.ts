@@ -1,28 +1,37 @@
 import { TFunction } from 'i18next'
 
+export function secondsToHoursAndMinutes(seconds: number): {
+  hours: number
+  minutes: number
+} {
+  // round up: the caller tells the user how long to wait, so never understate
+  const totalMinutes = Math.ceil(seconds / 60)
+  return {
+    hours: Math.floor(totalMinutes / 60),
+    minutes: totalMinutes % 60,
+  }
+}
+
 export function formatSecondsToHoursAndMinutes(
   t: TFunction,
   seconds: number
 ): string {
-  // round up: the caller tells the user how long to wait, so never understate
-  const totalMinutes = Math.ceil(seconds / 60)
-  const hrs = Math.floor(totalMinutes / 60)
-  const mins = totalMinutes % 60
+  const { hours, minutes } = secondsToHoursAndMinutes(seconds)
 
   const parts = []
 
-  if (hrs > 0) {
-    parts.push(t('time_hour', { count: hrs }))
+  if (hours > 0) {
+    parts.push(t('time_hour', { count: hours }))
   }
 
-  if (hrs > 0 && mins > 0) {
+  if (hours > 0 && minutes > 0) {
     parts.push(t('time_and'))
   }
 
-  if (mins > 0) {
+  if (minutes > 0) {
     parts.push(
       t('time_minute', {
-        count: mins,
+        count: minutes,
       })
     )
   }

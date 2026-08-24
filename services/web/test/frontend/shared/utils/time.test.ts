@@ -1,6 +1,9 @@
 import { expect } from 'chai'
 import { TFunction } from 'i18next'
-import { formatSecondsToHoursAndMinutes } from '@/shared/utils/time'
+import {
+  formatSecondsToHoursAndMinutes,
+  secondsToHoursAndMinutes,
+} from '@/shared/utils/time'
 
 // stands in for i18next, echoing the key and its count
 const t = ((key: string, options?: { count?: number }) =>
@@ -60,5 +63,35 @@ describe('formatSecondsToHoursAndMinutes', function () {
     expect(formatSecondsToHoursAndMinutes(t, ONE_HOUR_IN_SECONDS + 1)).to.equal(
       '1 time_hour time_and 1 time_minute'
     )
+  })
+})
+
+describe('secondsToHoursAndMinutes', function () {
+  it('rounds a part-minute up - 50s', function () {
+    expect(secondsToHoursAndMinutes(50)).to.deep.equal({
+      hours: 0,
+      minutes: 1,
+    })
+  })
+
+  it('rounds a part-minute up - 1m 59s', function () {
+    expect(secondsToHoursAndMinutes(ONE_MINUTE_IN_SECONDS + 59)).to.deep.equal({
+      hours: 0,
+      minutes: 2,
+    })
+  })
+
+  it('carries whole minutes into hours without a 60 - 1h', function () {
+    expect(secondsToHoursAndMinutes(ONE_HOUR_IN_SECONDS)).to.deep.equal({
+      hours: 1,
+      minutes: 0,
+    })
+  })
+
+  it('is zero for no remaining time', function () {
+    expect(secondsToHoursAndMinutes(0)).to.deep.equal({
+      hours: 0,
+      minutes: 0,
+    })
   })
 })
