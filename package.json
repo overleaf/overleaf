@@ -80,7 +80,6 @@
     "send": "patch:send@npm%3A0.19.0#~/.yarn/patches/send-npm-0.19.0.patch",
     "serve-static": "1.16.2",
     "recurly": "4.12.0",
-    "mongoose": "8.22.1",
     "pg": "8.7.1",
     "pg-query-stream": "4.7.1",
     "@aws-sdk/client-s3": "3.994.0",
