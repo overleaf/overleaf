@@ -47,6 +47,10 @@ const createTagFallbackSchema = z.object({
 async function createTag(req, res) {
   const { body } = parseReq(req, createTagSchema, {
     fallbackSchema: createTagFallbackSchema,
+    // TAG_COLOR_REGEX only admits '#rrggbb' or the exact
+    // 'hsl(<h>, 70%, 45%)' form the project-list colour picker emits, so log
+    // the value to find out what real clients are sending instead.
+    logFields: ['body.color'],
   })
   const { name, color } = body
   const userId = SessionManager.getLoggedInUserId(req.session)
@@ -217,6 +221,8 @@ const editTagFallbackSchema = z.object({
 async function editTag(req, res) {
   const { params, body } = parseReq(req, editTagSchema, {
     fallbackSchema: editTagFallbackSchema,
+    // same unknown as createTag above
+    logFields: ['body.color'],
   })
   const { tagId } = params
   const { name, color } = body
