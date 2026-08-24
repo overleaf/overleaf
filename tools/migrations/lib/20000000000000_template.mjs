@@ -2,6 +2,11 @@
 
 import Helpers from './lib/helpers.mjs'
 
+// Environments this migration should run in: 'server-ce', 'server-pro', 'saas'.
+// Two extra tags are also supported:
+//   'auxiliary'   - the migration operates on collections on the auxiliary Mongo cluster
+//   'nonblocking' - deployments may go through while this migration is pending
+// See the README for details.
 const tags = ['server-ce', 'server-pro', 'saas']
 
 const migrate = async client => {
