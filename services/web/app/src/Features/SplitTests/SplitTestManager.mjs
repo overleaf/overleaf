@@ -4,6 +4,7 @@ import SplitTestUtils from './SplitTestUtils.mjs'
 import OError from '@overleaf/o-error'
 import _ from 'lodash'
 import { CacheFlow } from 'cache-flow'
+import Settings from '@overleaf/settings'
 
 // customer.io silently drops attribute values over 1000 bytes, so cap the
 // number of split tests whose assignments are sent in the
@@ -594,11 +595,12 @@ async function _saveSplitTest(splitTest) {
 }
 
 /*
- * As this is only used for utility in local dev environment, we should make sure this isn't run in
- * any other deployment environment.
+ * As this is only used for utility in local dev environment (and the test
+ * suites), we should make sure this isn't run in any other deployment
+ * environment.
  */
 function _checkEnvIsSafe(operation) {
-  if (process.env.NODE_ENV !== 'development') {
+  if (!Settings.isDevEnv && !Settings.isCI) {
     throw new Errors.ForbiddenError(
       `Attempted to ${operation} all feature flags outside of local env`
     )
