@@ -6,7 +6,6 @@ import {
 } from '../../context/project-list-context'
 import TagsList from './tags-list'
 import ProjectsFilterMenu from '../projects-filter-menu'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { Folder } from '@phosphor-icons/react'
 import { ActivePage } from '../../util/navigation-state'
 
@@ -51,14 +50,13 @@ export default function SidebarFilters({
   activePage: ActivePage
 }) {
   const { t } = useTranslation()
-  const isLibraryEnabled = isSplitTestEnabled('overleaf-library')
   return (
     <ul className="list-unstyled project-list-filters">
       <SidebarFilter
         activePage={activePage}
         filter="all"
-        text={isLibraryEnabled ? t('projects') : t('all_projects')}
-        icon={isLibraryEnabled && <Folder size={20} />}
+        text={t('projects')}
+        icon={<Folder size={20} />}
       />
       <SidebarFilter
         activePage={activePage}
@@ -75,13 +73,6 @@ export default function SidebarFilters({
         filter="archived"
         text={t('archived_projects')}
       />
-      {!isLibraryEnabled && (
-        <SidebarFilter
-          activePage={activePage}
-          filter="trashed"
-          text={t('trashed_projects')}
-        />
-      )}
       <li aria-hidden="true">
         <hr />
       </li>

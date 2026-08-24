@@ -574,7 +574,6 @@ async function projectListPage(req, res, next) {
   const splitTests = [
     // Split tests that will be made available to the frontend
     'import-docx',
-    'overleaf-library',
     'import-markdown',
     'themed-modals',
     'shared-workspace',

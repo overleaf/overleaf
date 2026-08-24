@@ -53,7 +53,8 @@ body {
     .navbar-header .navbar-logo {
       @include media-breakpoint-up(md) {
         position: relative;
-        top: var(--spacing-05);
+        top: calc(var(--spacing-05) * 2);
+        left: var(--spacing-05);
       }
     }
 
@@ -100,61 +101,6 @@ body {
               }
             }
           }
-        }
-      }
-    }
-  }
-
-  &.library-enabled {
-    .navbar-default .navbar-header .navbar-logo {
-      @include media-breakpoint-up(md) {
-        top: calc(var(--spacing-05) * 2);
-        left: var(--spacing-05);
-      }
-    }
-
-    .project-list-wrapper .project-list-sidebar-wrapper-react {
-      padding-top: calc(var(--spacing-08) - 1px);
-
-      .project-list-sidebar-scroll {
-        padding-top: 0;
-        padding-right: var(--spacing-05);
-      }
-
-      ul.project-list-filters {
-        margin-top: var(--spacing-05);
-
-        .sidebar-filter-button {
-          display: flex;
-          align-items: center;
-          padding-left: calc(var(--spacing-05) + 20px + var(--spacing-05));
-        }
-
-        .sidebar-filter-button-with-icon {
-          // Only the items with an icon are 44px tall: 20px of content between
-          // 12px paddings. The rest of the filters stay at 40px.
-          line-height: var(--line-height-02);
-          padding: var(--spacing-05);
-
-          // Without this the icon is an inline box sitting on the text
-          // baseline, which leaves descender space below it and stops
-          // align-items from centring it against the label.
-          .icon {
-            display: flex;
-            align-items: center;
-          }
-
-          svg {
-            margin-right: var(--spacing-05);
-          }
-        }
-
-        .dropdown-header {
-          padding-left: calc(var(--spacing-06) + 20px + var(--spacing-05));
-        }
-
-        > li.tag button.tag-name {
-          padding-left: calc(var(--spacing-06) + 20px + var(--spacing-05));
         }
       }
     }
@@ -210,7 +156,7 @@ body {
       max-width: 320px;
       min-width: 200px;
       margin-top: var(--spacing-03);
-      padding: var(--spacing-08) 0 0 0;
+      padding: calc(var(--spacing-08) - 1px) 0 0;
 
       .new-project-dropdown {
         padding: 0 var(--spacing-08) var(--spacing-05) var(--spacing-05);
@@ -240,8 +186,44 @@ body {
         flex: 1 1 auto;
         overflow: auto;
         margin: 0 var(--spacing-02) 0 0;
-        padding: var(--spacing-05) var(--spacing-07) var(--spacing-05)
-          var(--spacing-05);
+        padding: 0 var(--spacing-05) var(--spacing-05);
+      }
+
+      ul.project-list-filters {
+        margin-top: var(--spacing-05);
+
+        .sidebar-filter-button {
+          display: flex;
+          align-items: center;
+          padding-left: calc(var(--spacing-05) + 20px + var(--spacing-05));
+        }
+
+        .sidebar-filter-button-with-icon {
+          // Only the items with an icon are 44px tall: 20px of content between
+          // 12px paddings. The rest of the filters stay at 40px.
+          line-height: var(--line-height-02);
+          padding: var(--spacing-05);
+
+          // Without this the icon is an inline box sitting on the text
+          // baseline, which leaves descender space below it and stops
+          // align-items from centring it against the label.
+          .icon {
+            display: flex;
+            align-items: center;
+          }
+
+          svg {
+            margin-right: var(--spacing-05);
+          }
+        }
+
+        .dropdown-header {
+          padding-left: calc(var(--spacing-06) + 20px + var(--spacing-05));
+        }
+
+        > li.tag button.tag-name {
+          padding-left: calc(var(--spacing-06) + 20px + var(--spacing-05));
+        }
       }
 
       .ds-nav-page-switcher-logo {

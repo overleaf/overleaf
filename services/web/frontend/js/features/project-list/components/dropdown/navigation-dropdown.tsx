@@ -9,13 +9,11 @@ import {
 import {
   OLDropdown,
   OLDropdownDivider,
-  OLDropdownHeader,
   OLDropdownItem,
   OLDropdownMenu,
   OLDropdownToggle,
 } from '@/shared/components/ol/ol-dropdown-menu'
 import MaterialIcon from '@/shared/components/material-icon'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import ProjectsFilterMenu from '../projects-filter-menu'
 import TagsList from '../tags-list'
 import { ActivePage } from '../../util/navigation-state'
@@ -78,7 +76,6 @@ function NavigationDropdown({
   )
   const [view, setView] = useState<'top' | 'tags' | 'trash'>('top')
   const { filter, selectedTagId, tags } = useProjectListContext()
-  const isLibraryEnabled = isSplitTestEnabled('overleaf-library')
   const projectsTrashActive =
     activePage === 'projects' &&
     selectedTagId === undefined &&
@@ -126,7 +123,7 @@ function NavigationDropdown({
           filter="all"
           text={t('all_projects')}
           activePage={activePage}
-          leadingIcon={isLibraryEnabled && <Folder size={20} />}
+          leadingIcon={<Folder size={20} />}
         />
       </li>
       <li role="none">
@@ -134,7 +131,7 @@ function NavigationDropdown({
           filter="owned"
           text={t('your_projects')}
           activePage={activePage}
-          leadingIcon={isLibraryEnabled && <OLDropdownItem.EmptyLeadingIcon />}
+          leadingIcon={<OLDropdownItem.EmptyLeadingIcon />}
         />
       </li>
       <li role="none">
@@ -142,7 +139,7 @@ function NavigationDropdown({
           filter="shared"
           text={t('shared_with_you')}
           activePage={activePage}
-          leadingIcon={isLibraryEnabled && <OLDropdownItem.EmptyLeadingIcon />}
+          leadingIcon={<OLDropdownItem.EmptyLeadingIcon />}
         />
       </li>
       <li role="none">
@@ -150,71 +147,40 @@ function NavigationDropdown({
           filter="archived"
           text={t('archived_projects')}
           activePage={activePage}
-          leadingIcon={isLibraryEnabled && <OLDropdownItem.EmptyLeadingIcon />}
+          leadingIcon={<OLDropdownItem.EmptyLeadingIcon />}
         />
       </li>
-      {!isLibraryEnabled && (
-        <li role="none">
-          <Item
-            filter="trashed"
-            text={t('trashed_projects')}
-            activePage={activePage}
-          />
-        </li>
-      )}
-    </>
-  )
-
-  const submenuItems = (
-    <>
-      {filterItems}
-      <OLDropdownHeader className="text-uppercase">
-        {t('tags')}:
-      </OLDropdownHeader>
-      <TagsList />
     </>
   )
 
   return (
     <OLDropdown
-      onToggle={
-        isLibraryEnabled
-          ? show => {
-              if (show) {
-                if (selectedTagId !== undefined) {
-                  setView('tags')
-                } else if (isTrashActive) {
-                  setView('trash')
-                } else {
-                  setView('top')
-                }
-              } else {
-                setView('top')
-              }
-            }
-          : undefined
-      }
+      onToggle={show => {
+        if (show) {
+          if (selectedTagId !== undefined) {
+            setView('tags')
+          } else if (isTrashActive) {
+            setView('trash')
+          } else {
+            setView('top')
+          }
+        } else {
+          setView('top')
+        }
+      }}
     >
       <OLDropdownToggle
         id="projects-types-dropdown-toggle-btn"
         className="ps-0 mb-0 btn-transparent h3"
         size="lg"
-        aria-label={
-          isLibraryEnabled ? t('navigation_menu') : t('filter_projects')
-        }
+        aria-label={t('navigation_menu')}
       >
         <span className="text-truncate" aria-hidden>
           {title}
         </span>
       </OLDropdownToggle>
-      <OLDropdownMenu
-        flip={false}
-        className={
-          isLibraryEnabled ? 'projects-dropdown-menu-library' : undefined
-        }
-      >
-        {!isLibraryEnabled && submenuItems}
-        {isLibraryEnabled && view === 'top' && (
+      <OLDropdownMenu flip={false} className="projects-dropdown-menu-library">
+        {view === 'top' && (
           <>
             {filterItems}
             <li role="none">
@@ -257,7 +223,7 @@ function NavigationDropdown({
             </li>
           </>
         )}
-        {isLibraryEnabled && view === 'tags' && (
+        {view === 'tags' && (
           <>
             <li role="none">
               <OLDropdownItem
@@ -276,7 +242,7 @@ function NavigationDropdown({
             <TagsList />
           </>
         )}
-        {isLibraryEnabled && view === 'trash' && (
+        {view === 'trash' && (
           <>
             <li role="none">
               <OLDropdownItem

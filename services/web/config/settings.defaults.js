@@ -1031,6 +1031,7 @@ module.exports = {
     createFileModes: [],
     devToolbar: [],
     dsNavLibraryLink: [],
+    trashPageTabs: [],
     adminUserLibrary: [],
     gitBridge: [],
     publishModalDropdownButton: [],

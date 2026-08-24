@@ -2,14 +2,12 @@ import { JSXElementConstructor } from 'react'
 import { useTranslation } from 'react-i18next'
 import classnames from 'classnames'
 import { Trash } from '@phosphor-icons/react'
-import NewProjectButton from '../new-project-button'
 import SidebarFilters from './sidebar-filters'
 import AddAffiliation, { useAddAffiliation } from '../add-affiliation'
 import { usePersistedResize } from '@/shared/hooks/use-resize'
 import { useScrolled } from '@/features/project-list/components/sidebar/use-scroll'
 import { SurveyWidgetDsNav } from '@/features/project-list/components/survey-widget-ds-nav'
 import { SidebarLowerSection } from '@/shared/components/sidebar/sidebar-lower-section'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { DsNavOverleafLogo } from '@/shared/components/sidebar/ds-nav-overleaf-logo'
 import { useProjectListContext } from '@/features/project-list/context/project-list-context'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
@@ -29,7 +27,6 @@ function SidebarDsNav({
 }) {
   const { t } = useTranslation()
   const { show: showAddAffiliationWidget } = useAddAffiliation()
-  const isLibraryEnabled = isSplitTestEnabled('overleaf-library')
   const { filter, selectedTagId, selectFilter } = useProjectListContext()
   const isTrashActive =
     activePage === 'library'
@@ -43,7 +40,7 @@ function SidebarDsNav({
   const { mousePos, getHandleProps, getTargetProps } = usePersistedResize({
     name: 'project-sidebar',
   })
-  const { containerRef, scrolledUp, scrolledDown } = useScrolled()
+  const { containerRef, scrolledUp } = useScrolled()
 
   return (
     <div
@@ -54,19 +51,11 @@ function SidebarDsNav({
         },
       })}
     >
-      {isLibraryEnabled && (activePage === 'library' || isTrashActive) && (
-        <DsNavOverleafLogo />
-      )}
+      {(activePage === 'library' || isTrashActive) && <DsNavOverleafLogo />}
       <nav
         className="flex-grow flex-shrink"
         aria-label={t('project_categories_tags')}
       >
-        {!isLibraryEnabled && (
-          <NewProjectButton
-            id="new-project-button-sidebar"
-            className={scrolledDown ? 'show-shadow' : undefined}
-          />
-        )}
         <div
           className="project-list-sidebar-scroll"
           ref={containerRef}
@@ -84,29 +73,25 @@ function SidebarDsNav({
         )}
       >
         <SidebarLowerSection showThemeToggle>
-          {isLibraryEnabled && (
-            <>
-              {DsNavLibraryLink && (
-                <DsNavLibraryLink
-                  active={activePage === 'library' && !trashActive}
-                  inLibrary={activePage === 'library'}
-                />
-              )}
-              <button
-                type="button"
-                className={classnames('ds-nav-page-switcher-item', {
-                  active: isTrashActive,
-                })}
-                aria-current={isTrashActive ? 'page' : undefined}
-                onClick={() => selectFilter('trashed')}
-              >
-                <Trash size={20} />
-                <span className="ds-nav-page-switcher-item-label">
-                  {t('trash')}
-                </span>
-              </button>
-            </>
+          {DsNavLibraryLink && (
+            <DsNavLibraryLink
+              active={activePage === 'library' && !trashActive}
+              inLibrary={activePage === 'library'}
+            />
           )}
+          <button
+            type="button"
+            className={classnames('ds-nav-page-switcher-item', {
+              active: isTrashActive,
+            })}
+            aria-current={isTrashActive ? 'page' : undefined}
+            onClick={() => selectFilter('trashed')}
+          >
+            <Trash size={20} />
+            <span className="ds-nav-page-switcher-item-label">
+              {t('trash')}
+            </span>
+          </button>
           <div className="project-list-sidebar-survey-wrapper">
             <SurveyWidgetDsNav />
           </div>

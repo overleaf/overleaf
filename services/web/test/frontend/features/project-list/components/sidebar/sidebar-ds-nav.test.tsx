@@ -41,9 +41,6 @@ describe('<SidebarDsNav />', function () {
     global.localStorage.clear()
     window.metaAttributesCache.set('ol-tags', [])
     window.metaAttributesCache.set('ol-ExposedSettings', { isOverleaf: true })
-    window.metaAttributesCache.set('ol-splitTestVariants', {
-      'overleaf-library': 'enabled',
-    })
     window.metaAttributesCache.set('ol-inactiveTutorials', [
       'library-new-badge',
     ])

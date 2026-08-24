@@ -22,7 +22,6 @@ import { useSendProjectListMB } from '@/features/project-list/components/project
 import type { PortalTemplate } from '../../../../../types/portal-template'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useProjectListContext } from '@/features/project-list/context/project-list-context'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { NestableDropdownContextProvider } from '@/shared/context/nestable-dropdown-context'
 import { NestedMenuBarDropdown } from '@/shared/components/menu-bar/menu-bar-dropdown'
 
@@ -72,11 +71,9 @@ function NewProjectButton({
     useFeatureFlag('import-markdown') &&
     getMeta('ol-ExposedSettings').enablePandocConversions
   const { selectedTagId, tags } = useProjectListContext()
-  const isLibraryEnabled = isSplitTestEnabled('overleaf-library')
-  const initialTags =
-    isLibraryEnabled && selectedTagId
-      ? tags.filter(tag => tag._id === selectedTagId)
-      : []
+  const initialTags = selectedTagId
+    ? tags.filter(tag => tag._id === selectedTagId)
+    : []
   const sendTrackingEvent = useCallback(
     ({
       dropdownMenu,

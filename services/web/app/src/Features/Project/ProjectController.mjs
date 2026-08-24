@@ -639,7 +639,6 @@ const _ProjectController = {
       'export-markdown',
       'export-html',
       'command-palette',
-      'overleaf-library',
       'focus-mode',
       'markdown-visual',
       'ai-disabled-collaborators',

@@ -26,7 +26,6 @@ import overleafLogoDark from '@/shared/svgs/overleaf-a-ds-solution-mallard-dark.
 import CookieBanner from '@/shared/components/cookie-banner'
 import NoProjects from '@/features/project-list/components/no-projects'
 import { useActiveOverallTheme } from '@/shared/hooks/use-active-overall-theme'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export function ProjectListDsNav() {
@@ -44,48 +43,28 @@ export function ProjectListDsNav() {
     currentFilterProjectsCount,
   } = useProjectListContext()
   const activeOverallTheme = useActiveOverallTheme()
-  const isLibraryEnabled = isSplitTestEnabled('overleaf-library')
   const isSharedWorkspaceEnabled = useFeatureFlag('shared-workspace')
 
   const selectedTag = tags.find(tag => tag._id === selectedTagId)
-  const showTrashHeader = isLibraryEnabled && filter === 'trashed'
+  const showTrashHeader = filter === 'trashed'
   const showNewProjectButton =
-    !isLibraryEnabled ||
-    (filter !== 'shared' && filter !== 'archived' && filter !== 'trashed')
+    filter !== 'shared' && filter !== 'archived' && filter !== 'trashed'
 
   const tableTopArea = (
     <div className="pt-2 pb-3 d-md-none d-flex gap-2">
-      {isLibraryEnabled ? (
-        <>
-          <SearchForm
-            inputValue={searchText}
-            setInputValue={setSearchText}
-            filter={filter}
-            selectedTag={selectedTag}
-            className="overflow-hidden flex-grow-1"
-          />
-          {showNewProjectButton && (
-            <NewProjectButton
-              id="new-project-button-projects-table"
-              showAddAffiliationWidget
-              align="end"
-            />
-          )}
-        </>
-      ) : (
-        <>
-          <NewProjectButton
-            id="new-project-button-projects-table"
-            showAddAffiliationWidget
-          />
-          <SearchForm
-            inputValue={searchText}
-            setInputValue={setSearchText}
-            filter={filter}
-            selectedTag={selectedTag}
-            className="overflow-hidden flex-grow-1"
-          />
-        </>
+      <SearchForm
+        inputValue={searchText}
+        setInputValue={setSearchText}
+        filter={filter}
+        selectedTag={selectedTag}
+        className="overflow-hidden flex-grow-1"
+      />
+      {showNewProjectButton && (
+        <NewProjectButton
+          id="new-project-button-projects-table"
+          showAddAffiliationWidget
+          align="end"
+        />
       )}
     </div>
   )
@@ -93,7 +72,6 @@ export function ProjectListDsNav() {
   return (
     <div
       className={classNames('project-ds-nav-page', 'website-redesign', {
-        'library-enabled': isLibraryEnabled,
         'ds-nav-hides-top-navbar': showTrashHeader,
       })}
     >
@@ -159,7 +137,7 @@ export function ProjectListDsNav() {
                 ) : (
                   <div className="project-ds-nav-project-list">
                     <OLRow className="d-none d-md-flex align-items-center">
-                      <OLCol md={isLibraryEnabled ? 8 : undefined} lg={7}>
+                      <OLCol md={8} lg={7}>
                         <SearchForm
                           inputValue={searchText}
                           setInputValue={setSearchText}
@@ -167,7 +145,7 @@ export function ProjectListDsNav() {
                           selectedTag={selectedTag}
                         />
                       </OLCol>
-                      {isLibraryEnabled && showNewProjectButton && (
+                      {showNewProjectButton && (
                         <OLCol className="ms-auto" xs="auto">
                           <NewProjectButton
                             id="new-project-button-projects-table"
