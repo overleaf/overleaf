@@ -23,6 +23,7 @@ export const buildRangesFromSnapshot = (
   const comments = snapshot.getComments()
   const trackedChanges = snapshot.getTrackedChanges()
   const snapshotContent = snapshot.getContent()
+  const visibleContent = snapshot.getContent({ filterTrackedDeletes: true })
 
   const trackedDeletes = new TrackedDeletes(trackedChanges)
 
@@ -54,8 +55,14 @@ export const buildRangesFromSnapshot = (
       seenComments.add(comment.id)
 
       const range = comment.ranges[0] // show the comment next to the first range
+      if (!range) {
+        // detached comment (commented text deleted) has no range to anchor to
+        continue
+      }
+      // slice from visible content, not the raw snapshot (still has tracked-deletes)
       const pos = trackedDeletes.toCodeMirror(range.pos)
-      const text = snapshotContent.substring(pos, range.end)
+      const end = trackedDeletes.toCodeMirror(range.end)
+      const text = visibleContent.substring(pos, end)
 
       ranges.comments.push({
         id: comment.id,

@@ -145,17 +145,19 @@ const buildRangesDecorations = ({
   for (const comment of comments) {
     if (!comment.resolved) {
       for (const range of comment.ranges) {
-        decorations.push(
-          Decoration.mark({
-            class: 'ol-cm-change ol-cm-change-c',
-            id: comment.id,
-            rangeType: 'comment',
-            comment,
-          }).range(
-            trackedDeletes.toCodeMirror(range.pos),
-            trackedDeletes.toCodeMirror(range.end)
+        const from = trackedDeletes.toCodeMirror(range.pos)
+        const to = trackedDeletes.toCodeMirror(range.end)
+        // a range hidden inside a tracked delete has no visible text to mark
+        if (from < to) {
+          decorations.push(
+            Decoration.mark({
+              class: 'ol-cm-change ol-cm-change-c',
+              id: comment.id,
+              rangeType: 'comment',
+              comment,
+            }).range(from, to)
           )
-        )
+        }
       }
     }
   }

@@ -1,12 +1,15 @@
 import { expect } from 'chai'
 import { EditorState, Transaction, TransactionSpec } from '@codemirror/state'
 import {
+  AddCommentOperation,
+  Range,
   StringFileData,
   TextOperation,
   TrackingProps,
 } from 'overleaf-editor-core'
 import {
   historyOT,
+  rangesState,
   setTrackChangesUserId,
 } from '@/features/source-editor/extensions/history-ot'
 import { DocumentContainer } from '@/features/ide-react/editor/document-container'
@@ -81,8 +84,27 @@ function setup(
     edit(spec: TransactionSpec) {
       state = state.update(spec).state
     },
+    getState() {
+      return state
+    },
   }
 }
+
+describe('historyOT rangesState', function () {
+  it('applies a tracked delete covering a commented range without crashing', function () {
+    const snapshot = snapshotWithTrackedDeletes('one two three')
+    new AddCommentOperation('c1', [new Range(4, 3)]).apply(snapshot)
+    const { edit, getState } = setup(snapshot)
+
+    // tracked-delete "two ": the comment's range is fully hidden, so no mark
+    edit({ changes: { from: 4, to: 8 } })
+
+    expect(getState().doc.toString()).to.equal('one three')
+    const { decorations } = getState().field(rangesState)
+    // the tracked-delete widget only — no empty comment mark
+    expect(decorations.size).to.equal(1)
+  })
+})
 
 describe('historyOT updateSender', function () {
   describe('when the transaction does not change the document', function () {

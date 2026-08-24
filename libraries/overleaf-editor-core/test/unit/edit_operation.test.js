@@ -10,6 +10,7 @@ const DeleteCommentOperation = require('../../lib/operation/delete_comment_opera
 const SetCommentStateOperation = require('../../lib/operation/set_comment_state_operation')
 const Range = require('../../lib/range')
 const EditNoOperation = require('../../lib/operation/edit_no_operation')
+const StringFileData = require('../../lib/file_data/string_file_data')
 
 describe('EditOperation', function () {
   it('Cannot be instantiated', function () {
@@ -245,6 +246,35 @@ describe('EditOperationTransformer', function () {
     expect(aPrime.toJSON()).to.deep.eql(a.toJSON())
     expect(bPrime).to.be.an.instanceof(SetCommentStateOperation)
     expect(bPrime.toJSON()).to.deep.eql(b.toJSON())
+  })
+
+  it('transformMultiple rebases two concurrent op lists so they converge', function () {
+    const base = 'AB'
+    // two sequential client edits, inserting at the start
+    const as = [
+      new TextOperation().insert('x').retain(2),
+      new TextOperation().insert('y').retain(3),
+    ]
+    // two sequential server edits, inserting at the end
+    const bs = [
+      new TextOperation().retain(2).insert('1'),
+      new TextOperation().retain(3).insert('2'),
+    ]
+    const asOrig = as.map(op => EditOperationBuilder.fromJSON(op.toJSON()))
+    const bsOrig = bs.map(op => EditOperationBuilder.fromJSON(op.toJSON()))
+
+    EditOperationTransformer.transformMultiple(as, bs)
+
+    const applySeq = ops => {
+      const file = new StringFileData(base)
+      for (const op of ops) {
+        file.edit(op)
+      }
+      return file.getContent()
+    }
+    // client edits then rebased server edits, and the mirror order, both converge
+    expect(applySeq([...asOrig, ...bs])).to.equal('yxAB12')
+    expect(applySeq([...bsOrig, ...as])).to.equal('yxAB12')
   })
 })
 
