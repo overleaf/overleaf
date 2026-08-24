@@ -392,8 +392,8 @@ const proxySyncPdfSchema = z.object({
   }),
   query: z.object({
     page: z.string().regex(/^\d+$/),
-    h: z.string().regex(/^-?\d+\.\d+$/),
-    v: z.string().regex(/^-?\d+\.\d+$/),
+    h: z.string().regex(/^-?\d+(\.\d+)?$/),
+    v: z.string().regex(/^-?\d+(\.\d+)?$/),
     ...syncTeXBaseQuery,
   }),
 })
@@ -835,10 +835,10 @@ const _CompileController = {
     if (!page?.match(/^\d+$/)) {
       throw new Error('invalid page parameter')
     }
-    if (!h?.match(/^-?\d+\.\d+$/)) {
+    if (!h?.match(/^-?\d+(\.\d+)?$/)) {
       throw new Error('invalid h parameter')
     }
-    if (!v?.match(/^-?\d+\.\d+$/)) {
+    if (!v?.match(/^-?\d+(\.\d+)?$/)) {
       throw new Error('invalid v parameter')
     }
     await _syncTeX(

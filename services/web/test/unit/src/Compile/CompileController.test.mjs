@@ -1196,6 +1196,57 @@ describe('CompileController', function () {
       ctx.CompileManager.promises.syncTeX.should.have.been.calledOnce
     })
 
+    it('should accept integer h and v values with no fractional part', async function (ctx) {
+      ctx.req.query.h = '5'
+      ctx.req.query.v = '-5'
+      ctx.next = sinon.stub()
+      await ctx.CompileController.proxySyncPdf(ctx.req, ctx.res, ctx.next)
+      ctx.next.should.not.have.been.called
+      ctx.CompileManager.promises.syncTeX.should.have.been.calledWith(
+        ctx.projectId,
+        ctx.user_id,
+        sinon.match({
+          validatedOptions: sinon.match({ h: '5', v: '-5' }),
+        })
+      )
+    })
+
+    it('should reject a non-numeric h value', async function (ctx) {
+      ctx.req.query.h = 'not-a-number'
+      ctx.next = sinon.stub()
+      await ctx.CompileController.proxySyncPdf(ctx.req, ctx.res, ctx.next)
+      ctx.next.should.have.been.calledWithMatch({
+        name: 'InvalidRequestError',
+        zodError: asZodError({
+          origin: 'string',
+          code: 'invalid_format',
+          format: 'regex',
+          pattern: '/^-?\\d+(\\.\\d+)?$/',
+          path: ['query', 'h'],
+          message: 'Invalid string: must match pattern /^-?\\d+(\\.\\d+)?$/',
+        }),
+      })
+      ctx.CompileManager.promises.syncTeX.should.have.been.calledOnce
+    })
+
+    it('should reject a non-numeric v value', async function (ctx) {
+      ctx.req.query.v = 'not-a-number'
+      ctx.next = sinon.stub()
+      await ctx.CompileController.proxySyncPdf(ctx.req, ctx.res, ctx.next)
+      ctx.next.should.have.been.calledWithMatch({
+        name: 'InvalidRequestError',
+        zodError: asZodError({
+          origin: 'string',
+          code: 'invalid_format',
+          format: 'regex',
+          pattern: '/^-?\\d+(\\.\\d+)?$/',
+          path: ['query', 'v'],
+          message: 'Invalid string: must match pattern /^-?\\d+(\\.\\d+)?$/',
+        }),
+      })
+      ctx.CompileManager.promises.syncTeX.should.have.been.calledOnce
+    })
+
     describe('when the schema is in log-only mode', function () {
       beforeEach(function () {
         setReqValidationModeForTests('log')
