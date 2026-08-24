@@ -33,6 +33,19 @@ function buildRefProviderSettings(settings) {
   }
 }
 
+function getInitialTheme(overallThemeSetting) {
+  switch (overallThemeSetting) {
+    case 'light-':
+      return 'light'
+    case '':
+      return 'dark'
+    case 'system':
+      return 'system'
+    default:
+      return 'dark'
+  }
+}
+
 async function buildUserSettings(_req, _res, user) {
   return {
     mode: user.ace.mode,
@@ -63,4 +76,5 @@ async function buildUserSettings(_req, _res, user) {
 
 export default {
   buildUserSettings,
+  getInitialTheme,
 }

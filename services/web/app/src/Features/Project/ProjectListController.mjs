@@ -664,6 +664,7 @@ async function projectListPage(req, res, next) {
     userAffiliations,
     userEmails,
     userSettings,
+    initialTheme: UserSettingsHelper.getInitialTheme(userSettings.overallTheme),
     reconfirmedViaSAML,
     allInReconfirmNotificationPeriods,
     survey,

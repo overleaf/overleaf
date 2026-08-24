@@ -8,5 +8,7 @@ export default function useThemedPage(featureFlag?: string) {
     // Sets the body's data-theme attribute for theming
     document.body.dataset.theme =
       activeOverallTheme === 'dark' ? 'default' : 'light'
+    // drop the server-rendered first-paint hint
+    delete document.body.dataset.initialTheme
   }, [activeOverallTheme])
 }

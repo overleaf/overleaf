@@ -1079,7 +1079,7 @@ const _ProjectController = {
         user
       )
 
-      const initialLoadingScreenTheme = getInitialLoadingScreenTheme(
+      const initialLoadingScreenTheme = UserSettingsHelper.getInitialTheme(
         userSettings?.overallTheme
       )
 
@@ -1467,19 +1467,6 @@ const _ProjectController = {
       user.writefull.autoCreatedAccount = false
     }
   },
-}
-
-function getInitialLoadingScreenTheme(overallThemeSetting) {
-  switch (overallThemeSetting) {
-    case 'light-':
-      return 'light'
-    case '':
-      return 'dark'
-    case 'system':
-      return 'system'
-    default:
-      return 'dark'
-  }
 }
 
 const defaultSettingsForAnonymousUser = userId => ({

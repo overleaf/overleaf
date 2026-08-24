@@ -44,6 +44,9 @@
 @import 'base/links';
 @import 'base/base';
 
+// Body theming for the first paint, before the client resolves the theme
+@import 'base/initial-theme';
+
 // Page layout that isn't related to a particular component or page
 @import 'base/layout';
 
