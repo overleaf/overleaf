@@ -370,6 +370,7 @@ export interface Meta {
   'ol-usersBestSubscription': ProjectDashboardSubscription | undefined
   'ol-usersEmail': string | undefined
   'ol-usersSubscription': { personal: boolean; group: boolean }
+  'ol-v1Url': string | undefined
   'ol-validationStatus': ValidationStatus
   'ol-viaDomainCapture': boolean
   'ol-wikiEnabled': boolean

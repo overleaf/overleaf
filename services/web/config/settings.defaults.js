@@ -1073,6 +1073,8 @@ module.exports = {
     managedGroupSubscriptionEnrollmentNotification: [],
     managedGroupEnrollmentInvite: [],
     ssoCertificateInfo: [],
+    domainVerificationLabel: [],
+    domainVerificationToken: [],
     v1ImportDataScreen: [],
     snapshotUtils: [],
     visualEditorProviders: [],
