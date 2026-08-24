@@ -102,6 +102,16 @@ describe('parseReq log-only rollout', () => {
       }).not.toThrow()
       expect(result).toEqual({ body: { name: 1234 } })
     })
+
+    it('is a no-op in enforce-log mode too: the failure still throws', () => {
+      setReqValidationModeForTests('enforce-log')
+      const req = { body: { name: 1234 } } as Request
+      const schema = z.object({ body: z.object({ name: z.string() }) })
+
+      expect(() => parseReq(req, schema, { logOnly: true })).toThrowError(
+        expect.objectContaining({ name: 'InvalidRequestError' })
+      )
+    })
   })
 
   describe('with an injected logger', () => {
@@ -142,6 +152,158 @@ describe('parseReq log-only rollout', () => {
           parseReq(req, schema, { logOnly: true, fallbackSchema: z.any() })
         ).toThrowError(expect.objectContaining({ name: 'InvalidParamsError' }))
         expect(warnMock).not.toHaveBeenCalled()
+      })
+    })
+
+    describe('enforce-log mode (throw+log)', () => {
+      beforeEach(() => {
+        setReqValidationModeForTests('enforce-log')
+      })
+
+      it('logs the failure and then throws, with logOnly set', () => {
+        const req = { body: { name: 1234 } } as Request
+        const schema = z.object({ body: z.object({ name: z.string() }) })
+
+        expect(() => parseReq(req, schema, { logOnly: true })).toThrowError(
+          expect.objectContaining({ name: 'InvalidRequestError' })
+        )
+        expect(warnMock).toHaveBeenCalledTimes(1)
+        const [ctx, msg] = warnMock.mock.calls[0] as WarnCall
+        expect(ctx.kind).toBe('enforced')
+        expect(msg).toBe(
+          'req-validation: request failed schema and was rejected'
+        )
+        expect(ctx.issues).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ path: 'body.name' }),
+          ])
+        )
+      })
+
+      it('logs and then throws InvalidParamsError for a params failure', () => {
+        const req = { params: { id: 'nope' } } as Request<{ id: string }>
+        const schema = z.object({
+          params: z.object({ id: z.string().regex(/^[0-9]+$/) }),
+        })
+
+        expect(() => parseReq(req, schema, { logOnly: true })).toThrowError(
+          expect.objectContaining({ name: 'InvalidParamsError' })
+        )
+        expect(warnMock).toHaveBeenCalledTimes(1)
+        const [ctx] = warnMock.mock.calls[0] as WarnCall
+        expect(ctx.kind).toBe('enforced')
+      })
+
+      it('logs nothing and throws when no opts are passed', () => {
+        const req = { body: { name: 1234 } } as Request
+        const schema = z.object({ body: z.object({ name: z.string() }) })
+
+        expect(() => parseReq(req, schema)).toThrowError(
+          expect.objectContaining({ name: 'InvalidRequestError' })
+        )
+        expect(warnMock).not.toHaveBeenCalled()
+      })
+
+      it('returns the parsed data and logs nothing on success', () => {
+        const req = { body: { name: 'ok' } } as Request
+        const schema = z.object({ body: z.object({ name: z.string() }) })
+
+        const result = parseReq(req, schema, {
+          logOnly: true,
+          fallbackSchema: z.any(),
+        })
+
+        expect(result).toEqual({ body: { name: 'ok' } })
+        expect(warnMock).not.toHaveBeenCalled()
+      })
+
+      it('logs enforced-fallback-passed but still throws when the fallback would have passed', () => {
+        const req = { body: { count: '5' } } as Request
+        const primary = z.object({ body: z.object({ count: z.number() }) })
+        const fallback = z.object({
+          body: z.object({ count: z.coerce.number().default(0) }),
+        })
+
+        expect(() =>
+          parseReq(req, primary, { fallbackSchema: fallback })
+        ).toThrowError(expect.objectContaining({ name: 'InvalidRequestError' }))
+        expect(warnMock).toHaveBeenCalledTimes(1)
+        const [ctx] = warnMock.mock.calls[0] as WarnCall
+        expect(ctx.kind).toBe('enforced-fallback-passed')
+      })
+
+      it('classifies from the primary error, not the fallback error, when both fail', () => {
+        const req = {
+          params: { id: 'not-a-number' },
+          body: { name: 'ok' },
+        } as Request<{ id: string }, any, { name: string }>
+        // Fails on body (name is a string, not a number).
+        const primary = z.object({
+          params: z.object({ id: z.string() }),
+          body: z.object({ name: z.number() }),
+        })
+        // Fails on params (id is a string, not a number).
+        const fallback = z.object({
+          params: z.object({ id: z.number() }),
+          body: z.object({ name: z.string() }),
+        })
+
+        // Log mode throws InvalidParamsError here, from the fallback's error.
+        expect(() =>
+          parseReq(req, primary, { fallbackSchema: fallback, logOnly: true })
+        ).toThrowError(expect.objectContaining({ name: 'InvalidRequestError' }))
+        const [ctx] = warnMock.mock.calls[0] as WarnCall
+        expect(ctx.kind).toBe('enforced')
+      })
+
+      it('resolves logFields into failingValues', () => {
+        const req = { body: { zipUrl: '/bad/path' } } as Request
+        const schema = z.object({
+          body: z.object({ zipUrl: z.string().url() }),
+        })
+
+        expect(() =>
+          parseReq(req, schema, { logOnly: true, logFields: ['body.zipUrl'] })
+        ).toThrow()
+
+        const [ctx] = warnMock.mock.calls[0] as WarnCall
+        expect(ctx.failingValues).toEqual({ 'body.zipUrl': '/bad/path' })
+      })
+
+      it('never leaks a sentinel value present in the request', () => {
+        const req = { body: { name: 'SECRET_VALUE_123' } } as Request
+        const schema = z.object({ body: z.object({ name: z.number() }) })
+
+        expect(() => parseReq(req, schema, { logOnly: true })).toThrow()
+
+        expect(serializedLogOutput(warnMock.mock.calls)).not.toContain(
+          'SECRET_VALUE_123'
+        )
+      })
+
+      it('logs exactly once for a repeated identical failure against the same schema', () => {
+        const schema = z.strictObject({
+          body: z.strictObject({ name: z.string() }),
+        })
+        const req = { body: { name: 1234 } } as Request
+
+        expect(() => parseReq(req, schema, { logOnly: true })).toThrow()
+        expect(() => parseReq(req, schema, { logOnly: true })).toThrow()
+
+        expect(warnMock).toHaveBeenCalledTimes(1)
+      })
+
+      it('logs again when the same schema fails a different way', () => {
+        const schema = z.strictObject({
+          body: z.strictObject({ name: z.string() }),
+        })
+        const req1 = { body: { name: 1234 } } as Request
+        const req2 = { body: { name: 'ok', extra: true } } as Request
+
+        expect(() => parseReq(req1, schema, { logOnly: true })).toThrow()
+        expect(() => parseReq(req2, schema, { logOnly: true })).toThrow()
+
+        expect(warnMock).toHaveBeenCalledTimes(2)
       })
     })
 

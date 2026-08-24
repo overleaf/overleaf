@@ -20,18 +20,24 @@ const {
  */
 
 /**
- * Log-only rollout options for parseReq(), see REQ_VALIDATION_MODE below.
+ * Rollout options for parseReq(), see REQ_VALIDATION_MODE below. Passing opts
+ * marks a call site as instrumented: in REQ_VALIDATION_MODE=log they change
+ * what a schema failure does, in REQ_VALIDATION_MODE=enforce-log they only
+ * add the failure log, and in REQ_VALIDATION_MODE=enforce they are inert.
  *
  * @typedef {object} ParseReqOptions
  * @property {boolean} [logOnly] - In REQ_VALIDATION_MODE=log, a primary
  *   schema failure (with no passing fallbackSchema) logs once and returns
- *   the raw, un-coerced request input instead of throwing.
+ *   the raw, un-coerced request input instead of throwing. It never
+ *   suppresses the throw in enforce-log mode.
  * @property {ZodType} [fallbackSchema] - In REQ_VALIDATION_MODE=log, a
  *   primary schema failure is re-parsed against this looser/pre-refinement
  *   schema. If it passes, its output is returned (and the primary schema's
  *   issues are logged). If it also fails, behavior falls back to logOnly
  *   above, classifying/throwing from the fallback's ZodError when logOnly
- *   is not set.
+ *   is not set. In enforce-log mode it never changes the outcome (the
+ *   request is rejected either way) and is only re-parsed to tag the log
+ *   entry with whether the looser schema would have accepted the request.
  * @property {string[]} [logFields] - Dotted field paths (e.g. 'body.zipUrl')
  *   whose raw input values are resolved and included in the schema-failure
  *   log entry. Values are only resolved on failure; strings are truncated
@@ -63,30 +69,41 @@ function schemaInput(req) {
 }
 
 /*
- * Rollout mode for parseReq's log-only instrumentation, controlled by the
- * REQ_VALIDATION_MODE env var. Default (unset or any invalid value) is
+ * Rollout mode for parseReq's schema-failure instrumentation, controlled by
+ * the REQ_VALIDATION_MODE env var. Default (unset or any invalid value) is
  * 'log' -- deliberately not coupled to NODE_ENV, nothing automatic.
  *
  *  - 'log': a schema failure at an instrumented call site (one that passes
  *    opts) logs instead of throwing, see parseReq() below. Call sites that
  *    don't pass opts are unaffected and always throw.
+ *  - 'enforce-log': throw+log. Failures are rejected exactly as in 'enforce'
+ *    -- opts change nothing about the outcome -- but an instrumented call
+ *    site logs the failure first, so the visibility built for the 'log'
+ *    rollout (sanitized issues, caller trace, opts.logFields values, deduped
+ *    per schema and signature) survives the move out of 'log' mode. This is
+ *    the mode to move a service to once its schemas look clean in 'log'
+ *    mode, and to stay in while the instrumentation is still in the code.
  *  - 'enforce': opts are inert, every call site always throws on failure,
  *    exactly as if parseReq() had no third parameter at all.
  */
 
 /**
+ * @typedef {'log' | 'enforce-log' | 'enforce'} ReqValidationMode
+ */
+
+/**
  * @param {string | null | undefined} m
- * @returns {m is 'log' | 'enforce'}
+ * @returns {m is ReqValidationMode}
  */
 function isValidReqValidationMode(m) {
-  return m === 'log' || m === 'enforce'
+  return m === 'log' || m === 'enforce-log' || m === 'enforce'
 }
 
-/** @type {'log' | 'enforce' | null} */
+/** @type {ReqValidationMode | null} */
 let cachedMode = null
 
 /**
- * @returns {'log' | 'enforce'}
+ * @returns {ReqValidationMode}
  */
 function mode() {
   if (cachedMode == null) {
@@ -98,8 +115,9 @@ function mode() {
 
 /**
  * Override the mode for tests. Pass null to clear the cache and force a
- * re-read of REQ_VALIDATION_MODE on the next access; pass 'log'/'enforce'/
- * anything else to force that value (coerced the same way mode() would).
+ * re-read of REQ_VALIDATION_MODE on the next access; pass 'log'/'enforce-log'
+ * /'enforce'/anything else to force that value (coerced the same way mode()
+ * would).
  *
  * Exported from index.js -- unlike testUtils.js's stateless assertion
  * helpers, this mutates module state that must be visible to the exact
@@ -198,12 +216,38 @@ function sanitizeIssues(issues, depth = 0) {
 }
 
 /**
+ * What happened to the request the log entry describes: the first two kinds
+ * are the 'log' mode outcomes (the request was let through), the last two the
+ * 'enforce-log' ones (the request was rejected, and 'enforced-fallback-
+ * passed' marks a rejection the looser fallbackSchema would have avoided --
+ * i.e. one the tightened schema newly introduces, the interesting signal).
+ *
+ * @typedef {'log-only' | 'fallback-passed' | 'enforced' | 'enforced-fallback-passed'} LogKind
+ */
+
+/**
+ * The log message per kind. The 'log' rollout's wording is kept verbatim for
+ * its two kinds so existing log queries keep matching, with a distinct
+ * message for the throw+log kinds; the `kind` field separates all four.
+ *
+ * @type {Record<LogKind, string>}
+ */
+const LOG_MESSAGES = {
+  'log-only': 'req-validation: request failed schema in log-only rollout',
+  'fallback-passed':
+    'req-validation: request failed schema in log-only rollout',
+  enforced: 'req-validation: request failed schema and was rejected',
+  'enforced-fallback-passed':
+    'req-validation: request failed schema and was rejected',
+}
+
+/**
  * Log a schema failure once per unique (kind, sanitized issues) signature
  * for the given primary schema. No-op if no logger has been injected.
  *
  * @param {Request} req
  * @param {ZodType} schema - the primary schema; the dedup key.
- * @param {'log-only' | 'fallback-passed'} kind
+ * @param {LogKind} kind
  * @param {readonly ZodIssue[]} issues
  * @param {Request} input - the (possibly lockdown-unwrapped) request input
  * @param {string[]} [logFields] - dotted paths to resolve from input
@@ -258,7 +302,7 @@ function logSchemaFailure(req, schema, kind, issues, input, logFields) {
       req,
       ...(resolvedFields && { failingValues: resolvedFields }),
     },
-    'req-validation: request failed schema in log-only rollout'
+    LOG_MESSAGES[kind]
   )
 }
 
@@ -284,14 +328,16 @@ function throwClassified(error) {
  * @template {ZodType} T
  * @param {Request} req - The Express request object
  * @param {T} schema - The Zod schema to validate against
- * @param {ParseReqOptions} [opts] - Log-only rollout options. Untouched call
- *   sites that omit opts always enforce (throw on failure), in every mode --
- *   opts only matter when REQ_VALIDATION_MODE=log.
+ * @param {ParseReqOptions} [opts] - Rollout options. Untouched call sites
+ *   that omit opts always enforce (throw on failure) and log nothing, in
+ *   every mode -- opts change the outcome only when REQ_VALIDATION_MODE=log,
+ *   and only add the failure log when REQ_VALIDATION_MODE=enforce-log.
  * @returns {output<T>} The validated request object. Note: in
  *   REQ_VALIDATION_MODE=log, a failing parse at an instrumented call site
  *   (opts set) does not necessarily produce T -- it may instead return
  *   opts.fallbackSchema's output, or the raw, un-coerced request input, per
- *   the opts handling documented above.
+ *   the opts handling documented above. In enforce-log and enforce mode a
+ *   failing parse always throws, so the return value really is T.
  */
 function parseReq(req, schema, opts) {
   const input = schemaInput(req)
@@ -347,6 +393,24 @@ function parseReq(req, schema, opts) {
     }
     // opts present but neither field set: nothing to do in log mode,
     // fall through to throwing as normal.
+  } else if (opts && mode() === 'enforce-log') {
+    // Throw+log: the outcome is 'enforce's -- classified from the primary
+    // schema's error, whatever opts say, since the primary schema is the one
+    // being enforced -- but the failure is logged first, so an instrumented
+    // call site keeps reporting what is failing after the service moves out
+    // of 'log' mode. A fallbackSchema only picks the kind here; it is parsed
+    // on the failure path only, so this costs nothing on healthy traffic.
+    const fallbackPassed = Boolean(
+      opts.fallbackSchema && opts.fallbackSchema.safeParse(input).success
+    )
+    logSchemaFailure(
+      req,
+      schema,
+      fallbackPassed ? 'enforced-fallback-passed' : 'enforced',
+      parsed.error.issues,
+      input,
+      opts.logFields
+    )
   }
 
   throwClassified(parsed.error)
