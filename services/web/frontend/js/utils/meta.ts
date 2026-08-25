@@ -283,7 +283,7 @@ export interface Meta {
   'ol-recurlyApiKey': string
   'ol-recurlySubdomain': string
   'ol-refSyncState': {
-    synced: boolean
+    syncAvailable: boolean
     accessOk: boolean
     lastSyncProblem:
       | 'zotero_no_collection'
