@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { expect } from 'chai'
 import SidebarDsNav from '../../../../../../frontend/js/features/project-list/components/sidebar/sidebar-ds-nav'
 import {
@@ -61,7 +61,7 @@ describe('<SidebarDsNav />', function () {
     await renderSidebar({ activePage: 'library', trashActive: true })
 
     expect(
-      screen.getByRole('button', { name: 'Trash' }).getAttribute('aria-current')
+      screen.getByRole('link', { name: 'Trash' }).getAttribute('aria-current')
     ).to.equal('page')
     expect(
       screen.getByRole('link', { name: 'Library' }).getAttribute('aria-current')
@@ -75,7 +75,7 @@ describe('<SidebarDsNav />', function () {
       screen.getByRole('link', { name: 'Library' }).getAttribute('aria-current')
     ).to.equal('page')
     expect(
-      screen.getByRole('button', { name: 'Trash' }).getAttribute('aria-current')
+      screen.getByRole('link', { name: 'Trash' }).getAttribute('aria-current')
     ).to.be.null
   })
 
@@ -88,8 +88,24 @@ describe('<SidebarDsNav />', function () {
       screen.getByRole('link', { name: 'Library' }).getAttribute('aria-current')
     ).to.equal('page')
     expect(
-      screen.getByRole('button', { name: 'Trash' }).getAttribute('aria-current')
+      screen.getByRole('link', { name: 'Trash' }).getAttribute('aria-current')
     ).to.be.null
+  })
+
+  it('links trash to the library trash on the library view', async function () {
+    await renderSidebar({ activePage: 'library' })
+
+    expect(
+      screen.getByRole('link', { name: 'Trash' }).getAttribute('href')
+    ).to.equal('/library/trashed')
+  })
+
+  it('navigates to the project trash on the projects view', async function () {
+    await renderSidebar({ activePage: 'projects' })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Trash' }))
+
+    expect(window.location.pathname).to.equal('/project/trashed')
   })
 
   describe('library "New" badge', function () {

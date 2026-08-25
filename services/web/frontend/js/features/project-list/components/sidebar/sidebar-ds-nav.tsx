@@ -42,6 +42,16 @@ function SidebarDsNav({
   })
   const { containerRef, scrolledUp } = useScrolled()
 
+  const trashItemClassName = classnames('ds-nav-page-switcher-item', {
+    active: isTrashActive,
+  })
+  const trashItemContent = (
+    <>
+      <Trash size={20} />
+      <span className="ds-nav-page-switcher-item-label">{t('trash')}</span>
+    </>
+  )
+
   return (
     <div
       className="project-list-sidebar-wrapper-react d-none d-md-flex"
@@ -79,19 +89,26 @@ function SidebarDsNav({
               inLibrary={activePage === 'library'}
             />
           )}
-          <button
-            type="button"
-            className={classnames('ds-nav-page-switcher-item', {
-              active: isTrashActive,
-            })}
-            aria-current={isTrashActive ? 'page' : undefined}
-            onClick={() => selectFilter('trashed')}
-          >
-            <Trash size={20} />
-            <span className="ds-nav-page-switcher-item-label">
-              {t('trash')}
-            </span>
-          </button>
+          {/* The trash view defaults to the location the user is navigating from: the
+          library trash when on the library, the project trash everywhere else. */}
+          {activePage === 'library' ? (
+            <a
+              href="/library/trashed"
+              className={trashItemClassName}
+              aria-current={isTrashActive ? 'page' : undefined}
+            >
+              {trashItemContent}
+            </a>
+          ) : (
+            <button
+              type="button"
+              className={trashItemClassName}
+              aria-current={isTrashActive ? 'page' : undefined}
+              onClick={() => selectFilter('trashed')}
+            >
+              {trashItemContent}
+            </button>
+          )}
           <div className="project-list-sidebar-survey-wrapper">
             <SurveyWidgetDsNav />
           </div>
