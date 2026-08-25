@@ -141,8 +141,12 @@ function NotCancelOption({
 export function CancelSubscription() {
   const { t } = useTranslation()
   const location = useLocation()
-  const { personalSubscription, plans, userCanExtendTrial } =
-    useSubscriptionDashboardContext()
+  const {
+    personalSubscription,
+    plans,
+    queryingIndividualPlansData,
+    userCanExtendTrial,
+  } = useSubscriptionDashboardContext()
   const lossMessagingEnabled = useFeatureFlag('cancel-loss-messaging')
   const {
     isLoading: isLoadingCancel,
@@ -164,14 +168,15 @@ export function CancelSubscription() {
 
   if (!personalSubscription || !('payment' in personalSubscription)) return null
 
-  const showDowngrade =
-    personalSubscription.payment.isEligibleForDowngradeUpsell
+  const { isEligibleForDowngradeUpsell } = personalSubscription.payment
+  if (isEligibleForDowngradeUpsell && queryingIndividualPlansData) {
+    return <LoadingSpinner />
+  }
   const planToDowngradeTo = plans.find(
     plan => plan.planCode === planCodeToDowngradeTo
   )
-  if (showDowngrade && !planToDowngradeTo) {
-    return <LoadingSpinner />
-  }
+  const showDowngrade =
+    isEligibleForDowngradeUpsell && Boolean(planToDowngradeTo)
 
   async function handleCancelSubscription() {
     try {

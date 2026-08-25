@@ -16,8 +16,13 @@ import {
   trialSubscription,
 } from '../../../../fixtures/subscriptions'
 import sinon from 'sinon'
-import { cleanUpContext } from '../../../../helpers/render-with-subscription-dash-context'
+import {
+  cleanUpContext,
+  renderWithSubscriptionDashContext,
+} from '../../../../helpers/render-with-subscription-dash-context'
 import { renderActiveSubscription } from '../../../../helpers/render-active-subscription'
+import { ActiveSubscription } from '../../../../../../../../frontend/js/features/subscription/components/dashboard/states/active/active'
+import { plans } from '../../../../fixtures/plans'
 import { cloneDeep } from 'lodash'
 import fetchMock from 'fetch-mock'
 import {
@@ -688,6 +693,52 @@ describe('<ActiveSubscription />', function () {
             name: downgradeButtonText,
           })
         ).to.be.null
+      })
+
+      it('falls back to the cancellation confirmation when the downgrade plan is unavailable', async function () {
+        renderWithSubscriptionDashContext(
+          <ActiveSubscription subscription={monthlyActiveCollaborator} />,
+          {
+            metaTags: [
+              {
+                name: 'ol-plans',
+                value: plans.filter(plan => plan.planCode !== 'paid-personal'),
+              },
+              { name: 'ol-subscription', value: monthlyActiveCollaborator },
+              { name: 'ol-recommendedCurrency', value: 'USD' },
+            ],
+          }
+        )
+        showConfirmCancelUI()
+        await screen.findByRole('button', { name: 'Cancel my subscription' })
+        screen.getByRole('button', { name: 'I want to stay' })
+        expect(
+          screen.queryByRole('button', {
+            name: downgradeButtonText,
+          })
+        ).to.be.null
+      })
+
+      it('shows a loading state while the plans data is being queried', function () {
+        renderWithSubscriptionDashContext(
+          <ActiveSubscription subscription={monthlyActiveCollaborator} />,
+          {
+            metaTags: [
+              { name: 'ol-subscription', value: monthlyActiveCollaborator },
+              { name: 'ol-recommendedCurrency', value: 'USD' },
+            ],
+            queryingRecurly: true,
+          }
+        )
+        showConfirmCancelUI()
+        screen.getByRole('status')
+        expect(
+          screen.queryByRole('button', {
+            name: downgradeButtonText,
+          })
+        ).to.be.null
+        expect(screen.queryByRole('button', { name: 'Cancel my subscription' }))
+          .to.be.null
       })
 
       it('does not show option to extend trial when on a collaborator trial', function () {
