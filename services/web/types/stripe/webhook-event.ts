@@ -54,6 +54,7 @@ export interface InvoicePaidWebhookEvent extends Stripe.EventBase {
         subscription_details: Stripe.Invoice.Parent.SubscriptionDetails & {
           metadata: {
             billing_migration_id?: string
+            paymentMethodPending?: string
             recurly_to_stripe_migration_status?:
               | 'in_progress'
               | 'completed'
@@ -122,7 +123,7 @@ export interface CustomerUpdatedWebhookEvent extends Stripe.EventBase {
     object: Stripe.Customer
     previous_attributes?: {
       invoice_settings?: {
-        default_payment_method?: string
+        default_payment_method?: string | null
       }
       address?: Stripe.Address
       name?: string
