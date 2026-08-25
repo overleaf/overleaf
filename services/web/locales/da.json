@@ -1587,7 +1587,6 @@
   "saml_invalid_signature_error": "Beklager, informationen modtaget fra din identity provider har en ugyldig signatur. Kontakt venligst din administrator for mere information.",
   "saml_login_disabled_error": "Beklager, single sign-on login er blevet deaktiveret for __email__. Kontakt venligst din administrator for mere information.",
   "saml_login_failure": "Beklager, der opstod et problem med at logge dig ind. Kontakt venligst din administrator for mere information.",
-  "saml_login_identity_mismatch_error": "Beklager, du prøver at logge ind i Overleaf som __email__ men identiteten modtaget fra din identity provider er ikke den korrekte for denne Overleaf konto.",
   "saml_login_identity_not_found_error": "Beklager, vi kunne ikke finde en Overleaf konto sat op for single sign-on med denne identity provider.",
   "saml_metadata": "Overleaf SAML Metadata",
   "saml_missing_signature_error": "Beklager, informationen modtaget fra din identity provider er ikke signeret (både response og assertion signaturer er påkrævet). Kontakt venligst din administrator for mere information.",

@@ -592,7 +592,6 @@
   "saml_invalid_signature_error": "Lo sentimos, la información recibida de su proveedor de identidad tiene una firma no válida. Póngase en contacto con su administrador para obtener más información.",
   "saml_login_disabled_error": "Lo sentimos, el inicio de sesión único (SSO) se ha desactivado para __email__. Póngase en contacto con su administrador para obtener más información.",
   "saml_login_failure": "Lo sentimos, ha habido un problema al iniciar sesión. Póngase en contacto con su administrador para obtener más información.",
-  "saml_login_identity_mismatch_error": "Lo sentimos, estás intentando iniciar sesión en Overleaf como __email__ pero la identidad devuelta por tu proveedor de identidad no es la correcta para esta cuenta de Overleaf.",
   "saml_login_identity_not_found_error": "Lo sentimos, no hemos podido encontrar una cuenta de Overleaf configurada para el inicio de sesión único con este proveedor de identidad.",
   "saml_missing_signature_error": "Lo sentimos, la información recibida de su proveedor de identidad no está firmada (se requieren las firmas de respuesta y de aserción). Póngase en contacto con su administrador para obtener más información.",
   "saving": "Guardando",

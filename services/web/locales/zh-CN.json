@@ -1795,7 +1795,6 @@
   "saml_invalid_signature_error": "很抱歉，从您的身份提供商处收到的信息签名无效。有关详细信息，请与您的管理员联系。",
   "saml_login_disabled_error": "很抱歉，__email__的单点登录已被禁用。有关详细信息，请与管理员联系。",
   "saml_login_failure": "抱歉，您登录时出现问题。请联系您的管理员以获取更多信息。",
-  "saml_login_identity_mismatch_error": "抱歉，您正在尝试以 __email__ 身份登录 Overleaf，但您的身份提供商返回的身份不是此 Overleaf 帐户的正确身份。",
   "saml_login_identity_not_found_error": "抱歉，我们无法找到为此身份提供商设置单点登录的 Overleaf 帐户。",
   "saml_metadata": "Overleaf SAML 元数据",
   "saml_missing_signature_error": "抱歉，从您的身份提供商收到的信息未签名（响应和断言签名都是必需的）。 请联系您的管理员以获取更多信息。",
