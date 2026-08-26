@@ -13,7 +13,7 @@ let EditFileOperation = null
 let SetFileMetadataOperation = null
 
 /**
- * @import { ReadonlyBlobStore } from "../types"
+ * @import { ReadonlyBlobStore, RawOperation } from "../types"
  * @import Snapshot from "../snapshot"
  */
 
@@ -55,7 +55,7 @@ class Operation {
   /**
    * Serialize an Operation.
    *
-   * @return {Object}
+   * @return {RawOperation}
    */
   toRaw() {
     return {}

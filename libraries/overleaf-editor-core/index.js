@@ -25,11 +25,23 @@ const Operation = require('./lib/operation')
 const RestoreOrigin = require('./lib/origin/restore_origin')
 const RestoreFileOrigin = require('./lib/origin/restore_file_origin')
 const Origin = require('./lib/origin')
+const { EDITOR_ORIGIN_KIND } = require('./lib/origin')
+const EditorOrigin = require('./lib/origin/editor_origin')
 const OtClient = require('./lib/ot_client')
+const rebaseChanges = require('./lib/rebase')
+const {
+  editorChangeIdentity,
+  editorChangeIdentityOf,
+  isSameEditorChange,
+} = require('./lib/change_identity')
 const TextOperation = require('./lib/operation/text_operation')
 const EditOperation = require('./lib/operation/edit_operation')
 const safePathname = require('./lib/safe_pathname')
 const Snapshot = require('./lib/snapshot')
+const {
+  DEFAULT_TEXT_EXTENSIONS,
+  DEFAULT_EDITABLE_FILENAMES,
+} = require('./lib/text_file_defaults')
 const util = require('./lib/util')
 const V2DocVersions = require('./lib/v2_doc_versions')
 const {
@@ -60,6 +72,8 @@ exports.ChangeNote = ChangeNote
 exports.Chunk = Chunk
 exports.ChunkResponse = ChunkResponse
 exports.Comment = Comment
+exports.DEFAULT_TEXT_EXTENSIONS = DEFAULT_TEXT_EXTENSIONS
+exports.DEFAULT_EDITABLE_FILENAMES = DEFAULT_EDITABLE_FILENAMES
 exports.DeleteCommentOperation = DeleteCommentOperation
 exports.File = File
 exports.FileMap = FileMap
@@ -80,7 +94,13 @@ exports.Operation = Operation
 exports.RestoreOrigin = RestoreOrigin
 exports.RestoreFileOrigin = RestoreFileOrigin
 exports.Origin = Origin
+exports.EditorOrigin = EditorOrigin
+exports.EDITOR_ORIGIN_KIND = EDITOR_ORIGIN_KIND
 exports.OtClient = OtClient
+exports.rebaseChanges = rebaseChanges
+exports.editorChangeIdentity = editorChangeIdentity
+exports.editorChangeIdentityOf = editorChangeIdentityOf
+exports.isSameEditorChange = isSameEditorChange
 exports.TextOperation = TextOperation
 exports.EditOperation = EditOperation
 exports.safePathname = safePathname

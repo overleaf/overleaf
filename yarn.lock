@@ -26005,6 +26005,7 @@ __metadata:
     path-browserify: "npm:^1.0.1"
     sinon: "npm:^9.2.4"
     typescript: "npm:^5.0.4"
+    utf-8-validate: "npm:^5.0.4"
   languageName: unknown
   linkType: soft
 

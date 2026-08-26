@@ -258,6 +258,14 @@ const rawOrigin = z.union([
     version: z.number().int(),
     timestamp: z.iso.datetime(),
   }),
+  // An editor change that still carries the id of the editor instance it came
+  // from. Once a chunk is written the id is dropped from all but that editor's
+  // latest change, leaving a bare {kind: 'editor'} that the catch-all below
+  // accepts.
+  z.strictObject({
+    kind: z.literal('editor'),
+    editorId: z.uuid(),
+  }),
   z.strictObject({
     kind: z.string(),
   }),

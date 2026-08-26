@@ -1,5 +1,9 @@
 const Path = require('node:path')
 const { merge } = require('@overleaf/settings/merge')
+const {
+  DEFAULT_TEXT_EXTENSIONS,
+  DEFAULT_EDITABLE_FILENAMES,
+} = require('overleaf-editor-core/lib/text_file_defaults')
 
 let defaultFeatures, siteUrl
 
@@ -27,51 +31,6 @@ const intFromEnv = function (name, defaultValue) {
   }
   return parseInt(process.env[name], 10) || defaultValue
 }
-
-const defaultTextExtensions = [
-  'tex',
-  'latex',
-  'sty',
-  'cls',
-  'bst',
-  'bib',
-  'bibtex',
-  'txt',
-  'tikz',
-  'mtx',
-  'rtex',
-  'md',
-  'asy',
-  'lbx',
-  'bbx',
-  'cbx',
-  'm',
-  'lco',
-  'dtx',
-  'ins',
-  'ist',
-  'def',
-  'clo',
-  'ldf',
-  'rmd',
-  'qmd',
-  'lua',
-  'py',
-  'gv',
-  'mf',
-  'yml',
-  'yaml',
-  'lhs',
-  'lean',
-  'lean4',
-  'hs',
-  'mk',
-  'xmpdata',
-  'cfg',
-  'rnw',
-  'ltx',
-  'inc',
-]
 
 const parseTextExtensions = function (extensions) {
   if (extensions) {
@@ -899,12 +858,14 @@ module.exports = {
 
   compileBodySizeLimitMb: process.env.COMPILE_BODY_SIZE_LIMIT_MB || 7,
 
-  textExtensions: defaultTextExtensions.concat(
+  // The defaults come from overleaf-editor-core so that every service that
+  // classifies a file as a doc or as a binary file works from the same list.
+  textExtensions: DEFAULT_TEXT_EXTENSIONS.concat(
     parseTextExtensions(process.env.ADDITIONAL_TEXT_EXTENSIONS)
   ),
 
   // case-insensitive file names that is editable (doc) in the editor
-  editableFilenames: ['latexmkrc', '.latexmkrc', 'makefile', 'gnumakefile'],
+  editableFilenames: DEFAULT_EDITABLE_FILENAMES.slice(),
 
   fileIgnorePattern:
     process.env.FILE_IGNORE_PATTERN ||

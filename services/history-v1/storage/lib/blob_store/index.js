@@ -2,15 +2,15 @@
 
 const config = require('config')
 const fs = require('node:fs')
-const isValidUtf8 = require('utf-8-validate')
 const { ReadableString } = require('@overleaf/stream-utils')
 
 const core = require('overleaf-editor-core')
+const {
+  getStringLengthOfFile,
+} = require('overleaf-editor-core/lib/blob_string_length')
 const objectPersistor = require('@overleaf/object-persistor')
 const OError = require('@overleaf/o-error')
 const Blob = core.Blob
-const TextOperation = core.TextOperation
-const containsNonBmpChars = core.util.containsNonBmpChars
 
 const assert = require('../assert')
 const blobHash = require('../blob_hash')
@@ -106,23 +106,6 @@ async function makeBlobForFile(pathname) {
     fs.createReadStream(pathname)
   )
   return new Blob(hash, byteLength)
-}
-
-async function getStringLengthOfFile(byteLength, pathname) {
-  // We have to read the file into memory to get its UTF-8 length, so don't
-  // bother for files that are too large for us to edit anyway.
-  if (byteLength > Blob.MAX_EDITABLE_BYTE_LENGTH_BOUND) {
-    return null
-  }
-
-  // We need to check if the file contains nonBmp or null characters
-  let data = await fs.promises.readFile(pathname)
-  if (!isValidUtf8(data)) return null
-  data = data.toString()
-  if (data.length > TextOperation.MAX_STRING_LENGTH) return null
-  if (containsNonBmpChars(data)) return null
-  if (data.indexOf('\x00') !== -1) return null
-  return data.length
 }
 
 async function deleteBlobsInBucket(projectId) {

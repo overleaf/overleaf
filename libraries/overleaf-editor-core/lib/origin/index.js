@@ -7,6 +7,14 @@ const assert = require('check-types').assert
 let RestoreOrigin = null
 let RestoreFileOrigin = null
 let RestoreProjectOrigin = null
+let EditorOrigin = null
+
+/**
+ * The origin kind of a change the editor submitted over the `applyHistoryOt`
+ * rpc. real-time stamps it and history-v1 matches on it when recognising a
+ * resend, so both need the same string.
+ */
+const EDITOR_ORIGIN_KIND = 'editor'
 
 /**
  * An Origin records where a {@link Change} came from. The Origin class handles
@@ -37,6 +45,11 @@ class Origin {
       return RestoreFileOrigin.fromRaw(raw)
     if (raw.kind === RestoreProjectOrigin.KIND)
       return RestoreProjectOrigin.fromRaw(raw)
+    // Only an editor change that still carries its editorId is an EditorOrigin.
+    // The id is dropped from all but an editor's latest change when a chunk is
+    // written, so most editor changes read back from storage are plain origins.
+    if (raw.kind === EditorOrigin.KIND && raw.editorId)
+      return EditorOrigin.fromRaw(raw)
     return new Origin(raw.kind)
   }
 
@@ -58,7 +71,9 @@ class Origin {
 }
 
 module.exports = Origin
+module.exports.EDITOR_ORIGIN_KIND = EDITOR_ORIGIN_KIND
 
 RestoreOrigin = require('./restore_origin')
 RestoreFileOrigin = require('./restore_file_origin')
 RestoreProjectOrigin = require('./restore_project_origin')
+EditorOrigin = require('./editor_origin')

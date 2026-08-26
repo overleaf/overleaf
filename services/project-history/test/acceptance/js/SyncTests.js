@@ -18,7 +18,7 @@ import { fetchNothing, RequestFailedError } from '@overleaf/fetch-utils'
 import { _getBlobHashFromString } from '../../../app/js/HashManager.js'
 import { db, ObjectId } from '../../../app/js/mongodb.js'
 
-const EMPTY_FILE_HASH = 'e69de29bb2d1d6434b8b29ae775ad8c2e48c5391'
+const EMPTY_FILE_HASH = File.EMPTY_FILE_HASH
 
 const MockHistoryStore = () => nock('http://127.0.0.1:3100')
 const MockFileStore = () => nock('http://127.0.0.1:3009')

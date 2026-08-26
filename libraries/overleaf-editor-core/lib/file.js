@@ -47,6 +47,11 @@ class File {
   /**
    * Blob hash for an empty file.
    *
+   * Spelled out rather than read from `Blob.EMPTY_HASH`, which is the same value: a
+   * static field initialised from another module's class is `undefined` wherever the
+   * load order has that module still mid-load, and then everything comparing a hash
+   * against this fails without saying anything.
+   *
    * @type {String}
    */
   static EMPTY_FILE_HASH = 'e69de29bb2d1d6434b8b29ae775ad8c2e48c5391'

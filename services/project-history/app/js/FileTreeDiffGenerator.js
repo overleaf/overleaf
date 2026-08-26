@@ -1,129 +1,102 @@
-/* eslint-disable
-    no-return-assign,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 import Core from 'overleaf-editor-core'
-import logger from '@overleaf/logger'
+import { buildFileTreeDiff } from 'overleaf-editor-core/lib/file_tree_diff.js'
 import * as Errors from './Errors.js'
 
-const { MoveFileOperation, AddFileOperation, EditFileOperation } = Core
+/**
+ * @import { FileTreeDiffEntry } from 'overleaf-editor-core/lib/file_tree_diff'
+ * @import { Snapshot } from 'overleaf-editor-core'
+ */
 
-export function buildDiff(chunk, fromVersion, toVersion) {
-  chunk = Core.Chunk.fromRaw(chunk.chunk)
+/**
+ * One file of the diff. Files without an operation are unchanged.
+ *
+ * @typedef {object} FileTreeDiffFile
+ * @property {string} pathname the pathname of the file at fromVersion, or the
+ *           pathname it was added at
+ * @property {string} [newPathname] the pathname of a renamed file at toVersion
+ * @property {'added' | 'edited' | 'renamed' | 'removed'} [operation]
+ * @property {number} [deletedAtV] version a removed file was removed at
+ * @property {boolean | null} [editable] null when it is not known
+ */
+
+/**
+ * Describe how the file tree changed between two versions of a chunk.
+ *
+ * @param {object} rawChunk chunk covering fromVersion to toVersion
+ * @param {number} fromVersion
+ * @param {number} toVersion
+ * @return {FileTreeDiffFile[]} one entry per file
+ */
+export function buildDiff(rawChunk, fromVersion, toVersion) {
+  const chunk = Core.Chunk.fromRaw(rawChunk.chunk)
   const chunkStartVersion = chunk.getStartVersion()
+  const changes = chunk.getChanges()
 
-  const diff = _getInitialDiffSnapshot(chunk, fromVersion)
+  // The chunk starts at chunkStartVersion, so bring its snapshot forward to the
+  // file tree at fromVersion, which the diff is reported against.
+  const initialSnapshot = chunk.getSnapshot()
+  initialSnapshot.applyAll(changes.slice(0, fromVersion - chunkStartVersion))
 
-  const changes = chunk
-    .getChanges()
-    .slice(fromVersion - chunkStartVersion, toVersion - chunkStartVersion)
-  for (let i = 0; i < changes.length; i++) {
-    const change = changes[i]
-    for (const operation of Array.from(change.getOperations())) {
-      if (operation.pathname === null || operation.pathname === '') {
-        // skip operations for missing files
-        logger.warn({ diff, operation }, 'invalid pathname in operation')
-      } else if (operation instanceof EditFileOperation) {
-        _applyEditFileToDiff(diff, operation)
-      } else if (operation instanceof AddFileOperation) {
-        _applyAddFileToDiff(diff, operation)
-      } else if (operation instanceof MoveFileOperation) {
-        if (operation.isRemoveFile()) {
-          const deletedAtV = fromVersion + i
-          _applyDeleteFileToDiff(diff, operation, deletedAtV)
-        } else {
-          _applyMoveFileToDiff(diff, operation)
-        }
-      }
+  const { entries } = buildFileTreeDiff(
+    changes.slice(
+      fromVersion - chunkStartVersion,
+      toVersion - chunkStartVersion
+    ),
+    {
+      initialPathnames: initialSnapshot.getFilePathnames(),
+      onMoveCollision: (entry, operation) => {
+        throw new Errors.InconsistentChunkError(
+          'trying to move to file that already exists',
+          {
+            pathname: operation.getPathname(),
+            newPathname: operation.getNewPathname(),
+          }
+        )
+      },
     }
-  }
+  )
 
-  return Object.values(diff)
+  return Array.from(entries.values(), entry =>
+    _buildDiffEntry(entry, initialSnapshot, fromVersion)
+  )
 }
 
-function _getInitialDiffSnapshot(chunk, fromVersion) {
-  // Start with a 'diff' which is snapshot of the filetree at the beginning,
-  // with nothing in the diff marked as changed.
-  // Use a bare object to protect against reserved names.
-  const diff = Object.create(null)
-  const files = _getInitialFiles(chunk, fromVersion)
-  for (const [pathname, file] of Object.entries(files)) {
-    diff[pathname] = { pathname, editable: file.isEditable() }
-  }
-  return diff
-}
+/**
+ * @param {FileTreeDiffEntry} entry
+ * @param {Snapshot} initialSnapshot file tree at fromVersion
+ * @param {number} fromVersion
+ * @return {FileTreeDiffFile}
+ */
+function _buildDiffEntry(entry, initialSnapshot, fromVersion) {
+  const { origin } = entry
+  const pathname = entry.chain[entry.chain.length - 1]
+  const renamed = origin != null && pathname !== origin
 
-function _getInitialFiles(chunk, fromVersion) {
-  const snapshot = chunk.getSnapshot()
-  const changes = chunk
-    .getChanges()
-    .slice(0, fromVersion - chunk.getStartVersion())
-  snapshot.applyAll(changes)
-  return snapshot.fileMap.files
-}
+  /** @type {FileTreeDiffFile} */
+  const diffEntry = { pathname: origin ?? pathname }
+  if (renamed) {
+    diffEntry.newPathname = pathname
+  }
+  if (entry.deletedAtChangeIndex != null) {
+    diffEntry.operation = 'removed'
+    diffEntry.deletedAtV = fromVersion + entry.deletedAtChangeIndex
+  } else if (origin == null) {
+    diffEntry.operation = 'added'
+  } else if (renamed) {
+    diffEntry.operation = 'renamed'
+  } else if (entry.edited) {
+    diffEntry.operation = 'edited'
+  }
 
-function _applyAddFileToDiff(diff, operation) {
-  return (diff[operation.pathname] = {
-    pathname: operation.pathname,
-    operation: 'added',
-    editable: operation.file.isEditable(),
-  })
-}
+  // Report the editability of the file, so that the frontend knows whether it
+  // can display a diff for it. It is left out for files that were edited before
+  // anything else happened to them: an edit implies that the file is editable.
+  const editedFirst = entry.file == null && entry.firstEditedAtChainIndex === 0
+  const file =
+    entry.file ?? (origin != null ? initialSnapshot.getFile(origin) : null)
+  if (file != null && !editedFirst) {
+    diffEntry.editable = file.isEditable()
+  }
 
-function _applyEditFileToDiff(diff, operation) {
-  const change = diff[operation.pathname]
-  if ((change != null ? change.operation : undefined) == null) {
-    // avoid exception for non-existent change
-    return (diff[operation.pathname] = {
-      pathname: operation.pathname,
-      operation: 'edited',
-    })
-  }
-}
-
-function _applyMoveFileToDiff(diff, operation) {
-  if (
-    diff[operation.newPathname] != null &&
-    diff[operation.newPathname].operation !== 'removed'
-  ) {
-    const err = new Errors.InconsistentChunkError(
-      'trying to move to file that already exists',
-      { diff, operation }
-    )
-    throw err
-  }
-  const change = diff[operation.pathname]
-  if (change == null) {
-    logger.warn({ diff, operation }, 'tried to rename non-existent file')
-    return
-  }
-  change.newPathname = operation.newPathname
-  if (change.operation === 'added') {
-    // If this file was added this time, just leave it as an add, but
-    // at the new name.
-    change.pathname = operation.newPathname
-    delete change.newPathname
-  } else {
-    change.operation = 'renamed'
-  }
-  diff[operation.newPathname] = change
-  return delete diff[operation.pathname]
-}
-
-function _applyDeleteFileToDiff(diff, operation, deletedAtV) {
-  // avoid exception for non-existent change
-  if (diff[operation.pathname] != null) {
-    diff[operation.pathname].operation = 'removed'
-  }
-  return diff[operation.pathname] != null
-    ? (diff[operation.pathname].deletedAtV = deletedAtV)
-    : undefined
+  return diffEntry
 }
