@@ -47,6 +47,8 @@ services:
       # OVERLEAF_SITE_URL: http://overleaf.example.com
       # OVERLEAF_NAV_TITLE: Overleaf Community Edition
       # OVERLEAF_HEADER_IMAGE_URL: http://example.com/mylogo.png
+      # OVERLEAF_HEADER_IMAGE_URL_LIGHT: http://example.com/mylogo-light.png
+      # OVERLEAF_HEADER_IMAGE_URL_DARK: http://example.com/mylogo-dark.png
       # OVERLEAF_ADMIN_EMAIL: support@it.com
 
       # OVERLEAF_LEFT_FOOTER: '[{"text": "Another page I want to link to can be found <a href=\"here\">here</a>"} ]'

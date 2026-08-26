@@ -340,6 +340,14 @@ if (process.env.OVERLEAF_HEADER_IMAGE_URL != null) {
   settings.nav.custom_logo = process.env.OVERLEAF_HEADER_IMAGE_URL
 }
 
+if (process.env.OVERLEAF_HEADER_IMAGE_URL_LIGHT != null) {
+  settings.nav.custom_logo_light = process.env.OVERLEAF_HEADER_IMAGE_URL_LIGHT
+}
+
+if (process.env.OVERLEAF_HEADER_IMAGE_URL_DARK != null) {
+  settings.nav.custom_logo_dark = process.env.OVERLEAF_HEADER_IMAGE_URL_DARK
+}
+
 if (process.env.OVERLEAF_HEADER_EXTRAS != null) {
   try {
     settings.nav.header_extras = JSON.parse(process.env.OVERLEAF_HEADER_EXTRAS)

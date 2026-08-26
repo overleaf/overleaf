@@ -78,6 +78,11 @@ export function ProjectListDsNav() {
       <SystemMessages />
       <DefaultNavbar
         {...navbarProps}
+        customLogo={
+          activeOverallTheme === 'dark'
+            ? navbarProps.customLogoDark
+            : navbarProps.customLogo
+        }
         overleafLogo={
           activeOverallTheme === 'dark' ? overleafLogoDark : overleafLogo
         }

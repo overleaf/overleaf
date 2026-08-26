@@ -22,7 +22,8 @@ block append meta
 		name='ol-navbar'
 		data-type='json'
 		content={
-			customLogo: settings.nav.custom_logo,
+			customLogo: settings.nav.custom_logo_light || settings.nav.custom_logo,
+			customLogoDark: settings.nav.custom_logo_dark || settings.nav.custom_logo,
 			title: nav.title,
 			canDisplayAdminMenu,
 			canDisplayAdminRedirect,
