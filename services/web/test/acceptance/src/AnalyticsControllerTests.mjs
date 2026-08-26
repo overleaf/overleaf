@@ -2,6 +2,7 @@ import { expect } from 'chai'
 import UserHelper from './helpers/User.mjs'
 import request from './helpers/request.js'
 import Features from '../../../app/src/infrastructure/Features.mjs'
+import MockAnalyticsApiClass from './mocks/MockAnalyticsApi.mjs'
 import { expectValidationErrorRaw } from '@overleaf/validation-tools/testUtils.js'
 
 const User = UserHelper.promises
@@ -18,6 +19,14 @@ function privateApiRequest(options) {
     },
   })
 }
+
+let MockAnalyticsApi
+
+before(function () {
+  if (Features.hasFeature('saas')) {
+    MockAnalyticsApi = MockAnalyticsApiClass.instance()
+  }
+})
 
 describe('AnalyticsController', function () {
   let owner
@@ -85,6 +94,81 @@ describe('AnalyticsController', function () {
         404,
         'projectId'
       )
+    })
+  })
+
+  describe('GET /analytics/uniExternalCollaboration', function () {
+    beforeEach(function () {
+      // both the analytics API URL and its mock are saas-only, see
+      // test/acceptance/config/settings.test.saas.js and Init.mjs
+      if (!Features.hasFeature('saas')) {
+        this.skip()
+      }
+      MockAnalyticsApi.reset()
+    })
+
+    it('should return the data from the analytics service', async function () {
+      const response = await privateApiRequest({
+        method: 'get',
+        url: '/analytics/uniExternalCollaboration?university_id=42',
+      })
+      expect(response.statusCode).to.equal(200)
+      expect(response.body).to.deep.equal([
+        { university_id: 123, external_collaborations: 321 },
+      ])
+      expect(
+        MockAnalyticsApi.getLastUniExternalCollaborationRequest().query
+      ).to.deep.equal({ university_id: '42' })
+    })
+
+    it('should reject a non-numeric university id', async function () {
+      const response = await privateApiRequest({
+        method: 'get',
+        url: '/analytics/uniExternalCollaboration?university_id=not-a-number',
+      })
+      expectValidationErrorRaw(response, 400, 'university_id')
+    })
+
+    it('should reject a non-positive university id', async function () {
+      const response = await privateApiRequest({
+        method: 'get',
+        url: '/analytics/uniExternalCollaboration?university_id=0',
+      })
+      expectValidationErrorRaw(response, 400, 'university_id')
+    })
+
+    it('should reject a missing university id', async function () {
+      const response = await privateApiRequest({
+        method: 'get',
+        url: '/analytics/uniExternalCollaboration',
+      })
+      expectValidationErrorRaw(response, 400, 'university_id')
+    })
+
+    it('should require private API auth', async function () {
+      const response = await authedRequest.request({
+        method: 'get',
+        url: '/analytics/uniExternalCollaboration?university_id=42',
+        json: true,
+      })
+      expect(response.statusCode).to.equal(401)
+    })
+
+    it('should not route a sub-path to the analytics service', async function () {
+      const response = await privateApiRequest({
+        method: 'get',
+        url: '/analytics/uniExternalCollaboration/extra?university_id=42',
+      })
+      expect(response.statusCode).to.equal(404)
+    })
+
+    it('should not route other methods to the analytics service', async function () {
+      await privateApiRequest({
+        method: 'post',
+        url: '/analytics/uniExternalCollaboration?university_id=42',
+      })
+      expect(MockAnalyticsApi.getLastUniExternalCollaborationRequest()).to.be
+        .null
     })
   })
 

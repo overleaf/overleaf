@@ -1,10 +1,13 @@
 import metrics from '@overleaf/metrics'
+import Settings from '@overleaf/settings'
+import { fetchJson } from '@overleaf/fetch-utils'
 import AnalyticsManager from './AnalyticsManager.mjs'
 import SessionManager from '../Authentication/SessionManager.mjs'
 import GeoIpLookup from '../../infrastructure/GeoIpLookup.mjs'
 import Features from '../../infrastructure/Features.mjs'
 import { expressify } from '@overleaf/promise-utils'
 import AccountMappingHelper from './AccountMappingHelper.mjs'
+import Errors from '../Errors/Errors.js'
 import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
 
 // The set of segmentation/event keys is caller-supplied and dynamic (every
@@ -125,8 +128,28 @@ function recordEvent(req, res, next) {
   res.sendStatus(202)
 }
 
+const uniExternalCollaborationSchema = z.object({
+  query: z.object({
+    // sent by v1's Api::V2::InstitutionsController#external_collaboration_data
+    university_id: z.coerce.number().int().positive(),
+  }),
+})
+
+async function uniExternalCollaboration(req, res) {
+  if (!Settings.apis.analytics) {
+    throw new Errors.ServiceNotConfiguredError(
+      'Analytics service not configured'
+    )
+  }
+  const { query } = parseReq(req, uniExternalCollaborationSchema)
+  const url = new URL('/uniExternalCollaboration', Settings.apis.analytics.url)
+  url.searchParams.set('university_id', query.university_id)
+  res.json(await fetchJson(url, { signal: AbortSignal.timeout(20_000) }))
+}
+
 export default {
   registerSalesforceMapping: expressify(registerSalesforceMapping),
+  uniExternalCollaboration: expressify(uniExternalCollaboration),
   updateEditingSession: expressify(updateEditingSession),
   recordEvent,
 }

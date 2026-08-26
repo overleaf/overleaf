@@ -8128,7 +8128,6 @@ __metadata:
     eventsource-parser: "npm:^1.1.2"
     express: "npm:4.22.1"
     express-bearer-token: "patch:express-bearer-token@npm%3A2.4.0#~/.yarn/patches/express-bearer-token-npm-2.4.0-731c8c5c99.patch"
-    express-http-proxy: "npm:^1.6.0"
     express-session: "npm:^1.17.1"
     fake-indexeddb: "npm:^6.0.0"
     fast-fuzzy: "npm:^1.12.0"
@@ -16502,7 +16501,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"debug@npm:^3.0.1, debug@npm:^3.1.0, debug@npm:^3.2.7":
+"debug@npm:^3.1.0, debug@npm:^3.2.7":
   version: 3.2.7
   resolution: "debug@npm:3.2.7"
   dependencies:
@@ -17660,7 +17659,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"es6-promise@npm:^4.1.0, es6-promise@npm:^4.1.1, es6-promise@npm:^4.2.8":
+"es6-promise@npm:^4.1.0, es6-promise@npm:^4.2.8":
   version: 4.2.8
   resolution: "es6-promise@npm:4.2.8"
   checksum: 10c0/2373d9c5e9a93bdd9f9ed32ff5cb6dd3dd785368d1c21e9bbbfd07d16345b3774ae260f2bd24c8f836a6903f432b4151e7816a7fa8891ccb4e1a55a028ec42c3
@@ -18496,17 +18495,6 @@ __metadata:
   dependencies:
     connect-flash: "npm:0.1.x"
   checksum: 10c0/ee878be8ba29c26e406735dd3f801157841a6cdb49ec86ad96a732e564b6c3abc2d12b3b4405bdf150c53950e1ee70dbfeaaf3f43ca959f603ea0d8c390490c4
-  languageName: node
-  linkType: hard
-
-"express-http-proxy@npm:^1.6.0":
-  version: 1.6.3
-  resolution: "express-http-proxy@npm:1.6.3"
-  dependencies:
-    debug: "npm:^3.0.1"
-    es6-promise: "npm:^4.1.1"
-    raw-body: "npm:^2.3.0"
-  checksum: 10c0/e27d85b923a812aa8d2ce90bc15cc8254bcd1691d43ea1c070760d4e3fe985d913e4e9f4523be649aff36a0c827b0d35222f5f5e62a5b03c8ffe58284aa91ef6
   languageName: node
   linkType: hard
 
@@ -28706,7 +28694,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"raw-body@npm:^2.3.0, raw-body@npm:~2.5.3":
+"raw-body@npm:~2.5.3":
   version: 2.5.3
   resolution: "raw-body@npm:2.5.3"
   dependencies:

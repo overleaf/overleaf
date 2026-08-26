@@ -8,6 +8,7 @@ class MockAnalyticsApi extends AbstractMockApi {
     this.lastSplitTestAssignmentsRequest = null
     this.lastSplitTestCalcRequest = null
     this.lastSplitTestEventsRequest = null
+    this.lastUniExternalCollaborationRequest = null
   }
 
   getLastGraphRequest() {
@@ -24,6 +25,10 @@ class MockAnalyticsApi extends AbstractMockApi {
 
   getLastSplitTestEventsRequest() {
     return this.lastSplitTestEventsRequest
+  }
+
+  getLastUniExternalCollaborationRequest() {
+    return this.lastUniExternalCollaborationRequest
   }
 
   applyRoutes() {
@@ -79,6 +84,14 @@ class MockAnalyticsApi extends AbstractMockApi {
       // case 3: recorded verbatim for later assertion by acceptance tests
       this.lastSplitTestEventsRequest = { query: getRawReqInput(req).query }
       res.json({ 'editor-open': { source: ['ide-open'] } })
+    })
+
+    this.app.get('/uniExternalCollaboration', (req, res) => {
+      // case 3: recorded verbatim for later assertion by acceptance tests
+      this.lastUniExternalCollaborationRequest = {
+        query: getRawReqInput(req).query,
+      }
+      res.json([{ university_id: 123, external_collaborations: 321 }])
     })
   }
 }
