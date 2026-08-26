@@ -17,6 +17,7 @@ describe('LoggingManager', function () {
       info: sinon.stub(),
       level: sinon.stub(),
       warn: sinon.stub(),
+      serializers: {},
     }
     this.Bunyan = {
       createLogger: sinon.stub().returns(this.bunyanLogger),
@@ -123,6 +124,37 @@ describe('LoggingManager', function () {
           'trace'
         )
       })
+    })
+  })
+
+  describe('addSerializer', function () {
+    beforeEach(function () {
+      this.serializer = sinon.stub()
+    })
+
+    it('registers the serializer on the current logger', function () {
+      this.LoggingManager.addSerializer('custom', this.serializer)
+      expect(this.bunyanLogger.serializers.custom).to.equal(this.serializer)
+    })
+
+    it('keeps the serializer through a later initialize', function () {
+      // A module registering a serializer as it is imported does so before the
+      // service initializes its own logger, which replaces the bunyan instance.
+      this.LoggingManager.addSerializer('custom', this.serializer)
+      this.Bunyan.createLogger.reset()
+      this.LoggingManager.initialize(this.loggerName)
+      expect(
+        this.Bunyan.createLogger.firstCall.args[0].serializers.custom
+      ).to.equal(this.serializer)
+    })
+
+    it('keeps the serializers initialize sets up', function () {
+      this.LoggingManager.addSerializer('custom', this.serializer)
+      this.Bunyan.createLogger.reset()
+      this.LoggingManager.initialize(this.loggerName)
+      expect(
+        this.Bunyan.createLogger.firstCall.args[0].serializers
+      ).to.include.keys('err', 'error', 'req', 'res')
     })
   })
 

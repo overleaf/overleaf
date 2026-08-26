@@ -17,6 +17,14 @@ const EXIT_DELAY = 500
 
 const LoggingManager = {
   /**
+   * The serializers registered by addSerializer, kept here rather than only on
+   * the logger so that they survive a later initialize() call. A module that
+   * registers one as it is imported would otherwise lose it, since a service
+   * initializes its logger after its imports have run.
+   */
+  customSerializers: {},
+
+  /**
    * @param {string} name - The name of the logger
    */
   initialize(name, options = {}) {
@@ -34,6 +42,7 @@ const LoggingManager = {
         error: Serializers.err,
         req: Serializers.req,
         res: Serializers.res,
+        ...this.customSerializers,
       },
       streams: options.streams ?? [this._getOutputStreamConfig()],
     })
@@ -42,6 +51,24 @@ const LoggingManager = {
     setLogger(this)
     setValidationToolsLogger(this)
     return this
+  },
+
+  /**
+   * Register a serializer, which decides what gets recorded for a named log
+   * field, e.g. `logger.error({ dropboxResponseError: err }, '...')`. Callers
+   * add their own on top of the ones initialize() sets up, and keep them across
+   * a later initialize(), so registering one as a module is imported works.
+   *
+   * A serializer takes whatever was logged under that field, so it receives an
+   * unknown and narrows it itself, and returns the value to record in its
+   * place, which is only ever JSON encoded.
+   *
+   * @param {string} name - the log field the serializer applies to
+   * @param {(value: unknown) => unknown} serializer
+   */
+  addSerializer(name, serializer) {
+    this.customSerializers[name] = serializer
+    this.logger.serializers[name] = serializer
   },
 
   /**

@@ -7823,7 +7823,14 @@ __metadata:
     "@overleaf/promise-utils": "workspace:*"
     "@overleaf/settings": "workspace:*"
     "@overleaf/validation-tools": "workspace:*"
+    "@types/express": "npm:4.17.23"
+    "@types/ioredis": "npm:^4.28.10"
+    "@types/lodash": "npm:^4.17.24"
+    "@types/lru-cache": "npm:^5.1.1"
+    "@types/minimist": "npm:^1.2.5"
     "@types/node": "npm:^24.5.2"
+    "@types/node-fetch": "npm:^2.6.13"
+    "@types/redlock": "npm:^4.0.8"
     async: "npm:^3.2.5"
     bunyan: "npm:^1.8.15"
     chai: "npm:^4.3.6"
@@ -10652,6 +10659,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/bluebird@npm:*":
+  version: 3.5.42
+  resolution: "@types/bluebird@npm:3.5.42"
+  checksum: 10c0/ce752a5e277bbc0cdee3dee9c875ac093d1331905a8a5175665ccb8cb76b7b95a84836f92bc46076c2fd1e384a107866893eeeb20f6fb33427482663879faf93
+  languageName: node
+  linkType: hard
+
 "@types/body-parser@npm:*":
   version: 1.19.6
   resolution: "@types/body-parser@npm:1.19.6"
@@ -11068,6 +11082,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/lru-cache@npm:^5.1.1":
+  version: 5.1.1
+  resolution: "@types/lru-cache@npm:5.1.1"
+  checksum: 10c0/1f17ec9b202c01a89337cc5528198a690be6b61a6688242125fbfb7fa17770e453e00e4685021abf5ae605860ca0722209faac5c254b780d0104730bb0b9e354
+  languageName: node
+  linkType: hard
+
 "@types/mdast@npm:^4.0.0, @types/mdast@npm:^4.0.4":
   version: 4.0.4
   resolution: "@types/mdast@npm:4.0.4"
@@ -11375,6 +11396,26 @@ __metadata:
   version: 4.38.0
   resolution: "@types/recurly__recurly-js@npm:4.38.0"
   checksum: 10c0/781729e40965519d4478cad9f9236a6e0c5f89f3bcf2e861bddd6b49562e46448f38c1b806c7611730d888bf68b840ea6d70ac52d8f6905d8c5ff8ca59622a50
+  languageName: node
+  linkType: hard
+
+"@types/redis@npm:^2.8.0":
+  version: 2.8.32
+  resolution: "@types/redis@npm:2.8.32"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/99fd52ffc1f4c2cbe3f1ec7a38f9a85a128a430fcbf8e241914d8687ea53555e90dc7b66b3ff1a0c9b74afa1c677551ee405b1f73926c944dadc6026e5e6a80a
+  languageName: node
+  linkType: hard
+
+"@types/redlock@npm:^4.0.8":
+  version: 4.0.8
+  resolution: "@types/redlock@npm:4.0.8"
+  dependencies:
+    "@types/bluebird": "npm:*"
+    "@types/ioredis": "npm:^4.28.10"
+    "@types/redis": "npm:^2.8.0"
+  checksum: 10c0/b570792496d2ee426c4222b97dd4d0918342612a4b28e38e044aa4a8c21fa6f3207b8051f4f936879e25c393b5fe82f964fc86f79d540f4d478077c7a9e004ff
   languageName: node
   linkType: hard
 

@@ -11,6 +11,9 @@
       "@overleaf/access-token-encryptor": [
         "./libraries/access-token-encryptor"
       ],
+      "@overleaf/access-token-encryptor/*": [
+        "./libraries/access-token-encryptor/*"
+      ],
       "@overleaf/fetch-utils": ["./libraries/fetch-utils"],
       "@overleaf/logger": ["./libraries/logger"],
       "@overleaf/metrics": ["./libraries/metrics"],

@@ -1,10 +1,43 @@
 import { zz } from '../../../zodHelpers'
 import { describe, expect, it } from 'vitest'
 import mongodb from 'mongodb'
+import { z } from 'zod'
 
 const { ObjectId } = mongodb
 
 describe('zodHelpers', () => {
+  describe('optional', () => {
+    it('parses a present value with the wrapped schema', () => {
+      const parsed = zz.optional(z.string()).safeParse('a value')
+      expect(parsed.success).toBe(true)
+      expect(parsed.data).toBe('a value')
+    })
+
+    it('normalises null to undefined', () => {
+      const parsed = zz.optional(z.string()).safeParse(null)
+      expect(parsed.success).toBe(true)
+      expect(parsed.data).toBe(undefined)
+    })
+
+    it('normalises undefined to undefined', () => {
+      const parsed = zz.optional(z.string()).safeParse(undefined)
+      expect(parsed.success).toBe(true)
+      expect(parsed.data).toBe(undefined)
+    })
+
+    it('leaves a null unparsed by the wrapped schema', () => {
+      // A coercing schema would otherwise turn null into a value of its own,
+      // such as the 0 that Number(null) gives.
+      const parsed = zz.optional(z.coerce.number()).safeParse(null)
+      expect(parsed.success).toBe(true)
+      expect(parsed.data).toBe(undefined)
+    })
+
+    it('reports a present value the wrapped schema rejects', () => {
+      const parsed = zz.optional(z.string()).safeParse(7)
+      expect(parsed.success).toBe(false)
+    })
+  })
   describe('objectId', () => {
     it('fails to parse when provided with an invalid ObjectId', () => {
       const parsed = zz.objectId().safeParse('aa')

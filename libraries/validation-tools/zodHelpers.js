@@ -21,6 +21,23 @@ const datetimeSchema = ({ allowNull, allowUndefined, ...zodOptions } = {}) => {
 }
 
 const zz = {
+  /**
+   * A field whose absence its source represents inconsistently: left out of
+   * some records and null in others. JSON has no undefined, and Mongo stores a
+   * $set of undefined as null, so an absent-ish field arrives as null about as
+   * often as it is missing outright.
+   *
+   * Unlike z.optional(), which accepts only undefined, both forms are accepted
+   * and normalised to undefined, so callers have a single absent value to
+   * check rather than a `T | null | undefined` to narrow.
+   *
+   * The one combinator here: it wraps another schema instead of describing a
+   * value type of its own.
+   *
+   * @template Output
+   * @param {z.ZodType<Output>} schema
+   */
+  optional: schema => schema.nullish().transform(value => value ?? undefined),
   objectId: () =>
     z.string().refine(ObjectId.isValid, { message: 'invalid Mongo ObjectId' }),
   coercedObjectId: () =>
