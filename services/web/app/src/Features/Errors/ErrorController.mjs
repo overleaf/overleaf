@@ -11,7 +11,7 @@ import { plainTextResponse } from '../../infrastructure/Response.mjs'
 import { expressifyErrorHandler } from '@overleaf/promise-utils'
 
 // Keep in sync with the third-party-datastore service, which matches on this
-// code: services/third-party-datastore/app/js/Dropbox/DropboxPoller.js
+// code: services/third-party-datastore/app/js/Dropbox/DropboxPoller.ts
 // (_isWebOverLimitError).
 const TOO_MANY_FILES_ERROR_CODE = 'project_has_too_many_files'
 
