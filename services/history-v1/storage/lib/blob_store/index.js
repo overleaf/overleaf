@@ -28,6 +28,21 @@ const { promiseMapWithLimit } = require('@overleaf/promise-utils')
 /** @type {Map<string, { blob: core.Blob, demoted: boolean}>} */
 const GLOBAL_BLOBS = new Map()
 
+/**
+ * Empty content, which reads need nothing stored to answer.
+ *
+ * Its hash is a property of the content rather than of anything written, and every
+ * project's empty file has it, so a read answers it from here rather than looking for
+ * it: a file may reference it before anything has stored it. Writes are unchanged and
+ * still store it, so a project that wrote empty content also has a blob for it; a read
+ * answers the same either way.
+ *
+ * Left out of `GLOBAL_BLOBS` deliberately, because that is loaded from the database and
+ * can be configured away, and because a global blob is fetched from the global bucket
+ * rather than not fetched at all.
+ */
+const EMPTY_BLOB = new Blob(Blob.EMPTY_HASH, 0, 0)
+
 function makeGlobalKey(hash) {
   return `${hash.slice(0, 2)}/${hash.slice(2, 4)}/${hash.slice(4)}`
 }
@@ -163,12 +178,13 @@ async function getProjectBlobsBatch(projectIds) {
  * blob store manages both content and metadata (byte and UTF-8 length) for
  * blobs.
  */
-class BlobStore {
+class BlobStore extends core.BlobStoreBase {
   /**
    * @constructor
    * @param {string} projectId the project for which we'd like to find blobs
    */
   constructor(projectId) {
+    super()
     assert.projectId(projectId)
     this.projectId = projectId
     this.backend = getBackend(this.projectId)
@@ -279,7 +295,7 @@ class BlobStore {
    * @param {string} hash hexadecimal SHA-1 hash
    * @return {Promise.<string>} promise for the content of the file
    */
-  async getString(hash) {
+  async fetchString(hash) {
     assert.blobHash(hash, 'bad hash')
 
     const projectId = this.projectId
@@ -333,6 +349,10 @@ class BlobStore {
    */
   async getStream(hash, opts = {}) {
     assert.blobHash(hash, 'bad hash')
+    if (hash === Blob.EMPTY_HASH) {
+      // Any range of empty content is empty, so opts needs no honouring.
+      return new ReadableString('')
+    }
 
     const { bucket, key } = getBlobLocation(this.projectId, hash)
     try {
@@ -354,6 +374,9 @@ class BlobStore {
    */
   async getBlob(hash) {
     assert.blobHash(hash, 'bad hash')
+    if (hash === Blob.EMPTY_HASH) {
+      return EMPTY_BLOB
+    }
     const globalBlob = GLOBAL_BLOBS.get(hash)
     if (globalBlob != null) {
       return globalBlob.blob
@@ -372,6 +395,10 @@ class BlobStore {
     const nonGlobalHashes = []
     const blobs = []
     for (const hash of hashes) {
+      if (hash === Blob.EMPTY_HASH) {
+        blobs.push(EMPTY_BLOB)
+        continue
+      }
       const globalBlob = GLOBAL_BLOBS.get(hash)
       if (globalBlob != null) {
         blobs.push(globalBlob.blob)

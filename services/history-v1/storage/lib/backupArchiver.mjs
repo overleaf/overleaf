@@ -29,7 +29,7 @@ import { NoKEKMatchedError } from '@overleaf/object-persistor/src/Errors.js'
 
 const globalBlobsBucket = config.get('blobStore.globalBucket')
 
-class BackupBlobStore {
+class BackupBlobStore extends core.BlobStoreBase {
   /**
    *
    * @param {string} historyId
@@ -38,6 +38,7 @@ class BackupBlobStore {
    * @param {boolean} useBackupGlobalBlobs
    */
   constructor(historyId, tmp, persistor, useBackupGlobalBlobs) {
+    super()
     this.historyId = historyId
     this.tmp = tmp
     this.blobs = new Map()
@@ -46,17 +47,13 @@ class BackupBlobStore {
   }
 
   /**
-   * Required for BlobStore interface - not supported.
-   *
    * @template T
    * @param {string} hash
    * @return {Promise<T>}
    */
   async getObject(hash) {
     try {
-      const stream = await this.getStream(hash)
-      const buffer = await streams.readStreamToBuffer(stream)
-      return JSON.parse(buffer.toString())
+      return await super.getObject(hash)
     } catch (err) {
       logger.warn({ err, hash }, 'Failed to fetch chunk blob')
       throw err
@@ -146,7 +143,7 @@ class BackupBlobStore {
    * @param {string} hash
    * @return {Promise<string>}
    */
-  async getString(hash) {
+  async fetchString(hash) {
     const stream = await this.getStream(hash)
     const buffer = await streams.readStreamToBuffer(stream)
     return buffer.toString()

@@ -9,9 +9,9 @@ import Errors from './Errors.js'
 import { callbackify, promisify } from 'node:util'
 import {
   AddFileOperation,
+  BlobStoreBase,
   Change,
   EditFileOperation,
-  File,
   MoveFileOperation,
   Snapshot,
 } from 'overleaf-editor-core'
@@ -799,7 +799,7 @@ export async function syncResourcesToDisk(
   }
 }
 
-class BlobStore {
+class BlobStore extends BlobStoreBase {
   /** @type {string} */
   #historyId
   /** @type {string[]} */
@@ -816,6 +816,7 @@ class BlobStore {
    * @param {string[]} globalBlobs
    */
   constructor(historyId, filestoreBlobPrefix, clsiPerfVariant, globalBlobs) {
+    super()
     this.#historyId = historyId
     this.#filestoreBlobPrefix = filestoreBlobPrefix
     this.#clsiPerfVariant = clsiPerfVariant
@@ -845,8 +846,7 @@ class BlobStore {
    * @param {string} hash
    * @return {Promise<string>}
    */
-  async getString(hash) {
-    if (hash === File.EMPTY_FILE_HASH) return ''
+  async fetchString(hash) {
     const u = this.getBlobURL(hash)
     let remainingAttempts = 3
     while (true) {
@@ -865,14 +865,5 @@ class BlobStore {
         await setTimeout(100)
       }
     }
-  }
-
-  /**
-   * @param {string} hash
-   * @return {Promise<any>}
-   */
-  async getObject(hash) {
-    const string = await this.getString(hash)
-    return JSON.parse(string)
   }
 }

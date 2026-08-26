@@ -1,5 +1,6 @@
 import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
+import { File } from 'overleaf-editor-core'
 import { ProjectSnapshot } from '@/infrastructure/project-snapshot'
 
 describe('ProjectSnapshot', function () {
@@ -712,6 +713,92 @@ describe('ProjectSnapshot', function () {
       expect(snapshot.getDocContents('nobom.bib')).to.equal(
         noBomContent + insertedText
       )
+    })
+  })
+
+  describe('blob with the hash of empty content', function () {
+    // Nothing is stored under that hash, on the server or here, so the content is
+    // answered from the hash rather than fetched. A new empty doc references it before
+    // anything has written it, so a fetch would 404 and take the whole snapshot down.
+
+    afterEach(function () {
+      fetchMock.removeRoutes().clearHistory()
+    })
+
+    it('loads an empty doc without fetching the blob', async function () {
+      const emptyChunk = {
+        history: {
+          snapshot: { files: {} },
+          changes: [
+            {
+              operations: [
+                {
+                  pathname: 'fresh.tex',
+                  file: { hash: File.EMPTY_FILE_HASH, stringLength: 0 },
+                },
+              ],
+              timestamp: '2025-01-01T12:00:00.000Z',
+            },
+          ],
+        },
+        startVersion: 0,
+      }
+
+      fetchMock.post(`/project/${projectId}/flush`, 200)
+      fetchMock.getOnce(`/project/${projectId}/latest/history`, {
+        chunk: emptyChunk,
+      })
+      // Served only if the short circuit does not answer first, in which case the
+      // content below is what comes back.
+      fetchMock.get(
+        `/project/${projectId}/blob/${File.EMPTY_FILE_HASH}`,
+        'fetched from the server'
+      )
+
+      await snapshot.refresh()
+
+      expect(snapshot.getDocPaths()).to.have.members(['fresh.tex'])
+      expect(snapshot.getDocContents('fresh.tex')).to.equal('')
+    })
+
+    it('applies edits made on top of an empty doc', async function () {
+      const insertedText = '\\documentclass{article}\n'
+      const emptyChunk = {
+        history: {
+          snapshot: { files: {} },
+          changes: [
+            {
+              operations: [
+                {
+                  pathname: 'fresh.tex',
+                  file: { hash: File.EMPTY_FILE_HASH, stringLength: 0 },
+                },
+              ],
+              timestamp: '2025-01-01T12:00:00.000Z',
+            },
+            {
+              operations: [
+                { pathname: 'fresh.tex', textOperation: [insertedText] },
+              ],
+              timestamp: '2025-01-01T12:01:00.000Z',
+            },
+          ],
+        },
+        startVersion: 0,
+      }
+
+      fetchMock.post(`/project/${projectId}/flush`, 200)
+      fetchMock.getOnce(`/project/${projectId}/latest/history`, {
+        chunk: emptyChunk,
+      })
+      fetchMock.get(
+        `/project/${projectId}/blob/${File.EMPTY_FILE_HASH}`,
+        'fetched from the server'
+      )
+
+      await snapshot.refresh()
+
+      expect(snapshot.getDocContents('fresh.tex')).to.equal(insertedText)
     })
   })
 })

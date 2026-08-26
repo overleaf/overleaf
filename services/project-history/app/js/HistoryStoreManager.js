@@ -18,6 +18,7 @@ import * as LocalFileWriter from './LocalFileWriter.js'
 import * as HashManager from './HashManager.js'
 import * as HistoryBlobTranslator from './HistoryBlobTranslator.js'
 import { callbackify, promisifyMultiResult } from '@overleaf/promise-utils'
+import { BlobStoreBase } from 'overleaf-editor-core'
 
 const HTTP_REQUEST_TIMEOUT = Settings.overleaf.history.requestTimeout
 
@@ -555,18 +556,14 @@ export function deleteProject(projectId, callback) {
 
 const getProjectBlobAsync = promisify(getProjectBlob)
 
-class BlobStore {
+class BlobStore extends BlobStoreBase {
   constructor(projectId) {
+    super()
     this.projectId = projectId
   }
 
-  async getString(hash) {
+  async fetchString(hash) {
     return await getProjectBlobAsync(this.projectId, hash)
-  }
-
-  async getObject(hash) {
-    const string = await this.getString(hash)
-    return JSON.parse(string)
   }
 }
 

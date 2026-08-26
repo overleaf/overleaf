@@ -5,9 +5,6 @@ const { expect } = require('chai')
 const cleanup = require('./support/cleanup')
 const testFiles = require('./support/test_files')
 
-const core = require('overleaf-editor-core')
-const File = core.File
-
 const storage = require('../../../../storage')
 const BatchBlobStore = storage.BatchBlobStore
 const BlobStore = storage.BlobStore
@@ -15,6 +12,10 @@ const BlobStore = storage.BlobStore
 const projectId = '123'
 const blobStore = new BlobStore(projectId)
 const batchBlobStore = new BatchBlobStore(blobStore)
+
+// A well-formed hash that nothing has been stored under. Not the empty file's hash,
+// which the blob store answers from the content it stands for rather than looking it up.
+const MISSING_HASH = '0'.repeat(40)
 
 describe('BatchBlobStore', function () {
   beforeEach(cleanup.everything)
@@ -29,7 +30,7 @@ describe('BatchBlobStore', function () {
     // Cache some blobs (one that exists and another that doesn't)
     await batchBlobStore.preload([
       testFiles.GRAPH_PNG_HASH,
-      File.EMPTY_FILE_HASH, // not found
+      MISSING_HASH, // not found
     ])
     expect(batchBlobStore.blobs.size).to.equal(1)
 
@@ -37,7 +38,7 @@ describe('BatchBlobStore', function () {
       await Promise.all([
         batchBlobStore.getBlob(testFiles.GRAPH_PNG_HASH), // cached
         batchBlobStore.getBlob(testFiles.HELLO_TXT_HASH), // not cached; exists
-        batchBlobStore.getBlob(File.EMPTY_FILE_HASH), // not cached; not exists
+        batchBlobStore.getBlob(MISSING_HASH), // not cached; not exists
         batchBlobStore.getBlob(testFiles.GRAPH_PNG_HASH), // duplicate
       ])
 

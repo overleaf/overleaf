@@ -1,4 +1,5 @@
 import { text } from 'node:stream/consumers'
+import { BlobStoreBase } from 'overleaf-editor-core'
 import HistoryManager from './HistoryManager.mjs'
 
 /**
@@ -8,11 +9,12 @@ import HistoryManager from './HistoryManager.mjs'
  * eagerly here -- needed for the ones with pending edit operations, whose content
  * is not in a single blob.
  */
-class HistoryBlobStore {
+class HistoryBlobStore extends BlobStoreBase {
   /**
    * @param {string} historyId
    */
   constructor(historyId) {
+    super()
     this.historyId = historyId
   }
 
@@ -20,20 +22,12 @@ class HistoryBlobStore {
    * @param {string} hash
    * @return {Promise<string>}
    */
-  async getString(hash) {
+  async fetchString(hash) {
     const { stream } = await HistoryManager.promises.requestBlob(
       this.historyId,
       hash
     )
     return await text(stream)
-  }
-
-  /**
-   * @param {string} hash
-   * @return {Promise<object>}
-   */
-  async getObject(hash) {
-    return JSON.parse(await this.getString(hash))
   }
 }
 

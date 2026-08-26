@@ -114,8 +114,9 @@ async function loadChunk(historyPathname, blobStore) {
   return new core.Chunk(history, 0)
 }
 
-class RecoveryBlobStore {
+class RecoveryBlobStore extends core.BlobStoreBase {
   constructor(historyId, tmp) {
+    super()
     this.historyId = historyId
     this.tmp = tmp
     this.blobs = new Map()
@@ -166,7 +167,7 @@ class RecoveryBlobStore {
     return new core.Blob(hash, byteLength, stringLength)
   }
 
-  async getString(hash) {
+  async fetchString(hash) {
     const stream = await this.getStream(hash)
     const buffer = await streams.readStreamToBuffer(stream)
     return buffer.toString()
