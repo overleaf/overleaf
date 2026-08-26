@@ -168,14 +168,24 @@ export async function waitForDb() {
  * MongoClient".
  *
  * @param {{ aux?: boolean }} [options]
+ * @returns {Promise<import('mongodb').ClientSession>}
  */
 export async function startSession({ aux = false } = {}) {
+  let client
   if (aux && auxMongoClient) {
     await auxConnectionPromise
-    return auxMongoClient.startSession()
+    client = auxMongoClient
+  } else {
+    client = await connectionPromise
   }
-  const client = await connectionPromise
-  return client.startSession()
+
+  // The session is a real mongodb ClientSession at runtime, but mongodb-legacy
+  // types its subclass via Omit, which drops ClientSession's private members and
+  // makes it structurally incompatible — hence the single cast here rather than
+  // at every call site.
+  return /** @type {import('mongodb').ClientSession} */ (
+    /** @type {unknown} */ (client.startSession())
+  )
 }
 
 export default {
