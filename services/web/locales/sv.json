@@ -835,7 +835,6 @@
   "start_free_trial": "Starta utvärderingsperiod",
   "state": "Status",
   "status_checks": "Rutinkontroller",
-  "still_have_questions": "Har du fortfarande frågor?",
   "stop_compile": "Stoppa kompilering",
   "stop_on_validation_error": "Kontrollera syntax innan kompilering",
   "store_your_work": "Lagra ditt arbete på din egen infrastruktur",
