@@ -191,8 +191,8 @@
     "format:pug:fix": "prettier --cache --cache-location ./.cache/prettier/.prettier-cache --write --check '**/*.pug'",
     "format:jenkins": "prettier --cache --cache-location ./.cache/prettier/.prettier-cache --check '**/Jenkinsfile'",
     "format:jenkins:fix": "prettier --cache --cache-location ./.cache/prettier/.prettier-cache --write --check '**/Jenkinsfile'",
-    "format:monorepo-check": "prettier --cache --cache-location ./.cache/prettier/.prettier-cache --check '**/Jenkinsfile' 'google-ops/packer/jenkins/vm_config/init.groovy.d/*.groovy' '**/*.md' '**/docker-compose.yml' '**/docker-compose.*.yml' '.agents/**/*.js' '.agents/**/*.md' '.github/**/*.md' .pnp.register.mjs",
-    "format:monorepo-check:fix": "prettier --cache --cache-location ./.cache/prettier/.prettier-cache --write --check '**/Jenkinsfile' 'google-ops/packer/jenkins/vm_config/init.groovy.d/*.groovy' '**/*.md' '**/docker-compose.yml' '**/docker-compose.*.yml' '.agents/**/*.js' '.agents/**/*.md' '.github/**/*.md' .pnp.register.mjs",
+    "format:monorepo-check": "prettier --cache --cache-location ./.cache/prettier/.prettier-cache --check '**/Jenkinsfile' 'google-ops/packer/jenkins/vm_config/init.groovy.d/*.groovy' '**/*.md' '**/docker-compose.yml' '**/docker-compose.*.yml' '.agents/**/*.js' '.agents/**/*.md' '.github/**/*.md' 'tools/monorepo-check/**/*.mjs' .pnp.register.mjs",
+    "format:monorepo-check:fix": "prettier --cache --cache-location ./.cache/prettier/.prettier-cache --write --check '**/Jenkinsfile' 'google-ops/packer/jenkins/vm_config/init.groovy.d/*.groovy' '**/*.md' '**/docker-compose.yml' '**/docker-compose.*.yml' '.agents/**/*.js' '.agents/**/*.md' '.github/**/*.md' 'tools/monorepo-check/**/*.mjs' .pnp.register.mjs",
     "lint": "eslint --cache --cache-location ./.cache/eslint/ --max-warnings 0",
     "lint:fix": "eslint --cache --cache-location ./.cache/eslint/ --fix"
   },

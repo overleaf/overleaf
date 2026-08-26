@@ -30,11 +30,17 @@ registerHooks({
       if (!pnp.findPackageLocator(issuer)) {
         return nextResolve(specifier, context)
       }
-      url = pathToFileURL(
-        pnp.resolveRequest(specifier, issuer, {
-          conditions: new Set(context.conditions),
-        })
-      ).href
+      try {
+        url = pathToFileURL(
+          pnp.resolveRequest(specifier, issuer, {
+            conditions: new Set(context.conditions),
+          })
+        ).href
+      } catch (err) {
+        // PnP reports a missing module with the CommonJS code. require() returned above, so this is an ESM import and node's own resolver would raise the ESM code, which is what callers of an optional import catch.
+        if (err.code === 'MODULE_NOT_FOUND') err.code = 'ERR_MODULE_NOT_FOUND'
+        throw err
+      }
     }
     try {
       // Keep the resolved path in the chain so loaders registered later can still mock it.
