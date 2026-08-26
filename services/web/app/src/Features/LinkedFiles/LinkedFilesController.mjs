@@ -12,6 +12,7 @@
  */
 import SessionManager from '../Authentication/SessionManager.mjs'
 import Settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
 import _ from 'lodash'
 import AnalyticsManager from '../../../../app/src/Features/Analytics/AnalyticsManager.mjs'
 import LinkedFilesHandler from './LinkedFilesHandler.mjs'
@@ -162,6 +163,35 @@ const refreshLinkedFileFallbackSchema = z.object({
   }),
 })
 
+// Keys whose values are safe to log as-is. Every other key is kept (so the shape of the data stays visible in the log) but its value is replaced.
+const LINKED_FILE_DATA_ALLOW_LIST = [
+  'provider',
+  'importedAt',
+  'source_project_id',
+  'v1_source_doc_id',
+  'source_entity_path',
+  'source_output_file_path',
+  'format',
+  'group_id',
+  'clsiServerId',
+]
+
+function redactLinkedFileData(data) {
+  return Object.fromEntries(
+    Object.entries(data).map(([key, value]) => {
+      if (LINKED_FILE_DATA_ALLOW_LIST.includes(key)) return [key, value]
+      if (key === 'url') {
+        try {
+          return [key, new URL(value).origin + '/<redacted>']
+        } catch {
+          return [key, '<bad input>']
+        }
+      }
+      return [key, '<redacted>']
+    })
+  )
+}
+
 async function createLinkedFile(req, res, next) {
   const { params, body } = parseReq(req, createLinkedFileSchema, {
     fallbackSchema: createLinkedFileFallbackSchema,
@@ -201,7 +231,14 @@ async function createLinkedFile(req, res, next) {
     }
     return res.json({ new_file_id: newFileId })
   } catch (err) {
-    return LinkedFilesController.handleError(err, req, res, next)
+    return LinkedFilesController.handleError(
+      err,
+      { projectId, userId, parentFolderId },
+      data,
+      req,
+      res,
+      next
+    )
   }
 }
 
@@ -257,7 +294,14 @@ async function refreshLinkedFile(req, res, next) {
       historySource
     )
   } catch (err) {
-    return LinkedFilesController.handleError(err, req, res, next)
+    return LinkedFilesController.handleError(
+      err,
+      { projectId, userId, parentFolderId },
+      linkedFileData,
+      req,
+      res,
+      next
+    )
   }
 
   if (shouldReindexReferences) {
@@ -309,7 +353,16 @@ export default LinkedFilesController = {
 
   refreshLinkedFile: expressify(refreshLinkedFile),
 
-  handleError(error, req, res, next) {
+  handleError(error, info, linkedFileData, req, res, next) {
+    logger.warn(
+      {
+        error,
+        req,
+        ...info,
+        linkedFileData: redactLinkedFileData(linkedFileData),
+      },
+      'failed to create/refresh linked file'
+    )
     if (error instanceof AccessDeniedError) {
       res.status(403)
       plainTextResponse(

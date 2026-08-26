@@ -52,7 +52,15 @@ describe('LinkedFilesController', function () {
     ctx.ProjectLocator = {}
     ctx.logger = {
       error: sinon.stub(),
+      warn: sinon.stub(),
     }
+    // parseReq logs through the same stub, so find the call this suite is about
+    // rather than assuming it is the only one.
+    ctx.lastLinkedFileWarning = () =>
+      ctx.logger.warn
+        .getCalls()
+        .filter(call => call.args[1] === 'failed to create/refresh linked file')
+        .pop()?.args[0]
     ctx.settings = { enabledLinkedFileTypes: [] }
     ctx.SplitTestHandler = {
       promises: { featureFlagEnabled: sinon.stub().resolves(false) },
@@ -237,6 +245,32 @@ describe('LinkedFilesController', function () {
       expect(ctx.next.firstCall.args[0]?.name).to.equal('InvalidRequestError')
       expect(ctx.Agent.promises.createLinkedFile).to.not.have.been.called
     })
+
+    it('logs the failure with the linked file data redacted', async function (ctx) {
+      const error = new Error('agent failed')
+      ctx.Agent.promises.createLinkedFile.rejects(error)
+      ctx.req.body.data = { url: 'https://example.com/foo?token=secret' }
+
+      await new Promise(resolve => {
+        ctx.next = sinon.stub().callsFake(() => resolve())
+        ctx.res = { json: () => resolve(), sendStatus: () => resolve() }
+        ctx.LinkedFilesController.createLinkedFile(ctx.req, ctx.res, ctx.next)
+      })
+
+      expect(ctx.next).to.have.been.calledWith(error)
+      expect(ctx.lastLinkedFileWarning()).to.deep.equal({
+        error,
+        req: ctx.req,
+        projectId: ctx.projectId,
+        userId: ctx.userId,
+        parentFolderId: ctx.parentFolderId,
+        linkedFileData: {
+          provider: ctx.provider,
+          url: 'https://example.com/<redacted>',
+          importedAt: ctx.fakeTime.toISOString(),
+        },
+      })
+    })
   })
   describe('refreshLinkedFiles', function () {
     beforeEach(function (ctx) {
@@ -310,6 +344,32 @@ describe('LinkedFilesController', function () {
       expect(ctx.Agent.promises.refreshLinkedFile).to.not.have.been.called
     })
 
+    it('logs the failure with the linked file data redacted', async function (ctx) {
+      const error = new Error('agent failed')
+      ctx.Agent.promises.refreshLinkedFile.rejects(error)
+      ctx.file.linkedFileData.url = 'https://example.com/foo?token=secret'
+
+      await new Promise(resolve => {
+        ctx.next = sinon.stub().callsFake(() => resolve())
+        ctx.res = { json: () => resolve(), sendStatus: () => resolve() }
+        ctx.LinkedFilesController.refreshLinkedFile(ctx.req, ctx.res, ctx.next)
+      })
+
+      expect(ctx.next).to.have.been.calledWith(error)
+      expect(ctx.lastLinkedFileWarning()).to.deep.equal({
+        error,
+        req: ctx.req,
+        projectId: ctx.projectId,
+        userId: ctx.userId,
+        parentFolderId: 'parent-folder-id',
+        linkedFileData: {
+          provider: ctx.provider,
+          url: 'https://example.com/<redacted>',
+          importedAt: ctx.fakeTime.toISOString(),
+        },
+      })
+    })
+
     describe('when bib file re-indexing is required', function () {
       const clientId = 'client-id'
       beforeEach(function (ctx) {
@@ -344,6 +404,73 @@ describe('LinkedFilesController', function () {
             ctx.next
           )
         })
+      })
+    })
+  })
+  describe('handleError', function () {
+    function redactedDataFor(ctx, linkedFileData) {
+      ctx.LinkedFilesController.handleError(
+        new Error('agent failed'),
+        {},
+        linkedFileData,
+        {},
+        {},
+        sinon.stub()
+      )
+      return ctx.lastLinkedFileWarning().linkedFileData
+    }
+
+    it('keeps only the origin of a url', function (ctx) {
+      expect(
+        redactedDataFor(ctx, {
+          provider: 'url',
+          url: 'https://example.com/secret/path?token=secret',
+        })
+      ).to.deep.equal({
+        provider: 'url',
+        url: 'https://example.com/<redacted>',
+      })
+    })
+
+    it('reports a url it cannot parse, leaving the input alone', function (ctx) {
+      const linkedFileData = { provider: 'url', url: 'not-a-url' }
+
+      expect(redactedDataFor(ctx, linkedFileData)).to.deep.equal({
+        provider: 'url',
+        url: '<bad input>',
+      })
+      expect(linkedFileData.url).to.equal('not-a-url')
+    })
+
+    it('redacts the build id of an output file', function (ctx) {
+      expect(
+        redactedDataFor(ctx, {
+          provider: 'project_output_file',
+          source_project_id: ctx.projectId,
+          source_output_file_path: 'output.pdf',
+          build_id: '1234abcd-5678ef90',
+          clsiServerId: 'clsi-server-id',
+        })
+      ).to.deep.equal({
+        provider: 'project_output_file',
+        source_project_id: ctx.projectId,
+        source_output_file_path: 'output.pdf',
+        build_id: '<redacted>',
+        clsiServerId: 'clsi-server-id',
+      })
+    })
+
+    it('redacts the value of a field it does not know', function (ctx) {
+      expect(
+        redactedDataFor(ctx, {
+          provider: 'project_file',
+          source_entity_path: 'refs/linked.bib',
+          new_secret_field: 'hunter2',
+        })
+      ).to.deep.equal({
+        provider: 'project_file',
+        source_entity_path: 'refs/linked.bib',
+        new_secret_field: '<redacted>',
       })
     })
   })
