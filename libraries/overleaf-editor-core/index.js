@@ -27,13 +27,13 @@ const RestoreOrigin = require('./lib/origin/restore_origin')
 const RestoreFileOrigin = require('./lib/origin/restore_file_origin')
 const Origin = require('./lib/origin')
 const { EDITOR_ORIGIN_KIND } = require('./lib/origin')
-const EditorOrigin = require('./lib/origin/editor_origin')
 const OtClient = require('./lib/ot_client')
 const rebaseChanges = require('./lib/rebase')
 const {
   editorChangeIdentity,
   editorChangeIdentityOf,
   isSameEditorChange,
+  isChangeFrom,
 } = require('./lib/change_identity')
 const TextOperation = require('./lib/operation/text_operation')
 const EditOperation = require('./lib/operation/edit_operation')
@@ -96,13 +96,13 @@ exports.Operation = Operation
 exports.RestoreOrigin = RestoreOrigin
 exports.RestoreFileOrigin = RestoreFileOrigin
 exports.Origin = Origin
-exports.EditorOrigin = EditorOrigin
 exports.EDITOR_ORIGIN_KIND = EDITOR_ORIGIN_KIND
 exports.OtClient = OtClient
 exports.rebaseChanges = rebaseChanges
 exports.editorChangeIdentity = editorChangeIdentity
 exports.editorChangeIdentityOf = editorChangeIdentityOf
 exports.isSameEditorChange = isSameEditorChange
+exports.isChangeFrom = isChangeFrom
 exports.TextOperation = TextOperation
 exports.EditOperation = EditOperation
 exports.safePathname = safePathname

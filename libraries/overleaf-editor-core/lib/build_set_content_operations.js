@@ -11,7 +11,7 @@ const { diffAsTextOperation } = require('./diff_as_text_operation')
 /**
  * @import Blob from './blob'
  * @import StringFileData from './file_data/string_file_data'
- * @import { BlobStore, RangesBlob } from './types'
+ * @import { FileMetadata, ReadWriteBlobStore, RangesBlob } from './types'
  */
 
 /**
@@ -29,11 +29,12 @@ const { diffAsTextOperation } = require('./diff_as_text_operation')
  * @param {string} args.pathname
  * @param {string} [args.content] new doc content
  * @param {Blob} [args.blob] blob with the new file content
- * @param {Object} [args.metadata] metadata for the file; the file's metadata
- *        is always replaced with this value (defaults to empty metadata)
+ * @param {FileMetadata} [args.metadata] metadata for the file; the file's
+ *        metadata is always replaced with this value (defaults to empty
+ *        metadata)
  * @param {{userId: string, ts: Date}} [args.tracking] record the change as
  *        tracked changes (ignored when replacing with a blob)
- * @param {BlobStore} args.blobStore
+ * @param {ReadWriteBlobStore} args.blobStore
  * @return {Promise<{operations: Operation[], status: 'applied' | 'noop'}>}
  */
 async function buildSetContentOperations({

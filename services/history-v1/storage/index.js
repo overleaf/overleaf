@@ -1,5 +1,4 @@
 exports.BatchBlobStore = require('./lib/batch_blob_store')
-exports.blobHash = require('./lib/blob_hash')
 exports.HashCheckBlobStore = require('./lib/hash_check_blob_store')
 exports.chunkStore = require('./lib/chunk_store')
 exports.redisBuffer = require('./lib/chunk_store/redis')

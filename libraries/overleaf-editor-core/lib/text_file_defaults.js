@@ -4,12 +4,13 @@
 /**
  * The file names that may hold editable text, as data.
  *
- * These lists decide whether a file becomes a doc or a binary file, so every
- * service that classifies a file has to work from the same list: one carrying a
- * shorter copy turns the same bytes into a binary file, and a project changes
- * the type of a file just by taking a different path into history. Consumers
- * read them from here instead of carrying a copy. web layers the
- * ADDITIONAL_TEXT_EXTENSIONS override on top for Server CE/Pro.
+ * These lists decide whether a file becomes a doc or a binary file (see
+ * lib/file_type_detector.js), so every service that classifies a file has to
+ * work from the same list: one carrying a shorter copy turns the same bytes into
+ * a binary file, and a project changes the type of a file just by taking a
+ * different path into history. Consumers read them from here instead of carrying
+ * a copy. web layers the ADDITIONAL_TEXT_EXTENSIONS override on top for Server
+ * CE/Pro.
  *
  * Frozen because they are shared: copy them (`.concat(...)`, `.slice()`) before
  * handing them to anything that merges configuration into its own objects.

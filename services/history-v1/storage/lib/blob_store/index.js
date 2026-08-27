@@ -6,14 +6,15 @@ const { ReadableString } = require('@overleaf/stream-utils')
 
 const core = require('overleaf-editor-core')
 const {
+  blobHashFromStream,
+  blobHashFromString,
   getStringLengthOfFile,
-} = require('overleaf-editor-core/lib/blob_string_length')
+} = require('overleaf-editor-core/lib/blob_utils')
 const objectPersistor = require('@overleaf/object-persistor')
 const OError = require('@overleaf/o-error')
 const Blob = core.Blob
 
 const assert = require('../assert')
-const blobHash = require('../blob_hash')
 const mongodb = require('../mongodb')
 const persistor = require('../persistor')
 const projectKey = require('@overleaf/object-persistor/src/ProjectKey.js')
@@ -116,7 +117,7 @@ function getBackend(projectId) {
 
 async function makeBlobForFile(pathname) {
   const { size: byteLength } = await fs.promises.stat(pathname)
-  const hash = await blobHash.fromStream(
+  const hash = await blobHashFromStream(
     byteLength,
     fs.createReadStream(pathname)
   )
@@ -221,7 +222,7 @@ class BlobStore extends core.BlobStoreBase {
    */
   async putString(string) {
     assert.string(string, 'bad string')
-    const hash = blobHash.fromString(string)
+    const hash = blobHashFromString(string)
 
     const existingBlob = await this._findBlobBeforeInsert(hash)
     if (existingBlob != null) {

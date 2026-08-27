@@ -41,7 +41,7 @@ class Blob {
   /**
    * The hash of empty content, which is the same for every project.
    *
-   * git's hash of an empty blob, as `blobHash` computes it: it is a property of the
+   * git's hash of an empty blob, as `blobHashFromString` computes it: it is a property of the
    * content rather than of anything stored, so it can be recognised without looking
    * anything up. `File.EMPTY_FILE_HASH` is the same value under the name a file's
    * content goes by.

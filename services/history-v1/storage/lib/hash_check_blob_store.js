@@ -1,5 +1,5 @@
 const { Blob, BlobStoreBase } = require('overleaf-editor-core')
-const blobHash = require('./blob_hash')
+const { blobHashFromString } = require('overleaf-editor-core/lib/blob_utils')
 
 // We want to simulate applying all of the operations so we can return the
 // resulting hashes to the caller for them to check. To do this, we need to be
@@ -34,7 +34,7 @@ class HashCheckBlobStore extends BlobStoreBase {
    */
   async putString(string) {
     return new Blob(
-      blobHash.fromString(string),
+      blobHashFromString(string),
       Buffer.byteLength(string),
       string.length
     )

@@ -51,7 +51,7 @@ import {
 } from '@overleaf/mongo-utils/batchedUpdate.js'
 import { createGunzip } from 'node:zlib'
 import { text } from 'node:stream/consumers'
-import { fromStream as blobHashFromStream } from '../lib/blob_hash.js'
+import { blobHashFromStream } from 'overleaf-editor-core/lib/blob_utils.js'
 import { NotFoundError } from '@overleaf/object-persistor/src/Errors.js'
 
 // Create a singleton promise that loads global blobs once

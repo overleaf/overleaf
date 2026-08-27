@@ -8,7 +8,7 @@ import {
 } from './backupPersistor.mjs'
 import { Blob, Chunk, History } from 'overleaf-editor-core'
 import { BlobStore, GLOBAL_BLOBS, makeProjectKey } from './blob_store/index.js'
-import blobHash from './blob_hash.js'
+import { blobHashFromStream } from 'overleaf-editor-core/lib/blob_utils.js'
 import { NotFoundError } from '@overleaf/object-persistor/src/Errors.js'
 import logger from '@overleaf/logger'
 import path from 'node:path'
@@ -78,7 +78,7 @@ export async function verifyBlobs(historyId, hashes, projectCache) {
       }
       throw err
     }
-    const backupHash = await blobHash.fromStream(blob.getByteLength(), stream)
+    const backupHash = await blobHashFromStream(blob.getByteLength(), stream)
     if (backupHash !== hash) {
       throw new BackupCorruptedInvalidBlobError(
         'hash mismatch for backed up blob',

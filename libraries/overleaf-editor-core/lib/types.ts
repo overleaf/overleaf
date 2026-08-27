@@ -14,6 +14,12 @@ export type BlobStore = {
 
 export type ReadonlyBlobStore = Pick<BlobStore, 'getString' | 'getObject'>
 
+/**
+ * Everything but looking a blob up by its hash: reading content and storing
+ * content, which is all it takes to build operations over content.
+ */
+export type ReadWriteBlobStore = Omit<BlobStore, 'getBlob'>
+
 export type RangesBlob = {
   comments: CommentRawData[]
   trackedChanges: TrackedChangeRawData[]
@@ -34,6 +40,16 @@ export type ClearTrackingPropsRawData = z.infer<
 export type TrackingDirective = TrackingProps | ClearTrackingProps
 
 export type StringFileRawData = z.infer<typeof schemas.rawStringFileData>
+
+export type RawBaseOrigin = z.infer<typeof schemas.rawBaseOrigin>
+
+export type RawRestoreOrigin = z.infer<typeof schemas.rawRestoreOrigin>
+
+export type RawRestoreFileOrigin = z.infer<typeof schemas.rawRestoreFileOrigin>
+
+export type RawRestoreProjectOrigin = z.infer<
+  typeof schemas.rawRestoreProjectOrigin
+>
 
 export type RawOrigin = z.infer<typeof schemas.rawOrigin>
 

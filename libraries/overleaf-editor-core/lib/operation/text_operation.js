@@ -501,7 +501,7 @@ class TextOperation extends EditOperation {
     }
     const operation1 = this
     if (operation1.targetLength !== operation2.baseLength) {
-      throw new Error(
+      throw new UnprocessableError(
         'The base length of the second operation has to be the ' +
           'target length of the first operation'
       )
@@ -537,12 +537,12 @@ class TextOperation extends EditOperation {
       }
 
       if (typeof op1 === 'undefined') {
-        throw new Error(
+        throw new UnprocessableError(
           'Cannot compose operations: first operation is too short.'
         )
       }
       if (typeof op2 === 'undefined') {
-        throw new Error(
+        throw new UnprocessableError(
           'Cannot compose operations: first operation is too long.'
         )
       }
@@ -651,7 +651,9 @@ class TextOperation extends EditOperation {
    */
   static transform(operation1, operation2) {
     if (operation1.baseLength !== operation2.baseLength) {
-      throw new Error('Both operations have to have the same base length')
+      throw new UnprocessableError(
+        'Both operations have to have the same base length'
+      )
     }
 
     const operation1prime = new TextOperation()
@@ -695,12 +697,12 @@ class TextOperation extends EditOperation {
       }
 
       if (typeof op1 === 'undefined') {
-        throw new Error(
+        throw new UnprocessableError(
           'Cannot compose operations: first operation is too short.'
         )
       }
       if (typeof op2 === 'undefined') {
-        throw new Error(
+        throw new UnprocessableError(
           'Cannot compose operations: first operation is too long.'
         )
       }
@@ -781,7 +783,7 @@ class TextOperation extends EditOperation {
         }
         operation2prime.remove(minl)
       } else {
-        throw new Error("The two operations aren't compatible")
+        throw new UnprocessableError("The two operations aren't compatible")
       }
     }
 

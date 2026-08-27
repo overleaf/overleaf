@@ -271,6 +271,26 @@ class File {
   }
 
   /**
+   * Load the content of an editable file, answering with the data holding it.
+   *
+   * Only an editable file has content: any other kind is bytes addressed by
+   * hash, and hollow data records the size of content it does not have. Both
+   * answer {@link File#getContent} with null, which this rules out for its
+   * caller -- what it answers with is the data that always has the content.
+   *
+   * @param {ReadonlyBlobStore} blobStore
+   * @return {Promise<StringFileData>} the loaded data of this file
+   * @throws {NotEditableError} where the file is not an editable doc
+   */
+  async loadEager(blobStore) {
+    await this.load('eager', blobStore)
+    if (!(this.data instanceof StringFileData)) {
+      throw new File.NotEditableError()
+    }
+    return this.data
+  }
+
+  /**
    * Store the file's content in the blob store and return a raw file with
    * the corresponding hash. As a side effect, make this object consistent with
    * the hash.

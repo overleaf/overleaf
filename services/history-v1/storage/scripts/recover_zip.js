@@ -42,9 +42,7 @@ function createStorage() {
 }
 
 const core = require('overleaf-editor-core')
-const {
-  getStringLengthOfFile,
-} = require('overleaf-editor-core/lib/blob_string_length')
+const { getStringLengthOfFile } = require('overleaf-editor-core/lib/blob_utils')
 const projectKey = require('@overleaf/object-persistor/src/ProjectKey.js')
 const streams = require('../lib/streams')
 

@@ -12,7 +12,7 @@ const Change = core.Change
 const File = core.File
 const Operation = core.Operation
 
-const blobHash = require('../../../../storage/lib/blob_hash')
+const { blobHashFromString } = require('overleaf-editor-core/lib/blob_utils')
 const persistChanges = require('../../../../storage/lib/persist_changes')
 
 describe('project hashed content', function () {
@@ -72,7 +72,7 @@ describe('project hashed content', function () {
     const file = response.obj.files['tracked.tex']
     // The content is hashed as it stands, tracked delete included, and the ranges
     // are hashed separately.
-    expect(file.hash).to.equal(blobHash.fromString(content))
+    expect(file.hash).to.equal(blobHashFromString(content))
     expect(file.rangesHash).to.match(/^[0-9a-f]{40}$/)
   })
 
@@ -92,7 +92,7 @@ describe('project hashed content', function () {
 
     expect(response.status).to.equal(200)
     const file = response.obj.files['main.tex']
-    expect(file.hash).to.equal(blobHash.fromString(content))
+    expect(file.hash).to.equal(blobHashFromString(content))
     expect(file.rangesHash).to.be.undefined
   })
 })

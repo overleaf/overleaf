@@ -241,34 +241,63 @@ const rawSnapshot = z.strictObject({
 })
 
 // mirrors Origin.fromRaw: three restore variants plus a generic kind
+//
+// Every variant may carry the id of the client that submitted the change, which
+// is what lets history recognise a resend and the client recognise its own change
+// coming back. It is optional throughout: most changes are ones nothing has to
+// recognise again, and the id is dropped from the rest once they can no longer be
+// resent, so a bare {kind} is the common shape.
+const historyClientId = z.uuid().optional()
+
+// The kinds that have a shape of their own, which the variants below describe. A
+// payload claiming one of them has to match that shape rather than falling through
+// to the catch-all, where it would validate as a kind and nothing else and then be
+// read back as a change that has lost what the kind promised.
+const namedOriginKinds = ['restore', 'file-restore', 'project-restore']
+
+// The fields every origin has, which is also what an origin with nothing but a kind
+// serialises to -- Origin's own raw form, and the union's catch-all below.
+const rawBaseOrigin = z.strictObject({
+  kind: z.string().refine(kind => !namedOriginKinds.includes(kind), {
+    message: 'origin kind has a shape of its own',
+  }),
+  historyClientId,
+})
+
+const rawRestoreOrigin = z.strictObject({
+  kind: z.literal('restore'),
+  version: z.number().int(),
+  timestamp: z.iso.datetime(),
+  historyClientId,
+})
+
+const rawRestoreFileOrigin = z.strictObject({
+  kind: z.literal('file-restore'),
+  version: z.number().int(),
+  path: z.string(),
+  timestamp: z.iso.datetime(),
+  historyClientId,
+})
+
+const rawRestoreProjectOrigin = z.strictObject({
+  kind: z.literal('project-restore'),
+  version: z.number().int(),
+  timestamp: z.iso.datetime(),
+  historyClientId,
+})
+
+// The named kinds discriminate on `kind`, so a payload claiming one of them is
+// checked against that shape alone and the error says which field it got wrong. The
+// catch-all cannot join them -- its kind is any string, which zod rejects as a
+// discriminator -- so it sits alongside, and its refinement above is what stops it
+// swallowing a named kind.
 const rawOrigin = z.union([
-  z.strictObject({
-    kind: z.literal('restore'),
-    version: z.number().int(),
-    timestamp: z.iso.datetime(),
-  }),
-  z.strictObject({
-    kind: z.literal('file-restore'),
-    version: z.number().int(),
-    path: z.string(),
-    timestamp: z.iso.datetime(),
-  }),
-  z.strictObject({
-    kind: z.literal('project-restore'),
-    version: z.number().int(),
-    timestamp: z.iso.datetime(),
-  }),
-  // An editor change that still carries the id of the editor instance it came
-  // from. Once a chunk is written the id is dropped from all but that editor's
-  // latest change, leaving a bare {kind: 'editor'} that the catch-all below
-  // accepts.
-  z.strictObject({
-    kind: z.literal('editor'),
-    editorId: z.uuid(),
-  }),
-  z.strictObject({
-    kind: z.string(),
-  }),
+  z.discriminatedUnion('kind', [
+    rawRestoreOrigin,
+    rawRestoreFileOrigin,
+    rawRestoreProjectOrigin,
+  ]),
+  rawBaseOrigin,
 ])
 
 // mirrors Operation.fromRaw: add file / edit file / move (or delete) file /
@@ -347,6 +376,10 @@ module.exports = {
   rawFileMap,
   rawV2DocVersions,
   rawSnapshot,
+  rawBaseOrigin,
+  rawRestoreOrigin,
+  rawRestoreFileOrigin,
+  rawRestoreProjectOrigin,
   rawOrigin,
   rawAddFileOperation,
   rawMoveFileOperation,

@@ -391,6 +391,13 @@ describe('TextOperation', function () {
   })
 
   describe('compose', function () {
+    it('rejects a second operation built on different content', function () {
+      const a = new TextOperation().retain(4)
+      const b = new TextOperation().retain(7)
+
+      expect(() => a.compose(b)).to.throw(TextOperation.UnprocessableError)
+    })
+
     it(
       'composes (randomised)',
       random.test(numTrials, () => {
@@ -728,6 +735,20 @@ describe('TextOperation', function () {
   })
 
   describe('transform', function () {
+    it('rejects operations built on different content', function () {
+      // Two operations that do not describe the same starting content cannot be
+      // transformed against each other. That is the pair being wrong, not this
+      // process, and a caller that answers a client has to be able to tell the
+      // difference -- an internal error reads as worth retrying, and the same
+      // pair fails the same way every time.
+      const a = new TextOperation().retain(4)
+      const b = new TextOperation().retain(7)
+
+      expect(() => TextOperation.transform(a, b)).to.throw(
+        TextOperation.UnprocessableError
+      )
+    })
+
     it(
       'transforms (randomised)',
       random.test(numTrials, () => {

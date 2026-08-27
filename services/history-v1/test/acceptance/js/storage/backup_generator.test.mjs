@@ -13,7 +13,7 @@ import { ObjectId } from 'mongodb'
 import testFiles from './support/test_files.js'
 import { BlobStore } from '../../../../storage/lib/blob_store/index.js'
 import fs from 'node:fs'
-import blobHash from '../../../../storage/lib/blob_hash.js'
+import { blobHashFromString } from 'overleaf-editor-core/lib/blob_utils.js'
 
 const scenarios = [
   {
@@ -197,7 +197,7 @@ for (const scenario of scenarios) {
       expect(results[1].chunkRecord.endVersion).to.equal(20)
       expect(results[1].blobsToBackup).to.have.deep.members([
         {
-          hash: blobHash.fromString('a'.repeat(7)),
+          hash: blobHashFromString('a'.repeat(7)),
           byteLength: 7,
           stringLength: 7,
         },
@@ -213,7 +213,7 @@ for (const scenario of scenarios) {
       expect(results[2].chunkRecord.endVersion).to.equal(24)
       expect(results[2].blobsToBackup).to.have.deep.members([
         {
-          hash: blobHash.fromString('a'.repeat(16)),
+          hash: blobHashFromString('a'.repeat(16)),
           byteLength: 16,
           stringLength: 16,
         },
@@ -270,7 +270,7 @@ for (const scenario of scenarios) {
               {
                 version: 11,
                 blob: {
-                  hash: blobHash.fromString('a'.repeat(7)),
+                  hash: blobHashFromString('a'.repeat(7)),
                   byteLength: 7,
                   stringLength: 7,
                 },
@@ -291,7 +291,7 @@ for (const scenario of scenarios) {
               {
                 version: 21,
                 blob: {
-                  hash: blobHash.fromString('a'.repeat(16)),
+                  hash: blobHashFromString('a'.repeat(16)),
                   byteLength: 16,
                   stringLength: 16,
                 },

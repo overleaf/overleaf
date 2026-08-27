@@ -13,10 +13,10 @@ const { parseReq } = require('@overleaf/validation-tools')
 
 const logger = require('@overleaf/logger')
 const { Chunk, ChunkResponse, Blob } = require('overleaf-editor-core')
+const { blobHashFromFile } = require('overleaf-editor-core/lib/blob_utils')
 const {
   BlobStore,
   BatchBlobStore,
-  blobHash,
   chunkStore,
   redisBuffer,
   HashCheckBlobStore,
@@ -392,7 +392,7 @@ async function createProjectBlob(req, res, next) {
       )
       return render.requestEntityTooLarge(res)
     }
-    const hash = await blobHash.fromFile(tmpPath)
+    const hash = await blobHashFromFile(tmpPath)
     if (hash !== expectedHash) {
       logger.warn({ projectId, hash, expectedHash }, 'Hash mismatch')
       return render.conflict(res, 'File hash mismatch')

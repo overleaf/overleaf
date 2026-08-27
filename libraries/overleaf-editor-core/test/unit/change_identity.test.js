@@ -5,6 +5,7 @@ const {
   editorChangeIdentity,
   editorChangeIdentityOf,
   isSameEditorChange,
+  isChangeFrom,
   EDITOR_ORIGIN_KIND,
 } = require('../..')
 
@@ -23,7 +24,7 @@ describe('editor change identity', function () {
       origin:
         'origin' in overrides
           ? overrides.origin
-          : { kind: EDITOR_ORIGIN_KIND, editorId: EDITOR_A },
+          : { kind: EDITOR_ORIGIN_KIND, historyClientId: EDITOR_A },
     }
   }
 
@@ -40,18 +41,20 @@ describe('editor change identity', function () {
     // change is treated as a duplicate and silently discarded.
 
     it('a different editor sharing the author and timestamp', function () {
-      // The case editorId exists for: two tabs of one user, or two anonymous
+      // The case historyClientId exists for: two tabs of one user, or two anonymous
       // editors, can produce changes on the same millisecond.
       expect(
         same(
           raw(),
-          raw({ origin: { kind: EDITOR_ORIGIN_KIND, editorId: EDITOR_B } })
+          raw({
+            origin: { kind: EDITOR_ORIGIN_KIND, historyClientId: EDITOR_B },
+          })
         )
       ).to.be.false
     })
 
-    it('a different author sharing the editorId', function () {
-      // editorId comes from the client, so a forged one must not let one account
+    it('a different author sharing the historyClientId', function () {
+      // historyClientId comes from the client, so a forged one must not let one account
       // suppress another's change.
       expect(same(raw(), raw({ v2Authors: [USER_B] }))).to.be.false
     })
@@ -69,7 +72,7 @@ describe('editor change identity', function () {
       expect(same(raw(), raw({ origin: undefined }))).to.be.false
     })
 
-    it('a change whose editorId was stripped when its chunk was written', function () {
+    it('a change whose historyClientId was stripped when its chunk was written', function () {
       expect(same(raw(), raw({ origin: { kind: EDITOR_ORIGIN_KIND } }))).to.be
         .false
     })
@@ -91,14 +94,14 @@ describe('editor change identity', function () {
     })
 
     it('still separates two anonymous editors', function () {
-      // They share an empty author, so the editorId is the only thing keeping
+      // They share an empty author, so the historyClientId is the only thing keeping
       // their changes apart.
       expect(
         same(
           raw({ v2Authors: [null] }),
           raw({
             v2Authors: [null],
-            origin: { kind: EDITOR_ORIGIN_KIND, editorId: EDITOR_B },
+            origin: { kind: EDITOR_ORIGIN_KIND, historyClientId: EDITOR_B },
           })
         )
       ).to.be.false
@@ -131,7 +134,7 @@ describe('editor change identity', function () {
   describe('editorChangeIdentityOf', function () {
     it('matches a raw change describing the same submission', function () {
       const mine = editorChangeIdentityOf({
-        editorId: EDITOR_A,
+        historyClientId: EDITOR_A,
         author: USER_A,
         timestamp: new Date(TIMESTAMP),
       })
@@ -141,7 +144,7 @@ describe('editor change identity', function () {
 
     it('treats a missing author as anonymous', function () {
       const mine = editorChangeIdentityOf({
-        editorId: EDITOR_A,
+        historyClientId: EDITOR_A,
         author: null,
         timestamp: new Date(TIMESTAMP),
       })
@@ -158,5 +161,81 @@ describe('editor change identity', function () {
   it('never matches a null identity, including against another null', function () {
     expect(isSameEditorChange(null, null)).to.be.false
     expect(isSameEditorChange(editorChangeIdentity(raw()), null)).to.be.false
+  })
+})
+
+describe('isChangeFrom', function () {
+  const KIND = 'github'
+
+  function raw(overrides = {}) {
+    return {
+      operations: [],
+      timestamp: overrides.timestamp || TIMESTAMP,
+      v2Authors: 'v2Authors' in overrides ? overrides.v2Authors : [USER_A],
+      origin: 'origin' in overrides ? overrides.origin : { kind: KIND },
+    }
+  }
+
+  const expected = {
+    originKind: KIND,
+    author: USER_A,
+    timestamp: new Date(TIMESTAMP),
+  }
+
+  it('recognises a change this writer placed', function () {
+    expect(isChangeFrom(raw(), expected)).to.be.true
+  })
+
+  it('recognises it among several authors', function () {
+    expect(isChangeFrom(raw({ v2Authors: [USER_B, USER_A] }), expected)).to.be
+      .true
+  })
+
+  it('compares the timestamp as a point in time', function () {
+    // two spellings of the same instant are the same change
+    expect(
+      isChangeFrom(
+        raw({ timestamp: '2025-01-02T04:04:05.678+01:00' }),
+        expected
+      )
+    ).to.be.true
+  })
+
+  describe('what it refuses to match', function () {
+    // a false match here has the writer take a commit it never landed as landed, and the removes it holds are never applied
+
+    it('a kind another writer stamps', function () {
+      expect(isChangeFrom(raw({ origin: { kind: 'dropbox' } }), expected)).to.be
+        .false
+    })
+
+    it('a change with no origin', function () {
+      expect(isChangeFrom(raw({ origin: undefined }), expected)).to.be.false
+    })
+
+    it('a change placed on behalf of another user', function () {
+      expect(isChangeFrom(raw({ v2Authors: [USER_B] }), expected)).to.be.false
+    })
+
+    it('a change with no authors recorded', function () {
+      expect(isChangeFrom(raw({ v2Authors: undefined }), expected)).to.be.false
+      expect(isChangeFrom(raw({ v2Authors: [] }), expected)).to.be.false
+    })
+
+    it('a change from another moment', function () {
+      expect(
+        isChangeFrom(raw({ timestamp: '2025-01-02T03:04:05.679Z' }), expected)
+      ).to.be.false
+    })
+
+    it('an unparseable timestamp', function () {
+      expect(isChangeFrom(raw({ timestamp: 'not a date' }), expected)).to.be
+        .false
+    })
+
+    it('nothing at all on either side', function () {
+      expect(isChangeFrom(undefined, expected)).to.be.false
+      expect(isChangeFrom(raw(), undefined)).to.be.false
+    })
   })
 })
