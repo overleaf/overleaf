@@ -200,6 +200,26 @@ module.exports = {
       price_in_cents: 1500,
       features: features.collaborator,
     },
+    // The real student plans live in settings.overrides.saas.js, but
+    // @overleaf/settings' merge replaces arrays wholesale rather than
+    // merging them, so this list (not that one) is what acceptance tests
+    // see. Without these, PlansLocator.findLocalPlanInSettings cannot
+    // resolve 'student' and any test of the student-verification gate is
+    // blocked before the gate is reached. Feature set is deliberately
+    // borrowed from collaborator: the gate only needs the plan to resolve.
+    {
+      planCode: 'student',
+      name: 'Student monthly',
+      price_in_cents: 1000,
+      features: features.collaborator,
+    },
+    {
+      planCode: 'student-annual',
+      name: 'Student annual',
+      price_in_cents: 10000,
+      annual: true,
+      features: features.collaborator,
+    },
     {
       planCode: 'professional',
       name: 'Pro monthly',

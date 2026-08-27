@@ -334,6 +334,17 @@ export interface Meta {
   }>
   'ol-stripePublicKeyUK': string
   'ol-stripePublicKeyUS': string
+  'ol-studentVerificationPage': {
+    planCode: string
+    origin: 'change-plan' | undefined
+    alreadyVerified: boolean
+    alreadyOnPlan: boolean
+    // Already translated by the server, because the keys come from the plans
+    // config and so are not picked up by the frontend translation build.
+    studentPlanFeatures: string[]
+    standardPlanFeatures: string[]
+    ip: string | undefined
+  }
   'ol-subscription': any // TODO: mixed types, split into two fields
   'ol-subscriptionChangePreview': SubscriptionChangePreview
   'ol-subscriptionCreationPreview': SubscriptionCreationPreview
