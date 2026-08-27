@@ -75,7 +75,7 @@ export class BibtexEntryAccumulator {
     if (type.is(StringLiteral)) {
       // Strip surrounding quotes/braces and collapse multi-line indentation.
       let s = getText(node.from + 1, node.to - 1)
-      s = s.replaceAll(/\n\s*/g, ' ')
+      s = s.replaceAll(/[\n\r]\s*/g, ' ')
       this.fieldValue = this.fieldValue.addString(s)
       return false
     }

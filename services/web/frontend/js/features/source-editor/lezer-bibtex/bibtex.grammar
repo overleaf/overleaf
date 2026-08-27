@@ -1,12 +1,12 @@
 @tokens {
-  whiteSpace { $[\t\n ]+ }
+  whiteSpace { $[\t\n\r ]+ }
 
   // Anything outside of an entry at the top level is a BibTeX free-form comment
-  Junk { ![@ \t\n%] ![@]* }
+  Junk { ![@ \t\n\r%] ![@]* }
 
   // BibLaTeX supports comments starting with a % and extending to the end of
   // the line
-  Comment { "%" ![\n]* }
+  Comment { "%" ![\n\r]* }
 
   // See https://metacpan.org/release/AMBS/Text-BibTeX-0.91/view/btparse/doc/bt_language.pod
   identifierSymbol { $[!$&*+./:;<>?^`_|] | "[" | "]" | "-" }

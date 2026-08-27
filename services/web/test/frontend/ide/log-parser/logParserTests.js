@@ -296,6 +296,15 @@ describe('logParser', function () {
     )
   })
 
+  it('should parse a biber .blg file with CRLF line endings', function () {
+    const log = readLog('biber.blg').replace(/\n/g, '\r\n')
+    const bibParser = new BibLogParser(log, {})
+    const result = bibParser.parse()
+    expect(result.all.length).to.equal(14)
+    expect(result.errors.length).to.equal(1)
+    expect(result.warnings.length).to.equal(2)
+  })
+
   it('should throw an error when non-biblog passed to BibLogParser', function () {
     const log = readLog('caption-warnings.log')
     const bibParser = new BibLogParser(log, {})

@@ -85,7 +85,7 @@ export default class BibLogParser {
     }
     this.text = text.replace(/(\r\n)|\r/g, '\n')
     this.options = options
-    this.lines = text.split('\n')
+    this.lines = this.text.split('\n')
 
     // each parser is a pair of [regex, processFunction], where processFunction
     // describes how to transform the regex mactch into a log entry object.
