@@ -1,13 +1,12 @@
 import { defineConfig } from 'cypress'
 import { webpackConfig } from './cypress/support/webpack.cypress'
 
-// Cypress's Electron process uses PackherdModuleLoader which doesn't go through
-// PnP hooks. Reporter packages are materialized into /tmp/cypress-reporter by
-// scripts/materialize-cypress-reporter.js at container startup.
+// Cypress builds reporters in its Electron process, which has no Yarn PnP.
+// @overleaf/cypress-pnp-reporter loads cypress-multi-reporters there.
 let reporterOptions = {}
 if (process.env.CI) {
   reporterOptions = {
-    reporter: '/tmp/cypress-reporter/node_modules/cypress-multi-reporters',
+    reporter: require.resolve('@overleaf/cypress-pnp-reporter'),
     reporterOptions: {
       configFile: 'cypress/cypress-multi-reporters.json',
     },
@@ -29,7 +28,16 @@ export default defineConfig({
       webpackConfig,
     },
     setupNodeEvents(on, config) {
-      //
+      on('before:browser:launch', (browser, launchOptions) => {
+        if (browser.family === 'chromium') {
+          // Cypress adds this for docker's default 64MB /dev/shm; the compose services raise shm_size instead, so Chrome's shared memory stays in RAM.
+          const noDevShm = launchOptions.args.indexOf('--disable-dev-shm-usage')
+          if (noDevShm !== -1) {
+            launchOptions.args.splice(noDevShm, 1)
+          }
+        }
+        return launchOptions
+      })
     },
     specPattern:
       process.env.CYPRESS_SPEC_PATTERN ||

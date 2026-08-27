@@ -7138,6 +7138,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@overleaf/cypress-pnp-reporter@workspace:*, @overleaf/cypress-pnp-reporter@workspace:libraries/cypress-pnp-reporter":
+  version: 0.0.0-use.local
+  resolution: "@overleaf/cypress-pnp-reporter@workspace:libraries/cypress-pnp-reporter"
+  dependencies:
+    "@types/node": "npm:^24.5.2"
+    chai: "npm:^4.3.6"
+    cypress-multi-reporters: "npm:^2.0.5"
+    eslint: "npm:^10.4.0"
+    mocha: "npm:^11.1.0"
+    mocha-junit-reporter: "npm:^2.2.1"
+    mocha-multi-reporters: "npm:^1.5.1"
+    typescript: "npm:^5.0.4"
+  languageName: unknown
+  linkType: soft
+
 "@overleaf/dictionaries@https://github.com/overleaf/dictionaries/archive/refs/tags/v0.0.3.tar.gz":
   version: 0.0.3
   resolution: "@overleaf/dictionaries@https://github.com/overleaf/dictionaries/archive/refs/tags/v0.0.3.tar.gz"
@@ -7707,16 +7722,15 @@ __metadata:
     "@cypress/code-coverage": "npm:^4.0.2"
     "@cypress/grep": "npm:^6.0.2"
     "@isomorphic-git/lightning-fs": "npm:^4.6.0"
+    "@overleaf/cypress-pnp-reporter": "workspace:*"
     "@testing-library/cypress": "npm:^10.1.0"
     "@types/uuid": "npm:^9.0.8"
     adm-zip: "npm:^0.6.0"
     cypress: "npm:15.20.1"
-    cypress-multi-reporters: "npm:^2.0.5"
     eslint: "npm:^10.4.0"
     isomorphic-git: "npm:^1.33.1"
     mailtrap: "npm:^4.3.0"
     mocha: "npm:^11.7.5"
-    mocha-junit-reporter: "npm:^2.2.1"
     pdfjs-dist: "npm:^5.1.91"
     typescript: "npm:^5.0.4"
     uuid: "npm:^9.0.1"
@@ -7728,19 +7742,18 @@ __metadata:
   resolution: "@overleaf/server-ce-test@workspace:server-ce/test"
   dependencies:
     "@isomorphic-git/lightning-fs": "npm:^4.6.0"
+    "@overleaf/cypress-pnp-reporter": "workspace:*"
     "@overleaf/promise-utils": "workspace:*"
     "@overleaf/validation-tools": "workspace:*"
     "@testing-library/cypress": "npm:10.1.0"
     "@types/uuid": "npm:^9.0.8"
     adm-zip: "npm:^0.6.0"
     cypress: "npm:15.20.1"
-    cypress-multi-reporters: "npm:^2.0.5"
     eslint: "npm:^10.4.0"
     express: "npm:4.22.1"
     isomorphic-git: "npm:^1.33.1"
     js-yaml: "npm:^4.1.1"
     mocha: "npm:^11.7.5"
-    mocha-junit-reporter: "npm:^2.2.1"
     pdfjs-dist: "npm:^5.1.91"
     typescript: "npm:^5.0.4"
     uuid: "npm:^9.0.1"
@@ -7956,6 +7969,7 @@ __metadata:
     "@node-saml/passport-saml": "patch:@node-saml/passport-saml@npm%3A5.1.0#~/.yarn/patches/@node-saml-passport-saml-npm-5.1.0-5d7df575fa.patch"
     "@overleaf/access-token-encryptor": "workspace:*"
     "@overleaf/codemirror-tree-view": "npm:^0.1.3"
+    "@overleaf/cypress-pnp-reporter": "workspace:*"
     "@overleaf/dictionaries": "https://github.com/overleaf/dictionaries/archive/refs/tags/v0.0.3.tar.gz"
     "@overleaf/eslint-plugin": "workspace:*"
     "@overleaf/fetch-utils": "workspace:*"
@@ -8097,7 +8111,6 @@ __metadata:
     csv-parse: "npm:^6.2.1"
     csv-stringify: "npm:^6.7.0"
     cypress: "npm:15.20.1"
-    cypress-multi-reporters: "npm:^2.0.5"
     cypress-plugin-tab: "npm:^1.0.5"
     d3: "npm:^3.5.16"
     daterangepicker: "npm:2.1.27"
