@@ -36,7 +36,7 @@ const breadcrumbsTheme = EditorView.baseTheme({
 export function breadcrumbPanel() {
   return [
     EditorView.editorAttributes.of({
-      style: '--breadcrumbs-height: 28px;',
+      style: '--breadcrumbs-height: 34px;',
     }),
     breadcrumbsTheme,
   ]

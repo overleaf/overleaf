@@ -182,6 +182,8 @@ const settings = {
   // when emails are sent out and in generated links:
   siteUrl: (siteUrl = process.env.OVERLEAF_SITE_URL || 'http://localhost'),
 
+  enableRegiserPage: process.env.OVERLEAF_ENABLE_REGISTER_PAGE === 'true',
+
   // Status page URL as displayed on the maintenance/500 pages.
   statusPageUrl: process.env.OVERLEAF_STATUS_PAGE_URL
     ? // Add https:// protocol prefix if not set (Allow plain-text http:// for Server Pro/CE).
@@ -393,6 +395,17 @@ if (process.env.OVERLEAF_EMAIL_FROM_ADDRESS != null) {
   }
 
   if (
+    process.env.OVERLEAF_EMAIL_SMTP_USER != null &&
+    process.env.OVERLEAF_EMAIL_SMTP_PASS_FILE != null
+  ) {
+    settings.email.parameters.auth = {
+      user: process.env.OVERLEAF_EMAIL_SMTP_USER,
+      pass: require('fs').readFileSync(
+        process.env.OVERLEAF_EMAIL_SMTP_PASS_FILE,
+        'utf8'
+      ),
+    }
+  } else if (
     process.env.OVERLEAF_EMAIL_SMTP_USER != null ||
     process.env.OVERLEAF_EMAIL_SMTP_PASS != null
   ) {

@@ -3,11 +3,7 @@ import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-ope
 import { useFileTreeOpenContext } from '@/features/ide-react/context/file-tree-open-context'
 import classNames from 'classnames'
 import SourceEditor from '@/features/source-editor/components/source-editor'
-import { Panel, PanelGroup } from 'react-resizable-panels'
-import { VerticalResizeHandle } from '@/features/ide-react/components/resize/vertical-resize-handle'
-import { FC, Suspense } from 'react'
-import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
-import SymbolPalettePane from '@/features/ide-react/components/editor/symbol-palette-pane'
+import { FC } from 'react'
 import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
@@ -17,8 +13,7 @@ const [pythonRunnerModule] = importOverleafModules('pythonRunner') as {
 }[]
 
 export const Editor = () => {
-  const { opening, errorState, showSymbolPalette } =
-    useEditorPropertiesContext()
+  const { opening, errorState } = useEditorPropertiesContext()
   const { selectedEntityCount, openEntity } = useFileTreeOpenContext()
   const { currentDocumentId, currentDocument } = useEditorOpenDocContext()
 
@@ -39,42 +34,18 @@ export const Editor = () => {
       className={classNames('ide-redesign-editor-content', {
         hidden: openEntity?.type !== 'doc' || selectedEntityCount !== 1,
       })}
+      style={{ minHeight: 0, overflow: 'hidden' }}
     >
-      <PanelGroup
-        autoSaveId="ide-redesign-editor-symbol-palette"
-        direction="vertical"
-      >
-        <Panel
-          id="ide-redesign-panel-source-editor"
-          order={1}
-          className="ide-redesign-editor-panel"
-        >
-          {pythonRunnerModule &&
-          isPythonDocument &&
-          isSplitTestEnabled('overleaf-code') ? (
-            <pythonRunnerModule.import.PythonEditorSplit />
-          ) : (
-            <SourceEditor />
-          )}
-          {isLoading && <EditorLoadingPane />}
-        </Panel>
-        {showSymbolPalette && (
-          <>
-            <VerticalResizeHandle id="ide-redesign-editor-symbol-palette" />
-            <Panel
-              id="ide-redesign-panel-symbol-palette"
-              order={2}
-              defaultSize={25}
-              minSize={10}
-              maxSize={50}
-            >
-              <Suspense fallback={<FullSizeLoadingSpinner delay={500} />}>
-                <SymbolPalettePane />
-              </Suspense>
-            </Panel>
-          </>
+      <div className="ide-redesign-editor-panel" style={{ height: '100%' }}>
+        {pythonRunnerModule &&
+        isPythonDocument &&
+        isSplitTestEnabled('overleaf-code') ? (
+          <pythonRunnerModule.import.PythonEditorSplit />
+        ) : (
+          <SourceEditor />
         )}
-      </PanelGroup>
+        {isLoading && <EditorLoadingPane />}
+      </div>
     </div>
   )
 }

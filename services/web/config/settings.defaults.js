@@ -1071,7 +1071,12 @@ module.exports = {
     usGovBanner: [],
     rollingBuildsUpdatedAlert: [],
     offlineModeToolbarButtons: [],
-    settingsEntries: [],
+    settingsEntries: [
+      Path.resolve(
+        __dirname,
+        '../modules/symbol-palette/frontend/components/symbol-palette-settings-entry'
+      ),
+    ],
     autoCompleteExtensions: [],
     sectionTitleGenerators: [],
     toastGenerators: [
@@ -1104,7 +1109,12 @@ module.exports = {
     settingsModalSpellcheckSections: [],
     editorFloatingMenuActions: [],
     referenceIndices: [],
-    railEntries: [],
+    railEntries: [
+      Path.resolve(
+        __dirname,
+        '../modules/symbol-palette/frontend/components/symbol-palette-rail-entry'
+      ),
+    ],
     railPopovers: [],
     railActions: [],
     railModals: [],
@@ -1114,6 +1124,7 @@ module.exports = {
     'history-v1',
     'launchpad',
     'server-ce-scripts',
+    'symbol-palette',
     'user-activate',
   ],
   viewIncludes: {},

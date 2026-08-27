@@ -65,6 +65,13 @@ const spellcheckExtraSectionHooks: SettingsSectionHook[] =
 const useSlotSections = (hooks: SettingsSectionHook[]): SettingsSection[] =>
   hooks.map(hook => hook()).filter((s): s is SettingsSection => s != null)
 
+const moduleSettingsEntries = (
+  importOverleafModules('settingsEntries') as {
+    import: { default: SettingsEntry }
+    path: string
+  }[]
+).map(({ import: { default: entry } }) => entry)
+
 type SettingsModalState = {
   show: boolean
   setShow: (shown: boolean) => void
@@ -291,6 +298,8 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
         ],
         hidden: !hasEmailNotifications,
       },
+
+      ...moduleSettingsEntries,
 
       {
         key: 'account_settings',

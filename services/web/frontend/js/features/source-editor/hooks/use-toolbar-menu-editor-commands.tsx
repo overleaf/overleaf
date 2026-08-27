@@ -6,7 +6,6 @@ import {
 import { FigureModalSource } from '@/features/source-editor/components/figure-modal/figure-modal-context'
 import * as commands from '@/features/source-editor/extensions/toolbar/commands'
 import { setSectionHeadingLevel } from '@/features/source-editor/extensions/toolbar/sections'
-import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import getMeta from '@/utils/meta'
 import { redo, selectAll, undo } from '@codemirror/commands'
@@ -351,7 +350,6 @@ export const useToolbarMenuBarEditorCommands = () => {
     ]
   }, [view, t, editorIsVisible, trackedWrite, isTeXFile, canComment, comment])
 
-  const { toggleSymbolPalette } = useEditorPropertiesContext()
   const symbolPaletteAvailable = getMeta('ol-symbolPaletteAvailable')
   useCommandProvider(() => {
     if (!editorIsVisible) {
@@ -371,14 +369,17 @@ export const useToolbarMenuBarEditorCommands = () => {
         id: 'insert-symbol',
         label: t('symbol'),
         handler: () => {
-          toggleSymbolPalette?.()
+          window.dispatchEvent(
+            new CustomEvent('ui:select-rail-tab', {
+              detail: { tab: 'symbol-palette', open: true },
+            })
+          )
         },
       },
     ]
   }, [
     symbolPaletteAvailable,
     t,
-    toggleSymbolPalette,
     editorIsVisible,
     isTeXFile,
     trackedWrite,
