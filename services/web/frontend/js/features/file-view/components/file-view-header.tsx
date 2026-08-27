@@ -26,6 +26,13 @@ const tprFileViewNotOriginalImporter = importOverleafModules(
   path: string
 }[]
 
+// Third-party actions rendered next to the download button in the file view
+// header (e.g. the "Edit Image" button from the toast-image module).
+const fileViewButtons = importOverleafModules('fileViewButtons') as {
+  import: { default: ElementType }
+  path: string
+}[]
+
 const MAX_URL_LENGTH = 60
 const FRONT_OF_URL_LENGTH = 35
 const FILLER = '...'
@@ -87,6 +94,11 @@ export default function FileViewHeader({ file }: FileViewHeaderProps) {
           <MaterialIcon type="download" className="align-middle" />{' '}
           <span>{t('download')}</span>
         </OLButton>
+        {fileViewButtons.map(
+          ({ import: { default: FileViewButton }, path }) => (
+            <FileViewButton key={path} file={file} />
+          )
+        )}
       </div>
       {file.linkedFileData &&
         tprFileViewNotOriginalImporter.map(

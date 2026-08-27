@@ -1,0 +1,102 @@
+/* SVG diagram editor (modules/diagram) — host shell for the embedded
+   full SVG-Edit app (which renders its own toolbars/panels inside the
+   iframe). Over the pane: status hint + save/companion button only. */
+
+.dg-root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  background: #fff;
+}
+
+.dg-frame {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 240px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.dg-frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  background: #fff;
+}
+
+.dg-fail {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 16px;
+  text-align: center;
+  background: #fafafa;
+  color: #555;
+  font-size: 14px;
+}
+
+.dg-fail .dg-hint {
+  text-align: center;
+}
+
+.dg-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 12px;
+  background: #f7f7f7;
+  border-top: 1px solid #e2e2e2;
+  font-size: 12px;
+  color: #666;
+  min-height: 34px;
+}
+
+.dg-hint {
+  flex: 1 1 auto;
+  font-size: 12px;
+  color: #666;
+}
+
+.dg-status {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.dg-status.success {
+  color: #1c7c1c;
+}
+
+.dg-status.error {
+  color: #b3261e;
+}
+
+.dg-save {
+  appearance: none;
+  border: 1px solid transparent;
+  background: #2f6fd0;
+  color: #fff;
+  font-size: 13px;
+  line-height: 1.4;
+  padding: 3px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.dg-save:hover:not(:disabled) {
+  background: #2a61b8;
+}
+
+.dg-save:disabled {
+  opacity: 0.4;
+  cursor: default;
+}

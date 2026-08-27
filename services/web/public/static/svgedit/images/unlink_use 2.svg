@@ -1,0 +1,14 @@
+<svg width="222" height="222" xmlns="http://www.w3.org/2000/svg">
+  <path id="svg_1" d="m93.75,118.44922c-4.5,13.58447 -14.66553,11.5 -28.25,11.5l-34,0c-13.58447,0 -24.5,-7.16553 -24.5,-21.5c0,-14.33447 10.91553,-20.5 24.5,-20.5l34,0c13.58447,0 19.75,-2.33447 26.5,10.75" stroke-width="13" stroke="#3f3f3f" fill="none"/>
+  <g id="svg_11">
+   <line id="svg_4" y2="65.94563" x2="83.07683" y1="28.27895" x1="45.41017" stroke-linecap="round" stroke-width="8" stroke="#007fff" fill="none"/>
+   <line id="svg_5" y2="15.01293" x2="109.41467" y1="65.94638" x1="109.41467" stroke-linecap="round" stroke-width="8" stroke="#007fff" fill="none"/>
+   <line id="svg_6" y2="29.31928" x2="177.58937" y1="65.94638" x1="140.96227" stroke-linecap="round" stroke-width="8" stroke="#007fff" fill="none"/>
+  </g>
+  <g id="svg_12" transform="rotate(-180, 108, 172.111)">
+   <line y2="190.94563" x2="79.57683" y1="153.27895" x1="41.91017" stroke-linecap="round" stroke-width="8" stroke="#007fff" fill="none" id="svg_13"/>
+   <line y2="140.01293" x2="105.91467" y1="190.94638" x1="105.91467" stroke-linecap="round" stroke-width="8" stroke="#007fff" fill="none" id="svg_14"/>
+   <line y2="154.31928" x2="174.08937" y1="190.94638" x1="137.46227" stroke-linecap="round" stroke-width="8" stroke="#007fff" fill="none" id="svg_15"/>
+  </g>
+  <path transform="rotate(-180, 172.125, 108.926)" id="svg_2" d="m215.5,118.44901c-4.5,13.58499 -14.6655,11.5 -28.25,11.5l-34,0c-13.5845,0 -24.5,-7.16501 -24.5,-21.5c0,-14.3343 10.9155,-20.4998 24.5,-20.4998l34,0c13.5845,0 19.75,-2.3345 26.5,10.75" stroke-width="13" stroke="#3f3f3f" fill="none"/>
+</svg>

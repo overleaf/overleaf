@@ -1,0 +1,19 @@
+ <svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+   <defs>
+    <linearGradient y2="1" x2="1" y1="0.5" x1="1" id="svg_53">
+     <stop stop-opacity="1" stop-color="#606060" offset="0"/>
+     <stop stop-opacity="0" stop-color="#5e5e5e" offset="1"/>
+    </linearGradient>
+   </defs>
+    <rect stroke="#606060" fill="#eaeaea" id="svg_55" height="21" width="18" y="1.6692" x="2.42792"/>
+    <line fill="none" stroke="#a0a0a0" id="svg_56" y2="4.37757" x2="14.89023" y1="4.37757" x1="6.696"/>
+    <line fill="none" stroke="#a0a0a0" id="svg_57" y2="7.10804" x2="12.92026" y1="7.10804" x1="6.6948"/>
+    <line fill="none" stroke="#a0a0a0" id="svg_58" y2="9.84241" x2="15.64716" y1="9.84241" x1="6.6942"/>
+    <line fill="none" stroke="#a0a0a0" id="svg_59" y2="12.36585" x2="13.21805" y1="12.36585" x1="6.69691"/>
+    <line fill="none" stroke="#a0a0a0" id="svg_60" y2="15.06507" x2="14.43591" y1="15.06507" x1="6.69691"/>
+    <line fill="none" stroke="#a0a0a0" id="svg_61" y2="17.84241" x2="13.36979" y1="17.84241" x1="6.69691"/>
+    <g id="svg_54">
+     <path transform="rotate(-45, 12.5448, 11.7085)" stroke="none" fill="#606060" id="svg_31" d="m11.24329,8.73944l0,2.79974l2.53499,0.07777l0,-2.95528c1.78134,0.07777 2.26093,1.39987 2.12391,2.95528c-0.06851,1.63318 -1.30175,3.49967 -3.49418,3.26636c-2.19242,-0.31108 -2.87755,-1.39987 -3.15161,-2.72197c-0.27406,-1.39987 0.41108,-3.34413 1.98689,-3.4219z"/>
+     <rect opacity="0.95" transform="rotate(-45, 16.2485, 15.1732)" stroke="none" fill="url(#svg_53)" id="svg_50" height="4.85445" width="2.57974" y="12.746" x="15.04047"/>
+    </g>
+  </svg>

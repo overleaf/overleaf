@@ -1,0 +1,12 @@
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 17 17">
+ <defs>
+  <linearGradient y2="0.79688" x2="0.5625" y1="0.19141" x1="0.42969" id="svg_91">
+   <stop stop-opacity="1" stop-color="#d3a16b" offset="0"/>
+   <stop stop-opacity="1" stop-color="#a37c53" offset="1"/>
+  </linearGradient>
+ </defs>
+  <path stroke="none" fill="url(#svg_91)" id="svg_9" d="m0.12852,8.18338c3.59931,-7.71208 13.19749,-7.36932 16.75236,0.08569c-3.02165,7.5407 -13.59741,7.66924 -16.75236,-0.08569z"/>
+  <path id="svg_76" stroke="none" fill="#ffffff" d="m0.33033,8.2557c3.5173,-4.97159 12.89675,-4.75063 16.37062,0.05524c-2.95279,4.86111 -13.28756,4.94397 -16.37062,-0.05524z"/>
+  <circle stroke="none" fill="#4f92c1" id="svg_88" r="3.08008" cy="7.71116" cx="8.45861"/>
+  <circle stroke="none" fill="#000000" id="svg_89" r="1.27539" cy="7.6539" cx="8.43159"/>
+ </svg>

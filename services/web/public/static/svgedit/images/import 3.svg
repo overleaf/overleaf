@@ -1,0 +1,10 @@
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs>
+  <linearGradient y2="0.875" x2="0.21484" y1="0.00391" x1="0.04297" id="svg_46_import">
+   <stop stop-opacity="1" stop-color="#81f4bb" offset="0"/>
+   <stop stop-opacity="1" stop-color="#37b76e" offset="1"/>
+  </linearGradient>
+ </defs>
+ <rect x="2.42792" y="1.6692" width="18" height="21" id="svg_55" fill="#eaeaea" stroke="#606060"/>
+    <path stroke="#285582" fill="url(#svg_46_import)" id="svg_45" d="m7.14286,12.74903l5.21236,5.79151l5.50193,-5.88803l-2.50965,-0.09653l0,-2.79923c0,-2.3166 -2.3166,-5.59846 -6.56371,-5.59846c-4.05405,0 -6.27413,3.37838 -6.56371,6.75676c0.48263,-1.5444 2.7027,-4.53668 4.44015,-4.44015c2.12355,-0.09653 2.79923,1.64093 2.79923,3.37838l0.09653,2.79923l-2.41313,0.09653z"/>
+</svg>

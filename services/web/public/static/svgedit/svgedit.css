@@ -1,0 +1,627 @@
+:root {
+  --main-bg-color: #72797A;
+  --text-color: #000000;
+  --border-color: #808080;
+  --canvas-bg-color: #B2B2B2;
+  --link-color: #19c;
+  --ruler-color: #B2B2B2;
+  --icon-bg-color: #72797A;
+  --icon-bg-color-hover: #2B3C45;
+  --input-color: #B2B2B2;
+  --orange-color: #f9bc01;
+  --global-se-spin-input-width: 82px;
+  --top-toolbar-min-height: 80px;
+}
+
+.svg_editor * {
+  transform-origin: 0 0;
+}
+
+.svg_editor {
+  display: grid;
+  grid-template-rows: minmax(var(--top-toolbar-min-height), auto) 15px 1fr 40px;
+  grid-template-columns: 40px 15px 50px 1fr 15px;
+  grid-template-areas:
+    "main main   main top top"
+    "left corner rulerX rulerX side"
+    "left rulerY workarea workarea side"
+    "left bottom bottom bottom bottom";
+  font-size: 8pt;
+  background: var(--main-bg-color);
+  font-family: Verdana, Helvetica, Arial;
+  color: var(--text-color);
+  user-select: text;
+  width: 100%;
+  height: 100%;
+}
+
+#title_panel>p {
+  color: white;
+  padding-left: 5px;
+  padding-right: 3px;
+  font-weight: bold;
+}
+
+/* class to open the right panel */
+.svg_editor.open {
+  grid-template-columns: 34px 15px 50px 1fr 220px;
+}
+
+#svgroot {
+  user-select: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#workarea {
+  grid-area: workarea;
+  background-color: #A0A0A0;
+  border: 1px solid var(--border-color);
+  overflow: auto;
+  text-align: center;
+}
+
+#svgcanvas {
+  line-height: normal;
+  display: inline-block;
+  background: var(--canvas-bg-color);
+  text-align: center;
+  vertical-align: middle;
+  position: relative;
+}
+
+#sidepanels {
+  grid-area: side;
+}
+
+#sidepanel_handle {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  color: white;
+  position: absolute;
+  cursor: pointer;
+  top: 50%;
+}
+
+.svg_editor:not(.open) #sidepanel_content {
+  display: none;
+}
+
+a {
+  color: var(--link-color);
+}
+
+hr {
+  border: none;
+  border-bottom: 1px solid var(--border-color);
+}
+
+#linkLabel>svg {
+  height: 20px;
+  padding-top: 4px;
+}
+
+#layersLabel {
+  color: white;
+}
+
+#layerpanel {
+  user-select: none;
+  padding-left: 15px;
+}
+
+#layerbuttons {
+  margin: 0;
+  padding: 0;
+  padding-left: 2px;
+  padding-right: 2px;
+  width: 125px;
+  height: 20px;
+  border: 0px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#layerlist {
+  margin: 1px;
+  padding: 0;
+  width: 132px;
+  border-collapse: collapse;
+  border: 1px solid var(--border-color);
+  background-color: #FFFFFF;
+}
+
+#layerlist tr.layer {
+  background-color: #FFFFFF;
+  margin: 0;
+  padding: 0;
+}
+
+#layerlist tr.layersel {
+  border: 1px solid var(--border-color);
+  background-color: #CCCCCC;
+}
+
+#layerlist td.layervis {
+  width: 22px;
+  cursor: pointer;
+}
+
+#layerlist td.layerinvis {
+  background-image: none;
+  cursor: pointer;
+}
+
+#layerlist td.layervis * {
+  display: block;
+}
+
+#layerlist td.layerinvis * {
+  display: none;
+}
+
+#layerlist td.layername {
+  cursor: pointer;
+}
+
+#layerlist td.layername:hover {
+  color: blue;
+}
+
+#layerlist tr.layersel td.layername {
+  font-weight: bold;
+}
+
+#selLayerLabel {
+  white-space: nowrap;
+}
+
+#selLayerNames {
+  display: block;
+  top: -8px;
+  position: relative;
+}
+
+/* Main button
+—————————————————————————————*/
+
+#main_button {
+  grid-area: main;
+  color: #fff;
+  border-radius: 3px;
+  padding-block: 2px;
+  padding-left: 3px;
+  height: 34px;
+}
+
+#main_icon {
+  position: relative;
+  top: -2px;
+  left: -2px;
+  width: 95px;
+  line-height: 26px;
+}
+
+#main_icon:hover {
+  background: #eee !important;
+}
+
+#main_icon.buttondown {
+  background: #eee !important;
+  -moz-box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  box-shadow: none !important;
+  border-radius: 3px 3px 0 0;
+}
+
+#logo {
+  margin-top: -2px;
+}
+
+#logo img {
+  border: 0;
+  width: 28px;
+  height: 28px;
+}
+
+#main_icon>div {
+  float: left;
+}
+
+#main_button .dropdown {
+  position: absolute;
+  right: 7px;
+  top: 4px;
+}
+
+#main_icon span {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  display: block;
+  z-index: 2;
+  font-weight: bold;
+  padding-left: 34px;
+  line-height: 32px;
+  font-family: sans-serif;
+}
+
+#main_menu {
+  z-index: 12;
+  background: #eee;
+  position: relative;
+  width: 230px;
+  padding: 5px;
+  -moz-box-shadow: #555 1px 1px 4px;
+  -webkit-box-shadow: #555 1px 1px 4px;
+  box-shadow: #555 1px 1px 4px;
+  font-size: 1.1em;
+  display: none;
+  overflow: hidden;
+  clear: both;
+  top: -9px;
+}
+
+#main_menu ul,
+#main_menu li {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#main_menu li {
+  /*  height: 35px;*/
+  line-height: 22px;
+  padding-top: 7px;
+  padding-left: 7px;
+  margin: -5px;
+  overflow: auto;
+  cursor: pointer;
+}
+
+#main_menu li:hover {
+  background: #FFC;
+}
+
+#main_menu li>div {
+  float: left;
+  padding-right: 5px;
+}
+
+#main_menu p {
+  margin-top: 5px;
+}
+
+/*—————————————————————————————*/
+
+#tools_top {
+  grid-area: top;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  align-content: flex-start;
+  background-color: var(--main-bg-color);
+  min-height: var(--top-toolbar-min-height);
+}
+
+#tools_top>* {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  background-color: var(--main-bg-color);
+}
+
+/*—————————————————————————————*/
+
+#tools_bottom {
+  grid-area: bottom;
+  overflow-x: auto;
+  overflow-y: hidden;
+  display: flex;
+  align-items: center;
+  scrollbar-width: thin;
+  /* Firefox */
+}
+
+#tools_bottom::-webkit-scrollbar {
+  /* Chrome, Edge, and Safari */
+  width: 3px;
+  height: 3px;
+}
+
+#tools_bottom se-list,
+#tools_bottom se-select {
+  margin-bottom: 8px;
+}
+
+#zoom {
+  color: var(--text-color);
+  background-color: var(--main-bg-color);
+  border: none;
+}
+
+/*—————————————————————————————*/
+
+#tools_left {
+  grid-area: left;
+  border-right: none;
+  margin-left: auto;
+  margin-right: auto;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  /* Firefox */
+  user-select: none;
+}
+
+#tools_left::-webkit-scrollbar {
+  /* Chrome, Edge, and Safari */
+  width: 3px;
+}
+
+#tools_left::-webkit-scrollbar-track,
+#tools_bottom::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#tools_left::-webkit-scrollbar-thumb,
+#tools_bottom::-webkit-scrollbar-thumb {
+  background-color: rgb(70, 70, 70);
+}
+
+/* End scrollbar styling */
+
+/*—————————————————————————————*/
+
+#workarea.wireframe #svgcontent * {
+  fill: none;
+  stroke: #000;
+  stroke-width: 1px;
+  stroke-opacity: 1.0;
+  stroke-dasharray: 0;
+  opacity: 1;
+  pointer-events: stroke;
+  filter: none;
+}
+
+#workarea.wireframe #svgcontent text {
+  fill: #000;
+  stroke: none;
+}
+
+#workarea.wireframe #canvasBackground>rect {
+  fill: #FFF !important;
+}
+
+#cur_context_panel {
+  grid-area: rulerX;
+  line-height: 22px;
+  overflow: auto;
+  padding-left: 5px;
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #ccc;
+}
+
+#cur_context_panel a {
+  float: none;
+  text-decoration: none;
+}
+
+#cur_context_panel a:hover {
+  text-decoration: underline;
+}
+
+input[type=text] {
+  padding: 2px;
+}
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown button {
+  width: 15px;
+  height: 21px;
+  margin: 6px 0 0 1px;
+  padding: 0;
+  border-left: 1px solid #FFFFFF;
+  border-top: 1px solid #FFFFFF;
+  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  background-color: #E8E8E8;
+}
+
+.dropdown button.down {
+  border-left: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-color);
+  border-right: 1px solid #FFFFFF;
+  border-bottom: 1px solid #FFFFFF;
+  background-color: #5a6162;
+}
+
+.dropdown ul {
+  list-style: none;
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  left: -85px;
+  top: 26px;
+  z-index: 4;
+  display: none;
+}
+
+.dropup ul {
+  top: auto;
+  bottom: 24px;
+}
+
+.dropdown li {
+  display: block;
+  width: 120px;
+  padding: 4px;
+  background: #E8E8E8;
+  border: 1px solid #5a6162;
+  margin: 0 0 -1px 0;
+  line-height: 16px;
+}
+
+.dropdown li:hover {
+  background-color: #FFC;
+}
+
+.dropdown li.special {
+  padding: 10px 4px;
+}
+
+.dropdown li.special:hover {
+  background: #FFC;
+}
+
+#font_family_dropdown-list li {
+  font-size: 1.4em;
+}
+
+#font_family {
+  margin-left: 5px;
+  margin-right: 0;
+}
+
+#main_menu li#tool_open,
+#main_menu li#tool_import {
+  position: relative;
+  overflow: hidden;
+}
+
+#tool_image {
+  overflow: hidden;
+}
+
+#tool_open input,
+#tool_import input,
+#tool_image input {
+  position: absolute;
+  opacity: 0;
+  font-size: 10em;
+  top: -5px;
+  right: -5px;
+  margin: 0;
+  cursor: pointer;
+  /* Sadly doesn't appear to have an effect */
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.tool_sep {
+  border-left: 1px outset #EEE;
+  margin: 5px 1px;
+  height: 30px;
+}
+
+.width_label {
+  padding-right: 5px;
+}
+
+#text {
+  position: absolute;
+  left: -9999px;
+}
+
+.bottom-icon {
+  width: 22px;
+}
+
+#palette {
+  margin-left: auto;
+  margin-right: 16px;
+  display: flex;
+  align-items: center;
+}
+
+#stroke_expand {
+  width: 0;
+  overflow: hidden;
+}
+
+#toggle_stroke_tools {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 25px;
+  text-align: center;
+  border-radius: 0 3px 3px 0;
+  margin: 0;
+}
+
+#toggle_stroke_tools:before {
+  content: '>>';
+  letter-spacing: -3px;
+  font-weight: bold;
+  color: #666;
+}
+
+.expanded #toggle_stroke_tools:before {
+  content: '<<';
+}
+
+#toggle_stroke_tools:hover {
+  background: white;
+}
+
+#tool_opacity {
+  right: 0;
+}
+
+#tool_opacity {
+  overflow: visible;
+}
+
+ul li.current {
+  background-color: #F4E284;
+}
+
+#copyright {
+  text-align: right;
+  padding-right: .3em;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  background-color: black;
+  opacity: 0.6;
+  z-index: 5;
+}
+
+#save_output_btns {
+  display: none;
+  text-align: left;
+}
+
+#save_output_btns p {
+  margin: .5em 1.5em;
+  display: inline-block;
+}
+
+#bg_blocks {
+  overflow: auto;
+  margin-left: 30px;
+}
+
+/* ------------ */
+
+.dropdown li.tool_button {
+  width: 24px;
+}

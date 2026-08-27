@@ -60,7 +60,10 @@ export function showVisualForFile(filename: string): boolean {
   if (key === 'editor.lastUsedMode') {
     return migrateTexVisualMode()
   }
-  return false
+  // A module-provided visual editor (e.g. the SVG diagram canvas editor)
+  // is the product default for the file types it claims — unless the user
+  // has explicitly chosen the code editor for that family (stored above).
+  return true
 }
 
 export const EditorPropertiesProvider: FC<PropsWithChildren> = ({

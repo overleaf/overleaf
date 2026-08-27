@@ -1,0 +1,15 @@
+<svg width="44" height="44" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="se_marker_start_svg_2" markerHeight="5" markerWidth="5" orient="auto" refX="50" refY="50" viewBox="0 0 100 100">
+      <path d="m0,50l100,40l-30,-40l30,-40l-100,40z" fill="#f9bc01" id="svg_3" stroke="#f9bc01" stroke-width="10"/>
+    </marker>
+    <marker id="se_marker_end_svg_2" markerHeight="5" markerWidth="5" orient="auto" refX="50" refY="50" viewBox="0 0 100 100">
+      <path d="m100,50l-100,40l30,-40l-30,-40l100,40z" fill="#f9bc01" id="svg_4" stroke="#f9bc01" stroke-width="10"/>
+    </marker>
+  </defs>
+  <g class="layer">
+    <title>Layer 1</title>
+    <text fill="#000000" font-family="serif" font-size="15" id="svg_1" stroke="#000000" stroke-width="0" text-anchor="middle" x="22.78779" xml:space="preserve" y="26.00814">A      B</text>
+    <line fill="none" id="svg_2" marker-end="url(#se_marker_end_svg_2)" marker-start="url(#se_marker_start_svg_2)" stroke="#f9bc01" x1="16.19377" x2="29.36873" y1="20.75" y2="20.75"/>
+  </g>
+</svg>

@@ -1,0 +1,59 @@
+.toast-image-editor-modal .modal-dialog {
+  max-width: 95vw;
+  width: 95vw;
+}
+
+.toast-image-editor-modal .modal-body {
+  padding: 0;
+  overflow: hidden;
+}
+
+.toast-image-editor-modal .tui-image-editor-container {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.toast-image-editor-modal .tui-image-editor-container .tui-image-editor-main {
+  top: 0 !important;
+}
+
+/* Hide TUI Image Editor built-in load/download buttons in the modal */
+.toast-image-editor-modal .tui-image-editor-header .tui-image-editor-button-load,
+.toast-image-editor-modal .tui-image-editor-header .tui-image-editor-button-download,
+.toast-image-editor-modal .tui-image-editor-container .tui-image-editor-download-btn,
+.toast-image-editor-modal .tui-image-editor-container .tui-image-editor-load-btn,
+.toast-image-editor-modal button[title='Load'],
+.toast-image-editor-modal button[title='Download'] {
+  display: none !important;
+}
+
+/* TUI 3.15.3 still renders its chrome despite loadButton/downloadButton:false —
+   hide it by structure: the canvas top header (brand logo + Load/Download)
+   and the controls-strip logo/Load/Download block. The menu column (crop,
+   flip, rotate, draw, shape, icon, text, mask, filter) and the help menu
+   (zoom/hand/history/undo/redo) stay. */
+.toast-image-editor-modal .tui-image-editor-header {
+  display: none !important;
+  height: 0 !important;
+}
+.toast-image-editor-modal .tui-image-editor-controls-logo,
+.toast-image-editor-modal .tui-image-editor-controls-buttons,
+.toast-image-editor-modal .tui-image-editor-download-btn,
+.toast-image-editor-modal .tui-image-editor-load-btn,
+.toast-image-editor-modal .tie-canvas-load-btn {
+  display: none !important;
+}
+
+/* Selected (active) tool button in TUI's tool column: TUI gives the active
+   item a WHITE background. Its icon color comes from runtime-injected CSS
+   (theme's menu.activeIcon.color) — if that ever regresses to white the
+   icon is invisible (white-on-white). This belt keeps the active item's
+   icon and label dark regardless of the injected value. */
+.toast-image-editor-modal .tui-image-editor-menu > .tui-image-editor-item.active svg use {
+  fill: #1e1e1e !important;
+  stroke: #1e1e1e !important;
+}
+.toast-image-editor-modal .tui-image-editor-menu > .tui-image-editor-item.active label,
+.toast-image-editor-modal .tui-image-editor-menu > .tui-image-editor-item.active span {
+  color: #1e1e1e !important;
+}

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<svg width="20" height="16" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg" version="1.1">
+    <title>circle_cursor</title>
+    <g class="layer">
+        <title>Layer 1</title>
+        <g class="layer" id="svg_2">
+            <g id="layer2">
+                <path d="m0.1,6.37l6.3,-6.27l-6.3,0l0,6.27z" fill="#2b3c45" id="path9" stroke="#2b3c45"
+                    stroke-dashoffset="0" stroke-width="0.2" />
+            </g>
+            <ellipse cx="11.0" cy="7" fill="#ffffff" id="svg_1" rx="7.5" ry="3.43" stroke="#2b3c45" stroke-width="1" />
+        </g>
+    </g>
+</svg>

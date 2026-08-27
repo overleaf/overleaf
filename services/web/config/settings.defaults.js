@@ -58,6 +58,8 @@ const defaultTextExtensions = [
   'lua',
   'py',
   'gv',
+  'svg',
+  'drawio',
   'mf',
   'yml',
   'yaml',
@@ -1024,7 +1026,12 @@ module.exports = {
     //
     // Restart webpack after making changes.
     //
-    createFileModes: [],
+    createFileModes: [
+      Path.resolve(
+        __dirname,
+        '../modules/diagram/frontend/js/components/create-diagram-file'
+      ),
+    ],
     devToolbar: [],
     gitBridge: [],
     publishModal: [],
@@ -1033,6 +1040,14 @@ module.exports = {
     tprFileViewRefreshButton: [],
     tprFileViewNotOriginalImporter: [],
     contactUsModal: [],
+    // Buttons rendered next to the download button in the file view header
+    // (e.g. the "Edit Image" action from the toast-image module).
+    fileViewButtons: [
+      Path.resolve(
+        __dirname,
+        '../modules/toast-image/frontend/js/components/toast-image-editor'
+      ),
+    ],
     sourceEditorExtensions: [],
     sourceEditorVisualExtensions: [],
     sourceEditorComponents: [],
@@ -1067,7 +1082,16 @@ module.exports = {
     ssoCertificateInfo: [],
     v1ImportDataScreen: [],
     snapshotUtils: [],
-    visualEditorProviders: [],
+    // The SVG diagram editor replaces the code editor for `.svg` documents
+    // (the canvas owns the whole editor pane; "Code | Visual" switches to
+    // the raw SVG source). Registered as a visual editor — NOT as a
+    // sourceEditorComponent (that would render it underneath CodeMirror).
+    visualEditorProviders: [
+      Path.resolve(
+        __dirname,
+        '../modules/diagram/frontend/js/visual-editor-provider'
+      ),
+    ],
     usGovBanner: [],
     rollingBuildsUpdatedAlert: [],
     offlineModeToolbarButtons: [],
@@ -1115,6 +1139,8 @@ module.exports = {
     'launchpad',
     'server-ce-scripts',
     'user-activate',
+    'diagram',
+    'toast-image',
   ],
   viewIncludes: {},
 

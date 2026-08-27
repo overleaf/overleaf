@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="-1 -1 110 110">
+     <line fill="none" id="svg_4" marker-start="url(#se_marker_start_svg_4)" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="5" x1="0" x2="42.58373" y1="0" y2="56.42415"/>
+     <line fill="none" id="svg_5" stroke="#000000" stroke-linecap="round" stroke-width="5" x1="99.99999" x2="42.58373" y1="56.42415" y2="56.42415"/>
+     <rect fill="none" height="26.47059" id="svg_2" stroke="#000000" stroke-dasharray="10,10" stroke-linecap="round" stroke-linejoin="round" stroke-width="5" width="55.02392" x="44.01914" y="16.71827"/>
+     <rect fill="none" height="32.73994" id="svg_3" stroke="#000000" stroke-dasharray="10,10" stroke-linecap="round" stroke-linejoin="null" stroke-width="5" width="55.98086" x="44.01914" y="67.56966"/>
+     <defs>
+      <marker class="leftarrow" id="se_marker_start_svg_4" markerHeight="5" markerUnits="strokeWidth" markerWidth="5" orient="auto" refX="0" refY="50" viewBox="0 0 100 100">
+        <path d="m0,50l100,40l-30,-40l30,-40l-100,40z" fill="#000000" id="svg_1" stroke="#000000" stroke-width="10"/>
+      </marker>
+    </defs>
+    </svg>

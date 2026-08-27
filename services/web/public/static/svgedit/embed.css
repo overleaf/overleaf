@@ -1,0 +1,20 @@
+/* Overleaf diagram editor — host CSS for the embedded SVG-Edit app.
+   The app expects a full-size container and manages its own layout. */
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+#container {
+  width: 100%;
+  height: 100%;
+}
+
+/* Host hardening: the storage prompt must never appear in the Overleaf
+   context (the storage extension is not even loaded — belt and braces). */
+#se-storage-dialog {
+  display: none !important;
+}

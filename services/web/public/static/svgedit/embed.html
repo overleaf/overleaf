@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<!-- Overleaf diagram editor — host page for the embedded SVG-Edit app.
+     SVG-Edit 7.4.2 asset set (editor, icons, extensions) ships alongside
+     this file; see LICENSE (permissive OR-license, e.g. MIT) and
+     services/web/modules/diagram/README.md.
+     The Overleaf parent page owns the document source; this page only
+     hosts the canvas, toolbars and dialogs. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>diagram</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="./svgedit.css" />
+    <link rel="stylesheet" href="./embed.css" />
+  </head>
+  <body>
+    <div id="container"></div>
+    <script type="module" src="./embed.js"></script>
+  </body>
+</html>

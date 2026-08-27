@@ -1,0 +1,5 @@
+<svg viewBox="-60 -60 120 120" xmlns="http://www.w3.org/2000/svg">
+    <line y2="0" x2="40" y1="0" x1="-20" stroke-width="5" stroke="#f9bc01" fill="none"/>
+    <text text-anchor="middle" font-family="serif" font-size="80"  y="20" x="-40" stroke-width="0" stroke="#f9bc01" fill="#f9bc01">T</text>
+    <path stroke-width="5" stroke="#f9bc01" fill="#f9bc01" d="M50,0 L30,-15 L30,15 Z"/>
+</svg>

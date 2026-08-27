@@ -1,0 +1,21 @@
+<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs>
+  <linearGradient id="svg_90" x1="0" y1="0" x2="1" y2="1">
+   <stop offset="0" stop-color="#ccddff" stop-opacity="1"/>
+   <stop offset="1" stop-color="#789fed" stop-opacity="1"/>
+  </linearGradient>
+  <linearGradient id="svg_92" x1="0" y1="0" x2="1" y2="1">
+   <stop offset="0" stop-color="#70a1e5" stop-opacity="1"/>
+   <stop offset="1" stop-color="#4b6baf" stop-opacity="1"/>
+  </linearGradient>
+ </defs>
+  <rect x="2.5" y="2.5" width="8" height="7" fill="url(#svg_90)" stroke="url(#svg_92)" id="svg_87"/>
+  <rect x="5.5" y="6.5" width="8" height="7" id="svg_84" fill="#7399d6" stroke="url(#svg_92)"/>
+  <rect x="9.5" y="1.5" width="2" height="2" fill="#a0a0a0" stroke="#555555" id="svg_79"/>
+  <rect x="1.5" y="8.5" width="2" height="2" fill="#a0a0a0" stroke="#555555" id="svg_83"/>
+  <rect x="1.5" y="1.5" width="2" height="2" id="svg_78" fill="#a0a0a0" stroke="#555555"/>
+  <rect id="svg_93" x="12.5" y="5.5" width="2" height="2" fill="#a0a0a0" stroke="#555555"/>
+  <rect id="svg_94" x="12.5" y="12.5" width="2" height="2" fill="#a0a0a0" stroke="#555555"/>
+  <rect id="svg_95" x="4.5" y="12.5" width="2" height="2" fill="#a0a0a0" stroke="#555555"/>
+  <rect id="svg_96" x="4.5" y="5.5" width="2" height="2" fill="#a0a0a0" stroke="#555555"/>
+</svg>

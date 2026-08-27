@@ -1,0 +1,17 @@
+<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <g>
+  <path stroke="#000" stroke-width="15" fill="#fddb8c" d="m123.5,38l-84,106l27,115l166,2l29,-111"/>
+  <line x1="276.5" y1="153" x2="108.5" y2="24" stroke="#000" stroke-width="10" fill="none"/>
+  <g stroke-width="15" stroke="#00f" fill="#0ff">
+   <circle r="30" cy="41" cx="123"/>
+   <circle r="30" cy="146" cx="40"/>
+   <circle r="30" cy="260" cx="69"/>
+   <circle r="30" cy="260" cx="228"/>
+   <circle r="30" cy="148" cx="260"/>
+  </g>
+  <g  stroke="#A00" stroke-width="15" fill="none">
+   <line x1="168" y1="24" x2="210" y2="150"/>
+   <line x1="210" y1="24" x2="168" y2="150"/>
+  </g>
+ </g>
+</svg>

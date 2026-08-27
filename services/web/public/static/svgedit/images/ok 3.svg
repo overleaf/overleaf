@@ -1,0 +1,9 @@
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" xmlns:xlink="http://www.w3.org/1999/xlink" class="svg_icon"><svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+   <defs>
+    <linearGradient y2="0.65625" x2="0.94141" y1="0.43359" x1="0.42969" id="svg_106">
+     <stop stop-opacity="1" stop-color="#38ff45" offset="0"/>
+     <stop stop-opacity="1" stop-color="#127c0c" offset="1"/>
+    </linearGradient>
+   </defs>
+    <path transform="rotate(45, 12, 10)" stroke="#005500" fill="url(#svg_106)" id="svg_101" d="m7.9,15.9l4.9,-0.05l0,-13.75l3.8,0l0,17.6l-8.7,0l0,-3.8z"/>
+  </svg></svg>

@@ -1,0 +1,23 @@
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg">
+<!--
+Copied from /editor/images/svg_edit_icons.svg#save but with id renamed, first stop-color changed to red, and SVG namespaces moved to root
+-->
+<g id="webappfind_save">
+  <svg viewBox="0 0 24 24">
+   <defs>
+    <linearGradient y2="0" x2="1" y1="0" x1="0" id="svg_41">
+     <stop stop-opacity="1" stop-color="red" offset="0"/>
+     <stop stop-opacity="1" stop-color="#d6d6d6" offset="1"/>
+    </linearGradient>
+    <linearGradient y2="0.875" x2="0.21484" y1="0.00391" x1="0.04297" id="svg_46">
+     <stop stop-opacity="1" stop-color="#81bbf4" offset="0"/>
+     <stop stop-opacity="1" stop-color="#376eb7" offset="1"/>
+    </linearGradient>
+   </defs>
+     <path stroke="#202020" fill="#e0e0e0" id="svg_21" d="m1.51669,22.3458l21.13245,-0.10111l0,-6.06673l-2.62892,-9.80789l-16.27907,0.10111l-2.32558,9.20121l0.10111,6.67341z"/>
+     <rect stroke="#efefef" fill="url(#svg_41)" id="svg_32" height="4.75108" width="19.21031" y="16.58227" x="2.42667"/>
+     <path stroke="#ffffff" fill="#fddb8c" id="svg_42" d="m4.55005,11.12235l0.70779,-2.83114l13.04348,0l0.70779,3.13448c-0.70779,2.52781 -4.04479,3.84227 -7.17897,3.84227c-2.72977,0 -6.37007,-1.41557 -7.28008,-4.1456z"/>
+    <path stroke="#285582" fill="url(#svg_46)" id="svg_45" d="m7.14286,9.74903l5.21236,5.79151l5.50193,-5.88803l-2.50965,-0.09653l0,-2.79923c0,-2.3166 -2.3166,-5.59846 -6.56371,-5.59846c-4.05405,0 -6.27413,3.37838 -6.56371,6.75676c0.48263,-1.5444 2.7027,-4.53668 4.44015,-4.44015c2.12355,-0.09653 2.79923,1.64093 2.79923,3.37838l0.09653,2.79923l-2.41313,0.09653z"/>
+  </svg>
+</g>
+</svg>

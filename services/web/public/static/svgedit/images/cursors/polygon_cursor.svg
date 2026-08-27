@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<svg width="20" height="16" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg" version="1.1">
+    <title>circle_cursor</title>
+    <g class="layer">
+        <title>Layer 1</title>
+        <g class="layer" id="svg_2">
+            <path d="m0.1,6.37l6.3,-6.27l-6.3,0l0,6.27z" fill="#2b3c45" id="path9" stroke="#2b3c45"
+                stroke-dashoffset="0" stroke-width="0.2" />
+        </g>
+        <!-- Replaced rectangle with pentagon -->
+        <path 
+            d="M10,4 
+               L13.09,6.26 
+               L11.91,10 
+               L8.09,10 
+               L6.91,6.26 
+               Z"
+            fill="#ffffff" stroke="#2b3c45" stroke-width="0.8" id="svg_pentagon" />
+    </g>
+</svg>

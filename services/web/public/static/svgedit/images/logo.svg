@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<svg width="51.03999999999999" height="50.519999999999996" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+ <g class="layer">
+  <title>Layer 1</title>
+  <circle class="cls-2" cx="16.24" cy="25.3" fill="#f8ba00" id="svg_4" r="2.53"/>
+  <rect class="cls-2" fill="#f8ba00" height="3.49" id="svg_9" transform="rotate(-45.01 -24.58 20.82)" width="13" x="-18.24" y="59.15"/>
+  <rect class="cls-2" fill="#f8ba00" height="22.71" id="svg_11" transform="matrix(1 0 0 1 0 0) matrix(0.70723 -0.706983 0.706983 0.70723 0 0)" width="3.49" x="-16.15" y="26.07"/>
+  <rect class="cls-2" fill="#f8ba00" height="22.68" id="svg_10" transform="matrix(1 0 0 1 0 0)" width="3.49" x="14.5" y="25.3"/>
+  <rect class="cls-2" fill="#f8ba00" height="3.49" id="svg_12" transform="matrix(1 0 0 1 0 0) matrix(0.999998 -0.00209439 0.00209439 0.999998 -0.0000630073 -0.000167486)" width="22.45" x="4.85" y="34.98"/>
+  <rect fill="#f8ba00" height="11.53" id="svg_18" stroke="#ff7f00" transform="matrix(1 0 0 1 0 0) matrix(0.64861 -0.779867 0.808105 0.625945 -0.822136 32.906)" width="28.49" x="20.36" y="10.49"/>
+  <path d="m38.4,1.03l-18.96,22.09l-2.34,12.96l12.01,-4.58l19.23,-22.82" fill="#ffffff" id="svg_14" stroke="#000000" stroke-width="2"/>
+  <circle class="cls-2" cx="4.93" cy="36.72" fill="#f8ba00" id="svg_2" r="2.53"/>
+  <circle class="cls-2" cx="8.24" cy="28.61" fill="#f8ba00" id="svg_3" r="2.53"/>
+  <circle class="cls-2" cx="27.58" cy="36.64" fill="#f8ba00" id="svg_5" r="2.53"/>
+  <circle class="cls-2" cx="24.3" cy="44.67" fill="#f8ba00" id="svg_6" r="2.53"/>
+  <circle class="cls-2" cx="16.24" cy="47.99" fill="#f8ba00" id="svg_7" r="2.53"/>
+  <circle class="cls-2" cx="8.24" cy="44.67" fill="#f8ba00" id="svg_8" r="2.53"/>
+  <path d="m40.72,2.11l-18.54,22.9" fill="#000000" id="svg_13" stroke="#000000"/>
+  <path d="m19.6,22.51a17,16.79 0 0 0 4.26,4.98a20.17,19.93 0 0 0 6.84,3.48" id="svg_16" stroke="#000000"/>
+  <path d="m20.04,23.16a16.7,16.7 0 0 0 4,5.15a19.8,19.8 0 0 0 6.11,3.09" fill="#000000" id="svg_17"/>
+  <path d="m43.25,4.15l-18.54,22.9" fill="#000000" id="svg_1" stroke="#000000"/>
+  <path d="m45.93,6.51l-18.54,22.9" fill="#000000" id="svg_15" stroke="#000000"/>
+  <ellipse cx="27.82" cy="8.33" fill="#ffffff" id="svg_24" rx="5.17" ry="1.1" stroke="#000000" transform="matrix(1.05242 0.725092 -0.607613 1.2559 19.2958 -26.1351)"/>
+ </g>
+</svg>

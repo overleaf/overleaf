@@ -1,0 +1,17 @@
+<svg width="29" height="29" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg" xmlns:se="http://svg-edit.googlecode.com" data-name="Ebene 1">
+  <defs>
+    <marker id="se_marker_start_svg_3" markerHeight="5" markerWidth="5" orient="auto" refX="50" refY="50" viewBox="0 0 100 100">
+      <path d="m0,50l100,40l-30,-40l30,-40l-100,40z" fill="#f9bc01" id="svg_1" stroke="#f9bc01" stroke-width="10"/>
+    </marker>
+    <marker id="se_marker_end_svg_3" markerHeight="5" markerWidth="5" orient="auto" refX="50" refY="50" viewBox="0 0 100 100">
+      <path d="m100,50l-100,40l30,-40l-30,-40l100,40z" fill="#f9bc01" id="svg_4" stroke="#f9bc01" stroke-width="10"/>
+    </marker>
+  </defs>
+  <g class="layer">
+    <title>Layer 1</title>
+    <g id="svg_5">
+      <text fill="#000000" font-family="serif" font-size="24" id="svg_2" stroke="#000000" stroke-width="0" text-anchor="middle" x="15.25" xml:space="preserve" y="20.5">ab</text>
+      <line fill="none" id="svg_3" marker-end="url(#se_marker_end_svg_3)" marker-start="url(#se_marker_start_svg_3)" stroke="#f9bc01" x1="4.75" x2="24.64486" y1="25.75" y2="25.75"/>
+    </g>
+  </g>
+</svg>
