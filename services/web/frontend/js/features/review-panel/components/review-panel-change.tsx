@@ -21,6 +21,7 @@ import {
   DeleteIcon,
   EditIcon,
 } from '@/features/review-panel/components/review-panel-action-icons'
+import { useDeepLinkContext } from '@/features/ide-react/context/deep-link-context'
 
 export const ReviewPanelChange = memo<{
   change: Change<EditOperation>
@@ -50,6 +51,7 @@ export const ReviewPanelChange = memo<{
     const changesUsers = useChangesUsersContext()
     const { showGenericMessageModal } = useModalsContext()
     const user = useUserContext()
+    const { deepLinkedChangeId, clearDeepLinkedChange } = useDeepLinkContext()
 
     const [accepting, setAccepting] = useState(false)
 
@@ -124,6 +126,11 @@ export const ReviewPanelChange = memo<{
         handleEnter={handleMouseEnter}
         handleLeave={handleMouseLeave}
         entryIndicator="edit"
+        autoSelect={
+          deepLinkedChangeId === change.id ||
+          (aggregate != null && deepLinkedChangeId === aggregate.id)
+        }
+        onAutoSelected={clearDeepLinkedChange}
       >
         <div
           className="review-panel-entry-content"

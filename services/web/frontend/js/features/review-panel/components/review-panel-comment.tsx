@@ -15,6 +15,7 @@ import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import { useTranslation } from 'react-i18next'
 import { debugConsole } from '@/utils/debugging'
+import { useDeepLinkContext } from '@/features/ide-react/context/deep-link-context'
 
 export const ReviewPanelComment = memo<{
   comment: Change<CommentOperation>
@@ -38,6 +39,7 @@ export const ReviewPanelComment = memo<{
     const { showGenericMessageModal } = useModalsContext()
     const { t } = useTranslation()
     const permissions = usePermissionsContext()
+    const { deepLinkedThreadId, clearDeepLinkedThread } = useDeepLinkContext()
 
     const [processing, setProcessing] = useState(false)
 
@@ -170,6 +172,8 @@ export const ReviewPanelComment = memo<{
         handleEnter={handleMouseEnter}
         handleLeave={handleMouseLeave}
         entryIndicator="comment"
+        autoSelect={deepLinkedThreadId === comment.op.t}
+        onAutoSelected={clearDeepLinkedThread}
       >
         <ReviewPanelCommentContent
           comment={comment}

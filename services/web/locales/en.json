@@ -446,6 +446,7 @@
   "command_palette": "Command palette",
   "command_palette_search": "Command palette search",
   "comment": "Comment",
+  "comment_not_found": "Comment not found",
   "comment_only": "Comment only",
   "comment_only_upgrade_for_track_changes": "Comment only. Upgrade for track changes.",
   "comment_only_upgrade_to_enable_track_changes": "Comment only. <0>Upgrade</0> to enable track changes.",

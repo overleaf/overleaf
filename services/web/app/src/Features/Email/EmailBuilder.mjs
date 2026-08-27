@@ -106,6 +106,12 @@ function NoCTAEmailTemplate(content) {
   if (!content.message) {
     throw new Error('missing message')
   }
+  if (!content.secondaryMessage) {
+    content.secondaryMessage = () => []
+  }
+  if (!content.footerMessage) {
+    content.footerMessage = () => {}
+  }
   return {
     subject(opts) {
       return content.subject(opts)
@@ -113,15 +119,11 @@ function NoCTAEmailTemplate(content) {
     layout(opts) {
       return BaseEmailLayout(opts)
     },
+    footerMessage(opts) {
+      return content.footerMessage(opts)
+    },
     plainTextTemplate(opts) {
-      return `\
-${content.greeting(opts)}
-
-${content.message(opts, true).join('\r\n\r\n')}
-
-Regards,
-The ${settings.appName} Team - ${settings.siteUrl}\
-      `
+      return _emailBodyPlainText(content, opts, false)
     },
     compiledTemplate(opts) {
       return NoCTAEmailBody({

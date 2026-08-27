@@ -1,9 +1,11 @@
 import { useEffect } from 'react'
 import { useSettingsModalContext } from '../context/settings-modal-context'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
+import { useDeepLinkContext } from '@/features/ide-react/context/deep-link-context'
 
 export default function useOpenSettingsViaQueryParam() {
   const { setShow, setActiveTab } = useSettingsModalContext()
+  const { deepLinkedSettings } = useDeepLinkContext()
 
   useEffect(() => {
     const inNotificationsSplitTest = isSplitTestEnabled('email-notifications')
@@ -11,16 +13,11 @@ export default function useOpenSettingsViaQueryParam() {
       return
     }
 
-    const params = new URLSearchParams(window.location.search)
-    if (params.get('open') !== 'project-notifications') {
+    if (deepLinkedSettings !== 'project-notifications') {
       return
     }
 
     setShow(true)
     setActiveTab('project_notifications')
-
-    const url = new URL(window.location.href)
-    url.searchParams.delete('open')
-    window.history.replaceState(window.history.state, '', url.toString())
-  }, [setShow, setActiveTab])
+  }, [deepLinkedSettings, setShow, setActiveTab])
 }

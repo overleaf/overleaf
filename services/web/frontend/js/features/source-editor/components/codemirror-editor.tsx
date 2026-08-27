@@ -13,6 +13,7 @@ import { ReviewPanelProviders } from '@/features/review-panel/context/review-pan
 import { ReviewPanelRoot } from '@/features/review-panel/components/review-panel-root'
 import ReviewPanelTabsHeaderPortal from '@/features/review-panel/components/review-panel-tabs-header-portal'
 import ReviewTooltipMenu from '@/features/review-panel/components/review-tooltip-menu'
+import DeepLink from '@/features/review-panel/components/deep-link'
 import EditorFloatingMenu from '@/features/editor-floating-menu/editor-floating-menu'
 import AddCommentCommand from '@/features/editor-floating-menu/components/add-comment-command'
 import {
@@ -109,6 +110,7 @@ function CodeMirrorEditorComponents({
 
       <MathPreviewTooltip />
       <EditorContextMenu />
+      <DeepLink />
       {features.trackChangesVisible &&
         (writefullToolbarMigrationEnabled ? (
           <>

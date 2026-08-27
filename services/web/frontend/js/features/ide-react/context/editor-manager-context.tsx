@@ -39,6 +39,7 @@ import { convertFileRefToBinaryFile } from '@/features/ide-react/util/file-view'
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
 import { showConnectionRestoredToast } from '@/features/ide-react/components/connection-restored-toast'
+import { useDeepLinkContext } from '@/features/ide-react/context/deep-link-context'
 
 export interface GotoOffsetOptions {
   gotoOffset: number
@@ -118,6 +119,12 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
   useEffect(() => {
     wantTrackChangesRef.current = wantTrackChanges
   }, [wantTrackChanges])
+
+  const {
+    deepLinkedDocId,
+    deepLinkedThreadId,
+    reportDeepLinkedThreadNotFound,
+  } = useDeepLinkContext()
 
   const { fileTreeData } = useFileTreeData()
   const fileTreeDataRef = useRef(fileTreeData)
@@ -527,13 +534,34 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
 
   const openInitialDoc = useCallback(
     async (fallbackDocId?: string) => {
+      if (deepLinkedDocId) {
+        const deepLinkedDoc = findDocEntityById(fileTreeData, deepLinkedDocId)
+        if (deepLinkedDoc) {
+          return await openDoc(deepLinkedDoc)
+        }
+
+        // the deep link points at a doc that is no longer in the project, so
+        // any comment it referenced is unreachable
+        if (deepLinkedThreadId) {
+          reportDeepLinkedThreadNotFound()
+        }
+      }
+
       const docId =
         customLocalStorage.getItem(currentDocumentIdStorageKey) || fallbackDocId
       if (docId) {
         return await openDocWithId(docId)
       }
     },
-    [currentDocumentIdStorageKey, openDocWithId]
+    [
+      currentDocumentIdStorageKey,
+      deepLinkedDocId,
+      deepLinkedThreadId,
+      fileTreeData,
+      openDoc,
+      openDocWithId,
+      reportDeepLinkedThreadNotFound,
+    ]
   )
 
   useEffect(() => {
