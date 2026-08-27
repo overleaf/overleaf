@@ -115,6 +115,8 @@ ENV OVERLEAF_APP_NAME="Overleaf Community Edition"
 
 ENV OPTIMISE_PDF="true"
 
+ENV REQ_VALIDATION_MODE=enforce-log
+
 # Phusion Image timeouts before sending SIGKILL to processes
 # ----------------------------------------------------------
 ENV KILL_PROCESS_TIMEOUT=55
