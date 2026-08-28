@@ -94,12 +94,6 @@ export class BibtexFieldValue {
     return new BibtexFieldValue([...this.parts, new NamedString(name)])
   }
 
-  private invalidateCache() {
-    this.bibtexString = null
-    this.editableString = null
-    this.displayString = null
-  }
-
   toString() {
     if (this.bibtexString == null) {
       if (this.parts.length === 0) {
@@ -183,7 +177,7 @@ export class BibtexFieldValue {
    *   {This is from 1995}
    */
   static fromEditableString(editable: string) {
-    let bibtexValue = new BibtexFieldValue()
+    const builder = new BibtexFieldValueBuilder()
     let currentString = ''
     let index = 0
 
@@ -209,13 +203,11 @@ export class BibtexFieldValue {
       )
       if (identifierEnd !== null && editable[identifierEnd] === '#') {
         if (currentString !== '') {
-          bibtexValue = bibtexValue.addString(currentString)
+          builder.addString(currentString)
           currentString = ''
         }
 
-        bibtexValue = bibtexValue.addNamedString(
-          editable.slice(nextIndex, identifierEnd)
-        )
+        builder.addNamedString(editable.slice(nextIndex, identifierEnd))
         index = identifierEnd + 1
         continue
       }
@@ -225,10 +217,41 @@ export class BibtexFieldValue {
     }
 
     if (currentString !== '') {
-      bibtexValue = bibtexValue.addString(currentString)
+      builder.addString(currentString)
     }
 
-    return bibtexValue
+    return builder.build()
+  }
+}
+
+/**
+ * Accumulates the parts of a field value in place, for a parser that reads them
+ * one at a time. BibtexFieldValue's own add* methods copy the parts array, so
+ * building a long "#"-concatenated value through them is quadratic.
+ */
+export class BibtexFieldValueBuilder {
+  private readonly parts: Part[] = []
+
+  addString(value: string) {
+    this.parts.push(new StringLiteral(value))
+  }
+
+  addNumber(value: string) {
+    this.parts.push(new NumberLiteral(value))
+  }
+
+  addNamedString(name: string) {
+    this.parts.push(new NamedString(name))
+  }
+
+  /** Whether any part has been added, so "{}" is not an empty builder. */
+  isEmpty(): boolean {
+    return this.parts.length === 0
+  }
+
+  /** The value built so far, unaffected by later additions to the builder. */
+  build(): BibtexFieldValue {
+    return new BibtexFieldValue([...this.parts])
   }
 }
 

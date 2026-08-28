@@ -12,7 +12,10 @@ import {
 import { parser as lezerParser } from '@/features/source-editor/lezer-bibtex/bibtex.mjs'
 import { BibtexEntry } from '@shared/bibtex/bibtex-entry.mts'
 import { PositionedBibtexEntry } from './positioned-bibtex-entry'
-import { BibtexFieldValue } from '@shared/bibtex/bibtex-field-value.mts'
+import {
+  BibtexFieldValue,
+  BibtexFieldValueBuilder,
+} from '@shared/bibtex/bibtex-field-value.mts'
 
 type GetText = (from: number, to: number) => string
 
@@ -43,14 +46,14 @@ export class BibtexEntryAccumulator {
   private key: string | null = null
   private fields: Map<string, BibtexFieldValue> = new Map()
   private fieldName: string | null = null
-  private fieldValue: BibtexFieldValue = new BibtexFieldValue()
+  private fieldValue = new BibtexFieldValueBuilder()
 
   reset() {
     this.type = null
     this.key = null
     this.fields = new Map()
     this.fieldName = null
-    this.fieldValue = new BibtexFieldValue()
+    this.fieldValue = new BibtexFieldValueBuilder()
   }
 
   /**
@@ -75,17 +78,15 @@ export class BibtexEntryAccumulator {
     // not export a term for it. Multi-line indentation is collapsed.
     if (type.name === 'StringContents') {
       const s = getText(node.from, node.to).replaceAll(/[\n\r]\s*/g, ' ')
-      this.fieldValue = this.fieldValue.addString(s)
+      this.fieldValue.addString(s)
       return false
     }
     if (type.is(NumberLiteral)) {
-      this.fieldValue = this.fieldValue.addNumber(getText(node.from, node.to))
+      this.fieldValue.addNumber(getText(node.from, node.to))
       return false
     }
     if (type.is(StringName)) {
-      this.fieldValue = this.fieldValue.addNamedString(
-        getText(node.from, node.to)
-      )
+      this.fieldValue.addNamedString(getText(node.from, node.to))
       return false
     }
     return true
@@ -94,10 +95,10 @@ export class BibtexEntryAccumulator {
   leave(node: SyntaxNodeRef) {
     if (node.type.is(Field)) {
       if (this.fieldName != null) {
-        this.fields.set(this.fieldName, this.fieldValue)
+        this.fields.set(this.fieldName, this.fieldValue.build())
       }
       this.fieldName = null
-      this.fieldValue = new BibtexFieldValue()
+      this.fieldValue = new BibtexFieldValueBuilder()
     }
   }
 
