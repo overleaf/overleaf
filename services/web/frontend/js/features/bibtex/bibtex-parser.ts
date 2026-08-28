@@ -11,9 +11,9 @@ import {
   StringName,
 } from '@/features/source-editor/lezer-bibtex/bibtex.terms.mjs'
 import { parser as lezerParser } from '@/features/source-editor/lezer-bibtex/bibtex.mjs'
-import { BibtexEntry } from './bibtex-entry.mts'
+import { BibtexEntry } from '@shared/bibtex/bibtex-entry.mts'
 import { PositionedBibtexEntry } from './positioned-bibtex-entry'
-import { BibtexFieldValue } from './bibtex-field-value.mts'
+import { BibtexFieldValue } from '@shared/bibtex/bibtex-field-value.mts'
 
 type GetText = (from: number, to: number) => string
 

@@ -1,4 +1,4 @@
-import { BibtexNameList } from './bibtex-name.mts'
+import { BibtexNameList } from '@shared/bibtex/bibtex-name.mts'
 
 const YEAR_REGEX = /^\d{4}$/
 

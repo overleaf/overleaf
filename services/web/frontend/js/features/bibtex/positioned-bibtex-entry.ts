@@ -1,5 +1,5 @@
 import { ProjectionItem } from '@/features/source-editor/utils/tree-operations/projection'
-import { BibtexEntry } from './bibtex-entry.mts'
+import { BibtexEntry } from '@shared/bibtex/bibtex-entry.mts'
 
 /**
  * A BibtexEntry placed in a CodeMirror document. The `entry` reference is

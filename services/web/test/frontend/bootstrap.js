@@ -7,6 +7,7 @@ require('@babel/register')({
       {
         alias: {
           '^@/(.+)': './frontend/js/\\1',
+          '^@shared/(.+)': './shared/\\1',
           '^@modules/(.+)': './modules/\\1',
         },
       },
