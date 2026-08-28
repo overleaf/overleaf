@@ -1,0 +1,375 @@
+/*
+ * LaTeX Equation Editor — v5 design
+ * Layout: draggable floating editor with MathLive input, keyboard toggle,
+ * command search dropdown, minimize/restore.
+ *
+ * Deliberately non-blocking: no backdrop, no focus trap, so the MathLive
+ * virtual keyboard (attached to document.body) stays visible and usable,
+ * and the rest of the editor remains reachable while the window is open.
+ *
+ * Uses Overleaf's --*-themed CSS vars that auto-switch with data-theme.
+ */
+
+/* MathLive (math-field, virtual keyboard) + bundled KaTeX fonts */
+@import 'mathlive/static.css';
+
+/* ── Portal root ── */
+
+#latex-editor-modal-root {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    z-index: 99999;
+
+    /* No transform here — allows children to use position: fixed relative to viewport */
+}
+
+/* Ensure the MathLive virtual keyboard floats above the editor window */
+/* stylelint-disable-next-line selector-class-pattern */
+.ML__keyboard {
+    z-index: 100000 !important;
+}
+
+/* ── Window shell ── */
+
+.latex-editor-modal {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    width: 840px;
+    min-width: 640px;
+    max-height: 90vh;
+    background: var(--bg-primary-themed, #fff);
+    border: 1px solid var(--border-divider-themed, #e0e0e0);
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgb(0 0 0 / 18%);
+    font-family: var(--bs-font-sans-serif, system-ui, sans-serif);
+    color: var(--content-primary-themed, #333);
+    overflow: hidden;
+}
+
+/* ── Header ── */
+
+.latex-editor-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border-divider-themed, #e0e0e0);
+    background: var(--bg-secondary-themed, #f8f8f8);
+    flex-shrink: 0;
+    user-select: none;
+}
+
+.latex-editor-header-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.latex-editor-title {
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.latex-editor-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.latex-editor-raw-toggle {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--content-secondary-themed, #666);
+    cursor: pointer;
+
+    input[type='checkbox'] {
+        accent-color: #138a07;
+    }
+}
+
+.latex-editor-minimize {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    color: inherit;
+
+    &:hover {
+        background: rgb(125 125 125 / 15%);
+    }
+}
+
+.latex-editor-close-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background: transparent !important;
+    background-image: none !important;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+    color: var(--content-primary-themed, #333);
+    opacity: 0.7;
+    padding: 0;
+
+    &::before {
+        content: '×';
+    }
+
+    &:hover {
+        opacity: 1;
+        background: rgb(125 125 125 / 15%) !important;
+    }
+}
+
+/* ── Minimized state ── */
+/* stylelint-disable-next-line selector-class-pattern */
+.latex-editor--minimized {
+    width: 300px;
+    min-width: auto;
+    max-height: none;
+
+    .latex-editor-header {
+        border-bottom: none;
+    }
+
+    .latex-editor-body {
+        display: none;
+    }
+}
+
+/* ── Body ── */
+
+.latex-editor-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden auto;
+}
+
+/* ── Content column ── */
+
+.latex-editor-content {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+    padding: 12px 14px;
+    min-width: 0;
+}
+
+/* ── MathLive input ── */
+
+.latex-editor-mathfield-wrapper {
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.latex-editor-mathfield {
+    min-height: 80px;
+    padding: 14px;
+    border: 2px solid #138a07;
+    border-radius: 6px;
+    background: var(--bg-primary-themed, #fff);
+    font-size: 22px;
+    color: var(--content-primary-themed, #222);
+    outline: none;
+
+    &:focus-within {
+        border-color: #138a07;
+        box-shadow: 0 0 0 2px rgb(19 138 7 / 15%);
+    }
+}
+
+/* Raw LaTeX textarea */
+.latex-editor-raw-textarea {
+    min-height: 80px;
+    padding: 12px;
+    border: 2px solid #138a07;
+    border-radius: 6px;
+    background: var(--bg-primary-themed, #fff);
+    color: var(--content-primary-themed, #333);
+    font-family: 'SF Mono', 'Fira Code', var(--bs-font-monospace, monospace);
+    font-size: 14px;
+    resize: none;
+    outline: none;
+    box-sizing: border-box;
+    scrollbar-width: thin;
+
+    &:focus {
+        box-shadow: 0 0 0 2px rgb(19 138 7 / 15%);
+    }
+}
+
+/* Textarea fallback */
+.latex-editor-textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 12px;
+    border: 2px solid #138a07;
+    border-radius: 6px;
+    background: var(--bg-primary-themed, #fff);
+    color: var(--content-primary-themed, #333);
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: 14px;
+    resize: vertical;
+    outline: none;
+    box-sizing: border-box;
+
+    &:focus {
+        box-shadow: 0 0 0 2px rgb(19 138 7 / 15%);
+    }
+}
+
+/* ── Action bar ── */
+
+.latex-editor-action-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    flex-shrink: 0;
+}
+
+.latex-editor-action-spacer {
+    flex: 1;
+}
+
+/* Keyboard toggle button */
+.latex-editor-keyboard-toggle {
+    font-size: 16px;
+    line-height: 1;
+    padding: 3px 8px;
+}
+
+/* ── Search (in action bar) ── */
+
+.latex-editor-search-wrapper {
+    position: relative;
+}
+
+.latex-editor-search-input {
+    width: 220px;
+    padding: 5px 10px;
+    border: 1px solid var(--border-divider-themed, #ddd);
+    border-radius: 5px;
+    font-size: 12px;
+    color: var(--content-primary-themed, #333);
+    background: var(--bg-primary-themed, #fff);
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+
+    &:focus {
+        border-color: #138a07;
+    }
+
+    &::placeholder {
+        color: var(--content-placeholder-themed, #aaa);
+    }
+}
+
+.latex-editor-search-dropdown {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    width: 340px;
+    max-height: 260px;
+    overflow-y: auto;
+    background: var(--bg-primary-themed, #fff);
+    border: 1px solid var(--border-divider-themed, #ddd);
+    border-radius: 6px;
+    box-shadow: 0 -4px 16px rgb(0 0 0 / 12%);
+    margin-bottom: 4px;
+    z-index: 10;
+    scrollbar-width: thin;
+    scrollbar-color: #ccc transparent;
+}
+
+.latex-editor-search-result {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--content-primary-themed, #333);
+    text-align: left;
+    transition: background 0.1s;
+
+    &:hover {
+        background: rgb(19 138 7 / 8%);
+    }
+}
+
+.latex-editor-cmd-code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 11px;
+    flex-shrink: 0;
+    color: var(--content-primary-themed, #333);
+}
+
+.latex-editor-cmd-desc {
+    font-size: 10.5px;
+    color: var(--content-secondary-themed, #888);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.latex-editor-no-results {
+    font-size: 11px;
+    color: var(--content-secondary-themed, #aaa);
+    padding: 10px;
+    text-align: center;
+}
+
+/* ── Export group ── */
+
+.latex-editor-export-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.latex-editor-export-select {
+    padding: 3px 6px;
+    border: 1px solid var(--border-divider-themed, #ccc);
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--content-primary-themed, #333);
+    background: var(--bg-primary-themed, #fff);
+    outline: none;
+    cursor: pointer;
+    height: 30px;
+
+    &:focus {
+        border-color: #138a07;
+    }
+}

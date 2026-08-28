@@ -334,6 +334,7 @@ export interface Meta {
   'ol-suggestedLanguage': SuggestedLanguage | undefined
   'ol-survey': Survey | undefined
   'ol-symbolPaletteAvailable': boolean
+  'ol-latexEditorAvailable': boolean
   'ol-tags': Tag[]
   'ol-teamInvites': TeamInvite[]
   'ol-thirdPartyIds': ThirdPartyIds

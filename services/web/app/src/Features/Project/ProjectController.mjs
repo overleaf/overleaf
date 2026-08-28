@@ -1013,6 +1013,7 @@ const _ProjectController = {
         debugPdfDetach,
         showSymbolPalette,
         symbolPaletteAvailable: Features.hasFeature('symbol-palette'),
+        latexEditorAvailable: Features.hasFeature('latex-editor'),
         userRestrictions: Array.from(req.userRestrictions || []),
         showAiFeatures,
         showAiFeaturesDisabled,

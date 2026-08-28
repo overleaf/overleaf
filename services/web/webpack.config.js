@@ -1,4 +1,5 @@
 const path = require('path')
+const fs = require('fs')
 const { globSync } = require('glob')
 const webpack = require('webpack')
 const CopyPlugin = require('copy-webpack-plugin')
@@ -63,6 +64,7 @@ const mathjaxDir = getModuleDirectory('mathjax')
 const pdfjsDir = getModuleDirectory('pdfjs-dist')
 const dictionariesDir = getModuleDirectory('@overleaf/dictionaries')
 const pyodideDir = getModuleDirectory('pyodide')
+const mathliveDir = getModuleDirectory('mathlive')
 
 const vendorDir = path.join(__dirname, 'frontend/js/vendor')
 
@@ -78,6 +80,17 @@ const DICTIONARIES_VERSION =
 if (DICTIONARIES_VERSION !== PackageVersions.version.dictionaries) {
   throw new Error(
     '"@overleaf/dictionaries" version de-synced, update services/web/app/src/infrastructure/PackageVersions.js'
+  )
+}
+
+// mathlive's package.json is not listed in its "exports" map, so resolve the
+// version from the installed package directory instead of a subpath require
+const MATHLIVE_VERSION = JSON.parse(
+  fs.readFileSync(path.join(mathliveDir, 'package.json'), 'utf8')
+).version
+if (MATHLIVE_VERSION !== PackageVersions.version.mathlive) {
+  throw new Error(
+    '"mathlive" version de-synced, update services/web/app/src/infrastructure/PackageVersions.js'
   )
 }
 
@@ -412,6 +425,13 @@ module.exports = {
           to: 'js/libs/pyodide',
           toType: 'dir',
           context: pyodideDir,
+        },
+        // Copy MathLive KaTeX fonts for the LaTeX equation editor (no CDN)
+        {
+          from: 'fonts/**/*',
+          to: `js/libs/mathlive-${PackageVersions.version.mathlive}`,
+          toType: 'dir',
+          context: mathliveDir,
         },
         {
           from: 'python_stdlib.zip',

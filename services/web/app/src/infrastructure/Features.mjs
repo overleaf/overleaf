@@ -10,6 +10,9 @@ const symbolPaletteModuleAvailable =
 const trackChangesModuleAvailable =
   Settings.moduleImportSequence?.includes('track-changes')
 
+const latexEditorModuleAvailable =
+  Settings.moduleImportSequence?.includes('latex-editor')
+
 /**
  * @typedef {Object} Settings
  * @property {Object | undefined}  apis
@@ -91,6 +94,8 @@ const Features = {
         return symbolPaletteModuleAvailable
       case 'track-changes':
         return trackChangesModuleAvailable
+      case 'latex-editor':
+        return latexEditorModuleAvailable
       default:
         throw new Error(`unknown feature: ${feature}`)
     }

@@ -1046,7 +1046,12 @@ module.exports = {
     sourceEditorToolbarStartButtons: [],
     sourceEditorToolbarButtonGroups: [],
     sourceEditorToolbarComponents: [],
-    sourceEditorToolbarEndButtons: [],
+    sourceEditorToolbarEndButtons: [
+      Path.resolve(
+        __dirname,
+        '../modules/latex-editor/frontend/js/components/latex-editor-toolbar-button'
+      ),
+    ],
     rootContextProviders: [],
     mainEditorLayoutModals: [],
     mainEditorLayoutPanels: [],
@@ -1115,6 +1120,7 @@ module.exports = {
     'launchpad',
     'server-ce-scripts',
     'user-activate',
+    'latex-editor',
   ],
   viewIncludes: {},
 
