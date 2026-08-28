@@ -6,7 +6,6 @@ import {
   CitationKey,
   Field,
   FieldName,
-  StringLiteral,
   NumberLiteral,
   StringName,
 } from '@/features/source-editor/lezer-bibtex/bibtex.terms.mjs'
@@ -72,10 +71,10 @@ export class BibtexEntryAccumulator {
       this.fieldName = getText(node.from, node.to).toLowerCase()
       return false
     }
-    if (type.is(StringLiteral)) {
-      // Strip surrounding quotes/braces and collapse multi-line indentation.
-      let s = getText(node.from + 1, node.to - 1)
-      s = s.replaceAll(/[\n\r]\s*/g, ' ')
+    // StringContents spans a literal's text without its delimiters; lezer does
+    // not export a term for it. Multi-line indentation is collapsed.
+    if (type.name === 'StringContents') {
+      const s = getText(node.from, node.to).replaceAll(/[\n\r]\s*/g, ' ')
       this.fieldValue = this.fieldValue.addString(s)
       return false
     }

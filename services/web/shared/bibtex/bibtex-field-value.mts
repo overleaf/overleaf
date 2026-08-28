@@ -1,7 +1,9 @@
 import { latexToUnicode } from './latex-to-unicode.mts'
 import { purifySpecialChars } from './bibtex-purify.mts'
-
-const IDENTIFIER_SYMBOLS = '!$&*+./:;<>?^`_|[]-'
+import {
+  isBibtexIdentifierContinuationChar,
+  isBibtexIdentifierStartChar,
+} from './bibtex-identifier.mts'
 
 class StringLiteral {
   private value: string
@@ -165,10 +167,8 @@ export class BibtexFieldValue {
    * 3. Any other '#' is treated as a literal '#'.
    * 4. Literal runs become braced strings and parts are joined with ' # '.
    *
-   * Identifier rule:
-   * - First char: letter or one of ! $ & * + . / : ; < > ? ^ ` _ | [ ] -
-   * - Following chars: same set plus digits.
-   * - Cannot start with a digit.
+   * Abbreviation names use the identifier character class from
+   * bibtex-identifier.mts, which cannot start with a digit.
    *
    * Example:
    * Editable:
@@ -255,22 +255,6 @@ function findBibtexIdentifierEndExclusive(
     index += 1
   }
   return index
-}
-
-function isBibtexIdentifierStartChar(char: string): boolean {
-  return isAsciiLetter(char) || IDENTIFIER_SYMBOLS.includes(char)
-}
-
-function isBibtexIdentifierContinuationChar(char: string): boolean {
-  return isBibtexIdentifierStartChar(char) || isDigit(char)
-}
-
-function isAsciiLetter(char: string): boolean {
-  return /^[A-Za-z]$/.test(char)
-}
-
-function isDigit(char: string): boolean {
-  return /^[0-9]$/.test(char)
 }
 
 export const __test = {
