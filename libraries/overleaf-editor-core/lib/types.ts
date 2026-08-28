@@ -17,6 +17,14 @@ export type ReadonlyBlobStore = Pick<BlobStore, 'getString' | 'getObject'>
 /**
  * Everything but looking a blob up by its hash: reading content and storing
  * content, which is all it takes to build operations over content.
+ *
+ * Looking a blob up is only ever needed for a file stored as a bare hash
+ * (HashFileData), and one of those does not reach a consumer outside history-v1:
+ * every snapshot and change it serves has blob metadata attached first
+ * (chunk_store's lazyLoadHistoryFiles), so a file arrives already knowing its
+ * own lengths. A store built for a consumer therefore does not need `getBlob`,
+ * and one that reimplements the classification rule to answer it would be a
+ * second opinion on whether a file is editable.
  */
 export type ReadWriteBlobStore = Omit<BlobStore, 'getBlob'>
 

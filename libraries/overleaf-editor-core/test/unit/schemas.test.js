@@ -285,6 +285,28 @@ describe('schemas', function () {
       expect(result.success).to.equal(false)
     })
 
+    it('accepts a main bibliography flag', function () {
+      const result = rawFileMetadata.safeParse({
+        mainBibliography: true,
+      })
+      expect(result.success).to.equal(true)
+    })
+
+    it('accepts both doc flags on one file', function () {
+      const result = rawFileMetadata.safeParse({
+        main: true,
+        mainBibliography: true,
+      })
+      expect(result.success).to.equal(true)
+    })
+
+    it('rejects a doc flag that is not a boolean', function () {
+      const result = rawFileMetadata.safeParse({
+        mainBibliography: 'yes',
+      })
+      expect(result.success).to.equal(false)
+    })
+
     it('accepts an empty object', function () {
       const result = rawFileMetadata.safeParse({})
       expect(result.success).to.equal(true)

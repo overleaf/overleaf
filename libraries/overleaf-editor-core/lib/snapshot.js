@@ -6,6 +6,12 @@ const OError = require('@overleaf/o-error')
 
 const FileMap = require('./file_map')
 const V2DocVersions = require('./v2_doc_versions')
+const {
+  hasDocumentMetadataFlag,
+  isDocumentMetadata,
+} = require('./file_metadata')
+
+/** @import { DOCUMENT_METADATA_KEYS } from "./file_metadata" */
 
 const FILE_LOAD_CONCURRENCY = 50
 
@@ -154,6 +160,27 @@ class Snapshot {
    */
   getFile(pathname) {
     return this.fileMap.getFile(pathname)
+  }
+
+  /**
+   * The pathname of the doc carrying a document flag (`main`, `mainBibliography`),
+   * if this snapshot records one.
+   *
+   * Sorted, so that a project which somehow has two answers gives the same one
+   * every time it is asked.
+   *
+   * @param {typeof DOCUMENT_METADATA_KEYS[number]} key
+   * @return {string | undefined}
+   */
+  getPathnameWithDocFlag(key) {
+    return this.getFilePathnames()
+      .sort()
+      .find(pathname => {
+        const metadata = this.getFile(pathname)?.getMetadata()
+        return (
+          hasDocumentMetadataFlag(metadata, key) && isDocumentMetadata(metadata)
+        )
+      })
   }
 
   /**

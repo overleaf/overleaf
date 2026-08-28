@@ -166,9 +166,10 @@ const rawFileMetadata = z.union([
   // linked-file v2
   rawLinkedFileData,
 
-  // main-file v1
+  // main-file v1, and the doc flags the editor sets
   z.strictObject({
-    main: z.boolean(),
+    main: z.boolean().optional(),
+    mainBibliography: z.boolean().optional(),
     importedAt: z.iso.datetime().optional(),
   }),
   // legacy v1 linked file

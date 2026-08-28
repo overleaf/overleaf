@@ -28,6 +28,15 @@ const RestoreFileOrigin = require('./lib/origin/restore_file_origin')
 const Origin = require('./lib/origin')
 const { EDITOR_ORIGIN_KIND } = require('./lib/origin')
 const OtClient = require('./lib/ot_client')
+const {
+  HISTORY_FILE_TREE_STAGE,
+  historyIsSourceOfTruth,
+} = require('./lib/ot_migration_stages')
+const {
+  chooseRootDoc,
+  isRootDocCandidate,
+  setMainPathnameOperations,
+} = require('./lib/root_doc')
 const rebaseChanges = require('./lib/rebase')
 const {
   editorChangeIdentity,
@@ -38,6 +47,12 @@ const {
 const TextOperation = require('./lib/operation/text_operation')
 const EditOperation = require('./lib/operation/edit_operation')
 const safePathname = require('./lib/safe_pathname')
+const {
+  DOCUMENT_METADATA_KEYS,
+  isDocumentMetadata,
+  hasDocumentMetadataFlag,
+  withDocumentMetadataFlag,
+} = require('./lib/file_metadata')
 const Snapshot = require('./lib/snapshot')
 const {
   DEFAULT_TEXT_EXTENSIONS,
@@ -98,6 +113,11 @@ exports.RestoreFileOrigin = RestoreFileOrigin
 exports.Origin = Origin
 exports.EDITOR_ORIGIN_KIND = EDITOR_ORIGIN_KIND
 exports.OtClient = OtClient
+exports.HISTORY_FILE_TREE_STAGE = HISTORY_FILE_TREE_STAGE
+exports.historyIsSourceOfTruth = historyIsSourceOfTruth
+exports.chooseRootDoc = chooseRootDoc
+exports.isRootDocCandidate = isRootDocCandidate
+exports.setMainPathnameOperations = setMainPathnameOperations
 exports.rebaseChanges = rebaseChanges
 exports.editorChangeIdentity = editorChangeIdentity
 exports.editorChangeIdentityOf = editorChangeIdentityOf
@@ -106,6 +126,10 @@ exports.isChangeFrom = isChangeFrom
 exports.TextOperation = TextOperation
 exports.EditOperation = EditOperation
 exports.safePathname = safePathname
+exports.DOCUMENT_METADATA_KEYS = DOCUMENT_METADATA_KEYS
+exports.isDocumentMetadata = isDocumentMetadata
+exports.hasDocumentMetadataFlag = hasDocumentMetadataFlag
+exports.withDocumentMetadataFlag = withDocumentMetadataFlag
 exports.Snapshot = Snapshot
 exports.util = util
 exports.V2DocVersions = V2DocVersions

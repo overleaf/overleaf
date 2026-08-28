@@ -71,6 +71,18 @@ const DEFAULT_TEXT_EXTENSIONS = Object.freeze([
 ])
 
 /**
+ * Extensions a doc may have to be the one a project compiles from.
+ *
+ * A subset of the text extensions above: every one of these is editable, and most of
+ * the editable ones cannot be a root doc. Shared for the same reason as the list it is
+ * drawn from -- the answer has to be the same wherever a project is created, and a
+ * writer holding a shorter copy leaves a project with nothing to compile.
+ *
+ * @type {ReadonlyArray<string>}
+ */
+const DEFAULT_ROOT_DOC_EXTENSIONS = Object.freeze(['tex', 'Rtex', 'ltx', 'Rnw'])
+
+/**
  * Whole file names, lower case, editable whatever their extension says.
  *
  * @type {ReadonlyArray<string>}
@@ -82,4 +94,8 @@ const DEFAULT_EDITABLE_FILENAMES = Object.freeze([
   'gnumakefile',
 ])
 
-module.exports = { DEFAULT_TEXT_EXTENSIONS, DEFAULT_EDITABLE_FILENAMES }
+module.exports = {
+  DEFAULT_TEXT_EXTENSIONS,
+  DEFAULT_EDITABLE_FILENAMES,
+  DEFAULT_ROOT_DOC_EXTENSIONS,
+}
