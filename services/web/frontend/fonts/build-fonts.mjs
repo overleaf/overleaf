@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 import fs from 'node:fs/promises'
 import { createWriteStream } from 'node:fs'
 import { basename, join } from 'node:path'

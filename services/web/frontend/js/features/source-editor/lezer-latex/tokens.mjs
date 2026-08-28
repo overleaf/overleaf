@@ -179,7 +179,7 @@ export const elementContext = new ContextTracker({
 
 // tokenizer for \verb|...| commands
 export const verbTokenizer = new ExternalTokenizer(
-  (input, stack) => {
+  input => {
     if (input.next === '*'.charCodeAt(0)) input.advance()
     const delimiter = input.next
     if (delimiter === -1) return // hit end of file
@@ -198,7 +198,7 @@ export const verbTokenizer = new ExternalTokenizer(
 
 // tokenizer for \lstinline|...| commands
 export const lstinlineTokenizer = new ExternalTokenizer(
-  (input, stack) => {
+  input => {
     let delimiter = input.next
     if (delimiter === -1) return // hit end of file
     if (/\s/.test(String.fromCharCode(delimiter))) {
@@ -317,7 +317,7 @@ export const argumentListWithOptionalTokenizer = lookaheadTokenizer(next => {
 
 const CHAR_AT_SYMBOL = _char('@')
 
-export const csnameTokenizer = new ExternalTokenizer((input, stack) => {
+export const csnameTokenizer = new ExternalTokenizer(input => {
   let offset = 0
   let end = -1
   // look at the first character, we are looking for acceptable control sequence names
@@ -349,26 +349,24 @@ export const csnameTokenizer = new ExternalTokenizer((input, stack) => {
 
 const END_DOCUMENT_MARK = '\\end{document}'.split('').reverse()
 
-export const trailingContentTokenizer = new ExternalTokenizer(
-  (input, stack) => {
-    if (input.next === -1) return // no trailing content
-    // Look back for end-document mark, bail out if any characters do not match
-    for (let i = 1; i < END_DOCUMENT_MARK.length + 1; i++) {
-      if (String.fromCharCode(input.peek(-i)) !== END_DOCUMENT_MARK[i - 1]) {
-        return
-      }
+export const trailingContentTokenizer = new ExternalTokenizer(input => {
+  if (input.next === -1) return // no trailing content
+  // Look back for end-document mark, bail out if any characters do not match
+  for (let i = 1; i < END_DOCUMENT_MARK.length + 1; i++) {
+    if (String.fromCharCode(input.peek(-i)) !== END_DOCUMENT_MARK[i - 1]) {
+      return
     }
-    while (input.next === CHAR_SPACE || input.next === CHAR_NEWLINE) {
-      const next = input.advance()
-      if (next === -1) return input.acceptToken(TrailingWhitespaceOnly) // trailing whitespace only
-    }
-    // accept the all content up to the end of the document
-    while (input.advance() !== -1) {
-      //
-    }
-    return input.acceptToken(TrailingContent)
   }
-)
+  while (input.next === CHAR_SPACE || input.next === CHAR_NEWLINE) {
+    const next = input.advance()
+    if (next === -1) return input.acceptToken(TrailingWhitespaceOnly) // trailing whitespace only
+  }
+  // accept the all content up to the end of the document
+  while (input.advance() !== -1) {
+    //
+  }
+  return input.acceptToken(TrailingContent)
+})
 
 const refCommands = new Set([
   '\\fullref',
@@ -616,7 +614,7 @@ const otherKnowncommands = {
 }
 // specializer for control sequences
 // return new tokens for specific control sequences
-export const specializeCtrlSeq = (name, terms) => {
+export const specializeCtrlSeq = name => {
   if (name === '\\begin') return Begin
   if (name === '\\end') return End
   if (refCommands.has(name)) {
@@ -728,7 +726,7 @@ const otherKnownEnvNames = {
   description: ListEnvName,
 }
 
-export const specializeEnvName = (name, terms) => {
+export const specializeEnvName = name => {
   if (tabularEnvNames.has(name)) {
     return TabularEnvName
   }
@@ -752,6 +750,6 @@ const otherKnownCtrlSyms = {
   '\\\\': LineBreakCtrlSym,
 }
 
-export const specializeCtrlSym = (name, terms) => {
+export const specializeCtrlSym = name => {
   return otherKnownCtrlSyms[name] || -1
 }
