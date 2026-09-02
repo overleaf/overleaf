@@ -496,7 +496,6 @@ const _ProjectController = {
       'markdown-visual',
       'ai-disabled-collaborators',
       'group-link-sharing',
-      'compile-with-checkpoint',
     ].filter(Boolean)
 
     const getUserValues = async userId =>
@@ -574,22 +573,19 @@ const _ProjectController = {
                 )
               ).isMember)()
           : false,
-        activeProfessionalGroupSubscriptions:
-          SubscriptionLocator.promises.getUserActiveProfessionalGroupSubscriptions(
-            userId,
-            {
-              _id: 1,
-              teamName: 1,
-              sharingPermissions: 1,
-            }
-          ),
+        activeGroupSubscriptions:
+          SubscriptionLocator.promises.getUserActiveGroupSubscriptions(userId, {
+            _id: 1,
+            teamName: 1,
+            sharingPermissions: 1,
+          }),
       })
 
       const {
         project,
         userValues,
         userIsMemberOfGroupSubscription,
-        activeProfessionalGroupSubscriptions,
+        activeGroupSubscriptions,
       } = responses
 
       await Promise.all([
@@ -651,11 +647,7 @@ const _ProjectController = {
         req,
         projectId
       )
-      const imageNames = await ProjectHelper.getAllowedImagesForUser(
-        req,
-        res,
-        user
-      )
+      const imageNames = await ProjectHelper.getAllowedImagesForUser(user)
 
       const privilegeLevel =
         await AuthorizationManager.promises.getPrivilegeLevelForProject(
@@ -765,8 +757,8 @@ const _ProjectController = {
           planLimit,
           exceedAtLimit,
         }
-        AnalyticsManager.recordEventForSession(
-          req.session,
+        AnalyticsManager.recordEventForUserInBackground(
+          userId,
           'project-opened',
           projectOpenedSegmentation
         )
@@ -852,8 +844,8 @@ const _ProjectController = {
         userIsMemberOfGroupSubscription
       )
 
-      AnalyticsManager.setUserPropertyForSessionInBackground(
-        req.session,
+      AnalyticsManager.setUserPropertyForUserInBackground(
+        userId,
         'customer-io-integration',
         true
       )
@@ -979,7 +971,7 @@ const _ProjectController = {
           ),
           isMemberOfGroupSubscription: userIsMemberOfGroupSubscription,
           hasInstitutionLicence: userHasInstitutionLicence,
-          activeProfessionalGroupSubscriptions,
+          activeGroupSubscriptions,
         },
         initialLoadingScreenTheme,
         userSettings,

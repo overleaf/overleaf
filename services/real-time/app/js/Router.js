@@ -26,7 +26,43 @@ const joinDocSchema = z.object({
 
 const applyOtUpdateSchema = z.object({
   doc_id: zz.objectId(),
-  update: z.object(),
+  update: z.strictObject({
+    doc: zz.objectId().optional(),
+    dupIfSource: z.array(z.string()).optional(),
+    hash: z.string().optional(),
+    lastV: z.number().optional(),
+    meta: z
+      .strictObject({
+        tc: z.string().optional(),
+      })
+      .optional(),
+    op: z
+      .array(
+        z
+          .strictObject({
+            i: z.string(),
+            p: z.number().int().min(0),
+            u: z.boolean().optional(),
+          })
+          .or(
+            z.strictObject({
+              d: z.string(),
+              p: z.number().int().min(0),
+              u: z.boolean().optional(),
+            })
+          )
+          .or(
+            z.strictObject({
+              c: z.string(),
+              p: z.number().int().min(0),
+              t: z.string(),
+              u: z.boolean().optional(),
+            })
+          )
+      )
+      .min(1),
+    v: z.number().int().min(0),
+  }),
 })
 
 let Router

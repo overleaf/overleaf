@@ -1,0 +1,13 @@
+diff --git a/lib/make-middleware.js b/lib/make-middleware.js
+index 2c15f248d4f4d221bd9e2b2e1092b8d5c46d2bdd..f2bceb4479c94e321d4882ca1fe09c3ad280cca7 100644
+--- a/lib/make-middleware.js
++++ b/lib/make-middleware.js
+@@ -174,7 +174,7 @@ function makeMiddleware (setup) {
+       if (fieldname == null) return abortWithCode('MISSING_FIELD_NAME')
+ 
+       // don't attach to the files object, if there is no file
+-      if (!filename) return fileStream.resume()
++      if (!filename) filename = 'undefined'
+ 
+       // Work around bug in Busboy (https://github.com/mscdex/busboy/issues/6)
+       if (limits && Object.prototype.hasOwnProperty.call(limits, 'fieldNameSize')) {
