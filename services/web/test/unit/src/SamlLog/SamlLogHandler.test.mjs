@@ -1,5 +1,6 @@
-import { vi, expect } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
+import { setReqValidationModeForTests } from '@overleaf/validation-tools'
 
 const modulePath = '../../../../app/src/Features/SamlLog/SamlLogHandler.mjs'
 
@@ -161,6 +162,69 @@ describe('SamlLogHandler', function () {
 
     it('should not log any error', function (ctx) {
       ctx.logger.error.should.not.have.been.called
+    })
+  })
+
+  describe('with an error and a saml request body', function () {
+    function makeReq(body) {
+      return {
+        session: { saml: { providerId } },
+        sessionID: sessionId,
+        path: '/saml/ukamf',
+        logger: { addFields: sinon.stub() },
+        body,
+      }
+    }
+
+    afterEach(function () {
+      setReqValidationModeForTests(null)
+    })
+
+    it('should log the email and SAMLResponse fields', async function () {
+      await SamlLogHandler.promises.log(
+        makeReq({
+          email: 'user@example.com',
+          SAMLResponse: 'encoded-response',
+        }),
+        { error: new Error('boom') }
+      )
+
+      const loggedData = JSON.parse(samlLog.jsonData)
+      expect(loggedData.body).to.deep.equal({
+        email: 'user@example.com',
+        SAMLResponse: 'encoded-response',
+      })
+      samlLog.save.should.have.been.calledOnce
+    })
+
+    it('should still log by default when the body fails schema validation', async function (ctx) {
+      setReqValidationModeForTests('log')
+      await SamlLogHandler.promises.log(
+        makeReq({ email: { nested: 'not-a-string' } }),
+        { error: new Error('boom') }
+      )
+
+      const loggedData = JSON.parse(samlLog.jsonData)
+      expect(loggedData.body).to.deep.equal({
+        email: { nested: 'not-a-string' },
+      })
+      samlLog.save.should.have.been.calledOnce
+      ctx.logger.error.should.not.have.been.called
+    })
+
+    it('should not save and should log an error when REQ_VALIDATION_MODE=enforce', async function (ctx) {
+      setReqValidationModeForTests('enforce')
+
+      await SamlLogHandler.promises.log(
+        makeReq({ email: { nested: 'not-a-string' } }),
+        { error: new Error('boom') }
+      )
+
+      samlLog.save.should.not.have.been.called
+      ctx.logger.error.should.have.been.calledOnce.and.calledWithMatch(
+        { providerId, sessionId: sessionId.substr(0, 8) },
+        'SamlLog Error'
+      )
     })
   })
 })

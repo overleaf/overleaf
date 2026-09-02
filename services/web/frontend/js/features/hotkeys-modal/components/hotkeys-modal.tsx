@@ -11,6 +11,7 @@ import {
 import OLButton from '@/shared/components/ol/ol-button'
 import OLRow from '@/shared/components/ol/ol-row'
 import OLCol from '@/shared/components/ol/ol-col'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export default memo(function HotkeysModal({
   animation = true,
@@ -26,11 +27,18 @@ export default memo(function HotkeysModal({
   trackChangesVisible?: boolean
 }) {
   const { t } = useTranslation()
+  const themed = useFeatureFlag('themed-modals')
 
   const ctrl = isMac ? 'Cmd' : 'Ctrl'
 
   return (
-    <OLModal size="lg" onHide={handleHide} show={show} animation={animation}>
+    <OLModal
+      size="lg"
+      onHide={handleHide}
+      show={show}
+      animation={animation}
+      themed={themed}
+    >
       <OLModalHeader>
         <OLModalTitle>{t('hotkeys')}</OLModalTitle>
       </OLModalHeader>

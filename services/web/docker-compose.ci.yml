@@ -29,8 +29,8 @@ services:
       REDIS_HOST: redis_test
       VITEST_NO_CACHE: true
       COVERAGE_UNIT_TESTS:
-      NO_COLOR: true
       MONOREPO:
+      REQ_VALIDATION_MODE: enforce
     depends_on:
       - redis_test
       - mongo
@@ -52,9 +52,10 @@ services:
       OVERLEAF_CONFIG:
       REDIS_HOST: redis_test
       COVERAGE_ACCEPTANCE_TESTS:
-      NO_COLOR: true
       MONOREPO:
       RETRIES:
+      REQ_LOCKDOWN_MODE: throw
+      REQ_VALIDATION_MODE: enforce
     extra_hosts:
       - "www.overleaf.test:127.0.0.1"
     volumes:
@@ -87,7 +88,6 @@ services:
       NODE_OPTIONS: "--unhandled-rejections=strict"
       CI:
       JUNIT_ROOT_SUITE_NAME:
-      NO_COLOR: true
 
   test_frontend_ct:
     build:
@@ -95,6 +95,8 @@ services:
       args:
         - USER_UID
         - USER_GID
+    # Keep Chrome's shared memory in RAM, so cypress.config.ts can drop --disable-dev-shm-usage and its write-then-delete churn.
+    shm_size: 1gb
     logging:
       driver: local
     working_dir: /overleaf/services/web
@@ -104,10 +106,15 @@ services:
       CYPRESS_RESULTS:
       CYPRESS_SPEC_PATTERN:
       CYPRESS_EXCLUDE_SPEC_PATTERN:
-      NO_COLOR: true
+      # Must clear ws's 30s closing-handshake timeout during teardown, or a green run exits 1 (#36734).
+      CYPRESS_INTERNAL_TEARDOWN_TIMEOUT: ${CYPRESS_INTERNAL_TEARDOWN_TIMEOUT:-45000}
+      # Cypress's CLI filters teardown errors out of stderr; either of these shows them (#36734).
+      DEBUG:
+      ELECTRON_ENABLE_LOGGING:
     volumes:
       - /dev/shm/overleaf:/overleaf
       - ./data/reports:/overleaf/services/web/data/reports
+      - ../../bin/shared:/overleaf/bin/shared:ro
     tmpfs:
       - /overleaf/services/web/node_modules/.cache:uid=1000,gid=1000
     entrypoint: yarn
@@ -131,7 +138,6 @@ services:
       CI:
       JUNIT_ROOT_SUITE_NAME:
       NODE_OPTIONS: "--unhandled-rejections=strict"
-      NO_COLOR: true
 
   tar:
     image: ci/$PROJECT_NAME:$BRANCH_NAME_TAG_SAFE-$BUILD_NUMBER-webpack

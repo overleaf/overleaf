@@ -1,4 +1,4 @@
-import { DropdownDivider } from '@/shared/components/dropdown/dropdown-menu'
+import { OLDropdownDivider } from '@/shared/components/ol/ol-dropdown-menu'
 import { MenuBar } from '@/shared/components/menu-bar/menu-bar'
 import { MenuBarDropdown } from '@/shared/components/menu-bar/menu-bar-dropdown'
 import { MenuBarOption } from '@/shared/components/menu-bar/menu-bar-option'
@@ -14,7 +14,7 @@ export const Default = () => {
       <MenuBarDropdown title="Edit" id="edit">
         <MenuBarOption title="Undo" />
         <MenuBarOption title="Redo" />
-        <DropdownDivider />
+        <OLDropdownDivider />
         <MenuBarOption title="Cut" />
         <MenuBarOption title="Copy" />
         <MenuBarOption title="Paste" />

@@ -1,17 +1,19 @@
-import _ from 'lodash'
 import RequestHelper from './RequestHelper.mjs'
 import AnalyticsManager from './AnalyticsManager.mjs'
-import querystring from 'node:querystring'
-import { URL } from 'node:url'
 import Settings from '@overleaf/settings'
-import OError from '@overleaf/o-error'
 import logger from '@overleaf/logger'
+import { parseReq, getRawReqInput } from '../../infrastructure/Validation.mjs'
+import UrlHelper from '../Helpers/UrlHelper.mjs'
 
 function recordUTMTags() {
   return function (req, res, next) {
-    const query = req.query
+    const rawQuery = getRawReqInput(req).query
 
     try {
+      const { query } = parseReq(req, RequestHelper.utmQuerySchema, {
+        logOnly: true,
+      })
+
       const utmValues = RequestHelper.parseUtm(query)
 
       if (utmValues) {
@@ -36,21 +38,32 @@ function recordUTMTags() {
           'utm-tags',
           propertyValue
         )
-
-        // redirect to URL without UTM query params
-        const queryWithoutUtm = _.omit(query, RequestHelper.UTM_KEYS)
-        const queryString =
-          Object.keys(queryWithoutUtm).length > 0
-            ? '?' + querystring.stringify(queryWithoutUtm)
-            : ''
-        return res.redirect(path + queryString)
       }
     } catch (error) {
       // log errors and fail silently
-      OError.tag(error, 'failed to track UTM tags', {
-        query,
-      })
-      logger.warn({ error }, error.message)
+      logger.warn({ error, rawQuery, req }, 'failed to track UTM tags')
+    }
+
+    try {
+      const strippedQuery = RequestHelper.stripUTMKeys(rawQuery)
+      const allFields = Object.keys(rawQuery).length
+      const withoutUTM = Object.keys(strippedQuery).length
+      if (allFields !== withoutUTM) {
+        let redirect =
+          UrlHelper.getSafeRedirectPath(
+            // Drop the query from URL, we will add our own below.
+            new URL(req.url, Settings.siteUrl).pathname
+          ) || '/'
+        if (withoutUTM > 0) redirect += `?${new URLSearchParams(strippedQuery)}`
+        res.redirect(redirect)
+        return
+      }
+    } catch (err) {
+      // log errors and fail silently
+      logger.warn(
+        { err, rawQuery, req },
+        'failed to remove UTM tags from query'
+      )
     }
 
     next()

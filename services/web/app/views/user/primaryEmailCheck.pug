@@ -1,6 +1,8 @@
 extends ../layout-website-redesign
 
 block vars
+	- var suppressNavbar = true
+	- var suppressFooter = true
 	- isWebsiteRedesign = true
 
 block content
@@ -34,4 +36,4 @@ block content
 				p.small.mb-2
 					| #{translate("keep_your_email_updated")}
 				p.small
-					| !{translate("learn_more_about_emails", {}, [{name: 'a', attrs: {href: '/learn/how-to/Keeping_your_account_secure', 'event-tracking': 'primary-email-check-learn-more', 'event-tracking-mb': 'true', 'event-tracking-trigger': 'click' }}])}
+					| !{translate("learn_more_about_emails", {}, [{name: 'a', attrs: {href: 'https://docs.overleaf.com/accounts-and-security/keeping-your-account-secure', 'event-tracking': 'primary-email-check-learn-more', 'event-tracking-mb': 'true', 'event-tracking-trigger': 'click' }}])}

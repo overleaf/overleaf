@@ -1,5 +1,6 @@
 // Disable prop type checks for test harnesses
 /* eslint-disable react/prop-types */
+import fetchMock from 'fetch-mock'
 import { merge } from 'lodash'
 import { SocketIOMock } from '@/ide/connection/SocketIoShim'
 import { IdeContext } from '@/shared/context/ide-context'
@@ -14,7 +15,6 @@ import React, {
 import { IdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { IdeEventEmitter } from '@/features/ide-react/create-ide-event-emitter'
 import { ReactScopeValueStore } from '@/features/ide-react/scope-value-store/react-scope-value-store'
-import { ReactScopeEventEmitter } from '@/features/ide-react/scope-event-emitter/react-scope-event-emitter'
 import { ConnectionContext } from '@/features/ide-react/context/connection-context'
 import {
   EditorOpenDocContext,
@@ -44,6 +44,7 @@ import type { DocumentContainer } from '@/features/ide-react/editor/document-con
 import {
   ProjectMetadata,
   ProjectUpdate,
+  TrackChangesStateData,
 } from '@/shared/context/types/project-metadata'
 import { User, UserId } from '../../../types/user'
 import { ProjectCompiler } from '../../../types/project-settings'
@@ -69,6 +70,22 @@ const defaultUserSettings = {
   referencesSearchMode: 'simple',
 } satisfies UserSettings
 
+const CHANGES_USERS_ROUTE = 'editor-providers-changes-users'
+
+// ChangesUsersProvider fetches this on mount, so every test rendering the editor
+// context needs the route. Tests that care about the response register their own
+// route before rendering, which takes precedence over this one.
+function mockChangesUsers() {
+  const alreadyMocked = fetchMock.router.routes.some(
+    route => route.config.name === CHANGES_USERS_ROUTE
+  )
+  if (!alreadyMocked) {
+    fetchMock.get('express:/project/:projectId/changes/users', [], {
+      name: CHANGES_USERS_ROUTE,
+    })
+  }
+}
+
 export type EditorProvidersProps = {
   user?: Pick<
     User,
@@ -77,6 +94,10 @@ export type EditorProvidersProps = {
     | 'signUpDate'
     | 'activeProfessionalGroupSubscriptions'
     | 'isProfessionalGroupPlan'
+    | 'isMemberOfGroupSubscription'
+    | 'hasInstitutionLicence'
+    | 'hasPaidSubscription'
+    | 'planCode'
   >
   projectId?: string
   projectName?: string
@@ -84,11 +105,12 @@ export type EditorProvidersProps = {
   rootDocId?: string
   imageName?: string
   compiler?: ProjectCompiler
+  png2pdf?: boolean
   socket?: Socket
   isRestrictedTokenMember?: boolean
   scope?: Record<string, any>
-  features?: Record<string, boolean>
-  projectFeatures?: Record<string, boolean>
+  features?: Record<string, boolean | string>
+  projectFeatures?: Record<string, boolean | string>
   permissionsLevel?: PermissionsLevel
   children?: React.ReactNode
   rootFolder?: Folder[]
@@ -132,7 +154,7 @@ export const projectDefaults: ProjectMetadata = {
   compiler: 'pdflatex' as ProjectCompiler,
   members: [],
   invites: [],
-  trackChangesState: {} as Record<UserId | '__guests__', boolean>,
+  trackChangesState: {} as TrackChangesStateData,
   spellCheckLanguage: 'en',
 }
 
@@ -164,6 +186,8 @@ export function EditorProviders({
   rootDocId = projectDefaults.rootDocId,
   imageName = projectDefaults.imageName,
   compiler = projectDefaults.compiler,
+  // left unset by default so the "never chosen" path is the one under test
+  png2pdf,
   socket = new SocketIOMock() as any as Socket,
   isRestrictedTokenMember = false,
   scope: defaultScope = {},
@@ -231,15 +255,18 @@ export function EditorProviders({
     rootFolder,
     imageName,
     compiler,
+    png2pdf,
     members: [],
     invites: [],
-    trackChangesState: false,
+    trackChangesState: {} as TrackChangesStateData,
     spellCheckLanguage: 'en',
   }
 
   // Add details for useUserContext
   window.metaAttributesCache.set('ol-user', { ...user, features })
   window.metaAttributesCache.set('ol-project_id', projectId)
+
+  mockChangesUsers()
 
   const customProviders: Record<string, FC<PropsWithChildren>> = {
     ConnectionProvider: makeConnectionProvider(socket),
@@ -393,18 +420,15 @@ const makeIdeReactProvider = (
       projectJoined: true,
       permissionsLevel: scope.permissionsLevel as PermissionsLevel,
       setPermissionsLevel: () => {},
+      outOfSync: false,
       setOutOfSync: () => {},
     }))
 
     const [ideContextValue] = useState(() => {
-      const scopeEventEmitter = new ReactScopeEventEmitter(
-        new IdeEventEmitter()
-      )
       const unstableStore = new ReactScopeValueStore()
 
       return {
         socket,
-        scopeEventEmitter,
         unstableStore,
       }
     })
@@ -728,6 +752,7 @@ const BASE_COMPILE_CONTEXT_MOCK = {
   logEntries: undefined,
   outputFilesArchive: undefined,
   pdfViewer: 'pdfjs',
+  png2pdf: false,
   position: undefined,
   rawLog: undefined,
   recompileFromScratch: () => {},
@@ -754,6 +779,7 @@ const BASE_COMPILE_CONTEXT_MOCK = {
   darkModePdf: false,
   setDarkModePdf: () => {},
   activeOverallTheme: 'light',
+  isNetworkStalled: false,
 } as const
 
 const makeDetachCompileProvider = (mockCompileOnLoad: boolean = false) => {

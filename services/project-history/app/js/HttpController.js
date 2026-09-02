@@ -18,10 +18,33 @@ import Stream, { pipeline } from 'node:stream'
 import { fetchNothing, RequestFailedError } from '@overleaf/fetch-utils'
 import { z, zz, parseReq } from '@overleaf/validation-tools'
 import { IncrementalResponse } from '@overleaf/stream-utils'
+import editorCoreSchemas from 'overleaf-editor-core/lib/schemas.js'
 
 const ONE_DAY_IN_SECONDS = 24 * 60 * 60
 
+// Most :project_id params accept either a Mongo ObjectId (web-linked
+// projects) or a legacy v1-only numeric id (see NumericProjectIdTests) —
+// project-history stores/queues these opaquely (Redis keys, plain string
+// Mongo fields) without requiring ObjectId format.
+const historyIdSchema = zz.objectId().or(z.coerce.number())
+
+// cloneProject only clones data that is keyed by a real Mongo ObjectId
+// (projectHistoryLabels/projectHistorySyncState/projectHistoryFailures all
+// convert this id with `new ObjectId(...)`), so — unlike most routes here —
+// it does not accept the legacy numeric v1-only id.
 const cloneProjectSchema = z.object({
+  body: z.strictObject({
+    targetProjectId: zz.objectId(),
+  }),
+
+  params: z.strictObject({
+    project_id: zz.objectId(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const cloneProjectFallbackSchema = z.object({
   body: z.object({
     targetProjectId: z.string(),
   }),
@@ -35,7 +58,9 @@ export function cloneProject(req, res) {
   const {
     params: { project_id: sourceProjectId },
     body: { targetProjectId },
-  } = parseReq(req, cloneProjectSchema)
+  } = parseReq(req, cloneProjectSchema, {
+    fallbackSchema: cloneProjectFallbackSchema,
+  })
   const incrResp = new IncrementalResponse({
     res,
     timeout: 10 * 60_000 - 5_000,
@@ -138,14 +163,25 @@ export function cloneProject(req, res) {
 }
 
 const getProjectBlobSchema = z.object({
+  params: z.strictObject({
+    history_id: historyIdSchema,
+    hash: editorCoreSchemas.rawBlobHash,
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const getProjectBlobFallbackSchema = z.object({
   params: z.object({
-    history_id: zz.objectId().or(z.coerce.number()),
+    history_id: historyIdSchema,
     hash: z.string(),
   }),
 })
 
 export function getProjectBlob(req, res, next) {
-  const { params } = parseReq(req, getProjectBlobSchema)
+  const { params } = parseReq(req, getProjectBlobSchema, {
+    fallbackSchema: getProjectBlobFallbackSchema,
+  })
   const historyId = params.history_id
   const blobHash = params.hash
   HistoryStoreManager.getProjectBlobStream(
@@ -167,8 +203,27 @@ export function getProjectBlob(req, res, next) {
   )
 }
 
+const initializeProjectSchema = z.object({
+  body: z.strictObject({
+    historyId: historyIdSchema.optional(),
+  }),
+})
+
+// Rollout-temporary fallback (loosened primary schema; no zod validation
+// existed for this route on main); delete when this route's
+// REQ_VALIDATION_MODE instrumentation is removed.
+const initializeProjectFallbackSchema = z.object({
+  body: z.object({
+    historyId: z.string().or(z.coerce.number()).optional(),
+  }),
+})
+
 export function initializeProject(req, res, next) {
-  const { historyId } = req.body
+  const { body } = parseReq(req, initializeProjectSchema, {
+    logOnly: true,
+    fallbackSchema: initializeProjectFallbackSchema,
+  })
+  const { historyId } = body
   HistoryStoreManager.initializeProject(historyId, (error, id) => {
     if (error != null) {
       return next(OError.tag(error))
@@ -178,8 +233,26 @@ export function initializeProject(req, res, next) {
 }
 
 const flushProjectSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+  }),
+  query: z.strictObject({
+    debug: z.stringbool().default(false),
+    bisect: z.stringbool().default(false),
+    // sent by document-updater's background flush (HistoryManager.js
+    // flushProjectChangesAsync); read only for the side effect of being
+    // present on the query string, not consumed here -- the flush is
+    // always processed the same way, this just distinguishes background
+    // flushes in logs/metrics upstream.
+    background: z.stringbool().optional(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const flushProjectFallbackSchema = z.object({
   params: z.object({
-    project_id: zz.objectId().or(z.coerce.number()),
+    project_id: zz.objectId(),
   }),
   query: z.object({
     debug: z.stringbool().default(false),
@@ -188,7 +261,9 @@ const flushProjectSchema = z.object({
 })
 
 export function flushProject(req, res, next) {
-  const { query, params } = parseReq(req, flushProjectSchema)
+  const { query, params } = parseReq(req, flushProjectSchema, {
+    fallbackSchema: flushProjectFallbackSchema,
+  })
   const projectId = params.project_id
   if (query.debug) {
     logger.debug(
@@ -225,8 +300,19 @@ export function flushProject(req, res, next) {
 }
 
 const dumpProjectSchema = z.object({
+  params: z.strictObject({
+    project_id: historyIdSchema,
+  }),
+  query: z.strictObject({
+    count: z.coerce.number().int().optional(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const dumpProjectFallbackSchema = z.object({
   params: z.object({
-    project_id: zz.objectId().or(z.coerce.number()),
+    project_id: historyIdSchema,
   }),
   query: z.object({
     count: z.coerce.number().int().optional(),
@@ -234,7 +320,9 @@ const dumpProjectSchema = z.object({
 })
 
 export function dumpProject(req, res, next) {
-  const { query, params } = parseReq(req, dumpProjectSchema)
+  const { query, params } = parseReq(req, dumpProjectSchema, {
+    fallbackSchema: dumpProjectFallbackSchema,
+  })
   const projectId = params.project_id
   const batchSize = query.count || UpdatesProcessor.REDIS_READ_BATCH_SIZE
   logger.debug({ projectId }, 'retrieving raw updates')
@@ -247,7 +335,7 @@ export function dumpProject(req, res, next) {
 }
 
 const flushOldSchema = z.object({
-  query: z.object({
+  query: z.strictObject({
     // flush projects with queued ops older than this
     maxAge: z.coerce
       .number()
@@ -267,8 +355,28 @@ const flushOldSchema = z.object({
   }),
 })
 
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const flushOldFallbackSchema = z.object({
+  query: z.object({
+    maxAge: z.coerce
+      .number()
+      .int()
+      .default(6 * 3600),
+    queueDelay: z.coerce.number().int().default(100),
+    limit: z.coerce.number().int().default(1000),
+    timeout: z.coerce
+      .number()
+      .int()
+      .default(60 * 1000),
+    background: z.stringbool().default(false),
+  }),
+})
+
 export function flushOld(req, res, next) {
-  const { query } = parseReq(req, flushOldSchema)
+  const { query } = parseReq(req, flushOldSchema, {
+    fallbackSchema: flushOldFallbackSchema,
+  })
   const { maxAge, queueDelay, limit, timeout, background } = query
   const options = { maxAge, queueDelay, limit, timeout, background }
   FlushManager.flushOldOps(options, (error, results) => {
@@ -280,8 +388,21 @@ export function flushOld(req, res, next) {
 }
 
 const getDiffSchema = z.object({
+  params: z.strictObject({
+    project_id: historyIdSchema,
+  }),
+  query: z.strictObject({
+    pathname: zz.filepath(),
+    from: z.coerce.number().int(),
+    to: z.coerce.number().int(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const getDiffFallbackSchema = z.object({
   params: z.object({
-    project_id: zz.objectId().or(z.coerce.number()),
+    project_id: historyIdSchema,
   }),
   query: z.object({
     pathname: z.string(),
@@ -291,7 +412,9 @@ const getDiffSchema = z.object({
 })
 
 export function getDiff(req, res, next) {
-  const { query, params } = parseReq(req, getDiffSchema)
+  const { query, params } = parseReq(req, getDiffSchema, {
+    fallbackSchema: getDiffFallbackSchema,
+  })
   const { pathname, from, to } = query
   const projectId = params.project_id
 
@@ -305,8 +428,20 @@ export function getDiff(req, res, next) {
 }
 
 const getFileTreeDiffSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+  }),
+  query: z.strictObject({
+    from: z.coerce.number().int(),
+    to: z.coerce.number().int(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const getFileTreeDiffFallbackSchema = z.object({
   params: z.object({
-    project_id: zz.objectId().or(z.coerce.number()),
+    project_id: zz.objectId(),
   }),
   query: z.object({
     from: z.coerce.number().int(),
@@ -315,7 +450,9 @@ const getFileTreeDiffSchema = z.object({
 })
 
 export function getFileTreeDiff(req, res, next) {
-  const { query, params } = parseReq(req, getFileTreeDiffSchema)
+  const { query, params } = parseReq(req, getFileTreeDiffSchema, {
+    fallbackSchema: getFileTreeDiffFallbackSchema,
+  })
   const { from, to } = query
   const projectId = params.project_id
 
@@ -328,8 +465,20 @@ export function getFileTreeDiff(req, res, next) {
 }
 
 const getUpdatesSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+  }),
+  query: z.strictObject({
+    before: z.coerce.number().int().optional(),
+    min_count: z.coerce.number().int().optional(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const getUpdatesFallbackSchema = z.object({
   params: z.object({
-    project_id: zz.objectId().or(z.coerce.number()),
+    project_id: zz.objectId(),
   }),
   query: z.object({
     before: z.coerce.number().int().optional(),
@@ -338,7 +487,9 @@ const getUpdatesSchema = z.object({
 })
 
 export function getUpdates(req, res, next) {
-  const { query, params } = parseReq(req, getUpdatesSchema)
+  const { query, params } = parseReq(req, getUpdatesSchema, {
+    fallbackSchema: getUpdatesFallbackSchema,
+  })
   const projectId = params.project_id
   const { before, min_count: minCount } = query
   SummarizedUpdatesManager.getSummarizedProjectUpdates(
@@ -360,7 +511,20 @@ export function getUpdates(req, res, next) {
   )
 }
 
+// Unlike most :project_id params in this file, this does NOT also accept a
+// numeric legacy id: SyncManager.getResyncState does
+// `new ObjectId(projectId.toString())`, which throws for a numeric id (the
+// ObjectId constructor only special-cases a raw number argument, not a
+// numeric string).
 const getResyncPendingSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const getResyncPendingFallbackSchema = z.object({
   params: z.object({
     project_id: zz.objectId(),
   }),
@@ -369,7 +533,9 @@ const getResyncPendingSchema = z.object({
 export function getResyncPending(req, res, next) {
   const {
     params: { project_id: projectId },
-  } = parseReq(req, getResyncPendingSchema)
+  } = parseReq(req, getResyncPendingSchema, {
+    fallbackSchema: getResyncPendingFallbackSchema,
+  })
   SyncManager.getResyncState(projectId, (err, state) => {
     if (err) return next(err)
     res.json({
@@ -379,7 +545,16 @@ export function getResyncPending(req, res, next) {
   })
 }
 
+// See getResyncPendingSchema: no numeric-id union, for the same reason.
 const getDebugInfoSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const getDebugInfoFallbackSchema = z.object({
   params: z.object({
     project_id: zz.objectId(),
   }),
@@ -388,7 +563,9 @@ const getDebugInfoSchema = z.object({
 export function getDebugInfo(req, res, next) {
   const {
     params: { project_id: projectId },
-  } = parseReq(req, getDebugInfoSchema)
+  } = parseReq(req, getDebugInfoSchema, {
+    fallbackSchema: getDebugInfoFallbackSchema,
+  })
   SyncManager.getResyncState(projectId, (err, state) => {
     if (err) return next(err)
     ErrorRecorder.getFailureRecord(projectId, (err, failureRecord) => {
@@ -409,13 +586,23 @@ export function getDebugInfo(req, res, next) {
 }
 
 const latestVersionSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const latestVersionFallbackSchema = z.object({
   params: z.object({
-    project_id: zz.objectId().or(z.coerce.number()),
+    project_id: zz.objectId(),
   }),
 })
 
 export function latestVersion(req, res, next) {
-  const { params } = parseReq(req, latestVersionSchema)
+  const { params } = parseReq(req, latestVersionSchema, {
+    fallbackSchema: latestVersionFallbackSchema,
+  })
   const projectId = params.project_id
   logger.debug({ projectId }, 'compressing project history and getting version')
   UpdatesProcessor.processUpdatesForProject(projectId, error => {
@@ -445,15 +632,27 @@ export function latestVersion(req, res, next) {
 }
 
 const getFileSnapshotSchema = z.object({
+  params: z.strictObject({
+    project_id: historyIdSchema,
+    version: z.coerce.number().int(),
+    pathname: zz.filepath(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const getFileSnapshotFallbackSchema = z.object({
   params: z.object({
-    project_id: zz.objectId().or(z.coerce.number()),
+    project_id: historyIdSchema,
     version: z.coerce.number().int(),
     pathname: z.string(),
   }),
 })
 
 export function getFileSnapshot(req, res, next) {
-  const { params } = parseReq(req, getFileSnapshotSchema)
+  const { params } = parseReq(req, getFileSnapshotSchema, {
+    fallbackSchema: getFileSnapshotFallbackSchema,
+  })
   const { project_id: projectId, version, pathname } = params
   SnapshotManager.getFileSnapshotStream(
     projectId,
@@ -472,15 +671,27 @@ export function getFileSnapshot(req, res, next) {
 }
 
 const getRangesSnapshotSchema = z.object({
+  params: z.strictObject({
+    project_id: historyIdSchema,
+    version: z.coerce.number().int(),
+    pathname: zz.filepath(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const getRangesSnapshotFallbackSchema = z.object({
   params: z.object({
-    project_id: zz.objectId().or(z.coerce.number()),
+    project_id: historyIdSchema,
     version: z.coerce.number().int(),
     pathname: z.string(),
   }),
 })
 
 export function getRangesSnapshot(req, res, next) {
-  const { params } = parseReq(req, getRangesSnapshotSchema)
+  const { params } = parseReq(req, getRangesSnapshotSchema, {
+    fallbackSchema: getRangesSnapshotFallbackSchema,
+  })
   const { project_id: projectId, version, pathname } = params
   SnapshotManager.getRangesSnapshot(
     projectId,
@@ -496,15 +707,27 @@ export function getRangesSnapshot(req, res, next) {
 }
 
 const getFileMetadataSnapshotSchema = z.object({
+  params: z.strictObject({
+    project_id: historyIdSchema,
+    version: z.coerce.number().int(),
+    pathname: zz.filepath(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const getFileMetadataSnapshotFallbackSchema = z.object({
   params: z.object({
-    project_id: zz.objectId().or(z.coerce.number()),
+    project_id: historyIdSchema,
     version: z.coerce.number().int(),
     pathname: z.string(),
   }),
 })
 
 export function getFileMetadataSnapshot(req, res, next) {
-  const { params } = parseReq(req, getFileMetadataSnapshotSchema)
+  const { params } = parseReq(req, getFileMetadataSnapshotSchema, {
+    fallbackSchema: getFileMetadataSnapshotFallbackSchema,
+  })
   const { project_id: projectId, version, pathname } = params
   SnapshotManager.getFileMetadataSnapshot(
     projectId,
@@ -520,13 +743,23 @@ export function getFileMetadataSnapshot(req, res, next) {
 }
 
 const getLatestSnapshotSchema = z.object({
+  params: z.strictObject({
+    project_id: historyIdSchema,
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const getLatestSnapshotFallbackSchema = z.object({
   params: z.object({
-    project_id: zz.objectId().or(z.coerce.number()),
+    project_id: historyIdSchema,
   }),
 })
 
 export function getLatestSnapshot(req, res, next) {
-  const { params } = parseReq(req, getLatestSnapshotSchema)
+  const { params } = parseReq(req, getLatestSnapshotSchema, {
+    fallbackSchema: getLatestSnapshotFallbackSchema,
+  })
   const { project_id: projectId } = params
   WebApiManager.getHistoryId(projectId, (error, historyId) => {
     if (error) return next(OError.tag(error))
@@ -545,8 +778,19 @@ export function getLatestSnapshot(req, res, next) {
 }
 
 const getChangesInChunkSinceSchema = z.object({
+  params: z.strictObject({
+    project_id: historyIdSchema,
+  }),
+  query: z.strictObject({
+    since: z.coerce.number().int().min(0),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const getChangesInChunkSinceFallbackSchema = z.object({
   params: z.object({
-    project_id: zz.objectId().or(z.coerce.number()),
+    project_id: historyIdSchema,
   }),
   query: z.object({
     since: z.coerce.number().int().min(0),
@@ -554,7 +798,9 @@ const getChangesInChunkSinceSchema = z.object({
 })
 
 export function getChangesInChunkSince(req, res, next) {
-  const { query, params } = parseReq(req, getChangesInChunkSinceSchema)
+  const { query, params } = parseReq(req, getChangesInChunkSinceSchema, {
+    fallbackSchema: getChangesInChunkSinceFallbackSchema,
+  })
   const { project_id: projectId } = params
   const { since } = query
   WebApiManager.getHistoryId(projectId, (error, historyId) => {
@@ -578,14 +824,25 @@ export function getChangesInChunkSince(req, res, next) {
 }
 
 const getProjectSnapshotSchema = z.object({
+  params: z.strictObject({
+    project_id: historyIdSchema,
+    version: z.coerce.number().int(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const getProjectSnapshotFallbackSchema = z.object({
   params: z.object({
-    project_id: zz.objectId().or(z.coerce.number()),
+    project_id: historyIdSchema,
     version: z.coerce.number().int(),
   }),
 })
 
 export function getProjectSnapshot(req, res, next) {
-  const { params } = parseReq(req, getProjectSnapshotSchema)
+  const { params } = parseReq(req, getProjectSnapshotSchema, {
+    fallbackSchema: getProjectSnapshotFallbackSchema,
+  })
   const { project_id: projectId, version } = params
   SnapshotManager.getProjectSnapshot(
     projectId,
@@ -600,14 +857,25 @@ export function getProjectSnapshot(req, res, next) {
 }
 
 const getPathsAtVersionSchema = z.object({
+  params: z.strictObject({
+    project_id: historyIdSchema,
+    version: z.coerce.number().int(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const getPathsAtVersionFallbackSchema = z.object({
   params: z.object({
-    project_id: zz.objectId().or(z.coerce.number()),
+    project_id: historyIdSchema,
     version: z.coerce.number().int(),
   }),
 })
 
 export function getPathsAtVersion(req, res, next) {
-  const { params } = parseReq(req, getPathsAtVersionSchema)
+  const { params } = parseReq(req, getPathsAtVersionSchema, {
+    fallbackSchema: getPathsAtVersionFallbackSchema,
+  })
   const { project_id: projectId, version } = params
   SnapshotManager.getPathsAtVersion(projectId, version, (error, result) => {
     if (error != null) {
@@ -640,8 +908,28 @@ export function checkLock(req, res) {
 }
 
 const resyncProjectSchema = z.object({
+  params: z.strictObject({
+    project_id: historyIdSchema,
+  }),
+  query: z.strictObject({
+    force: z.stringbool().default(false),
+    recoverCorruptedFiles: z.stringbool().default(false),
+  }),
+  body: z.strictObject({
+    force: z.boolean().default(false),
+    recoverCorruptedFiles: z.boolean().default(false),
+    // shared with SyncUpdateExpander, which types this as RawOrigin
+    // (overleaf-editor-core/lib/types.js)
+    origin: editorCoreSchemas.rawOrigin.optional(),
+    historyRangesMigration: z.enum(['forwards', 'backwards']).optional(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const resyncProjectFallbackSchema = z.object({
   params: z.object({
-    project_id: zz.objectId().or(z.coerce.number()),
+    project_id: historyIdSchema,
   }),
   query: z.object({
     force: z.stringbool().default(false),
@@ -660,7 +948,9 @@ const resyncProjectSchema = z.object({
 })
 
 export function resyncProject(req, res, next) {
-  const { query, params, body } = parseReq(req, resyncProjectSchema)
+  const { query, params, body } = parseReq(req, resyncProjectSchema, {
+    fallbackSchema: resyncProjectFallbackSchema,
+  })
   const projectId = params.project_id
   const options = {}
   if (body.origin) {
@@ -680,7 +970,7 @@ export function resyncProject(req, res, next) {
         return next(error)
       }
       // flush the sync operations
-      UpdatesProcessor.processUpdatesForProject(projectId, error => {
+      UpdatesProcessor.flushResyncUpdates(projectId, error => {
         if (error != null) {
           return next(error)
         }
@@ -693,7 +983,7 @@ export function resyncProject(req, res, next) {
         return next(error)
       }
       // flush the sync operations
-      UpdatesProcessor.processUpdatesForProject(projectId, error => {
+      UpdatesProcessor.flushResyncUpdates(projectId, error => {
         if (error != null) {
           return next(error)
         }
@@ -704,8 +994,19 @@ export function resyncProject(req, res, next) {
 }
 
 const forceDebugProjectSchema = z.object({
+  params: z.strictObject({
+    project_id: historyIdSchema,
+  }),
+  query: z.strictObject({
+    clear: z.stringbool().default(false),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const forceDebugProjectFallbackSchema = z.object({
   params: z.object({
-    project_id: zz.objectId().or(z.coerce.number()),
+    project_id: historyIdSchema,
   }),
   query: z.object({
     clear: z.stringbool().default(false),
@@ -713,7 +1014,9 @@ const forceDebugProjectSchema = z.object({
 })
 
 export function forceDebugProject(req, res, next) {
-  const { query, params } = parseReq(req, forceDebugProjectSchema)
+  const { query, params } = parseReq(req, forceDebugProjectSchema, {
+    fallbackSchema: forceDebugProjectFallbackSchema,
+  })
   const projectId = params.project_id
   // set the debug flag to true unless we see ?clear=true
   const state = !query.clear
@@ -757,13 +1060,23 @@ export function getQueueCounts(req, res, next) {
 }
 
 const getLabelsSchema = z.object({
+  params: z.strictObject({
+    project_id: historyIdSchema,
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const getLabelsFallbackSchema = z.object({
   params: z.object({
-    project_id: zz.objectId().or(z.coerce.number()),
+    project_id: historyIdSchema,
   }),
 })
 
 export function getLabels(req, res, next) {
-  const { params } = parseReq(req, getLabelsSchema)
+  const { params } = parseReq(req, getLabelsSchema, {
+    fallbackSchema: getLabelsFallbackSchema,
+  })
   const projectId = params.project_id
   HistoryApiManager.shouldUseProjectHistory(
     projectId,
@@ -786,8 +1099,27 @@ export function getLabels(req, res, next) {
 }
 
 const createLabelSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+    // vestigial: no route mounts createLabel with a :user_id param, so this
+    // is always undefined; kept only to preserve the params/body dual-read
+    // rollout behaviour below (see the comment at its use site)
+    user_id: zz.objectId().optional(),
+  }),
+  body: z.strictObject({
+    version: z.number().int(),
+    comment: z.string(),
+    created_at: zz.datetime().optional(),
+    validate_exists: z.boolean().default(true),
+    user_id: zz.objectId().nullable().optional(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const createLabelFallbackSchema = z.object({
   params: z.object({
-    project_id: zz.objectId().or(z.coerce.number()),
+    project_id: zz.objectId(),
     user_id: zz.objectId().optional(),
   }),
   body: z.object({
@@ -800,7 +1132,9 @@ const createLabelSchema = z.object({
 })
 
 export function createLabel(req, res, next) {
-  const { params, body } = parseReq(req, createLabelSchema)
+  const { params, body } = parseReq(req, createLabelSchema, {
+    fallbackSchema: createLabelFallbackSchema,
+  })
   const { project_id: projectId, user_id: userIdParam } = params
   const {
     version,
@@ -858,15 +1192,27 @@ export function createLabel(req, res, next) {
  * delete a label regardless of the current user, then use `deleteLabel` instead.
  */
 const deleteLabelForUserSchema = z.object({
+  params: z.strictObject({
+    project_id: historyIdSchema,
+    user_id: zz.objectId(),
+    label_id: zz.objectId(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const deleteLabelForUserFallbackSchema = z.object({
   params: z.object({
-    project_id: zz.objectId().or(z.coerce.number()),
+    project_id: historyIdSchema,
     user_id: zz.objectId(),
     label_id: zz.objectId(),
   }),
 })
 
 export function deleteLabelForUser(req, res, next) {
-  const { params } = parseReq(req, deleteLabelForUserSchema)
+  const { params } = parseReq(req, deleteLabelForUserSchema, {
+    fallbackSchema: deleteLabelForUserFallbackSchema,
+  })
   const { project_id: projectId, user_id: userId, label_id: labelId } = params
 
   LabelsManager.deleteLabelForUser(projectId, userId, labelId, error => {
@@ -878,14 +1224,25 @@ export function deleteLabelForUser(req, res, next) {
 }
 
 const deleteLabelSchema = z.object({
+  params: z.strictObject({
+    project_id: historyIdSchema,
+    label_id: zz.objectId(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const deleteLabelFallbackSchema = z.object({
   params: z.object({
-    project_id: zz.objectId().or(z.coerce.number()),
+    project_id: historyIdSchema,
     label_id: zz.objectId(),
   }),
 })
 
 export function deleteLabel(req, res, next) {
-  const { params } = parseReq(req, deleteLabelSchema)
+  const { params } = parseReq(req, deleteLabelSchema, {
+    fallbackSchema: deleteLabelFallbackSchema,
+  })
   const { project_id: projectId, label_id: labelId } = params
 
   LabelsManager.deleteLabel(projectId, labelId, error => {
@@ -897,18 +1254,31 @@ export function deleteLabel(req, res, next) {
 }
 
 const retryFailuresSchema = z.object({
-  query: z.object({
+  query: z.strictObject({
     failureType: z.enum(['soft', 'hard']).optional(),
     // bail out after this time limit
     timeout: z.coerce.number().int().default(300),
     // maximum number of projects to check
+    limit: z.coerce.number().int().default(100),
+    callbackUrl: z.url().optional(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const retryFailuresFallbackSchema = z.object({
+  query: z.object({
+    failureType: z.enum(['soft', 'hard']).optional(),
+    timeout: z.coerce.number().int().default(300),
     limit: z.coerce.number().int().default(100),
     callbackUrl: z.string().optional(),
   }),
 })
 
 export function retryFailures(req, res, next) {
-  const { query } = parseReq(req, retryFailuresSchema)
+  const { query } = parseReq(req, retryFailuresSchema, {
+    fallbackSchema: retryFailuresFallbackSchema,
+  })
   const { failureType, timeout, limit, callbackUrl } = query
   if (callbackUrl) {
     // send response but run in background when callbackUrl provided
@@ -920,6 +1290,10 @@ export function retryFailures(req, res, next) {
       if (callbackUrl) {
         // if present, notify the callbackUrl on success
         if (!error) {
+          // req.headers is not covered by the request-input lockdown (only
+          // body/query/params are), so this dynamic X-CALLBACK-* prefix scan
+          // doesn't need parseReq()/getRawReqInput() — it's forwarded
+          // verbatim to the caller-supplied callback, never read by name.
           // Needs Node 12
           // const callbackHeaders = Object.fromEntries(Object.entries(req.headers || {}).filter(([k,v]) => k.match(/^X-CALLBACK-/i)))
           const callbackHeaders = {}
@@ -944,6 +1318,15 @@ export function retryFailures(req, res, next) {
 }
 
 const transferLabelsSchema = z.object({
+  params: z.strictObject({
+    from_user: zz.objectId(),
+    to_user: zz.objectId(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const transferLabelsFallbackSchema = z.object({
   params: z.object({
     from_user: zz.objectId(),
     to_user: zz.objectId(),
@@ -951,7 +1334,9 @@ const transferLabelsSchema = z.object({
 })
 
 export function transferLabels(req, res, next) {
-  const { params } = parseReq(req, transferLabelsSchema)
+  const { params } = parseReq(req, transferLabelsSchema, {
+    fallbackSchema: transferLabelsFallbackSchema,
+  })
   const { from_user: fromUser, to_user: toUser } = params
   LabelsManager.transferLabels(fromUser, toUser, error => {
     if (error != null) {
@@ -962,13 +1347,23 @@ export function transferLabels(req, res, next) {
 }
 
 const deleteProjectSchema = z.object({
+  params: z.strictObject({
+    project_id: historyIdSchema,
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const deleteProjectFallbackSchema = z.object({
   params: z.object({
-    project_id: zz.objectId().or(z.coerce.number()),
+    project_id: historyIdSchema,
   }),
 })
 
 export function deleteProject(req, res, next) {
-  const { params } = parseReq(req, deleteProjectSchema)
+  const { params } = parseReq(req, deleteProjectSchema, {
+    fallbackSchema: deleteProjectFallbackSchema,
+  })
   const { project_id: projectId } = params
   // clear the timestamp before clearing the queue,
   // because the queue location is used in the migration

@@ -1,15 +1,20 @@
-import { expect, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import OError from '@overleaf/o-error'
+import {
+  InvalidParamsError,
+  InvalidRequestError,
+  setReqValidationModeForTests,
+} from '@overleaf/validation-tools'
 const modulePath = new URL(
   '../../../../app/src/Features/Exports/ExportsController.mjs',
   import.meta.url
 ).pathname
 
 describe('ExportsController', function () {
-  const projectId = '123njdskj9jlk'
-  const userId = '123nd3ijdks'
-  const brandVariationId = 22
+  const projectId = '507f191e810c19729de860ea'
+  const userId = '507f191e810c19729de860eb'
+  const brandVariationId = '22'
   const firstName = 'first'
   const lastName = 'last'
   const title = 'title'
@@ -203,10 +208,10 @@ describe('ExportsController', function () {
       json: sinon.stub(),
     }
 
-    ctx.req.params = { project_id: projectId, export_id: 897 }
+    ctx.req.params = { project_id: projectId, export_id: '897' }
     ctx.req.query = { token: 'mock-token' }
     await ctx.controller.exportStatus(ctx.req, res)
-    expect(ctx.handler.fetchExport).to.have.been.calledWith(897, 'mock-token')
+    expect(ctx.handler.fetchExport).to.have.been.calledWith('897', 'mock-token')
     expect(res.json.args[0][0]).to.deep.equal({
       export_json: {
         status_summary: 'completed',
@@ -223,7 +228,7 @@ describe('ExportsController', function () {
 
   describe('exportStatus token validation', function () {
     beforeEach(function (ctx) {
-      ctx.req.params = { project_id: projectId, export_id: 897 }
+      ctx.req.params = { project_id: projectId, export_id: '897' }
       ctx.handler.fetchExport = sinon.stub().resolves(
         `{
   "id":897,
@@ -264,7 +269,7 @@ describe('ExportsController', function () {
         }
         await ctx.controller.exportStatus(ctx.req, res)
         expect(ctx.handler.fetchExport).to.have.been.calledWith(
-          897,
+          '897',
           'mock-token'
         )
       })
@@ -277,7 +282,10 @@ describe('ExportsController', function () {
           json: sinon.stub(),
         }
         await ctx.controller.exportStatus(ctx.req, res)
-        expect(ctx.handler.fetchExport).to.have.been.calledWith(897, undefined)
+        expect(ctx.handler.fetchExport).to.have.been.calledWith(
+          '897',
+          undefined
+        )
       })
     })
 
@@ -289,7 +297,7 @@ describe('ExportsController', function () {
           .rejects(new Error('Request failed: 404'))
         await ctx.controller.exportStatus(ctx.req, ctx.res)
         expect(ctx.handler.fetchExport).to.have.been.calledWith(
-          897,
+          '897',
           'wrong-token'
         )
         expect(ctx.res.json.args[0][0]).to.deep.equal({
@@ -299,6 +307,55 @@ describe('ExportsController', function () {
           },
         })
       })
+    })
+  })
+
+  describe('exportStatus export_id validation', function () {
+    beforeEach(function (ctx) {
+      ctx.handler.fetchExport = sinon.stub().resolves('{}')
+      ctx.req.query = { token: 'mock-token' }
+      setReqValidationModeForTests('enforce')
+    })
+
+    afterEach(function () {
+      setReqValidationModeForTests(null)
+    })
+
+    it('should reject an invalid encoded export_id without calling v1', async function (ctx) {
+      ctx.req.params = {
+        project_id: projectId,
+        export_id: '..%2f..%2f..%2fv2%2fusers',
+      }
+      await ctx.controller.exportStatus(ctx.req, ctx.res, ctx.next)
+      expect(ctx.next).to.have.been.calledWith(
+        sinon.match.instanceOf(InvalidParamsError)
+      )
+      expect(ctx.handler.fetchExport).not.to.have.been.called
+    })
+
+    it('should reject an export_id with invalid characters without calling v1', async function (ctx) {
+      ctx.req.params = {
+        project_id: projectId,
+        export_id: '../../../etc/passwd',
+      }
+      await ctx.controller.exportStatus(ctx.req, ctx.res, ctx.next)
+      expect(ctx.next).to.have.been.calledWith(
+        sinon.match.instanceOf(InvalidParamsError)
+      )
+      expect(ctx.handler.fetchExport).not.to.have.been.called
+    })
+
+    it('should accept a well-formed export_id', async function (ctx) {
+      ctx.req.params = {
+        project_id: projectId,
+        export_id: 'abc-123_DEF',
+      }
+      await ctx.controller.exportStatus(ctx.req, ctx.res, ctx.next)
+      expect(ctx.next).not.to.have.been.called
+      expect(ctx.handler.fetchExport).to.have.been.calledWith(
+        'abc-123_DEF',
+        'mock-token'
+      )
     })
   })
 
@@ -365,6 +422,78 @@ describe('ExportsController', function () {
         )
         expect(ctx.res.sendStatus).to.have.been.calledWith(400)
         expect(ctx.next).not.to.have.been.called
+      })
+    })
+  })
+
+  describe('request validation', function () {
+    beforeEach(function () {
+      setReqValidationModeForTests('enforce')
+    })
+
+    afterEach(function () {
+      setReqValidationModeForTests(null)
+    })
+
+    describe('exportProject', function () {
+      it('should reject a malformed project_id', async function (ctx) {
+        ctx.req.params.project_id = 'not-an-object-id'
+        await ctx.controller.exportProject(ctx.req, ctx.res, ctx.next)
+        expect(ctx.next).to.have.been.calledWith(
+          sinon.match.instanceOf(InvalidParamsError)
+        )
+      })
+
+      it('should reject an unrecognized body field', async function (ctx) {
+        ctx.req.body.extra = 'nope'
+        await ctx.controller.exportProject(ctx.req, ctx.res, ctx.next)
+        expect(ctx.next).to.have.been.calledWith(
+          sinon.match.instanceOf(InvalidRequestError)
+        )
+      })
+    })
+
+    describe('exportStatus', function () {
+      beforeEach(function (ctx) {
+        ctx.req.query = { token: 'mock-token' }
+      })
+
+      it('should reject a malformed project_id', async function (ctx) {
+        ctx.req.params = {
+          project_id: 'not-an-object-id',
+          export_id: '897',
+        }
+        await ctx.controller.exportStatus(ctx.req, ctx.res, ctx.next)
+        expect(ctx.next).to.have.been.calledWith(
+          sinon.match.instanceOf(InvalidParamsError)
+        )
+      })
+    })
+
+    describe('exportDownload', function () {
+      beforeEach(function (ctx) {
+        ctx.req.params = {
+          project_id: projectId,
+          export_id: '897',
+          type: 'zip',
+        }
+        ctx.req.query = { token: 'mock-token' }
+      })
+
+      it('should reject a malformed project_id', async function (ctx) {
+        ctx.req.params.project_id = 'not-an-object-id'
+        await ctx.controller.exportDownload(ctx.req, ctx.res, ctx.next)
+        expect(ctx.next).to.have.been.calledWith(
+          sinon.match.instanceOf(InvalidParamsError)
+        )
+      })
+
+      it('should reject an invalid token query value', async function (ctx) {
+        ctx.req.query.token = { foo: 'bar' }
+        await ctx.controller.exportDownload(ctx.req, ctx.res, ctx.next)
+        expect(ctx.next).to.have.been.calledWith(
+          sinon.match.instanceOf(InvalidRequestError)
+        )
       })
     })
   })

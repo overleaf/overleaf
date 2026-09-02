@@ -16,6 +16,7 @@ module.exports = {
       process.env.MONGO_CONNECTION_STRING ||
       process.env.MONGO_URL ||
       `mongodb://${process.env.MONGO_HOST || '127.0.0.1'}/sharelatex`,
+    auxUrl: process.env.MONGO_AUX_CONNECTION_STRING,
     hasSecondaries: process.env.MONGO_HAS_SECONDARIES === 'true',
   },
 }

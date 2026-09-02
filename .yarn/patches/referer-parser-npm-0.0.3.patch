@@ -9,18 +9,6 @@ diff --git a/package.json b/package.json
    "description": "library for extracting marketing attribution data (such as search terms) from referrer URLs",
    "main": "index.js",
    "scripts": {
-@@ -15,9 +15,9 @@
-     }
-   ],
-   "dependencies": {
--    "js-yaml": "~2.1.0"
-+    "js-yaml": "^4.1.0"
-   },
-   "devDependencies": {
--    "mocha": "~1.12.0"
-+    "mocha": "~10.2.0"
-   }
- }
 diff --git a/index.js b/index.js
 --- a/index.js
 +++ b/index.js

@@ -22,7 +22,7 @@ const TextOperation = core.TextOperation
 const V2DocVersions = core.V2DocVersions
 
 const knex = require('../../../../storage').knex
-const blobHash = require('../../../../storage/lib/blob_hash')
+const { blobHashFromString } = require('overleaf-editor-core/lib/blob_utils')
 
 describe('history import', function () {
   beforeEach(cleanup.everything)
@@ -537,7 +537,7 @@ describe('history import', function () {
         },
       ],
     })
-    const testRangesHash = blobHash.fromString(rangesContent)
+    const testRangesHash = blobHashFromString(rangesContent)
     const testFile = File.fromHash(testFiles.HELLO_TXT_HASH, testRangesHash)
 
     const [contentResponse, rangesResponse] = await Promise.all([

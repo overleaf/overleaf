@@ -17,6 +17,12 @@ import useReviewPanelLayout from '../hooks/use-review-panel-layout'
 import { EntryIndicator } from './review-panel-entry-indicator'
 import { EditorView } from '@codemirror/view'
 
+// how many frames to wait for the panel to position and show an entry. The
+// panel repositions on a 100ms debounce and animates the move over 300ms, so
+// 60 frames is roughly a second at 60fps: long enough to outlast both, short
+// enough that a stuck entry stops polling instead of spinning forever.
+const MAX_FOCUS_FRAMES = 60
+
 export const ReviewPanelEntry: FC<
   React.PropsWithChildren<{
     position: number
@@ -30,6 +36,8 @@ export const ReviewPanelEntry: FC<
     handleEnter?: () => void
     handleLeave?: () => void
     entryIndicator?: 'comment' | 'edit'
+    autoSelect?: boolean
+    onAutoSelected?: () => void
   }>
 > = ({
   children,
@@ -44,6 +52,8 @@ export const ReviewPanelEntry: FC<
   handleEnter,
   handleLeave,
   entryIndicator,
+  autoSelect,
+  onAutoSelected,
 }) => {
   const state = useCodeMirrorStateContext()
   const view = useCodeMirrorViewContext()
@@ -57,16 +67,25 @@ export const ReviewPanelEntry: FC<
   const mousePressedRef = useRef(false)
 
   const selectEntry = useCallback(
-    (event: React.FocusEvent | React.MouseEvent) => {
+    (event?: React.FocusEvent | React.MouseEvent) => {
       setFocused(true)
 
-      if (event.target instanceof HTMLTextAreaElement) {
+      // The add-comment input is a CodeMirror editor (contenteditable div)
+      // rather than a textarea, so also treat focus landing inside it as a
+      // text-input focus.
+      const target = event?.target
+      const isTextInput =
+        target instanceof HTMLTextAreaElement ||
+        (target instanceof HTMLElement &&
+          target.closest('.review-panel-add-comment-editor') !== null)
+
+      if (isTextInput) {
         const entryBottom =
           (entryRef.current?.offsetTop || 0) +
           (entryRef.current?.offsetHeight || 0)
 
         if (entryBottom > OFFSET_FOR_ENTRIES_ABOVE) {
-          // if the entry textarea is visible, no need to select the entry
+          // if the entry input is visible, no need to select the entry
           // so that it doesn't scroll out of view as user types
           setTextareaFocused(true)
           return
@@ -134,6 +153,46 @@ export const ReviewPanelEntry: FC<
       openDocWithId,
     ]
   )
+
+  const autoSelectDoneRef = useRef(false)
+  const focusFrameRef = useRef(0)
+
+  useEffect(() => {
+    if (!autoSelect || autoSelectDoneRef.current) {
+      return
+    }
+
+    autoSelectDoneRef.current = true
+    selectEntry()
+    onAutoSelected?.()
+
+    // the panel positions entries asynchronously and keeps them hidden until
+    // then, and focus() does nothing on a hidden element, so wait for the entry
+    // to become visible
+    let attempts = 0
+
+    const focusWhenVisible = () => {
+      const entry = entryRef.current
+
+      if (!entry) {
+        return
+      }
+
+      if (entry.style.visibility === 'hidden' && attempts < MAX_FOCUS_FRAMES) {
+        attempts++
+        focusFrameRef.current = window.requestAnimationFrame(focusWhenVisible)
+        return
+      }
+
+      entry.focus({ preventScroll: true })
+    }
+
+    focusFrameRef.current = window.requestAnimationFrame(focusWhenVisible)
+  }, [autoSelect, onAutoSelected, selectEntry])
+
+  useEffect(() => {
+    return () => window.cancelAnimationFrame(focusFrameRef.current)
+  }, [])
 
   // Clear op highlight on dismount
   useEffect(() => {

@@ -129,7 +129,7 @@ const renderMath = async (
   }
 
   const math = await MathJax.tex2svgPromise(content, {
-    ...MathJax.getMetricsFor(element),
+    ...MathJax.getMetricsFor(element, displayMode),
     display: displayMode,
   })
   element.textContent = ''

@@ -5,6 +5,10 @@ const MockWebApi = require('./helpers/MockWebApi')
 const DocUpdaterClient = require('./helpers/DocUpdaterClient')
 const DocUpdaterApp = require('./helpers/DocUpdaterApp')
 const { RequestFailedError } = require('@overleaf/fetch-utils')
+const { getRawReqInput } = require('@overleaf/validation-tools')
+const {
+  expectValidationError,
+} = require('@overleaf/validation-tools/testUtils')
 const PersistenceManager = require('../../../app/js/PersistenceManager')
 
 describe('Getting a document', function () {
@@ -57,7 +61,7 @@ describe('Getting a document', function () {
       sinon
         .stub(MockWebApi, 'getDocumentController')
         .callsFake((req, res, next) => {
-          expect(req.query.peek).to.equal('true')
+          expect(getRawReqInput(req).query.peek).to.equal('true')
           return origGetDocumentController(req, res, next)
         })
       this.project_id = DocUpdaterClient.randomId()
@@ -128,6 +132,70 @@ describe('Getting a document', function () {
     })
   })
 
+  describe('when the document is a history-ot doc with tracked changes and comments', function () {
+    before(async function () {
+      this.project_id = DocUpdaterClient.randomId()
+      this.doc_id = DocUpdaterClient.randomId()
+      this.user_id = DocUpdaterClient.randomId()
+      this.thread_id = DocUpdaterClient.randomId()
+      this.ts = new Date().toISOString()
+
+      MockWebApi.insertDoc(this.project_id, this.doc_id, {
+        lines: this.lines,
+        version: this.version,
+        otMigrationStage: 1,
+        ranges: {
+          changes: [
+            {
+              id: DocUpdaterClient.randomId(),
+              op: { p: 4, d: 'one and a half\n' },
+              metadata: { user_id: this.user_id, ts: this.ts },
+            },
+          ],
+          comments: [
+            {
+              id: this.thread_id,
+              op: { p: 0, c: 'one', t: this.thread_id },
+            },
+          ],
+        },
+      })
+
+      this.returnedDoc = await DocUpdaterClient.getDoc(
+        this.project_id,
+        this.doc_id
+      )
+    })
+
+    it('should return the doc as a history-ot doc', function () {
+      this.returnedDoc.type.should.equal('history-ot')
+    })
+
+    it('should return the document lines without tracked deletes', function () {
+      this.returnedDoc.lines.should.deep.equal(this.lines)
+    })
+
+    it('should return the tracked changes in editor format with fresh ids', function () {
+      expect(this.returnedDoc.ranges.changes).to.have.length(1)
+      const [change] = this.returnedDoc.ranges.changes
+      expect(change.id).to.match(/^[0-9a-f]{24}$/)
+      expect(change.op).to.deep.equal({ p: 4, d: 'one and a half\n' })
+      expect(change.metadata).to.deep.equal({
+        user_id: this.user_id,
+        ts: this.ts,
+      })
+    })
+
+    it('should return the comments in editor format', function () {
+      expect(this.returnedDoc.ranges.comments).to.deep.equal([
+        {
+          id: this.thread_id,
+          op: { p: 0, c: 'one', t: this.thread_id, resolved: false },
+        },
+      ])
+    })
+  })
+
   describe('when the request asks for some recent ops', function () {
     before(async function () {
       this.project_id = DocUpdaterClient.randomId()
@@ -190,6 +258,41 @@ describe('Getting a document', function () {
       await expect(DocUpdaterClient.getDoc(projectId, docId))
         .to.be.rejectedWith(RequestFailedError)
         .and.eventually.have.nested.property('response.status', 404)
+    })
+  })
+
+  describe('when the doc id is malformed', function () {
+    it('should return 404', async function () {
+      const projectId = DocUpdaterClient.randomId()
+      let err
+      try {
+        await DocUpdaterClient.getDoc(projectId, 'not-an-object-id')
+        expect.fail('should have thrown')
+      } catch (error) {
+        err = error
+      }
+      expectValidationError(err, 404, 'doc_id')
+    })
+  })
+
+  describe('when the project id is malformed', function () {
+    it('should return 404', async function () {
+      const docId = DocUpdaterClient.randomId()
+      let err
+      try {
+        // encodeURIComponent so the traversal payload arrives as a literal
+        // path segment (the value of params.project_id) instead of being
+        // collapsed by fetch()/URL's dot-segment normalization before the
+        // request reaches the wire.
+        await DocUpdaterClient.getDoc(
+          encodeURIComponent('../../etc/passwd'),
+          docId
+        )
+        expect.fail('should have thrown')
+      } catch (error) {
+        err = error
+      }
+      expectValidationError(err, 404, 'project_id')
     })
   })
 

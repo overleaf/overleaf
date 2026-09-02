@@ -42,11 +42,23 @@ const removeItem = function (key: string) {
   return sessionStorage.removeItem(key)
 }
 
+const removeByPrefix = function (prefix: string) {
+  const keys = []
+  for (let i = 0; i < sessionStorage.length; i++) {
+    const key = sessionStorage.key(i)
+    if (key !== null && key.startsWith(prefix)) {
+      keys.push(key)
+    }
+  }
+  keys.forEach(key => sessionStorage.removeItem(key))
+}
+
 const customSessionStorage = {
   getItem: (key: string) => callSafe(getItem, key),
   setItem: (key: string, value: any) => callSafe(setItem, key, value),
   clear: () => callSafe(clear),
   removeItem: (key: string) => callSafe(removeItem, key),
+  removeByPrefix: (prefix: string) => callSafe(removeByPrefix, prefix),
 }
 
 export default customSessionStorage

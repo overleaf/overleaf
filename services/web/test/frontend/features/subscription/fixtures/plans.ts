@@ -18,6 +18,7 @@ const features = {
     compileGroup: 'priority',
     trackChanges: true,
     symbolPalette: true,
+    offlineMode: true,
   },
   personal: {
     aiUsageQuota: 'basic',
@@ -35,6 +36,7 @@ const features = {
     compileGroup: 'priority',
     trackChanges: false,
     symbolPalette: true,
+    offlineMode: true,
   },
   collaborator: {
     aiUsageQuota: 'standard',
@@ -52,6 +54,7 @@ const features = {
     compileGroup: 'priority',
     trackChanges: true,
     symbolPalette: true,
+    offlineMode: true,
   },
   professional: {
     aiUsageQuota: 'unlimited',
@@ -69,6 +72,7 @@ const features = {
     compileGroup: 'priority',
     trackChanges: true,
     symbolPalette: true,
+    offlineMode: true,
   },
 } satisfies Record<string, Features>
 

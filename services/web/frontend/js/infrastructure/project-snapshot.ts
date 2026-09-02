@@ -1,6 +1,12 @@
 import pLimit from 'p-limit'
-import { Change, Chunk, Snapshot, File } from 'overleaf-editor-core'
-import { RawChange, RawChunk } from 'overleaf-editor-core/lib/types'
+import {
+  BlobStoreBase,
+  Change,
+  Chunk,
+  Snapshot,
+  File,
+} from 'overleaf-editor-core'
+import type { RawChange, RawChunk } from 'overleaf-editor-core/lib/types'
 import { FetchError, getJSON, postJSON } from '@/infrastructure/fetch-json'
 import path from 'path-browserify'
 
@@ -151,11 +157,13 @@ export class ProjectSnapshot {
     if (byteLength == null) {
       return null
     }
-    let blobStoreOptions
     if (options?.maxSize != null && byteLength > options?.maxSize) {
-      blobStoreOptions = { maxSize: options.maxSize }
+      const blobStoreOptions = { maxSize: options.maxSize }
+      // Straight to fetchString: a binary file large enough to be read with a size
+      // limit is never the empty content the base class answers for.
+      return await this.blobStore.fetchString(hash, blobStoreOptions)
     }
-    return await this.blobStore.getString(hash, blobStoreOptions)
+    return await this.blobStore.getString(hash)
   }
 
   getDocs(): Map<string, File> {
@@ -256,23 +264,19 @@ export class ProjectSnapshot {
 /**
  * Blob store that fetches blobs from the history service
  */
-export class SimpleBlobStore {
+export class SimpleBlobStore extends BlobStoreBase {
   private projectId: string
 
   constructor(projectId: string) {
+    super()
     this.projectId = projectId
   }
 
-  async getString(
+  async fetchString(
     hash: string,
     options?: { maxSize?: number }
   ): Promise<string> {
     return await fetchBlob(this.projectId, hash, options)
-  }
-
-  async getObject(hash: string) {
-    const blob = await this.getString(hash)
-    return JSON.parse(blob)
   }
 }
 

@@ -1,4 +1,4 @@
-import { vi, expect } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
 import mongodb from 'mongodb-legacy'
@@ -112,6 +112,9 @@ describe('ProjectEntityUpdateHandler', function () {
         getProject: sinon.stub(),
       },
     }
+    ctx.ProjectHelper = {
+      isTrackChangesEnabledForUser: sinon.stub().returns(false),
+    }
     ctx.ProjectLocator = {
       promises: {
         findElement: sinon.stub(),
@@ -215,6 +218,10 @@ describe('ProjectEntityUpdateHandler', function () {
 
     vi.doMock('../../../../app/src/Features/Project/ProjectGetter', () => ({
       default: ctx.ProjectGetter,
+    }))
+
+    vi.doMock('../../../../app/src/Features/Project/ProjectHelper', () => ({
+      default: ctx.ProjectHelper,
     }))
 
     vi.doMock('../../../../app/src/Features/Project/ProjectLocator', () => ({
@@ -838,6 +845,10 @@ describe('ProjectEntityUpdateHandler', function () {
   })
 
   describe('upsertDoc', function () {
+    beforeEach(function (ctx) {
+      ctx.ProjectGetter.promises.getProject.resolves(ctx.project)
+    })
+
     describe('upserting into an invalid folder', function () {
       beforeEach(function (ctx) {
         ctx.ProjectLocator.promises.findElement.resolves({ element: null })
@@ -866,6 +877,7 @@ describe('ProjectEntityUpdateHandler', function () {
     describe('updating an existing doc', function () {
       let upsertDocResponse
       beforeEach(async function (ctx) {
+        ctx.project.track_changes = { 'some-user-id': true }
         ctx.existingDoc = { _id: docId, name: ctx.docName }
         ctx.existingFile = {
           _id: fileId,
@@ -893,13 +905,29 @@ describe('ProjectEntityUpdateHandler', function () {
           )
       })
 
+      it('gets the project with the track changes state', function (ctx) {
+        ctx.ProjectGetter.promises.getProject
+          .calledWith(projectId, {
+            rootFolder: true,
+            rootDoc_id: true,
+            track_changes: true,
+          })
+          .should.equal(true)
+      })
+
       it('tries to find the folder', function (ctx) {
         ctx.ProjectLocator.promises.findElement
           .calledWith({
-            project_id: projectId,
+            project: ctx.project,
             element_id: folderId,
             type: 'folder',
           })
+          .should.equal(true)
+      })
+
+      it('resolves the track changes state for the user', function (ctx) {
+        ctx.ProjectHelper.isTrackChangesEnabledForUser
+          .calledWith(ctx.project.track_changes, userId)
           .should.equal(true)
       })
 
@@ -910,7 +938,8 @@ describe('ProjectEntityUpdateHandler', function () {
             ctx.existingDoc._id,
             userId,
             ctx.docLines,
-            ctx.source
+            ctx.source,
+            false
           )
           .should.equal(true)
       })
@@ -918,6 +947,44 @@ describe('ProjectEntityUpdateHandler', function () {
       it('returns the doc', function (ctx) {
         expect(upsertDocResponse.isNew).to.equal(false)
         expect(upsertDocResponse.doc).to.eql(ctx.existingDoc)
+      })
+    })
+
+    describe('updating an existing doc with track changes enabled for the user', function () {
+      beforeEach(async function (ctx) {
+        ctx.ProjectHelper.isTrackChangesEnabledForUser.returns(true)
+        ctx.existingDoc = { _id: docId, name: ctx.docName }
+        ctx.folder = {
+          _id: folderId,
+          docs: [ctx.existingDoc],
+          fileRefs: [],
+        }
+        ctx.ProjectLocator.promises.findElement.resolves({
+          element: ctx.folder,
+        })
+        ctx.DocumentUpdaterHandler.promises.setDocument.resolves()
+
+        await ctx.ProjectEntityUpdateHandler.promises.upsertDoc(
+          projectId,
+          folderId,
+          ctx.docName,
+          ctx.docLines,
+          ctx.source,
+          userId
+        )
+      })
+
+      it('updates the doc contents with track changes', function (ctx) {
+        ctx.DocumentUpdaterHandler.promises.setDocument
+          .calledWith(
+            projectId,
+            ctx.existingDoc._id,
+            userId,
+            ctx.docLines,
+            ctx.source,
+            true
+          )
+          .should.equal(true)
       })
     })
 
@@ -948,7 +1015,7 @@ describe('ProjectEntityUpdateHandler', function () {
       it('tries to find the folder', function (ctx) {
         ctx.ProjectLocator.promises.findElement
           .calledWith({
-            project_id: projectId,
+            project: ctx.project,
             element_id: folderId,
             type: 'folder',
           })
@@ -1019,7 +1086,7 @@ describe('ProjectEntityUpdateHandler', function () {
         ctx.filePath = '/path/to/folder/foo.tex'
         ctx.ProjectLocator.promises.findElement
           .withArgs({
-            project_id: projectId,
+            project: ctx.project,
             element_id: ctx.folder._id,
             type: 'folder',
           })
@@ -3165,6 +3232,10 @@ describe('ProjectEntityUpdateHandler', function () {
   })
 
   describe('appendToDoc', function () {
+    beforeEach(function (ctx) {
+      ctx.ProjectGetter.promises.getProject.resolves(ctx.project)
+    })
+
     describe('when document cannot be found', function () {
       let appendToDocPromise
       beforeEach(function (ctx) {
@@ -3172,7 +3243,7 @@ describe('ProjectEntityUpdateHandler', function () {
         ctx.DocumentUpdaterHandler.promises.appendToDocument = sinon.stub()
         ctx.ProjectLocator.promises.findElement = sinon.stub()
         ctx.ProjectLocator.promises.findElement
-          .withArgs({ project_id: projectId, element_id: docId, type: 'doc' })
+          .withArgs({ project: ctx.project, element_id: docId, type: 'doc' })
           .rejects(new Errors.NotFoundError())
         appendToDocPromise =
           ctx.ProjectEntityUpdateHandler.promises.appendToDocWithPath(
@@ -3214,6 +3285,7 @@ describe('ProjectEntityUpdateHandler', function () {
     describe('when document is found', function () {
       let appendToDocResult
       beforeEach(async function (ctx) {
+        ctx.project.track_changes = { 'some-user-id': true }
         ctx.appendedLines = ['5678', 'def']
         ctx.DocumentUpdaterHandler.promises.appendToDocument = sinon.stub()
         ctx.DocumentUpdaterHandler.promises.appendToDocument
@@ -3221,7 +3293,7 @@ describe('ProjectEntityUpdateHandler', function () {
           .resolves({ rev: 1 })
         ctx.ProjectLocator.promises.findElement = sinon.stub()
         ctx.ProjectLocator.promises.findElement
-          .withArgs({ project_id: projectId, element_id: docId, type: 'doc' })
+          .withArgs({ project: ctx.project, element_id: docId, type: 'doc' })
           .resolves({ element: { _id: docId } })
         appendToDocResult =
           await ctx.ProjectEntityUpdateHandler.promises.appendToDocWithPath(
@@ -3233,18 +3305,58 @@ describe('ProjectEntityUpdateHandler', function () {
           )
       })
 
+      it('should resolve the track changes state for the user', function (ctx) {
+        ctx.ProjectHelper.isTrackChangesEnabledForUser.should.have.been.calledWith(
+          ctx.project.track_changes,
+          userId
+        )
+      })
+
       it('should forward call to DocumentUpdaterHandler.appendToDocument', function (ctx) {
         ctx.DocumentUpdaterHandler.promises.appendToDocument.should.have.been.calledWith(
           projectId,
           docId,
           userId,
           ctx.appendedLines,
-          ctx.source
+          ctx.source,
+          false
         )
       })
 
       it('should return the response from DocumentUpdaterHandler', function () {
         expect(appendToDocResult).to.eql({ rev: 1 })
+      })
+    })
+
+    describe('when track changes is enabled for the user', function () {
+      beforeEach(async function (ctx) {
+        ctx.ProjectHelper.isTrackChangesEnabledForUser.returns(true)
+        ctx.appendedLines = ['5678', 'def']
+        ctx.DocumentUpdaterHandler.promises.appendToDocument = sinon
+          .stub()
+          .resolves({ rev: 1 })
+        ctx.ProjectLocator.promises.findElement = sinon.stub()
+        ctx.ProjectLocator.promises.findElement
+          .withArgs({ project: ctx.project, element_id: docId, type: 'doc' })
+          .resolves({ element: { _id: docId } })
+        await ctx.ProjectEntityUpdateHandler.promises.appendToDocWithPath(
+          projectId,
+          docId,
+          ctx.appendedLines,
+          ctx.source,
+          userId
+        )
+      })
+
+      it('should forward the track changes flag', function (ctx) {
+        ctx.DocumentUpdaterHandler.promises.appendToDocument.should.have.been.calledWith(
+          projectId,
+          docId,
+          userId,
+          ctx.appendedLines,
+          ctx.source,
+          true
+        )
       })
     })
 
@@ -3257,7 +3369,7 @@ describe('ProjectEntityUpdateHandler', function () {
         )
         ctx.ProjectLocator.promises.findElement = sinon.stub()
         ctx.ProjectLocator.promises.findElement
-          .withArgs({ project_id: projectId, element_id: docId, type: 'doc' })
+          .withArgs({ project: ctx.project, element_id: docId, type: 'doc' })
           .resolves({ element: { _id: docId } })
       })
 

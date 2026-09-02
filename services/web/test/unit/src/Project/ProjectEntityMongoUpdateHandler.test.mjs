@@ -1,4 +1,4 @@
-import { vi, expect } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import tk from 'timekeeper'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
@@ -73,7 +73,6 @@ describe('ProjectEntityMongoUpdateHandler', function () {
     }
 
     ctx.Settings = { maxEntitiesPerProject: 100 }
-    ctx.CooldownManager = {}
     ctx.LockManager = {
       promises: {
         runWithLock: sinon.spy((namespace, id, runner) => runner()),
@@ -199,10 +198,6 @@ describe('ProjectEntityMongoUpdateHandler', function () {
 
     vi.doMock('@overleaf/settings', () => ({
       default: ctx.Settings,
-    }))
-
-    vi.doMock('../../../../app/src/Features/Cooldown/CooldownManager', () => ({
-      default: ctx.CooldownManager,
     }))
 
     vi.doMock('../../../../app/src/models/Folder', () => ({

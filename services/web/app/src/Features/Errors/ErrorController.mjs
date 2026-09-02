@@ -10,6 +10,11 @@ import HttpErrorHandler from './HttpErrorHandler.mjs'
 import { plainTextResponse } from '../../infrastructure/Response.mjs'
 import { expressifyErrorHandler } from '@overleaf/promise-utils'
 
+// Keep in sync with the third-party-datastore service, which matches on this
+// code: services/third-party-datastore/app/js/Dropbox/DropboxPoller.ts
+// (_isWebOverLimitError).
+const TOO_MANY_FILES_ERROR_CODE = 'project_has_too_many_files'
+
 function notFound(req, res) {
   res.status(404)
   res.render('general/404', { title: 'page_not_found' })
@@ -151,6 +156,10 @@ function handleApiError(err, req, res, next) {
   } else if (err instanceof InvalidRequestError) {
     req.logger.setLevel('warn')
     if (shouldSendErrorResponse) res.sendStatus(400)
+  } else if (err instanceof Errors.TooManyFilesError) {
+    req.logger.setLevel('warn')
+    if (shouldSendErrorResponse)
+      res.status(422).json({ code: TOO_MANY_FILES_ERROR_CODE })
   } else {
     req.logger.setLevel('error')
     if (shouldSendErrorResponse) res.sendStatus(500)

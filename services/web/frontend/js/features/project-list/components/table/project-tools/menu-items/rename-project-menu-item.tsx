@@ -2,7 +2,7 @@ import { memo, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useProjectListContext } from '../../../../context/project-list-context'
 import useIsMounted from '../../../../../../shared/hooks/use-is-mounted'
-import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
+import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
 import RenameProjectModal from '../../../modals/rename-project-modal'
 
 function RenameProjectMenuItem() {
@@ -34,9 +34,9 @@ function RenameProjectMenuItem() {
 
   return (
     <>
-      <OLDropdownMenuItem onClick={handleOpenModal} as="button" tabIndex={-1}>
+      <DropdownMenuItem onClick={handleOpenModal} as="button" tabIndex={-1}>
         {t('rename')}
-      </OLDropdownMenuItem>
+      </DropdownMenuItem>
       <RenameProjectModal
         handleCloseModal={handleCloseModal}
         showModal={showModal}

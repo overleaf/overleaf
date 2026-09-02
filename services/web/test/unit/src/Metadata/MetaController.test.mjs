@@ -1,7 +1,11 @@
-import { expect, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import MockResponse from '../helpers/MockResponse.mjs'
+import { setReqValidationModeForTests } from '@overleaf/validation-tools'
 const modulePath = '../../../../app/src/Features/Metadata/MetaController.mjs'
+
+const PROJECT_ID = '507f1f77bcf86cd799439011'
+const DOC_ID = '507f191e810c19729de860ea'
 
 describe('MetaController', function () {
   beforeEach(async function (ctx) {
@@ -46,6 +50,10 @@ describe('MetaController', function () {
     ctx.MetadataController = (await import(modulePath)).default
   })
 
+  afterEach(function () {
+    setReqValidationModeForTests(null)
+  })
+
   describe('getMetadata', function () {
     it('should respond with json', async function (ctx) {
       const projectMeta = {
@@ -60,18 +68,18 @@ describe('MetaController', function () {
         .stub()
         .resolves(projectMeta)
 
-      const req = { params: { project_id: 'project-id' } }
+      const req = { params: { project_id: PROJECT_ID } }
       const res = new MockResponse(vi)
       const next = sinon.stub()
 
       await ctx.MetadataController.getMetadata(req, res, next)
 
       ctx.MetaHandler.promises.getAllMetaForProject.should.have.been.calledWith(
-        'project-id'
+        PROJECT_ID
       )
       expect(res.json).toHaveBeenCalledTimes(1)
       expect(res.json).toHaveBeenCalledWith({
-        projectId: 'project-id',
+        projectId: PROJECT_ID,
         projectMeta,
       })
       next.should.not.have.been.called
@@ -82,17 +90,32 @@ describe('MetaController', function () {
         .stub()
         .throws(new Error('woops'))
 
-      const req = { params: { project_id: 'project-id' } }
+      const req = { params: { project_id: PROJECT_ID } }
       const res = new MockResponse(vi)
       const next = sinon.stub()
 
       await ctx.MetadataController.getMetadata(req, res, next)
 
       ctx.MetaHandler.promises.getAllMetaForProject.should.have.been.calledWith(
-        'project-id'
+        PROJECT_ID
       )
       expect(res.json).not.toHaveBeenCalled()
       next.should.have.been.calledWithMatch(error => error instanceof Error)
+    })
+
+    it('should reject a malformed project id', async function (ctx) {
+      const req = { params: { project_id: 'not-an-object-id' } }
+      const res = new MockResponse(vi)
+      const next = sinon.stub()
+
+      await ctx.MetadataController.getMetadata(req, res, next)
+
+      expect(ctx.MetaHandler.promises.getAllMetaForProject.called).to.equal(
+        false
+      )
+      next.should.have.been.calledWithMatch(
+        error => error.name === 'InvalidParamsError'
+      )
     })
   })
 
@@ -107,7 +130,7 @@ describe('MetaController', function () {
       ctx.EditorRealTimeController.emitToRoom = sinon.stub()
 
       const req = {
-        params: { project_id: 'project-id', doc_id: 'doc-id' },
+        params: { project_id: PROJECT_ID, doc_id: DOC_ID },
         body: { broadcast: true },
       }
       const res = new MockResponse(vi)
@@ -116,7 +139,7 @@ describe('MetaController', function () {
       await ctx.MetadataController.broadcastMetadataForDoc(req, res, next)
 
       ctx.MetaHandler.promises.getMetaForDoc.should.have.been.calledWith(
-        'project-id'
+        PROJECT_ID
       )
       expect(res.json).not.toHaveBeenCalled()
       expect(res.sendStatus).toHaveBeenCalledTimes(1)
@@ -125,7 +148,7 @@ describe('MetaController', function () {
 
       ctx.EditorRealTimeController.emitToRoom.should.have.been.calledOnce
       const { lastCall } = ctx.EditorRealTimeController.emitToRoom
-      expect(lastCall.args[0]).to.equal('project-id')
+      expect(lastCall.args[0]).to.equal(PROJECT_ID)
       expect(lastCall.args[1]).to.equal('broadcastDocMeta')
       expect(lastCall.args[2]).to.have.all.keys(['docId', 'meta'])
     })
@@ -142,7 +165,7 @@ describe('MetaController', function () {
       ctx.EditorRealTimeController.emitToRoom = sinon.stub()
 
       const req = {
-        params: { project_id: 'project-id', doc_id: 'doc-id' },
+        params: { project_id: PROJECT_ID, doc_id: DOC_ID },
         body: { broadcast: false },
       }
       const res = new MockResponse(vi)
@@ -151,12 +174,12 @@ describe('MetaController', function () {
       await ctx.MetadataController.broadcastMetadataForDoc(req, res, next)
 
       ctx.MetaHandler.promises.getMetaForDoc.should.have.been.calledWith(
-        'project-id'
+        PROJECT_ID
       )
       ctx.EditorRealTimeController.emitToRoom.should.not.have.been.called
       expect(res.json).toHaveBeenCalledTimes(1)
       expect(res.json).toHaveBeenCalledWith({
-        docId: 'doc-id',
+        docId: DOC_ID,
         meta: docMeta,
       })
       next.should.not.have.been.called
@@ -170,7 +193,7 @@ describe('MetaController', function () {
       ctx.EditorRealTimeController.emitToRoom = sinon.stub()
 
       const req = {
-        params: { project_id: 'project-id', doc_id: 'doc-id' },
+        params: { project_id: PROJECT_ID, doc_id: DOC_ID },
         body: { broadcast: true },
       }
       const res = new MockResponse(vi)
@@ -179,10 +202,48 @@ describe('MetaController', function () {
       await ctx.MetadataController.broadcastMetadataForDoc(req, res, next)
 
       ctx.MetaHandler.promises.getMetaForDoc.should.have.been.calledWith(
-        'project-id'
+        PROJECT_ID
       )
       expect(res.json).not.toHaveBeenCalled()
       next.should.have.been.calledWithMatch(error => error instanceof Error)
+    })
+
+    describe('request validation', function () {
+      beforeEach(function () {
+        setReqValidationModeForTests('enforce')
+      })
+
+      it('should reject a malformed doc id', async function (ctx) {
+        const req = {
+          params: { project_id: PROJECT_ID, doc_id: 'not-an-object-id' },
+          body: { broadcast: true },
+        }
+        const res = new MockResponse(vi)
+        const next = sinon.stub()
+
+        await ctx.MetadataController.broadcastMetadataForDoc(req, res, next)
+
+        expect(ctx.MetaHandler.promises.getMetaForDoc.called).to.equal(false)
+        next.should.have.been.calledWithMatch(
+          error => error.name === 'InvalidParamsError'
+        )
+      })
+
+      it('should reject an unrecognized body field', async function (ctx) {
+        const req = {
+          params: { project_id: PROJECT_ID, doc_id: DOC_ID },
+          body: { broadcast: true, evil: 'x' },
+        }
+        const res = new MockResponse(vi)
+        const next = sinon.stub()
+
+        await ctx.MetadataController.broadcastMetadataForDoc(req, res, next)
+
+        expect(ctx.MetaHandler.promises.getMetaForDoc.called).to.equal(false)
+        next.should.have.been.calledWithMatch(
+          error => error.name === 'InvalidRequestError'
+        )
+      })
     })
   })
 })

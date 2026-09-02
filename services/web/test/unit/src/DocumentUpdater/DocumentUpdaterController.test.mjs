@@ -1,4 +1,4 @@
-import { expect, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import MockResponse from '../helpers/MockResponse.mjs'
 
@@ -37,7 +37,9 @@ describe('DocumentUpdaterController', function () {
     )
 
     ctx.controller = (await import(MODULE_PATH)).default
-    ctx.projectId = '2k3j1lk3j21lk3j'
+    // Project_id/Doc_id are validated as Mongo ObjectIds
+    ctx.projectId = '507f191e810c19729de860ea'
+    ctx.docId = '507f191e810c19729de860eb'
     ctx.fileId = '12321kklj1lk3jk12'
     ctx.req = {
       params: {

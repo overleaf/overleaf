@@ -1,4 +1,5 @@
 import express from 'express'
+import { ParamsDictionary, Query } from 'express-serve-static-core'
 import {
   GetProjectsRequestBody,
   GetProjectsResponseBody,
@@ -10,10 +11,10 @@ import { ObjectId } from 'mongodb-legacy'
 import { Source } from '../Authorization/types'
 
 export type GetProjectsRequest = express.Request<
-  unknown,
-  unknown,
+  ParamsDictionary,
+  GetProjectsResponseBody,
   GetProjectsRequestBody,
-  unknown
+  Query
 >
 
 export type GetProjectsResponse = express.Response<GetProjectsResponseBody>

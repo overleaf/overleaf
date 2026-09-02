@@ -19,9 +19,6 @@ describe('RedisManager', function () {
           redis: {
             documentupdater: {
               key_schema: {
-                blockingKey({ doc_id: docId }) {
-                  return `Blocking:${docId}`
-                },
                 docLines({ doc_id: docId }) {
                   return `doclines:${docId}`
                 },
@@ -36,9 +33,6 @@ describe('RedisManager', function () {
                 },
                 projectKey({ doc_id: docId }) {
                   return `ProjectId:${docId}`
-                },
-                pendingUpdates({ doc_id: docId }) {
-                  return `PendingUpdates:${docId}`
                 },
                 docsInProject({ project_id: projectId }) {
                   return `DocsIn:${projectId}`

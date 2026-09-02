@@ -114,6 +114,7 @@ function _ensureIdsAreObjectIds(query) {
 
 export async function duplicateRoomToOtherRoom(sourceRoomId, targetRoomId) {
   const sourceMessages = await findAllMessagesInRooms([sourceRoomId])
+  if (sourceMessages.length === 0) return
   const targetMessages = sourceMessages.map(comment => {
     return _ensureIdsAreObjectIds({
       room_id: targetRoomId,

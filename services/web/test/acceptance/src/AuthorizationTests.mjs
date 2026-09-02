@@ -212,7 +212,6 @@ describe('Authorization', function () {
     this.other2 = new User()
     this.anon = new User()
     this.site_admin = new User({ email: 'admin@example.com' })
-    settings.adminRolesEnabled = false
     await Promise.all([
       this.owner.login(),
       this.other1.login(),

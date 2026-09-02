@@ -121,6 +121,7 @@ export default defineMain({
           ...storybookConfig.resolve?.alias,
           // custom prefixes for import paths
           '@': path.join(rootDir, 'frontend/js/'),
+          '@shared': path.join(rootDir, 'shared/'),
           '@modules': path.join(rootDir, 'modules/'),
           '@ol-types': path.join(rootDir, 'types/'),
           '@ol-storybook': path.join(rootDir, '.storybook/'),
@@ -128,6 +129,9 @@ export default defineMain({
             rootDir,
             'modules/writefull/frontend/js/integration/src/'
           ),
+          // Allow all packages to resolve core-js (injected by Babel's
+          // useBuiltIns: 'usage') even under Yarn PnP strict resolution.
+          'core-js': path.dirname(require.resolve('core-js/package.json')),
         },
       },
       module: {
@@ -135,6 +139,24 @@ export default defineMain({
         rules: (storybookConfig.module?.rules ?? []).concat(
           {
             test: /\.wasm$/,
+            type: 'asset/resource',
+            generator: {
+              filename: 'js/[name]-[contenthash][ext]',
+            },
+          },
+          {
+            // ONNX Runtime model files (symbol-recognition)
+            test: /\.ort$/,
+            type: 'asset/resource',
+            generator: {
+              filename: 'js/[name]-[contenthash][ext]',
+            },
+          },
+          {
+            // The reduced onnxruntime-web wasm glue (symbol-recognition).
+            // Emitting it as an asset stops webpack from parsing it (it
+            // contains a `worker_threads` require that only runs in Node).
+            test: /ort-wasm-simd-threaded\.mjs$/,
             type: 'asset/resource',
             generator: {
               filename: 'js/[name]-[contenthash][ext]',

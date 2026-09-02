@@ -14,7 +14,8 @@ import RequestParser from './RequestParser.js'
 import { pipeline } from 'node:stream/promises'
 import Settings from '@overleaf/settings'
 import Path from 'node:path'
-import { z } from '@overleaf/validation-tools'
+import { parseReq, z, zz } from '@overleaf/validation-tools'
+import { compileRequestBodySchema } from './schemas.js'
 
 const CONVERSION_CONFIGS = {
   docx: { extension: 'docx' },
@@ -22,17 +23,20 @@ const CONVERSION_CONFIGS = {
   html: { extension: 'zip' },
 }
 
-async function convertDocumentToLaTeX(req, res) {
-  const { path } = req.file
-  const conversionType = req.query.type
-  if (!Settings.enablePandocConversions) {
-    await fs.unlink(path).catch(() => {})
-    return res.sendStatus(404)
+// Shared by every multer route: validate the schema and, if that fails,
+// still clean up the uploaded temp file before propagating the error (the
+// upload is guaranteed present by FileUploadMiddleware, so it is safe to
+// unlink even though the schema hasn't validated it yet).
+async function parseUploadedFileReq(req, schema, opts) {
+  try {
+    return parseReq(req, schema, opts)
+  } catch (err) {
+    await fs.unlink(req.file.path).catch(() => {})
+    throw err
   }
-  if (!conversionType || !['docx', 'markdown'].includes(conversionType)) {
-    await fs.unlink(path).catch(() => {})
-    return res.sendStatus(400)
-  }
+}
+
+async function runDocumentToLaTeXConversion(res, path, conversionType) {
   logger.debug({ path, conversionType }, 'received file for conversion')
   const conversionId = crypto.randomUUID()
   let zipPath
@@ -79,22 +83,72 @@ async function convertDocumentToLaTeX(req, res) {
   }
 }
 
-const PDFToJPEGQuerySchema = z.object({
-  mode: z.enum(['preview', 'thumbnail']),
+const uploadedFileOnlySchema = z.object({ file: zz.uploadedFile() })
+
+const convertDocumentToLaTeXSchema = z.object({
+  // web's DocumentConversionManager.mjs always appends compileBackendClass
+  // and compileGroup to this route's URL (same as CompileController.js's
+  // clsiRoutingQueryFields), so the strict query schema must allow them too.
+  query: z.strictObject({
+    type: z.enum(['docx', 'markdown']),
+    compileBackendClass: zz.compileBackendClass().optional(),
+    compileGroup: zz.compileGroup().optional(),
+  }),
+  file: zz.uploadedFile(),
+})
+
+async function convertDocumentToLaTeX(req, res) {
+  if (!Settings.enablePandocConversions) {
+    await fs.unlink(req.file.path).catch(() => {})
+    return res.sendStatus(404)
+  }
+  const { file, query } = await parseUploadedFileReq(
+    req,
+    convertDocumentToLaTeXSchema,
+    { logOnly: true }
+  )
+  await runDocumentToLaTeXConversion(res, file.path, query.type)
+}
+
+// Legacy alias of convertDocumentToLaTeX, kept for backwards compatibility
+// during CLSI/web deploy transitions (see app.js): conversionType is fixed to
+// 'docx' rather than read from the query string.
+async function convertDocxToLaTeX(req, res) {
+  if (!Settings.enablePandocConversions) {
+    await fs.unlink(req.file.path).catch(() => {})
+    return res.sendStatus(404)
+  }
+  const { file } = await parseUploadedFileReq(req, uploadedFileOnlySchema, {
+    logOnly: true,
+  })
+  await runDocumentToLaTeXConversion(res, file.path, 'docx')
+}
+
+const convertPDFToJPEGSchema = z.object({
+  query: z.strictObject({
+    mode: z.enum(['preview', 'thumbnail']),
+    // v1's CLSI::PdfToJpeg always appends this (Rails.application.config
+    // .conversion_compile_backend_class); clsi-lb's haproxy config already
+    // used it to route the request to the right backend pool
+    // (url_param(compileBackendClass), see clsi-lb/app/js/haproxy-config.ts),
+    // so the handler below doesn't need to read it again.
+    compileBackendClass: zz.compileBackendClass().optional(),
+  }),
+  file: zz.uploadedFile(),
 })
 
 async function convertPDFToJPEG(req, res) {
-  const { path } = req.file
   if (!Settings.enablePdfConversions) {
-    await fs.unlink(path).catch(() => {})
+    await fs.unlink(req.file.path).catch(() => {})
     return res.sendStatus(404)
   }
-  const parsed = PDFToJPEGQuerySchema.safeParse(req.query)
-  if (!parsed.success) {
-    await fs.unlink(path).catch(() => {})
-    return res.sendStatus(400)
-  }
-  const { mode } = parsed.data
+  const { file, query } = await parseUploadedFileReq(
+    req,
+    convertPDFToJPEGSchema,
+    { logOnly: true }
+  )
+  const { path } = file
+  const { mode } = query
   logger.debug({ path, mode }, 'received pdf for conversion to jpeg')
   const conversionId = crypto.randomUUID()
   let jpegPath
@@ -124,24 +178,67 @@ async function convertPDFToJPEG(req, res) {
   }
 }
 
+// type/CONVERSION_CONFIGS keys kept in sync explicitly (rather than deriving
+// the enum from Object.keys) so the valid values are visible at a glance.
+const convertProjectToDocumentSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId().or(zz.submissionId()),
+    user_id: zz.objectId(),
+  }),
+  // web's DocumentConversionManager.mjs always appends compileBackendClass
+  // and compileGroup to this route's URL (same as CompileController.js's
+  // clsiRoutingQueryFields), so the strict query schema must allow them too.
+  query: z.strictObject({
+    type: z.enum(['docx', 'markdown', 'html']),
+    responseFormat: z.enum(['json', 'stream']).optional().default('stream'),
+    compileBackendClass: zz.compileBackendClass().optional(),
+    compileGroup: zz.compileGroup().optional(),
+  }),
+  body: compileRequestBodySchema,
+})
+
+// Rollout-temporary fallback (loosened primary schema; no zod validation
+// existed for this route on main); delete when this route's
+// REQ_VALIDATION_MODE instrumentation is removed. `body` is reused as-is:
+// compileRequestBodySchema has no coercions/defaults of its own, so a raw
+// passthrough of it on failure hands the handler the same shape it always
+// has (RequestParser does its own, non-zod parsing of the body).
+const convertProjectToDocumentFallbackSchema = z.object({
+  params: z.object({
+    project_id: z.string(),
+    user_id: z.string(),
+  }),
+  query: z.object({
+    type: z.enum(['docx', 'markdown', 'html']),
+    responseFormat: z.enum(['json', 'stream']).optional().default('stream'),
+  }),
+  body: compileRequestBodySchema,
+})
+
 async function convertProjectToDocument(req, res) {
   if (!Settings.enablePandocConversions) {
     return res.sendStatus(404)
   }
 
-  const { user_id: userId, project_id: projectId } = req.params
-  const type = req.query.type
-  if (!Object.hasOwn(CONVERSION_CONFIGS, type)) {
-    return res.sendStatus(400)
-  }
+  const { params, query, body } = parseReq(
+    req,
+    convertProjectToDocumentSchema,
+    {
+      logOnly: true,
+      fallbackSchema: convertProjectToDocumentFallbackSchema,
+    }
+  )
+  const { project_id: projectId, user_id: userId } = params
+  const { type, responseFormat } = query
   const config = CONVERSION_CONFIGS[type]
 
-  const request = await RequestParser.promises.parse(req.body)
+  const request = await RequestParser.promises.parse(body)
   request.project_id = projectId
   request.user_id = userId
   request.metricsOpts = {}
-
-  const responseFormat = req.query.responseFormat === 'json' ? 'json' : 'stream'
+  // Document conversions reuse the history writer but must never run png2pdf:
+  // the converted PDF bytes would be fed to pandoc instead of the original png.
+  request.png2pdf = false
 
   const conversionId = crypto.randomUUID()
   const conversionDir = Path.join(Settings.path.compilesDir, conversionId)
@@ -176,7 +273,8 @@ async function convertProjectToDocument(req, res) {
           userId,
           request,
           conversionDir,
-          {}
+          {}, // timings
+          {} // stats
         )
       } catch (err) {
         if (err instanceof Errors.MissingUpdatesError) {
@@ -253,6 +351,7 @@ async function convertProjectToDocument(req, res) {
 
 export default {
   convertDocumentToLaTeX: expressify(convertDocumentToLaTeX),
+  convertDocxToLaTeX: expressify(convertDocxToLaTeX),
   convertProjectToDocument: expressify(convertProjectToDocument),
   convertPDFToJPEG: expressify(convertPDFToJPEG),
 }

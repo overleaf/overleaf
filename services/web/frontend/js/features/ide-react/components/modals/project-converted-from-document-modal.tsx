@@ -8,7 +8,7 @@ import {
 } from '@/shared/components/ol/ol-modal'
 import OLButton from '@/shared/components/ol/ol-button'
 import { useEffect, useState } from 'react'
-import { showImportDocumentFeedbackToast } from '@/features/project-list/components/new-project-button/import-document-feedback-toast'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 function ProjectConvertedFromDocumentModal() {
   const [convertedFrom, setConvertedFrom] = useState<string | null>(null)
@@ -34,9 +34,6 @@ function ProjectConvertedFromDocumentModal() {
         <ProjectConvertedFromImportModalContent
           onHide={() => {
             setConvertedFrom(null)
-            if (convertedFrom === 'docx' || convertedFrom === 'markdown') {
-              showImportDocumentFeedbackToast(convertedFrom)
-            }
           }}
         />
       )}
@@ -50,6 +47,7 @@ function ProjectConvertedFromImportModalContent({
   onHide: () => void
 }) {
   const { t } = useTranslation()
+  const themed = useFeatureFlag('themed-modals')
 
   return (
     <OLModal
@@ -58,6 +56,7 @@ function ProjectConvertedFromImportModalContent({
       onHide={onHide}
       id="converted-from-document-modal"
       backdrop="static"
+      themed={themed}
     >
       <OLModalHeader>
         <OLModalTitle as="h3">{t('document_ready_for_editing')}</OLModalTitle>

@@ -39,7 +39,7 @@ export const AiConsentPromptMessageBody = ({
           <a
             href="https://docs.overleaf.com/integrations-and-add-ons/ai-features#data-privacy-and-responsible-use"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
           >
             our docs
           </a>

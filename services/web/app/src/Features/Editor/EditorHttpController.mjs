@@ -24,11 +24,25 @@ export default {
   deleteDoc: expressify(deleteDoc),
   deleteFile: expressify(deleteFile),
   deleteFolder: expressify(deleteFolder),
-  deleteEntity: expressify(deleteEntity),
   _nameIsAcceptableLength,
 }
 
-const joinProjectSchema = z.object({
+export const joinProjectSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+  }),
+  body: z.strictObject({
+    // the real-time service sends the sentinel 'anonymous-user' for
+    // link-sharing visitors with no account (see real-time's
+    // Router.js/WebsocketController.js), otherwise a genuine user id
+    userId: zz.objectId().or(z.literal('anonymous-user')),
+    anonymousAccessToken: z.string().optional(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const joinProjectFallbackSchema = z.object({
   params: z.object({
     Project_id: zz.objectId(),
   }),
@@ -39,7 +53,9 @@ const joinProjectSchema = z.object({
 })
 
 async function joinProject(req, res, next) {
-  const { params, body } = parseReq(req, joinProjectSchema)
+  const { params, body } = parseReq(req, joinProjectSchema, {
+    fallbackSchema: joinProjectFallbackSchema,
+  })
   const projectId = params.Project_id
   let userId = body.userId
   if (userId === 'anonymous-user') {
@@ -52,7 +68,7 @@ async function joinProject(req, res, next) {
     isRestrictedUser,
     isTokenMember,
     isInvitedMember,
-  } = await _buildJoinProjectView(req, projectId, userId)
+  } = await _buildJoinProjectView(projectId, userId, body.anonymousAccessToken)
   if (!project) {
     return res.sendStatus(403)
   }
@@ -76,13 +92,12 @@ async function joinProject(req, res, next) {
   })
 }
 
-async function _buildJoinProjectView(req, projectId, userId) {
+async function _buildJoinProjectView(projectId, userId, token) {
   const project = await ProjectGetter.promises.getProject(projectId)
   if (project == null) {
     throw new Errors.NotFoundError('project not found')
   }
   const projectAccess = new ProjectAccess(project)
-  const token = req.body.anonymousAccessToken
   const privilegeLevel =
     await AuthorizationManager.promises.getPrivilegeLevelForProjectWithProjectAccess(
       userId,
@@ -111,13 +126,23 @@ async function _buildJoinProjectView(req, projectId, userId) {
       await projectAccess.loadOwnerAndInvitedMembers())
     invites = await CollaboratorsInviteGetter.promises.getAllInvites(projectId)
   }
+  const accessRequestData = {}
+  if (privilegeLevel === PrivilegeLevels.OWNER) {
+    accessRequestData.editAccessRequests =
+      await projectAccess.loadAccessRequestsView()
+  } else if (userId) {
+    // Caller's own request only, so safe for restricted (link-share) viewers.
+    accessRequestData.myAccessRequest =
+      projectAccess.getAccessRequestForUser(userId)
+  }
   return {
     project: ProjectEditorHandler.buildProjectModelView(
       project,
       ownerMember,
       members,
       invites,
-      isRestrictedUser
+      isRestrictedUser,
+      accessRequestData
     ),
     privilegeLevel,
     isTokenMember,
@@ -130,10 +155,37 @@ function _nameIsAcceptableLength(name) {
   return name != null && name.length < 150 && name.length !== 0
 }
 
+const addEntitySchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+  }),
+  body: z.strictObject({
+    // an unacceptable (missing/empty/too-long) name is handled below by
+    // _nameIsAcceptableLength, which replies with a bare 400 -- kept
+    // optional here so that path (not a validation-error response) still
+    // runs for a missing name
+    name: z.string().optional(),
+    // top-level creation (directly under the project root) omits this
+    // field entirely, or sends it as null -- see file-tree-actionable.tsx's
+    // getSelectedParentFolderId, which does pass the root folder's own id
+    // explicitly for the interactive editor's "new file/folder" UI, but
+    // other real callers (e.g. ProjectStructureTests.mjs's
+    // createExampleFolder, mirroring third-party API usage) legitimately
+    // omit it or send null. ProjectEntityMongoUpdateHandler's
+    // _confirmFolder() already treats a missing/null parentFolderId
+    // (`== null`) as "use the project's root folder", exactly like
+    // ProjectUploadController's analogous folder_id/targetFolderId fields,
+    // so this is modeled the same way here rather than requiring every
+    // caller to resolve the root folder id up front.
+    parent_folder_id: zz.objectId().nullish(),
+  }),
+})
+
 async function addDoc(req, res, next) {
-  const projectId = req.params.Project_id
-  const { name } = req.body
-  const parentFolderId = req.body.parent_folder_id
+  const { params, body } = parseReq(req, addEntitySchema, { logOnly: true })
+  const projectId = params.Project_id
+  const { name } = body
+  const parentFolderId = body.parent_folder_id
   const userId = SessionManager.getLoggedInUserId(req.session)
 
   if (!_nameIsAcceptableLength(name)) {
@@ -150,7 +202,7 @@ async function addDoc(req, res, next) {
     )
     res.json(doc)
   } catch (err) {
-    if (err.message === 'project_has_too_many_files') {
+    if (err instanceof Errors.TooManyFilesError) {
       res.status(400).json(
         req.i18n.translate('project_has_too_many_files_limit', {
           limit: Settings.maxEntitiesPerProject,
@@ -163,9 +215,10 @@ async function addDoc(req, res, next) {
 }
 
 async function addFolder(req, res, next) {
-  const projectId = req.params.Project_id
-  const { name } = req.body
-  const parentFolderId = req.body.parent_folder_id
+  const { params, body } = parseReq(req, addEntitySchema, { logOnly: true })
+  const projectId = params.Project_id
+  const { name } = body
+  const parentFolderId = body.parent_folder_id
   const userId = SessionManager.getLoggedInUserId(req.session)
   if (!_nameIsAcceptableLength(name)) {
     return res.sendStatus(400)
@@ -180,7 +233,7 @@ async function addFolder(req, res, next) {
     )
     res.json(doc)
   } catch (err) {
-    if (err.message === 'project_has_too_many_files') {
+    if (err instanceof Errors.TooManyFilesError) {
       res.status(400).json(
         req.i18n.translate('project_has_too_many_files_limit', {
           limit: Settings.maxEntitiesPerProject,
@@ -194,11 +247,28 @@ async function addFolder(req, res, next) {
   }
 }
 
+const entityActionParamsSchema = z.strictObject({
+  Project_id: zz.objectId(),
+  entity_id: zz.objectId(),
+  entity_type: z.enum(['doc', 'file', 'folder']),
+})
+
+const renameEntitySchema = z.object({
+  params: entityActionParamsSchema,
+  body: z.strictObject({
+    name: z.string().optional(),
+    source: z.string().optional(),
+  }),
+})
+
 async function renameEntity(req, res, next) {
-  const projectId = req.params.Project_id
-  const entityId = req.params.entity_id
-  const entityType = req.params.entity_type
-  const { name, source = 'editor' } = req.body
+  const { params, body } = parseReq(req, renameEntitySchema, {
+    logOnly: true,
+  })
+  const projectId = params.Project_id
+  const entityId = params.entity_id
+  const entityType = params.entity_type
+  const { name, source = 'editor' } = body
   if (!_nameIsAcceptableLength(name)) {
     return res.sendStatus(400)
   }
@@ -214,12 +284,21 @@ async function renameEntity(req, res, next) {
   res.sendStatus(204)
 }
 
+const moveEntitySchema = z.object({
+  params: entityActionParamsSchema,
+  body: z.strictObject({
+    folder_id: zz.objectId(),
+    source: z.string().optional(),
+  }),
+})
+
 async function moveEntity(req, res, next) {
-  const projectId = req.params.Project_id
-  const entityId = req.params.entity_id
-  const entityType = req.params.entity_type
-  const folderId = req.body.folder_id
-  const source = req.body.source ?? 'editor'
+  const { params, body } = parseReq(req, moveEntitySchema, { logOnly: true })
+  const projectId = params.Project_id
+  const entityId = params.entity_id
+  const entityType = params.entity_type
+  const folderId = body.folder_id
+  const source = body.source ?? 'editor'
   const userId = SessionManager.getLoggedInUserId(req.session)
   await EditorController.promises.moveEntity(
     projectId,
@@ -232,25 +311,29 @@ async function moveEntity(req, res, next) {
   res.sendStatus(204)
 }
 
+const deleteEntitySchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+    entity_id: zz.objectId(),
+  }),
+})
+
 async function deleteDoc(req, res, next) {
-  req.params.entity_type = 'doc'
-  await deleteEntity(req, res, next)
+  await _deleteEntity(req, res, 'doc')
 }
 
 async function deleteFile(req, res, next) {
-  req.params.entity_type = 'file'
-  await deleteEntity(req, res, next)
+  await _deleteEntity(req, res, 'file')
 }
 
 async function deleteFolder(req, res, next) {
-  req.params.entity_type = 'folder'
-  await deleteEntity(req, res, next)
+  await _deleteEntity(req, res, 'folder')
 }
 
-async function deleteEntity(req, res, next) {
-  const projectId = req.params.Project_id
-  const entityId = req.params.entity_id
-  const entityType = req.params.entity_type
+async function _deleteEntity(req, res, entityType) {
+  const { params } = parseReq(req, deleteEntitySchema, { logOnly: true })
+  const projectId = params.Project_id
+  const entityId = params.entity_id
   const userId = SessionManager.getLoggedInUserId(req.session)
   await EditorController.promises.deleteEntity(
     projectId,

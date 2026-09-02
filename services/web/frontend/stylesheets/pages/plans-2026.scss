@@ -169,7 +169,8 @@
 
     &[data-ol-student-mode='true'] {
       .plans-new-group-member-picker,
-      .plans-educational-discount {
+      .plans-educational-discount,
+      .hide-for-plan-type-student {
         display: none;
       }
 
@@ -517,10 +518,7 @@
 
   .plans-feature-table-scroll-wrapper {
     padding-top: var(--spacing-04);
-
-    @include media-breakpoint-down(lg) {
-      overflow-x: auto;
-    }
+    overflow-x: auto;
   }
 
   // Below xl the plan cards already show prices and CTAs — the table
@@ -537,12 +535,17 @@
 
   .plans-feature-table {
     border: 1px solid var(--border-divider);
+    position: relative;
 
     // separate + spacing 0 is required for position: sticky on header cells
     border-collapse: separate;
     border-radius: var(--border-radius-medium);
     border-spacing: 0;
-    min-width: 768px;
+
+    // Set min-width to allow enough width for each plan column and prevent
+    // truncation of the column header (e.g. "Organizations") while ensuring
+    // that the table doesn't scroll above the large breakpoint (992px)
+    min-width: 968px;
     table-layout: fixed;
     width: 100%;
 

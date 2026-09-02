@@ -12,7 +12,7 @@ mixin notificationIcon(type)
 		+material-symbol('warning')
 
 mixin notification(options)
-	- var {ariaLive, id, type, title, content, disclaimer, className, dismissId, dismissCookiePaths} = options ?? {}
+	- var {ariaLive, id, type, title, content, action, disclaimer, className, dismissId, dismissCookiePaths, isActionBelowContent} = options ?? {}
 	- var classNames = `notification notification-type-${type} ${className ? className : ''} ${isActionBelowContent ? 'notification-cta-below-content' : ''}`
 
 	if dismissId && dismissedNotifications.includes(dismissId)
@@ -35,9 +35,8 @@ mixin notification(options)
 							b #{title}
 					| !{content}
 					block
-				//- TODO: handle action
-				//- if action
-				//- 	.notification-cta
+				if action
+					.notification-cta !{action}
 				if disclaimer
 					.notification-disclaimer #{disclaimer}
 			if dismissId

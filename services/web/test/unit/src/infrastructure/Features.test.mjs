@@ -1,4 +1,4 @@
-import { vi, expect } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 const modulePath = '../../../../app/src/infrastructure/Features.mjs'
 
 describe('Features', function () {

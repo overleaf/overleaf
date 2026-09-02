@@ -2,18 +2,19 @@
 
 const config = require('config')
 const fs = require('node:fs')
-const isValidUtf8 = require('utf-8-validate')
 const { ReadableString } = require('@overleaf/stream-utils')
 
 const core = require('overleaf-editor-core')
+const {
+  blobHashFromStream,
+  blobHashFromString,
+  getStringLengthOfFile,
+} = require('overleaf-editor-core/lib/blob_utils')
 const objectPersistor = require('@overleaf/object-persistor')
 const OError = require('@overleaf/o-error')
 const Blob = core.Blob
-const TextOperation = core.TextOperation
-const containsNonBmpChars = core.util.containsNonBmpChars
 
 const assert = require('../assert')
-const blobHash = require('../blob_hash')
 const mongodb = require('../mongodb')
 const persistor = require('../persistor')
 const projectKey = require('@overleaf/object-persistor/src/ProjectKey.js')
@@ -27,6 +28,21 @@ const { promiseMapWithLimit } = require('@overleaf/promise-utils')
 
 /** @type {Map<string, { blob: core.Blob, demoted: boolean}>} */
 const GLOBAL_BLOBS = new Map()
+
+/**
+ * Empty content, which reads need nothing stored to answer.
+ *
+ * Its hash is a property of the content rather than of anything written, and every
+ * project's empty file has it, so a read answers it from here rather than looking for
+ * it: a file may reference it before anything has stored it. Writes are unchanged and
+ * still store it, so a project that wrote empty content also has a blob for it; a read
+ * answers the same either way.
+ *
+ * Left out of `GLOBAL_BLOBS` deliberately, because that is loaded from the database and
+ * can be configured away, and because a global blob is fetched from the global bucket
+ * rather than not fetched at all.
+ */
+const EMPTY_BLOB = new Blob(Blob.EMPTY_HASH, 0, 0)
 
 function makeGlobalKey(hash) {
   return `${hash.slice(0, 2)}/${hash.slice(2, 4)}/${hash.slice(4)}`
@@ -101,28 +117,11 @@ function getBackend(projectId) {
 
 async function makeBlobForFile(pathname) {
   const { size: byteLength } = await fs.promises.stat(pathname)
-  const hash = await blobHash.fromStream(
+  const hash = await blobHashFromStream(
     byteLength,
     fs.createReadStream(pathname)
   )
   return new Blob(hash, byteLength)
-}
-
-async function getStringLengthOfFile(byteLength, pathname) {
-  // We have to read the file into memory to get its UTF-8 length, so don't
-  // bother for files that are too large for us to edit anyway.
-  if (byteLength > Blob.MAX_EDITABLE_BYTE_LENGTH_BOUND) {
-    return null
-  }
-
-  // We need to check if the file contains nonBmp or null characters
-  let data = await fs.promises.readFile(pathname)
-  if (!isValidUtf8(data)) return null
-  data = data.toString()
-  if (data.length > TextOperation.MAX_STRING_LENGTH) return null
-  if (containsNonBmpChars(data)) return null
-  if (data.indexOf('\x00') !== -1) return null
-  return data.length
 }
 
 async function deleteBlobsInBucket(projectId) {
@@ -180,12 +179,13 @@ async function getProjectBlobsBatch(projectIds) {
  * blob store manages both content and metadata (byte and UTF-8 length) for
  * blobs.
  */
-class BlobStore {
+class BlobStore extends core.BlobStoreBase {
   /**
    * @constructor
    * @param {string} projectId the project for which we'd like to find blobs
    */
   constructor(projectId) {
+    super()
     assert.projectId(projectId)
     this.projectId = projectId
     this.backend = getBackend(this.projectId)
@@ -222,7 +222,7 @@ class BlobStore {
    */
   async putString(string) {
     assert.string(string, 'bad string')
-    const hash = blobHash.fromString(string)
+    const hash = blobHashFromString(string)
 
     const existingBlob = await this._findBlobBeforeInsert(hash)
     if (existingBlob != null) {
@@ -296,7 +296,7 @@ class BlobStore {
    * @param {string} hash hexadecimal SHA-1 hash
    * @return {Promise.<string>} promise for the content of the file
    */
-  async getString(hash) {
+  async fetchString(hash) {
     assert.blobHash(hash, 'bad hash')
 
     const projectId = this.projectId
@@ -350,6 +350,10 @@ class BlobStore {
    */
   async getStream(hash, opts = {}) {
     assert.blobHash(hash, 'bad hash')
+    if (hash === Blob.EMPTY_HASH) {
+      // Any range of empty content is empty, so opts needs no honouring.
+      return new ReadableString('')
+    }
 
     const { bucket, key } = getBlobLocation(this.projectId, hash)
     try {
@@ -371,6 +375,9 @@ class BlobStore {
    */
   async getBlob(hash) {
     assert.blobHash(hash, 'bad hash')
+    if (hash === Blob.EMPTY_HASH) {
+      return EMPTY_BLOB
+    }
     const globalBlob = GLOBAL_BLOBS.get(hash)
     if (globalBlob != null) {
       return globalBlob.blob
@@ -389,6 +396,10 @@ class BlobStore {
     const nonGlobalHashes = []
     const blobs = []
     for (const hash of hashes) {
+      if (hash === Blob.EMPTY_HASH) {
+        blobs.push(EMPTY_BLOB)
+        continue
+      }
       const globalBlob = GLOBAL_BLOBS.get(hash)
       if (globalBlob != null) {
         blobs.push(globalBlob.blob)

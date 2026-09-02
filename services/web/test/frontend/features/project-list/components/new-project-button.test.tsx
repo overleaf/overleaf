@@ -34,17 +34,30 @@ describe('<NewProjectButton />', function () {
     })
 
     it('shows the correct dropdown menu', function () {
-      // static menu
-      screen.getByText('Blank project')
-      screen.getByText('Example project')
-      screen.getByText('Upload project')
-      screen.getByText('Import from GitHub')
-
-      // static text
+      // Section headers
+      screen.getByText('Import')
       screen.getByText('Templates')
 
-      // dynamic menu based on templateLinks
-      screen.getByText('Journal articles')
+      // Items
+      screen.getByText('Blank project')
+      screen.getByText('Existing project (.zip)')
+      screen.getByText('Example project')
+
+      // "More templates" trigger is present (templateLinks exist in beforeEach)
+      screen.getByText('More templates')
+
+      // Template links are NOT directly visible — they're inside the sub-dropdown
+      expect(screen.queryByText('Journal articles')).to.be.null
+      expect(screen.queryByText('View All')).to.be.null
+    })
+
+    it('shows template links in More templates sub-dropdown on hover', async function () {
+      const moreTrigger = screen.getByRole('menuitem', {
+        name: 'More templates',
+      })
+      fireEvent.mouseEnter(moreTrigger)
+      // After hovering the trigger, template links should appear
+      await screen.findByText('Journal articles')
       screen.getByText('View All')
     })
 
@@ -106,14 +119,14 @@ describe('<NewProjectButton />', function () {
       })
 
       fireEvent.click(newProjectButton)
-      // static menu
-      screen.getByText('Blank project')
-      screen.getByText('Example project')
-      screen.getByText('Upload project')
-      screen.getByText('Import from GitHub')
+      // Section headers
+      screen.getByText('Import')
+      screen.getByText('Templates')
 
-      // static text for institution templates
-      screen.getByText('Institution Templates')
+      // Items
+      screen.getByText('Blank project')
+      screen.getByText('Existing project (.zip)')
+      screen.getByText('Example project')
 
       // dynamic menu based on portalTemplates
       const affiliationTemplate = screen.getByRole('menuitem', {
@@ -123,12 +136,12 @@ describe('<NewProjectButton />', function () {
         '/edu/test-new-template#templates'
       )
 
-      // static text
-      screen.getByText('Templates')
+      // "More templates" trigger is present (templateLinks exist in beforeEach)
+      screen.getByText('More templates')
 
-      // dynamic menu based on templateLinks
-      screen.getByText('Journal articles')
-      screen.getByText('View All')
+      // Template links are NOT directly visible — they're inside the sub-dropdown
+      expect(screen.queryByText('Journal articles')).to.be.null
+      expect(screen.queryByText('View All')).to.be.null
     })
   })
 })

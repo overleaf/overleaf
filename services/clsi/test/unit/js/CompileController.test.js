@@ -70,7 +70,7 @@ describe('CompileController', () => {
   describe('compile', () => {
     beforeEach(ctx => {
       ctx.req.body = {
-        compile: 'mock-body',
+        compile: {},
       }
       ctx.req.params = { project_id: (ctx.project_id = 'project-id-123') }
       ctx.request = {
@@ -532,13 +532,13 @@ describe('CompileController', () => {
 
       ctx.CompileManager.wordcount = sinon
         .stub()
-        .callsArgWith(4, null, (ctx.texcount = ['mock-texcount']))
+        .callsArgWith(5, null, (ctx.texcount = ['mock-texcount']))
     })
 
     it('should return the word count of a file', ctx => {
       ctx.CompileController.wordcount(ctx.req, ctx.res, ctx.next)
       ctx.CompileManager.wordcount
-        .calledWith(ctx.project_id, undefined, ctx.file, ctx.image)
+        .calledWith(ctx.project_id, undefined, ctx.file, ctx.image, null)
         .should.equal(true)
     })
 
@@ -549,6 +549,68 @@ describe('CompileController', () => {
           texcount: ctx.texcount,
         })
         .should.equal(true)
+    })
+  })
+
+  describe('wordcountWithSync', () => {
+    beforeEach(ctx => {
+      ctx.file = 'main.tex'
+      ctx.project_id = '60a8c1d1e5e0a10123456789'
+      ctx.req.params = { project_id: ctx.project_id }
+      ctx.req.query = {
+        file: ctx.file,
+        image: (ctx.image = 'example.com/image'),
+      }
+      ctx.req.body = {
+        compile: {
+          options: {},
+          rootResourcePath: ctx.file,
+          resources: [{ path: ctx.file, content: 'hello' }],
+        },
+      }
+      ctx.res.json = sinon.stub()
+      ctx.res.status = sinon.stub().returns({ send: sinon.stub() })
+
+      ctx.request = { resources: ctx.req.body.compile.resources }
+      ctx.RequestParser.parse = sinon.stub().callsArgWith(1, null, ctx.request)
+      ctx.ProjectPersistenceManager.markProjectAsJustAccessed = sinon
+        .stub()
+        .callsArgWith(1, null)
+      ctx.CompileManager.wordcount = sinon
+        .stub()
+        .callsArgWith(5, null, (ctx.texcount = ['mock-texcount']))
+    })
+
+    it('should pass the parsed request through to the compile manager', ctx => {
+      ctx.CompileController.wordcountWithSync(ctx.req, ctx.res, ctx.next)
+      ctx.CompileManager.wordcount
+        .calledWith(ctx.project_id, undefined, ctx.file, ctx.image, ctx.request)
+        .should.equal(true)
+      ctx.request.project_id.should.equal(ctx.project_id)
+    })
+
+    it('should mark the project as just accessed', ctx => {
+      ctx.CompileController.wordcountWithSync(ctx.req, ctx.res, ctx.next)
+      ctx.ProjectPersistenceManager.markProjectAsJustAccessed
+        .calledWith(ctx.project_id)
+        .should.equal(true)
+    })
+
+    it('should return the texcount info', ctx => {
+      ctx.CompileController.wordcountWithSync(ctx.req, ctx.res, ctx.next)
+      ctx.res.json
+        .calledWith({
+          texcount: ctx.texcount,
+        })
+        .should.equal(true)
+    })
+
+    it('should return a 423 when a compile is in progress', ctx => {
+      ctx.CompileManager.wordcount = sinon
+        .stub()
+        .callsArgWith(5, new Errors.AlreadyCompilingError('locked'))
+      ctx.CompileController.wordcountWithSync(ctx.req, ctx.res, ctx.next)
+      ctx.res.status.calledWith(423).should.equal(true)
     })
   })
 })

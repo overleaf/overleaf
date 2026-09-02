@@ -32,6 +32,9 @@ SandboxedModule.configure({
     '@overleaf/logger': stubs.logger,
     'mongodb-legacy': require('mongodb-legacy'), // for ObjectId comparisons
     'overleaf-editor-core': require('overleaf-editor-core'), // does not play nice with sandbox
+    // pulls in mongodb (via zod ObjectId helpers), which does not compile in
+    // the sandbox (missing TextEncoder)
+    '@overleaf/validation-tools': require('@overleaf/validation-tools'),
   },
   globals: { Buffer, JSON, Math, console, process, URL },
   sourceTransformers: {

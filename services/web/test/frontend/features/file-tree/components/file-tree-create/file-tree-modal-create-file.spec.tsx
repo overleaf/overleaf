@@ -1,10 +1,12 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import FileTreeModalCreateFile from '../../../../../../frontend/js/features/file-tree/components/modals/file-tree-modal-create-file'
 import { useFileTreeActionable } from '../../../../../../frontend/js/features/file-tree/contexts/file-tree-actionable'
 import { useFileTreeData } from '../../../../../../frontend/js/shared/context/file-tree-data-context'
 import { EditorProviders } from '../../../../helpers/editor-providers'
 import { FileTreeProvider } from '../../helpers/file-tree-provider'
 import getMeta from '@/utils/meta'
+import CommandPaletteBody from '@/features/command-palette/components/command-palette-body'
+import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provider'
 
 describe('<FileTreeModalCreateFile/>', function () {
   it('handles invalid file names', function () {
@@ -178,7 +180,14 @@ describe('<FileTreeModalCreateFile/>', function () {
       </EditorProviders>
     )
 
-    cy.findByLabelText('File Name').type('test')
+    // Wait for auto-selection of name
+    cy.findByLabelText('File Name').as('input')
+    cy.get('@input').should($input => {
+      const elem = $input[0] as HTMLInputElement
+      expect(elem.selectionStart).to.equal(0)
+      expect(elem.selectionEnd).to.equal('name.tex'.lastIndexOf('.'))
+    })
+    cy.get('@input').type('test')
     cy.findByRole('button', { name: 'Create' }).click()
 
     cy.wait('@createDoc')
@@ -186,6 +195,239 @@ describe('<FileTreeModalCreateFile/>', function () {
     cy.get('@createDoc').its('request.body').should('deep.equal', {
       parent_folder_id: 'root-folder-id',
       name: 'test.tex',
+    })
+  })
+
+  it('does not re-select the initial name when it is edited before the deferred selection runs', function () {
+    cy.intercept('post', '/project/*/doc', {
+      statusCode: 204,
+    }).as('createDoc')
+
+    // capture requestAnimationFrame callbacks so the test controls when the
+    // deferred focus and selection of the initial name run
+    const requestAnimationFrameCallbacks: FrameRequestCallback[] = []
+    const flushRequestAnimationFrameCallbacks = () => {
+      requestAnimationFrameCallbacks
+        .splice(0)
+        .forEach(callback => callback(performance.now()))
+    }
+    cy.window().then(win => {
+      cy.stub(win, 'requestAnimationFrame').callsFake(
+        (callback: FrameRequestCallback) => {
+          requestAnimationFrameCallbacks.push(callback)
+          return requestAnimationFrameCallbacks.length
+        }
+      )
+    })
+
+    cy.mount(
+      <EditorProviders>
+        <FileTreeProvider>
+          <OpenWithMode mode="doc" />
+        </FileTreeProvider>
+      </EditorProviders>
+    )
+
+    cy.findByLabelText('File Name').as('input')
+    // run the deferred focus, which schedules the selection of "name"
+    cy.then(flushRequestAnimationFrameCallbacks)
+    // edit the name before the deferred selection has run
+    cy.get('@input').clear()
+    cy.get('@input').type('test.tex')
+    // run the deferred selection; it must not select the "test" part now that
+    // the name has been edited
+    cy.then(flushRequestAnimationFrameCallbacks)
+    cy.get('@input').type('123')
+    cy.get('@input').should('have.value', 'test.tex123')
+
+    cy.findByRole('button', { name: 'Create' }).click()
+    cy.wait('@createDoc')
+    cy.get('@createDoc').its('request.body').should('deep.equal', {
+      parent_folder_id: 'root-folder-id',
+      name: 'test.tex123',
+    })
+  })
+
+  it('does not select the initial name when it is edited before the deferred focus runs', function () {
+    // capture requestAnimationFrame callbacks so the test controls when the
+    // deferred focus and selection of the initial name run
+    const requestAnimationFrameCallbacks: FrameRequestCallback[] = []
+    const flushRequestAnimationFrameCallbacks = () => {
+      requestAnimationFrameCallbacks
+        .splice(0)
+        .forEach(callback => callback(performance.now()))
+    }
+    cy.window().then(win => {
+      cy.stub(win, 'requestAnimationFrame').callsFake(
+        (callback: FrameRequestCallback) => {
+          requestAnimationFrameCallbacks.push(callback)
+          return requestAnimationFrameCallbacks.length
+        }
+      )
+    })
+
+    cy.mount(
+      <EditorProviders>
+        <FileTreeProvider>
+          <OpenWithMode mode="doc" />
+        </FileTreeProvider>
+      </EditorProviders>
+    )
+
+    cy.findByLabelText('File Name').as('input')
+    // edit the name before the deferred focus has run
+    cy.get('@input').clear()
+    cy.get('@input').type('test.tex')
+    // run the deferred focus; it must not select the initial name now that
+    // the name has been edited
+    cy.then(flushRequestAnimationFrameCallbacks)
+    cy.get('@input').type('123')
+    cy.get('@input').should('have.value', 'test.tex123')
+  })
+
+  it('deletes the whole name when the deferred selection runs between select-all and delete', function () {
+    // capture requestAnimationFrame callbacks so the test controls when the
+    // deferred focus and selection of the initial name run
+    const requestAnimationFrameCallbacks: FrameRequestCallback[] = []
+    const flushRequestAnimationFrameCallbacks = () => {
+      requestAnimationFrameCallbacks
+        .splice(0)
+        .forEach(callback => callback(performance.now()))
+    }
+    cy.window().then(win => {
+      cy.stub(win, 'requestAnimationFrame').callsFake(
+        (callback: FrameRequestCallback) => {
+          requestAnimationFrameCallbacks.push(callback)
+          return requestAnimationFrameCallbacks.length
+        }
+      )
+    })
+
+    cy.mount(
+      <EditorProviders>
+        <FileTreeProvider>
+          <OpenWithMode mode="doc" />
+        </FileTreeProvider>
+      </EditorProviders>
+    )
+
+    cy.findByLabelText('File Name').as('input')
+    // run the deferred focus and selection
+    cy.then(flushRequestAnimationFrameCallbacks)
+    // this mirrors cy.clear() -- focus, select-all and delete -- with a frame
+    // boundary between the select-all and the delete: a deferred selection
+    // scheduled on focus must not shrink the select-all to the name part, as
+    // the delete would then leave the extension behind
+    cy.get('@input').type('{selectall}')
+    cy.then(flushRequestAnimationFrameCallbacks)
+    cy.get('@input').type('{del}')
+    cy.get('@input').should('have.value', '')
+  })
+
+  it('deletes the whole name when the deferred initial focus runs between select-all and delete', function () {
+    // capture requestAnimationFrame callbacks so the test controls when the
+    // deferred focus and selection of the initial name run
+    const requestAnimationFrameCallbacks: FrameRequestCallback[] = []
+    const flushRequestAnimationFrameCallbacks = () => {
+      requestAnimationFrameCallbacks
+        .splice(0)
+        .forEach(callback => callback(performance.now()))
+    }
+    cy.window().then(win => {
+      cy.stub(win, 'requestAnimationFrame').callsFake(
+        (callback: FrameRequestCallback) => {
+          requestAnimationFrameCallbacks.push(callback)
+          return requestAnimationFrameCallbacks.length
+        }
+      )
+    })
+
+    cy.mount(
+      <EditorProviders>
+        <FileTreeProvider>
+          <OpenWithMode mode="doc" />
+        </FileTreeProvider>
+      </EditorProviders>
+    )
+
+    // select-all before the deferred initial focus has run: it must not
+    // shrink the select-all to the name part, as the delete would then leave
+    // the extension behind
+    cy.findByLabelText('File Name').as('input')
+    cy.get('@input').type('{selectall}')
+    cy.then(flushRequestAnimationFrameCallbacks)
+    cy.get('@input').type('{del}')
+    cy.get('@input').should('have.value', '')
+  })
+
+  it('re-focuses the input when focus is temporarily stolen from the modal', function () {
+    cy.mount(
+      <EditorProviders>
+        <FileTreeProvider>
+          <OpenWithMode mode="doc" />
+        </FileTreeProvider>
+      </EditorProviders>
+    )
+
+    cy.findByLabelText('File Name').as('input')
+    // Wait for auto-selection of name
+    cy.get('@input').should($input => {
+      const elem = $input[0] as HTMLInputElement
+      expect(elem.selectionStart).to.equal(0)
+      expect(elem.selectionEnd).to.equal('name.tex'.lastIndexOf('.'))
+    })
+
+    // Simulate focus moving outside the modal after it has opened, e.g. the
+    // command palette returning focus to the editor after running the
+    // "new file" command, or the editor stealing focus when the main doc
+    // loads. The focus trap of the modal pulls the focus back into the modal.
+    cy.window().then(win => {
+      const outside = win.document.createElement('button')
+      win.document.body.appendChild(outside)
+      outside.focus()
+      outside.remove()
+    })
+
+    // The input must be focused again with the name selected. Ideally only
+    // the name part (without the extension) would be selected, but the focus
+    // trap select()s the entire value when pulling the focus back into the
+    // modal, and there is no upstream option to disable that. Accept both.
+    cy.get('@input').should($input => {
+      const elem = $input[0] as HTMLInputElement
+      expect(elem.ownerDocument.activeElement, 'the input is focused').to.equal(
+        elem
+      )
+      expect(elem.selectionStart).to.equal(0)
+      expect(['name.tex'.lastIndexOf('.'), 'name.tex'.length]).to.include(
+        elem.selectionEnd
+      )
+    })
+  })
+
+  it('focuses and selects the name when opened from the command palette', function () {
+    cy.mount(
+      <EditorProviders>
+        <FileTreeProvider>
+          <OpenFromCommandPalette />
+        </FileTreeProvider>
+      </EditorProviders>
+    )
+
+    cy.findByRole('menuitem', { name: 'File: New file' }).click()
+
+    // Ideally only the name part (without the extension) would be selected,
+    // but the focus trap of the modal select()s the entire value when pulling
+    // the focus back after the command palette returned it to the previously
+    // focused element. Which of the two wins depends on timing; accept both.
+    cy.findByLabelText('File Name').should($input => {
+      const elem = $input[0] as HTMLInputElement
+      expect(elem.ownerDocument.activeElement, 'the input is focused').to.equal(
+        elem
+      )
+      expect(elem.selectionStart).to.equal(0)
+      expect(['name.tex'.lastIndexOf('.'), 'name.tex'.length]).to.include(
+        elem.selectionEnd
+      )
     })
   })
 
@@ -589,4 +831,40 @@ function OpenWithMode({ mode }: { mode: string }) {
   }
 
   return <FileTreeModalCreateFile />
+}
+
+// Renders the real command palette next to the create-file modal, mirroring
+// CommandPaletteRoot (the palette unmounts when hidden) and the "new_file"
+// command registration from FileTreeActionButtons.
+function OpenFromCommandPalette() {
+  const { startCreatingFile } = useFileTreeActionable()
+  const { fileCount } = useFileTreeData()
+  const [showPalette, setShowPalette] = useState(true)
+
+  useCommandProvider(
+    () => [
+      {
+        id: 'new_file',
+        label: 'New file',
+        handler: () => startCreatingFile('doc'),
+      },
+    ],
+    [startCreatingFile]
+  )
+
+  if (!fileCount) {
+    return null
+  }
+
+  return (
+    <>
+      {showPalette && (
+        <CommandPaletteBody
+          show={showPalette}
+          onHide={() => setShowPalette(false)}
+        />
+      )}
+      <FileTreeModalCreateFile />
+    </>
+  )
 }

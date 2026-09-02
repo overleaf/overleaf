@@ -5,6 +5,11 @@
       "$value": "#fff",
       "$primitive": null
     },
+    "neutral-05": {
+      "$type": "color",
+      "$value": "#fafafb",
+      "$primitive": null
+    },
     "neutral-10": {
       "$type": "color",
       "$value": "#f4f5f6",
@@ -45,6 +50,11 @@
       "$value": "#2f3a4c",
       "$primitive": null
     },
+    "neutral-85": {
+      "$type": "color",
+      "$value": "#252e3c",
+      "$primitive": null
+    },
     "neutral-90": {
       "$type": "color",
       "$value": "#1b222c",
@@ -53,6 +63,11 @@
     "green-10": {
       "$type": "color",
       "$value": "#eaf6ef",
+      "$primitive": null
+    },
+    "green-15": {
+      "$type": "color",
+      "$value": "#daede2",
       "$primitive": null
     },
     "green-20": {
@@ -78,6 +93,11 @@
     "green-60": {
       "$type": "color",
       "$value": "#1e6b41",
+      "$primitive": null
+    },
+    "green-65": {
+      "$type": "color",
+      "$value": "#1c623b",
       "$primitive": null
     },
     "green-70": {

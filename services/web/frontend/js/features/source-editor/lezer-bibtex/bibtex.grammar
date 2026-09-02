@@ -1,24 +1,34 @@
 @tokens {
-  whiteSpace { $[\t\n ]+ }
+  whiteSpace { $[\t\n\r ]+ }
 
-  // Anything outside of an entry at the top level is a BibTeX free-form comment
-  Junk { ![@ \t\n%] ![@]* }
+  // Anything outside of an entry at the top level is a BibTeX free-form comment.
+  // A word may contain a "%" but may not start with one, so a "%" at a token
+  // boundary still opens a comment: btparse parses the entry in
+  // "Junk% @article{a}" but treats "Junk % @article{a}" as a comment.
+  junkWord { ![@ \t\n\r%] ![@ \t\n\r]* }
+  Junk { junkWord (whiteSpace junkWord)* }
 
   // BibLaTeX supports comments starting with a % and extending to the end of
   // the line
-  Comment { "%" ![\n]* }
+  Comment { "%" ![\n\r]* }
 
-  // See https://metacpan.org/release/AMBS/Text-BibTeX-0.91/view/btparse/doc/bt_language.pod
-  identifierSymbol { $[!$&*+./:;<>?^`_|] | "[" | "]" | "-" }
-  identifier {
-      (@asciiLetter | identifierSymbol)
-      (@asciiLetter | @digit | identifierSymbol)*
-  }
+  // btparse derives a name by "removing the magic 10 from printable ASCII, then
+  // further excluding @, \ and ~", the magic 10 being " # % ' ( ) , = { } and
+  // space. Stating that by exclusion rather than by listing the allowed
+  // punctuation also admits non-ASCII: btparse's own lexer is ASCII-only here,
+  // but biber accepts UTF-8 throughout, including in citation keys.
+  // See https://metacpan.org/dist/Text-BibTeX/view/btparse/doc/bt_language.pod
+  identifierChar { ![\u{0}-\u{20}\u{7f}"#%'(),=@\\{}~] }
+
+  // Identifiers cannot start with a digit, so that a value like 1995 is a
+  // NumberLiteral rather than a macro name. Citation keys can.
+  identifierStart { ![\u{0}-\u{20}\u{7f}"#%'(),=@\\{}~0-9] }
+
+  identifier { identifierStart identifierChar* }
 
   EntryType { identifier }
 
-  // Citation keys can start with a digit
-  CitationKey { (@asciiLetter | @digit | identifierSymbol)+ }
+  CitationKey { identifierChar+ }
 
   NumberLiteral { @digit+ }
 

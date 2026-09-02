@@ -1,5 +1,4 @@
 exports.BatchBlobStore = require('./lib/batch_blob_store')
-exports.blobHash = require('./lib/blob_hash')
 exports.HashCheckBlobStore = require('./lib/hash_check_blob_store')
 exports.chunkStore = require('./lib/chunk_store')
 exports.redisBuffer = require('./lib/chunk_store/redis')
@@ -23,6 +22,15 @@ exports.loadGlobalBlobs = loadGlobalBlobs
 
 const { InvalidChangeError } = require('./lib/errors')
 exports.InvalidChangeError = InvalidChangeError
+
+const {
+  buildSetContentChange,
+  ContentTooLargeError,
+  BlobNotFoundError,
+} = require('./lib/build_set_content_change')
+exports.buildSetContentChange = buildSetContentChange
+exports.ContentTooLargeError = ContentTooLargeError
+exports.BlobNotFoundError = BlobNotFoundError
 
 const { ChunkVersionConflictError } = require('./lib/chunk_store/errors')
 exports.ChunkVersionConflictError = ChunkVersionConflictError

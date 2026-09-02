@@ -1,10 +1,14 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import getMeta from '@/utils/meta'
-import { Dropdown, DropdownMenu, DropdownToggle } from 'react-bootstrap'
+import {
+  OLDropdown,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import { postJSON } from '@/infrastructure/fetch-json'
 import { debugConsole } from '@/utils/debugging'
-import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
+import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
 import OLSpinner from '@/shared/components/ol/ol-spinner'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useLocation } from '@/shared/hooks/use-location'
@@ -18,6 +22,7 @@ import sparkle from '@/shared/svgs/sparkle.svg'
 import { PaidSubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
 import { LICENSE_ADD_ON } from '@/features/group-management/components/upgrade-subscription/upgrade-subscription-plan-details'
 import WritefullManagedBundleAddOn from './change-plan/modals/writefull-bundle-management-modal'
+import { formatPaymentDate } from '../../../../util/payment-dates'
 
 type AddOnsProps = {
   subscription: PaidSubscription
@@ -106,8 +111,8 @@ function AddOn({
       </div>
       {reactivateState !== 'reactivating' && (
         <div className="ms-auto">
-          <Dropdown align="end">
-            <DropdownToggle
+          <OLDropdown align="end">
+            <OLDropdownToggle
               id="add-on-dropdown-toggle"
               className="add-on-options-toggle"
               variant="secondary"
@@ -116,28 +121,28 @@ function AddOn({
                 type="more_vert"
                 accessibilityLabel={t('more_options')}
               />
-            </DropdownToggle>
-            <DropdownMenu flip={false}>
+            </OLDropdownToggle>
+            <OLDropdownMenu flip={false}>
               {pendingCancellation ? (
-                <OLDropdownMenuItem
+                <DropdownMenuItem
                   onClick={() => handleReactivateClick(addOnCode)}
                   as="button"
                   tabIndex={-1}
                 >
                   {t('reactivate')}
-                </OLDropdownMenuItem>
+                </DropdownMenuItem>
               ) : (
-                <OLDropdownMenuItem
+                <DropdownMenuItem
                   onClick={() => handleCancelClick(addOnCode)}
                   as="button"
                   tabIndex={-1}
                   variant="danger"
                 >
                   {t('cancel')}
-                </OLDropdownMenuItem>
+                </DropdownMenuItem>
               )}
-            </DropdownMenu>
-          </Dropdown>
+            </OLDropdownMenu>
+          </OLDropdown>
         </div>
       )}
     </div>
@@ -185,7 +190,7 @@ function AddOns({
             )
           }
           displayPrice={addOnsDisplayPrices[addOn.addOnCode]}
-          nextBillingDate={subscription.payment.nextPaymentDueDate}
+          nextBillingDate={formatPaymentDate(subscription.payment.periodEnd)!}
         />
       ))}
       {hasAiAssistViaWritefull && <WritefullManagedBundleAddOn />}

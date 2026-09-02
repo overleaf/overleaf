@@ -55,11 +55,12 @@ import { captureException } from '@/infrastructure/error-reporter'
 import OError from '@overleaf/o-error'
 import getMeta from '@/utils/meta'
 import type { Annotation } from '../../../../types/annotation'
-import { useProjectSettingsContext } from '@/features/editor-left-menu/context/project-settings-context'
+import { useProjectSettingsContext } from '@/features/ide-settings/context/project-settings-context'
 import {
   ActiveOverallTheme,
   useActiveOverallTheme,
 } from '../hooks/use-active-overall-theme'
+import useIsNetworkStalled from '@/features/ide-react/hooks/use-is-network-stalled'
 
 type PdfFile = Record<string, any>
 
@@ -71,6 +72,7 @@ export type CompileContext = {
   compiling: boolean
   deliveryLatencies: Record<string, any>
   draft: boolean
+  png2pdf: boolean
   error?: string
   fileList?: PdfFileDataList
   hasChanges: boolean
@@ -130,6 +132,7 @@ export type CompileContext = {
   darkModePdf: boolean | undefined
   setDarkModePdf: (value: boolean) => void
   activeOverallTheme: ActiveOverallTheme
+  isNetworkStalled: boolean
 }
 
 export const LocalCompileContext = createContext<CompileContext | undefined>(
@@ -154,6 +157,7 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
   const { fileTreeData } = useFileTreeData()
   const { findEntityByPath } = useFileTreePathContext()
   const getRootDocInfo = useRootDoc()
+  const isNetworkStalled = useIsNetworkStalled()
 
   // whether a compile is in progress
   const [compiling, setCompiling] = useState(false)
@@ -271,6 +275,17 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
     listen: true,
   })
 
+  // ol-canUsePng2Pdf is the single source of truth from the backend: it already
+  // accounts for both the split-test rollout and the premium entitlement.
+  const canUsePng2pdf = Boolean(getMeta('ol-canUsePng2Pdf'))
+
+  // Optimise images is a project-wide setting, so it is read straight off the
+  // project rather than persisted per user. It is on by default for anyone who
+  // can use it and has not turned it off. Draft mode takes precedence: an
+  // optimized compile is never requested while draft is on, but the project
+  // setting is left alone so it resumes when draft is turned off again.
+  const png2pdf = canUsePng2pdf && (project?.png2pdf ?? true) && !draft
+
   // whether compiling should stop on first error
   const [stopOnFirstError, setStopOnFirstError] = usePersistedState(
     `stop_on_first_error:${projectId}`,
@@ -348,6 +363,11 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
     compiler.setOption('draft', draft)
   }, [compiler, draft])
 
+  // keep png2pdf (optimize images) setting in sync with the compiler
+  useEffect(() => {
+    compiler.setOption('png2pdf', png2pdf)
+  }, [compiler, png2pdf])
+
   // keep stop on first error setting in sync with the compiler
   useEffect(() => {
     compiler.setOption('stopOnFirstError', stopOnFirstError)
@@ -396,6 +416,7 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
       settingsUpToDate =
         getRootDocInfo().rootDocId === dataFromCache.rootDocId &&
         dataFromCache.options.draft === draft &&
+        Boolean(dataFromCache.options.png2pdf) === png2pdf &&
         // Allow stopOnFirstError to be enabled in the compile from cache and disabled locally.
         // Compiles that passed with stopOnFirstError=true will also pass with stopOnFirstError=false. The inverse does not hold, and we need to recompile.
         !!dataFromCache.options.stopOnFirstError >= stopOnFirstError
@@ -427,6 +448,7 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
     imageName,
     stopOnFirstError,
     draft,
+    png2pdf,
   ])
 
   // always compile the PDF once after opening the project, after the doc has loaded
@@ -755,6 +777,7 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
       compiling,
       deliveryLatencies,
       draft,
+      png2pdf,
       editedSinceCompileStarted,
       error,
       fileList,
@@ -802,6 +825,7 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
       darkModePdf,
       setDarkModePdf,
       activeOverallTheme,
+      isNetworkStalled,
     }),
     [
       animateCompileDropdownArrow,
@@ -813,6 +837,7 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
       compiling,
       deliveryLatencies,
       draft,
+      png2pdf,
       editedSinceCompileStarted,
       error,
       fileList,
@@ -857,6 +882,7 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
       darkModePdf,
       setDarkModePdf,
       activeOverallTheme,
+      isNetworkStalled,
     ]
   )
 

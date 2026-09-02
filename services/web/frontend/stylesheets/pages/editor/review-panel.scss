@@ -11,31 +11,16 @@ $rp-type-blue: #6b7797;
   --review-panel-width: 230px;
   --review-panel-width-mini: 24px;
   --review-panel-color-scheme: dark;
-  --review-mode-switcher-reviewing-bg: var(--yellow-10);
-  --review-mode-switcher-reviewing-hover-bg: var(--yellow-20);
-  --review-mode-switcher-reviewing-color: var(--yellow-60);
-
-  @include theme('default') {
-    .ide-redesign-main {
-      --review-panel-bg-color: var(--bg-dark-secondary);
-      --review-panel-color: var(--content-primary-dark);
-      --review-panel-color-secondary: var(--content-secondary-dark);
-      --review-panel-header-bg-color: var(--bg-dark-primary);
-      --review-panel-footer-bg-color: var(--bg-dark-primary);
-      --review-panel-entry-bg-color: var(--bg-dark-primary);
-      --review-panel-empty-state-bg-color: var(--bg-dark-primary);
-      --review-panel-button-hover-bg-color: var(--bg-dark-tertiary);
-      --review-panel-border-color: var(--border-divider-dark);
-      --review-panel-color-scheme: dark;
-      --review-mode-switcher-reviewing-bg: var(--yellow-70);
-      --review-mode-switcher-reviewing-hover-bg: var(--yellow-60);
-      --review-mode-switcher-reviewing-color: var(--yellow-10);
-    }
-  }
+  --review-mode-switcher-reviewing-bg: var(--yellow-70);
+  --review-mode-switcher-reviewing-hover-bg: var(--yellow-60);
+  --review-mode-switcher-reviewing-color: var(--yellow-10);
 }
 
 @include theme('light') {
   --review-panel-color-scheme: light;
+  --review-mode-switcher-reviewing-bg: var(--yellow-10);
+  --review-mode-switcher-reviewing-hover-bg: var(--yellow-20);
+  --review-mode-switcher-reviewing-color: var(--yellow-60);
 }
 
 .review-panel-container {
@@ -388,27 +373,8 @@ del.review-panel-content-highlight {
   }
 }
 
-.review-panel-mention {
+.mention-badge {
   color: var(--content-info-themed);
-}
-
-.review-panel-comment-input {
-  width: 100%;
-  font-size: var(--rp-base-font-size);
-  padding: 2px var(--spacing-03);
-  border-radius: var(--border-radius-base);
-  border: solid 1px var(--border-primary-themed);
-  resize: vertical;
-  color: var(--review-panel-color-secondary);
-  background-color: var(--review-panel-entry-bg-color);
-  height: 25px;
-  min-height: 25px;
-  overflow-x: hidden;
-  max-height: 400px;
-
-  &::placeholder {
-    color: var(--content-placeholder-themed);
-  }
 }
 
 .review-panel-comment-edit {
@@ -522,17 +488,30 @@ del.review-panel-content-highlight {
   }
 }
 
-.review-panel-add-comment-textarea {
-  padding: var(--spacing-01) var(--spacing-03);
-  resize: vertical;
-  min-height: 44px;
-  background: var(--bg-primary-themed);
-  color: var(--content-primary-themed);
+// Host box for the review-panel comment inputs. The inner CodeMirror is mounted
+// in a shadow root, so its styling lives in an
+// in-shadow CM theme (reviewPanelInputTheme in mentions-input.tsx), not here.
+// Only host-box rules and CSS custom properties (which cross the shadow
+// boundary) belong in this block. --rp-input-min-height feeds the inner
+// .cm-content min-height inside the shadow.
+.review-panel-add-comment-editor {
+  --rp-input-min-height: 44px;
+
+  background: var(--review-panel-entry-bg-color);
+  color: var(--review-panel-color);
   border: 1px solid var(--border-primary-themed);
   border-radius: var(--border-radius-base);
+  overflow: hidden;
+  cursor: text;
 
-  &::placeholder {
-    color: var(--content-placeholder-themed);
+  &.review-panel-comment-input {
+    // Default to two lines tall so long @mentions wrap into view
+    --rp-input-min-height: calc(
+      (2 * var(--line-height-02)) + (2 * var(--spacing-01))
+    );
+
+    font-size: var(--rp-base-font-size);
+    color: var(--review-panel-color-secondary);
   }
 }
 
@@ -782,7 +761,7 @@ del.review-panel-content-highlight {
     &:hover,
     &:focus-within {
       .review-mode-switcher-toggle-button.editing {
-        background-color: var(--review-panel-button-hover-bg-color);
+        background-color: var(--bg-tertiary-themed);
       }
 
       .review-mode-switcher-toggle-button.reviewing {

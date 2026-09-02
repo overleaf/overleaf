@@ -1,5 +1,5 @@
 import fetchMock from 'fetch-mock'
-import Notification from '../../js/shared/components/notification'
+import Notification from '@/shared/components/notification'
 import { postJSON } from '../../js/infrastructure/fetch-json'
 import useAsync from '../../js/shared/hooks/use-async'
 import { figmaDesignUrl } from '../../../.storybook/utils/figma-design-url'

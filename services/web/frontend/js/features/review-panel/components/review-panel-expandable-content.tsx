@@ -3,12 +3,12 @@ import OLButton from '@/shared/components/ol/ol-button'
 import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
 import { PreventSelectingEntry } from './review-panel-prevent-selecting'
-import { MentionBadge } from './mention-badge'
+import { MentionBadge } from '@/shared/components/mention-badge'
 import {
   MentionSegment,
   parseMentions,
   sliceMentionSegments,
-} from '../utils/parse-mentions'
+} from '@/shared/utils/parse-mentions'
 
 export const ExpandableContent = memo<{
   className?: string
@@ -18,7 +18,6 @@ export const ExpandableContent = memo<{
   checkNewLines?: boolean
   inline?: boolean
   translate?: 'yes' | 'no'
-  displayMentions?: boolean
 }>(function ExpandableContent({
   content,
   className,
@@ -27,7 +26,6 @@ export const ExpandableContent = memo<{
   checkNewLines = true,
   inline = false,
   translate,
-  displayMentions = false,
 }) {
   const { t } = useTranslation()
   const contentRef = useRef<HTMLDivElement>(null)
@@ -41,10 +39,7 @@ export const ExpandableContent = memo<{
 
   const isOverflowing = content.length > limit
 
-  const segments = useMemo(
-    () => (displayMentions ? parseMentions(content) : null),
-    [content, displayMentions]
-  )
+  const segments = useMemo(() => parseMentions(content), [content])
 
   const renderedContent = segments
     ? renderSegments(

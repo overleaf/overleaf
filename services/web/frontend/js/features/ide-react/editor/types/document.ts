@@ -1,6 +1,6 @@
 import { StringFileData } from 'overleaf-editor-core'
 import { AnyOperation } from '../../../../../../types/change'
-import { RawEditOperation } from 'overleaf-editor-core/lib/types'
+import type { RawEditOperation } from 'overleaf-editor-core/lib/types'
 
 export type Version = number
 

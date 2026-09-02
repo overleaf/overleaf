@@ -1,5 +1,6 @@
 import React, { FC, useEffect, useRef, useState } from 'react'
 import { EditorProviders } from '../../../helpers/editor-providers'
+import { makeEditorManagerProviderWithStaleDocs } from '../../ide-react/helpers/editor-manager-provider-with-stale-docs'
 import { TabsContainer } from '../../../../../frontend/js/features/source-editor/components/tabs/tabs-container'
 import {
   FileTreeDocumentFindResult,
@@ -112,7 +113,15 @@ function makeEditorManagerProvider() {
       setIgnoringExternalUpdates: () => {},
       openDocWithId: cy.stub().as('openDocWithId').resolves(),
       openDoc: cy.stub().as('openDoc').resolves(),
-      openDocs: { awaitBufferedOps: cy.stub().resolves() } as any,
+      openDocs: {
+        awaitBufferedOps: cy.stub().resolves(),
+        unsavedDocs: () => [],
+        hasUnsavedChanges: () => false,
+        getUnsavedOpsSize: () => ({
+          pendingOpsLength: 0,
+          inflightOpsLength: 0,
+        }),
+      } as any,
       openFileWithId: cy.stub().as('openFileWithId'),
       openInitialDoc: cy.stub().resolves(),
       isLoading: false,
@@ -197,15 +206,6 @@ function selectDoc(id: string, path?: string[]) {
   selectEntity(makeDocEntity(id, DOC_NAMES[id], path))
 }
 
-function enableEditorTabs() {
-  cy.window().then(win => {
-    win.metaAttributesCache.set('ol-splitTestVariants', {
-      'editor-tabs': 'enabled',
-    })
-    win.metaAttributesCache.set('ol-labsExperiments', ['editor-tabs'])
-  })
-}
-
 describe('File Tabs', function () {
   function mountTabs(options?: { rootFolder?: any; userSettings?: any }) {
     const rootFolder = options?.rootFolder ?? defaultRootFolder
@@ -232,7 +232,6 @@ describe('File Tabs', function () {
     cy.interceptEvents()
     cy.interceptTutorials()
     cy.interceptCompile()
-    enableEditorTabs()
 
     // Clear persisted tab state from localStorage
     cy.window().then(win => {
@@ -1169,25 +1168,70 @@ describe('File Tabs', function () {
     })
   })
 
-  describe('SplitTestBadge', function () {
-    it('renders the labs badge icon in the tabs container', function () {
+  describe('Network stall', function () {
+    function mountWithStaleDocs() {
+      cy.then(() => {
+        const now = performance.now()
+        const openDocWithId = cy.stub().as('openDocWithId').resolves()
+        const openDoc = cy.stub().as('openDoc').resolves()
+        const openFileWithId = cy.stub().as('openFileWithId')
+        cy.mount(
+          <EditorProviders
+            rootFolder={defaultRootFolder as any}
+            rootDocId={DOC_IDS.main}
+            providers={{
+              EditorManagerProvider: makeEditorManagerProviderWithStaleDocs(
+                now - 11_000,
+                { openDocWithId, openDoc, openFileWithId }
+              ),
+              EditorViewProvider: makeEditorViewProvider(),
+            }}
+          >
+            <FileTree />
+            <TabsContainer />
+          </EditorProviders>
+        )
+      })
+    }
+
+    beforeEach(function () {
+      cy.clock()
       cy.window().then(win => {
-        win.metaAttributesCache.set('ol-splitTestInfo', {
-          'editor-tabs': {
-            phase: 'beta',
-            badgeInfo: {
-              url: '/beta/editor-tabs',
-              tooltipText: 'Editor tabs are in beta',
-            },
-          },
+        win.metaAttributesCache.set('ol-splitTestVariants', {
+          'intermittent-connection-improvements': 'enabled',
         })
       })
+      mountWithStaleDocs()
+    })
 
-      mountTabs()
-
+    it('disables tabs when saving is stalled', function () {
       cy.then(() => selectDoc(DOC_IDS.main))
+      cy.tick(1000)
+      cy.findByRole('tab', { name: /main\.tex/ }).should(
+        'have.attr',
+        'aria-disabled',
+        'true'
+      )
+    })
 
-      cy.get('.editor-tabs-labs-icon').should('exist')
+    it('does not switch the active tab when clicking a disabled tab', function () {
+      cy.then(() => selectDoc(DOC_IDS.main))
+      cy.then(() => selectDoc(DOC_IDS.intro))
+      cy.tick(1000)
+      cy.get('@openDocWithId').invoke('resetHistory')
+      cy.findByRole('tab', { name: /main\.tex/ }).click()
+      cy.get('@openDocWithId').should('not.have.been.called')
+    })
+
+    it('does not disable tabs when the feature flag is off', function () {
+      mountWithStaleDocs()
+      cy.then(() => selectDoc(DOC_IDS.main))
+      cy.tick(1000)
+      cy.findByRole('tab', { name: /main\.tex/ }).should(
+        'not.have.attr',
+        'aria-disabled',
+        'true'
+      )
     })
   })
 })

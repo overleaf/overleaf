@@ -13,7 +13,7 @@ let EditFileOperation = null
 let SetFileMetadataOperation = null
 
 /**
- * @import { ReadonlyBlobStore } from "../types"
+ * @import { ReadonlyBlobStore, RawOperation } from "../types"
  * @import Snapshot from "../snapshot"
  */
 
@@ -35,7 +35,8 @@ class Operation {
     if (
       'textOperation' in raw ||
       'commentId' in raw ||
-      'deleteComment' in raw
+      'deleteComment' in raw ||
+      'noOp' in raw
     ) {
       return EditFileOperation.fromRaw(raw)
     }
@@ -54,7 +55,7 @@ class Operation {
   /**
    * Serialize an Operation.
    *
-   * @return {Object}
+   * @return {RawOperation}
    */
   toRaw() {
     return {}

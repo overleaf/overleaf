@@ -127,142 +127,6 @@ describe('RoomManager', function () {
     })
   })
 
-  describe('joinDoc', function () {
-    describe('when the doc room is empty', function () {
-      beforeEach(async function (ctx) {
-        await new Promise((resolve, reject) => {
-          ctx.RoomManager._clientsInRoom
-            .withArgs(ctx.client, ctx.doc_id)
-            .onFirstCall()
-            .returns(0)
-          ctx.client.join = sinon.stub()
-          ctx.callback = sinon.stub()
-          ctx.RoomEvents.on('doc-active', id => {
-            setTimeout(() => {
-              ctx.RoomEvents.emit(`doc-subscribed-${id}`)
-            }, 100)
-          })
-          ctx.RoomManager.joinDoc(ctx.client, ctx.doc_id, err => {
-            ctx.callback(err)
-            resolve()
-          })
-        })
-      })
-
-      it("should emit a 'doc-active' event with the id", function (ctx) {
-        ctx.RoomEvents.emit
-          .calledWithExactly('doc-active', ctx.doc_id)
-          .should.equal(true)
-      })
-
-      it("should listen for the 'doc-subscribed-id' event", function (ctx) {
-        ctx.RoomEvents.once
-          .calledWith(`doc-subscribed-${ctx.doc_id}`)
-          .should.equal(true)
-      })
-
-      it('should join the room using the id', function (ctx) {
-        ctx.client.join.calledWithExactly(ctx.doc_id).should.equal(true)
-      })
-    })
-
-    describe('when there are other clients in the doc room', function () {
-      beforeEach(async function (ctx) {
-        await new Promise((resolve, reject) => {
-          ctx.RoomManager._clientsInRoom
-            .withArgs(ctx.client, ctx.doc_id)
-            .onFirstCall()
-            .returns(123)
-            .onSecondCall()
-            .returns(124)
-          ctx.client.join = sinon.stub()
-          ctx.RoomManager.joinDoc(ctx.client, ctx.doc_id, err => {
-            if (err) return reject(err)
-            resolve()
-          })
-        })
-      })
-
-      it('should join the room using the id', function (ctx) {
-        ctx.client.join.called.should.equal(true)
-      })
-
-      it('should not emit any events', function (ctx) {
-        ctx.RoomEvents.emit.called.should.equal(false)
-      })
-    })
-  })
-
-  describe('leaveDoc', function () {
-    describe('when doc room will be empty after this client has left', function () {
-      beforeEach(function (ctx) {
-        ctx.RoomManager._clientAlreadyInRoom
-          .withArgs(ctx.client, ctx.doc_id)
-          .returns(true)
-        ctx.RoomManager._clientsInRoom
-          .withArgs(ctx.client, ctx.doc_id)
-          .onCall(0)
-          .returns(0)
-        ctx.client.leave = sinon.stub()
-        ctx.RoomManager.leaveDoc(ctx.client, ctx.doc_id)
-      })
-
-      it('should leave the room using the id', function (ctx) {
-        ctx.client.leave.calledWithExactly(ctx.doc_id).should.equal(true)
-      })
-
-      it("should emit a 'doc-empty' event with the id", function (ctx) {
-        ctx.RoomEvents.emit
-          .calledWithExactly('doc-empty', ctx.doc_id)
-          .should.equal(true)
-      })
-    })
-
-    describe('when there are other clients in the doc room', function () {
-      beforeEach(function (ctx) {
-        ctx.RoomManager._clientAlreadyInRoom
-          .withArgs(ctx.client, ctx.doc_id)
-          .returns(true)
-        ctx.RoomManager._clientsInRoom
-          .withArgs(ctx.client, ctx.doc_id)
-          .onCall(0)
-          .returns(123)
-        ctx.client.leave = sinon.stub()
-        ctx.RoomManager.leaveDoc(ctx.client, ctx.doc_id)
-      })
-
-      it('should leave the room using the id', function (ctx) {
-        ctx.client.leave.calledWithExactly(ctx.doc_id).should.equal(true)
-      })
-
-      it('should not emit any events', function (ctx) {
-        ctx.RoomEvents.emit.called.should.equal(false)
-      })
-    })
-
-    describe('when the client is not in the doc room', function () {
-      beforeEach(function (ctx) {
-        ctx.RoomManager._clientAlreadyInRoom
-          .withArgs(ctx.client, ctx.doc_id)
-          .returns(false)
-        ctx.RoomManager._clientsInRoom
-          .withArgs(ctx.client, ctx.doc_id)
-          .onCall(0)
-          .returns(0)
-        ctx.client.leave = sinon.stub()
-        ctx.RoomManager.leaveDoc(ctx.client, ctx.doc_id)
-      })
-
-      it('should not leave the room', function (ctx) {
-        ctx.client.leave.called.should.equal(false)
-      })
-
-      it('should not emit any events', function (ctx) {
-        ctx.RoomEvents.emit.called.should.equal(false)
-      })
-    })
-  })
-
   describe('leaveProjectAndDocs', function () {
     describe('when the client is connected to the project and multiple docs', function () {
       beforeEach(function (ctx) {
@@ -315,12 +179,17 @@ describe('RoomManager', function () {
             })
             // put the client in the rooms
             ctx.RoomManager.joinProject(ctx.client, ctx.project_id, () => {
-              ctx.RoomManager.joinDoc(ctx.client, ctx.doc_id, () => {
-                ctx.RoomManager.joinDoc(ctx.client, ctx.other_doc_id, () => {
-                  // now leave the project
-                  ctx.RoomManager.leaveProjectAndDocs(ctx.client)
-                  resolve()
-                })
+              ctx.RoomManager.joinEntity(ctx.client, 'doc', ctx.doc_id, () => {
+                ctx.RoomManager.joinEntity(
+                  ctx.client,
+                  'doc',
+                  ctx.other_doc_id,
+                  () => {
+                    // now leave the project
+                    ctx.RoomManager.leaveProjectAndDocs(ctx.client)
+                    resolve()
+                  }
+                )
               })
             })
           })

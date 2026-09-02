@@ -15,7 +15,7 @@ import ChunkStore from '../../../../storage/lib/chunk_store/index.js'
 import persistChanges from '../../../../storage/lib/persist_changes.js'
 import testFiles from '../storage/support/test_files.js'
 import cleanup from './support/cleanup.js'
-import { getZipEntries } from './support/unzip.js'
+import { getZipEntries, getZipEntryContents } from './support/unzip.js'
 
 describe('recover_zip script', function () {
   let projectId
@@ -119,6 +119,54 @@ describe('recover_zip script', function () {
     }
   })
 
+  it('recovers a file that carries tracked changes', async function () {
+    this.timeout(30 * 1000)
+
+    // A file with tracked changes has its ranges in a second blob, which the file
+    // needs alongside its content to be loaded at all. The zip holds the content as
+    // accepting the changes would leave it, so a tracked delete is not in it.
+    const content = 'the quick brown fox'
+    const addTracked = Operation.addFile(
+      'tracked.tex',
+      File.fromRaw({
+        content,
+        trackedChanges: [
+          {
+            range: { pos: 4, length: 'quick '.length },
+            tracking: {
+              type: 'delete',
+              ts: '2024-01-01T00:00:00.000Z',
+              userId: 'user1',
+            },
+          },
+        ],
+      })
+    )
+    const change3 = new Change([addTracked], new Date(), [])
+    await persistChanges(projectId, [change3], limitsToPersistImmediately, 2)
+
+    const zipPath = `/tmp/test-recover-zip-tracked-${projectId}.zip`
+    try {
+      const { stdout } = await runRecoverZipScript([projectId])
+
+      const urlMatch = stdout.match(/(https?:\/\/[^\s]+)/)
+      expect(urlMatch).to.not.be.null
+      const res = await fetch(urlMatch[1])
+      expect(res.ok).to.be.true
+      await fs.promises.writeFile(zipPath, Buffer.from(await res.arrayBuffer()))
+
+      const contents = await getZipEntryContents(zipPath)
+      expect([...contents.keys()].sort()).to.deep.equal([
+        'graph.png',
+        'main.tex',
+        'tracked.tex',
+      ])
+      expect(contents.get('tracked.tex').toString()).to.equal('the brown fox')
+    } finally {
+      await fs.promises.unlink(zipPath).catch(() => {})
+    }
+  })
+
   it('supports the --verbose flag', async function () {
     this.timeout(30 * 1000)
 
@@ -140,7 +188,7 @@ async function runRecoverZipScript(args) {
   try {
     result = await promisify(execFile)(
       'node',
-      ['storage/scripts/recover_zip.js', ...args],
+      ['--no-deprecation', 'storage/scripts/recover_zip.js', ...args],
       {
         encoding: 'utf-8',
         timeout: TIMEOUT,

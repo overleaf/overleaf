@@ -5,7 +5,7 @@ import ReconfirmationInfoSuccess from './reconfirmation-info/reconfirmation-info
 import ReconfirmationInfoPromptText from './reconfirmation-info/reconfirmation-info-prompt-text'
 import OLRow from '@/shared/components/ol/ol-row'
 import OLCol from '@/shared/components/ol/ol-col'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import { useUserEmailsContext } from '@/features/settings/context/user-email-context'
 import { ssoAvailableForInstitution } from '@/features/settings/utils/sso'
 import { useTranslation } from 'react-i18next'
@@ -44,14 +44,16 @@ function ReconfirmationInfo({ userEmailData }: ReconfirmationInfoProps) {
     return (
       <OLRow>
         <OLCol lg={12}>
-          <OLNotification
-            type="info"
-            content={
-              <ReconfirmationInfoSuccess
-                institution={affiliation.institution}
-              />
-            }
-          />
+          <div className="notification-list">
+            <Notification
+              type="info"
+              content={
+                <ReconfirmationInfoSuccess
+                  institution={affiliation.institution}
+                />
+              }
+            />
+          </div>
         </OLCol>
       </OLRow>
     )
@@ -62,39 +64,41 @@ function ReconfirmationInfo({ userEmailData }: ReconfirmationInfoProps) {
   }
 
   return (
-    <OLNotification
-      type="info"
-      content={
-        <ReconfirmationInfoPromptText
-          institutionName={affiliation.institution.name}
-          primary={userEmailData.default}
-        />
-      }
-      action={
-        affiliation?.institution && ssoAvailable ? (
-          <OLButton
-            variant="secondary"
-            disabled={isPending}
-            onClick={() => {
-              setIsPending(true)
-              location.assign(
-                `${samlInitPath}?university_id=${affiliation.institution.id}&reconfirm=/user/settings`
-              )
-            }}
-          >
-            {t('confirm_affiliation')}
-          </OLButton>
-        ) : (
-          <ResendConfirmationCodeModal
-            email={userEmailData.email}
-            setGroupLoading={setUserEmailsContextLoading}
-            groupLoading={state.isLoading}
-            onSuccess={getEmails}
-            triggerVariant="secondary"
+    <div className="notification-list">
+      <Notification
+        type="info"
+        content={
+          <ReconfirmationInfoPromptText
+            institutionName={affiliation.institution.name}
+            primary={userEmailData.default}
           />
-        )
-      }
-    />
+        }
+        action={
+          affiliation?.institution && ssoAvailable ? (
+            <OLButton
+              variant="secondary"
+              disabled={isPending}
+              onClick={() => {
+                setIsPending(true)
+                location.assign(
+                  `${samlInitPath}?university_id=${affiliation.institution.id}&reconfirm=/user/settings`
+                )
+              }}
+            >
+              {t('confirm_affiliation')}
+            </OLButton>
+          ) : (
+            <ResendConfirmationCodeModal
+              email={userEmailData.email}
+              setGroupLoading={setUserEmailsContextLoading}
+              groupLoading={state.isLoading}
+              onSuccess={getEmails}
+              triggerVariant="secondary"
+            />
+          )
+        }
+      />
+    </div>
   )
 }
 

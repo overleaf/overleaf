@@ -25,17 +25,24 @@ import {
   Project,
   Sort,
 } from '../../../../../types/project/dashboard/api'
-import usePersistedState from '../../../shared/hooks/use-persisted-state'
 import getMeta from '../../../utils/meta'
 import useAsync from '../../../shared/hooks/use-async'
 import { getProjects } from '../util/api'
 import sortProjects from '../util/sort-projects'
+import {
+  getInitialNavigationState,
+  getNavigationState,
+  getNavigationUrl,
+  migrateLegacyNavigationState,
+  NavigationState,
+} from '../util/navigation-state'
 import {
   isArchivedOrTrashed,
   isDeletableProject,
   isLeavableProject,
 } from '../util/project'
 import { debugConsole } from '@/utils/debugging'
+import { useLocation } from '@/shared/hooks/use-location'
 
 const MAX_PROJECT_PER_PAGE = 20
 
@@ -82,6 +89,7 @@ export type ProjectListContextValue = {
   tags: Tag[]
   untaggedProjectsCount: number
   projectsPerTag: Record<Tag['_id'], Project[]>
+  currentFilterProjectsCount: number
   filter: Filter
   selectFilter: (filter: Filter) => void
   selectedTagId?: string | undefined
@@ -111,11 +119,18 @@ export const ProjectListContext = createContext<
   ProjectListContextValue | undefined
 >(undefined)
 
+export type NavigationMode = 'filter-projects' | 'redirect-to-filtered-projects'
+
 type ProjectListProviderProps = {
   children: ReactNode
+  navigationMode?: NavigationMode
 }
 
-export function ProjectListProvider({ children }: ProjectListProviderProps) {
+export function ProjectListProvider({
+  children,
+  navigationMode = 'filter-projects',
+}: ProjectListProviderProps) {
+  const location = useLocation()
   const prefetchedProjectsBlob = getMeta('ol-prefetchedProjectsBlob')
   const [loadedProjects, setLoadedProjects] = useState<Project[]>(
     prefetchedProjectsBlob?.projects ?? []
@@ -135,14 +150,23 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     by: 'lastUpdated',
     order: 'desc',
   })
-  const [filter, setFilter] = usePersistedState<Filter>(
-    'project-list-filter',
-    'all'
+  const [initialNavigationState] = useState<NavigationState>(() => {
+    if (navigationMode !== 'filter-projects') {
+      return { type: 'filter', filter: 'all' }
+    }
+    return getInitialNavigationState()
+  })
+  const [filter, setFilter] = useState<Filter>(
+    initialNavigationState.type === 'filter'
+      ? initialNavigationState.filter
+      : 'all'
   )
   const prevSortRef = useRef<Sort>(sort)
-  const [selectedTagId, setSelectedTagId] = usePersistedState<
-    string | undefined
-  >('project-list-selected-tag-id', undefined)
+  const [selectedTagId, setSelectedTagId] = useState<string | undefined>(
+    initialNavigationState.type === 'tag'
+      ? initialNavigationState.tag
+      : undefined
+  )
   const [showCustomPicker, setShowCustomPicker] = useState(false)
 
   const olTags = getMeta('ol-tags') || []
@@ -255,6 +279,33 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     prevSortRef.current = sort
   }, [sort])
 
+  useEffect(() => {
+    if (navigationMode !== 'filter-projects') return
+    const handlePopState = () => {
+      const navigationState = getNavigationState(window.location.pathname)
+      if (navigationState.type === 'tag') {
+        setFilter('all')
+        setSelectedTagId(navigationState.tag)
+      } else {
+        setFilter(navigationState.filter)
+        setSelectedTagId(undefined)
+      }
+      setSelectedProjectIds(new Set<string>())
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [navigationMode])
+
+  // Temporary: migrate the legacy local-storage navigation state to the URL on
+  // first load. Safe to remove around September 2026 (see navigation-state.ts).
+  // Only in 'filter-projects' mode: migrateLegacyNavigationState() clears the
+  // stored state unconditionally, so running it on the library page would wipe
+  // the dashboard's remembered filter before the migration could apply it.
+  useEffect(() => {
+    if (navigationMode !== 'filter-projects') return
+    migrateLegacyNavigationState()
+  }, [navigationMode])
+
   const showAllProjects = useCallback(() => {
     setLoadMoreCount(0)
     setHiddenProjectsCount(0)
@@ -328,22 +379,50 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     }, {})
   }, [tags, loadedProjects])
 
+  // How many projects the current filter matches, ignoring the search text.
+  // `visibleProjects` can't answer "is this view empty?" on its own, because it
+  // is also narrowed by the search text (which persists across filter changes)
+  // and by pagination. Callers need the distinction to tell an empty view apart
+  // from a search that matched nothing.
+  const currentFilterProjectsCount = useMemo(
+    () => arrayFilter(loadedProjects, filters[filter]).length,
+    [loadedProjects, filter]
+  )
+
   const selectFilter = useCallback(
     (filter: Filter) => {
+      const url = getNavigationUrl({ type: 'filter', filter })
+      if (navigationMode === 'redirect-to-filtered-projects') {
+        location.assign(url)
+        return
+      }
       setFilter(filter)
       setSelectedTagId(undefined)
       const selected = false
       selectOrUnselectAllProjects(selected)
+      window.history.pushState(null, '', url)
     },
-    [selectOrUnselectAllProjects, setFilter, setSelectedTagId]
+    [
+      navigationMode,
+      location,
+      selectOrUnselectAllProjects,
+      setFilter,
+      setSelectedTagId,
+    ]
   )
 
   const selectTag = useCallback(
     (tagId: string) => {
+      const url = getNavigationUrl({ type: 'tag', tag: tagId })
+      if (navigationMode === 'redirect-to-filtered-projects') {
+        location.assign(url)
+        return
+      }
       setFilter('all')
       setSelectedTagId(tagId)
+      window.history.pushState(null, '', url)
     },
-    [setSelectedTagId, setFilter]
+    [navigationMode, location, setSelectedTagId, setFilter]
   )
 
   const addTag = useCallback((tag: Tag) => {
@@ -493,6 +572,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       updateProjectViewData,
       updateTag,
       projectsPerTag,
+      currentFilterProjectsCount,
       visibleProjects,
     }),
     [
@@ -532,6 +612,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       updateProjectViewData,
       updateTag,
       projectsPerTag,
+      currentFilterProjectsCount,
       visibleProjects,
     ]
   )

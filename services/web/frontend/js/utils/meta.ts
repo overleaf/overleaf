@@ -73,14 +73,11 @@ import { FullHistoryFailure } from '@ol-types/history/projectHistory'
 
 export interface Meta {
   'ol-ExposedSettings': ExposedSettings
-  'ol-addonPrices': Record<
-    string,
-    { annual: string; monthly: string; annualDividedByTwelve: string }
-  >
   'ol-adminCapabilities': AdminCapability[]
   'ol-adminSubscription': AdminSubscription
   'ol-adminUserExists': boolean
   'ol-aiAssistViaWritefullSource': string
+  'ol-aiToggling': boolean
   'ol-algolia': AlgoliaConfig | undefined
   'ol-allInReconfirmNotificationPeriods': UserEmailData[]
   'ol-allowedExperiments': string[]
@@ -90,6 +87,7 @@ export interface Meta {
   'ol-canUseAddSeatsFeature': boolean
   'ol-canUseClsiCache': boolean
   'ol-canUseFlexibleLicensing': boolean
+  'ol-canUsePng2Pdf': boolean
 
   // dynamic keys based on permissions
   'ol-cannot-add-secondary-email': boolean
@@ -122,6 +120,7 @@ export interface Meta {
   'ol-detachRole': 'detached' | 'detacher' | ''
   'ol-dictionariesRoot': 'string'
   'ol-domainCaptureEnabled': boolean | undefined
+  'ol-domainCapturePrereqsMet': boolean | undefined
   'ol-domainCaptureTestURL': string | undefined
   'ol-domainVerificationGracePeriodDays': number
   'ol-domainVerificationUIEnabled': boolean
@@ -129,6 +128,7 @@ export interface Meta {
   'ol-editorThemes': { name: string; dark: boolean }[]
   'ol-email': string
   'ol-emailAddressLimit': number
+  'ol-enableSplitTestCalculator': boolean
   'ol-error': { name: string } | undefined
   'ol-errorType': string | undefined
   'ol-expired': boolean
@@ -138,7 +138,7 @@ export interface Meta {
   'ol-galleryTagName': string
   'ol-gitBridgeEnabled': boolean
   'ol-gitBridgePublicBaseUrl': string
-  'ol-github': { enabled: boolean; error: boolean }
+  'ol-github': { enabled: boolean; error: boolean; expired?: boolean }
   'ol-groupAuditLogs': []
   'ol-groupDomains': []
   'ol-groupId': string
@@ -177,6 +177,7 @@ export interface Meta {
     nBinaryBlobs: number
     owned?: boolean
   }[]
+  'ol-homepageAnimatedWords': string[]
   'ol-i18n': { currentLangCode: string }
   'ol-imageNames': ImageName[]
   'ol-inactiveTutorials': string[]
@@ -213,6 +214,7 @@ export interface Meta {
   'ol-languages': SpellCheckLanguage[]
   'ol-learnedWords': string[]
   'ol-legacyEditorThemes': { name: string; dark: boolean }[]
+  'ol-libraryView': 'library' | 'trashed'
   'ol-licenseQuantity'?: number
   'ol-loadingText': string
   'ol-localIndividualPlans': LocalIndividualPlans
@@ -240,6 +242,7 @@ export interface Meta {
   'ol-odcData': OnboardingFormData
   'ol-otMigrationStage': number
   'ol-overallThemes': OverallThemeMeta[]
+  'ol-ownerHasSharingUpdates': boolean
   'ol-ownerIsManaged': boolean
   'ol-pages': number
   'ol-passwordStrengthOptions': PasswordStrengthOptions
@@ -259,6 +262,7 @@ export interface Meta {
   'ol-projectEntityCounts': { files: number; docs: number }
   'ol-projectHistoryFailures': FullHistoryFailure[]
   'ol-projectName': string
+  'ol-projectSyncErrorMessage': string
   'ol-projectSyncSuccessMessage': string
   'ol-projectTags': Tag[]
   'ol-project_id': string
@@ -278,12 +282,22 @@ export interface Meta {
     | undefined
   'ol-recurlyApiKey': string
   'ol-recurlySubdomain': string
+  'ol-refSyncState': {
+    syncAvailable: boolean
+    accessOk: boolean
+    lastSyncProblem:
+      | 'zotero_no_collection'
+      | 'zotero_multiple_collections'
+      | null
+  }
+  'ol-referenceLinkingErrorMessage': string
   'ol-ro-mirror-on-client-no-local-storage': boolean
   'ol-samlError': SAMLError | undefined
   'ol-script-log': ScriptLogType
   'ol-script-logs': ScriptLogType[]
   'ol-settingsGroupSSO': { enabled: boolean } | undefined
   'ol-settingsPlans': Plan[]
+  'ol-sharedWorkspaceEnabled': boolean
   'ol-sharingPermissions': SharingPermissions
   'ol-shouldAllowEditingDetails': boolean
   'ol-shouldLoadHotjar': boolean
@@ -306,9 +320,8 @@ export interface Meta {
   'ol-ssoErrorMessage': string
   'ol-ssoInitPath': string
   'ol-standardPlanPricing': {
-    monthly?: string
-    annual?: string
-    monthlyTimesTwelve?: string
+    monthly?: number
+    annual?: number
   }
   'ol-stripeCustomerData': Array<{
     customerId: string
@@ -321,6 +334,17 @@ export interface Meta {
   }>
   'ol-stripePublicKeyUK': string
   'ol-stripePublicKeyUS': string
+  'ol-studentVerificationPage': {
+    planCode: string
+    origin: 'change-plan' | undefined
+    alreadyVerified: boolean
+    alreadyOnPlan: boolean
+    // Already translated by the server, because the keys come from the plans
+    // config and so are not picked up by the frontend translation build.
+    studentPlanFeatures: string[]
+    standardPlanFeatures: string[]
+    ip: string | undefined
+  }
   'ol-subscription': any // TODO: mixed types, split into two fields
   'ol-subscriptionChangePreview': SubscriptionChangePreview
   'ol-subscriptionCreationPreview': SubscriptionCreationPreview
@@ -357,6 +381,7 @@ export interface Meta {
   'ol-usersBestSubscription': ProjectDashboardSubscription | undefined
   'ol-usersEmail': string | undefined
   'ol-usersSubscription': { personal: boolean; group: boolean }
+  'ol-v1Url': string | undefined
   'ol-validationStatus': ValidationStatus
   'ol-viaDomainCapture': boolean
   'ol-wikiEnabled': boolean

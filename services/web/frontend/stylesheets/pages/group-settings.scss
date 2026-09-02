@@ -374,10 +374,6 @@ h4.group-settings-title {
   .domain-verification-token-container {
     margin-bottom: var(--spacing-03);
   }
-
-  td .material-symbols {
-    vertical-align: middle;
-  }
 }
 
 .domain-verification-token-container {
@@ -391,4 +387,8 @@ h4.group-settings-title {
 
 .remove-domain-confirm-name {
   color: var(--content-danger);
+}
+
+.feature-settings-feature-switch {
+  padding-left: 0;
 }

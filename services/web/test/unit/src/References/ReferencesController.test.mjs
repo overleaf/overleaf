@@ -1,5 +1,6 @@
-import { vi } from 'vitest'
+import { afterEach, beforeEach, describe, it, vi } from 'vitest'
 import sinon from 'sinon'
+import { setReqValidationModeForTests } from '@overleaf/validation-tools'
 import MockRequest from '../helpers/MockRequest.mjs'
 import MockResponse from '../helpers/MockResponse.mjs'
 const modulePath =
@@ -7,7 +8,8 @@ const modulePath =
 
 describe('ReferencesController', function () {
   beforeEach(async function (ctx) {
-    ctx.projectId = '2222'
+    // Project_id is validated as a Mongo ObjectId
+    ctx.projectId = '507f191e810c19729de860ea'
 
     vi.doMock('@overleaf/settings', () => ({
       default: (ctx.settings = {
@@ -140,6 +142,22 @@ describe('ReferencesController', function () {
             resolve()
           })
         })
+      })
+    })
+
+    describe('request validation', function () {
+      beforeEach(function () {
+        setReqValidationModeForTests('enforce')
+      })
+
+      afterEach(function () {
+        setReqValidationModeForTests(null)
+      })
+
+      it('should reject a malformed project id', function (ctx) {
+        ctx.req.params.Project_id = 'not-an-object-id'
+        ;(() =>
+          ctx.controller.indexAll(ctx.req, ctx.res, ctx.next)).should.throw()
       })
     })
   })

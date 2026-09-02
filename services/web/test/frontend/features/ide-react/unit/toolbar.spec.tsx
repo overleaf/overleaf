@@ -4,6 +4,11 @@ import {
   makeEditorProvider,
 } from '../../../helpers/editor-providers'
 import { Cobranding } from '@ol-types/cobranding'
+import {
+  OnlineUsersContext,
+  type OnlineUser,
+} from '@/features/ide-react/context/online-users-context'
+import { UnsavedDocsContext } from '@/features/ide-react/context/unsaved-docs-context'
 import partnerLogoUrl from './cobranding-logo.png'
 
 describe('<Toolbar />', function () {
@@ -244,5 +249,132 @@ describe('<Toolbar />', function () {
     })
 
     // TODO: Test all the dynamic items
+  })
+
+  describe('upgrade button', function () {
+    afterEach(function () {
+      cy.window().then(win => {
+        win.metaAttributesCache.delete('ol-showUpgradePrompt')
+      })
+    })
+
+    const mountWithUpgradePrompt = (showUpgradePrompt: boolean) => {
+      cy.window().then(win => {
+        win.metaAttributesCache.set('ol-showUpgradePrompt', showUpgradePrompt)
+      })
+      cy.mount(
+        <EditorProviders>
+          <Toolbar />
+        </EditorProviders>
+      )
+    }
+
+    it('shows the upgrade button in the menu bar when the upgrade prompt is enabled', function () {
+      mountWithUpgradePrompt(true)
+      // Shown in the left-hand menu bar (the shipped position)...
+      cy.get('.ide-redesign-toolbar-menu').within(() => {
+        cy.findByRole('link', { name: 'Upgrade' }).should('be.visible')
+      })
+      // ...and no longer in the top-right actions area
+      cy.get('.ide-redesign-toolbar-actions').within(() => {
+        cy.findByRole('link', { name: 'Upgrade' }).should('not.exist')
+      })
+    })
+
+    it('does not show the upgrade button when the upgrade prompt is disabled', function () {
+      mountWithUpgradePrompt(false)
+      cy.findByRole('link', { name: 'Upgrade' }).should('not.exist')
+    })
+  })
+
+  describe('offline gating', function () {
+    const offlineIndicatorText = 'You’re offline'
+
+    const onlineUser: OnlineUser = {
+      id: 'client-1',
+      user_id: 'user-1',
+      email: 'alice@example.com',
+      name: 'alice',
+      initial: 'a',
+    }
+
+    const mountToolbar = ({
+      offline,
+      focusMode = false,
+    }: {
+      offline: boolean
+      focusMode?: boolean
+    }) => {
+      const unsavedDocs = offline ? new Map([['doc-1', 20]]) : new Map()
+      cy.mount(
+        <EditorProviders layoutContext={{ focusMode }}>
+          <OnlineUsersContext.Provider
+            value={{
+              onlineUsers: {},
+              onlineUserCursorHighlights: {},
+              onlineUsersArray: [onlineUser],
+              onlineUsersCount: 1,
+            }}
+          >
+            <UnsavedDocsContext.Provider
+              value={{ unsavedDocs, isLocked: false, isSavingStalled: offline }}
+            >
+              <Toolbar />
+            </UnsavedDocsContext.Provider>
+          </OnlineUsersContext.Provider>
+        </EditorProviders>
+      )
+    }
+
+    describe('with intermittent-connection-improvements enabled', function () {
+      beforeEach(function () {
+        cy.window().then(win => {
+          win.metaAttributesCache.set('ol-splitTestVariants', {
+            'intermittent-connection-improvements': 'enabled',
+          })
+        })
+      })
+
+      it('shows online users and no offline indicator when online', function () {
+        mountToolbar({ offline: false })
+        cy.get('.ide-redesign-online-users').should('exist')
+        cy.findByText(offlineIndicatorText).should('not.exist')
+      })
+
+      it('hides online users and shows the offline indicator when offline', function () {
+        mountToolbar({ offline: true })
+        cy.get('.ide-redesign-online-users').should('not.exist')
+        cy.findAllByText(offlineIndicatorText).first().should('be.visible')
+      })
+
+      it('shows the offline indicator in focus mode', function () {
+        mountToolbar({ offline: true, focusMode: true })
+        cy.findAllByText(offlineIndicatorText).first().should('be.visible')
+        cy.findByRole('button', { name: 'Exit focus mode' }).should(
+          'be.visible'
+        )
+      })
+
+      it('shows no offline indicator in focus mode when online', function () {
+        mountToolbar({ offline: false, focusMode: true })
+        cy.findByText(offlineIndicatorText).should('not.exist')
+      })
+    })
+
+    describe('with intermittent-connection-improvements disabled', function () {
+      it('always shows online users and never the offline indicator', function () {
+        mountToolbar({ offline: true })
+        cy.get('.ide-redesign-online-users').should('exist')
+        cy.findByText(offlineIndicatorText).should('not.exist')
+      })
+
+      it('shows no offline indicator in focus mode', function () {
+        mountToolbar({ offline: true, focusMode: true })
+        cy.findByText(offlineIndicatorText).should('not.exist')
+        cy.findByRole('button', { name: 'Exit focus mode' }).should(
+          'be.visible'
+        )
+      })
+    })
   })
 })

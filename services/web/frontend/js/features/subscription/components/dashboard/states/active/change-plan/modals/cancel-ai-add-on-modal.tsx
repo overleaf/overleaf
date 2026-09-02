@@ -12,7 +12,7 @@ import {
   OLModalTitle,
 } from '@/shared/components/ol/ol-modal'
 import OLButton from '@/shared/components/ol/ol-button'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import {
   AI_ADD_ON_CODE,
   ADD_ON_NAME,
@@ -66,19 +66,20 @@ export function CancelAiAddOnModal() {
       <OLModalHeader>
         <OLModalTitle>{t('cancel_add_on')}</OLModalTitle>
       </OLModalHeader>
-
       <OLModalBody>
         {error && (
-          <OLNotification
-            type="error"
-            aria-live="polite"
-            content={
-              <>
-                {t('generic_something_went_wrong')}. {t('try_again')}.{' '}
-                {t('generic_if_problem_continues_contact_us')}.
-              </>
-            }
-          />
+          <div className="notification-list">
+            <Notification
+              type="error"
+              aria-live="polite"
+              content={
+                <>
+                  {t('generic_something_went_wrong')}. {t('try_again')}.{' '}
+                  {t('generic_if_problem_continues_contact_us')}.
+                </>
+              }
+            />
+          </div>
         )}
         <p>
           <Trans
@@ -93,7 +94,6 @@ export function CancelAiAddOnModal() {
         </p>
         <p>{t('the_add_on_will_remain_active_until')}</p>
       </OLModalBody>
-
       <OLModalFooter>
         <OLButton
           variant="secondary"

@@ -1,4 +1,4 @@
-import { vi, assert, expect } from 'vitest'
+import { assert, beforeEach, describe, expect, it, vi } from 'vitest'
 import Path from 'node:path'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
@@ -68,6 +68,14 @@ describe('SplitTestHandler', function () {
     ctx.SessionManager = {
       isUserLoggedIn: sinon.stub().returns(false),
     }
+    // no module gates labs experiments unless a test says otherwise
+    ctx.Modules = {
+      promises: {
+        hooks: {
+          fire: sinon.stub().resolves([]),
+        },
+      },
+    }
 
     Features = {
       hasFeature: vi.fn().mockReturnValue(true),
@@ -75,6 +83,10 @@ describe('SplitTestHandler', function () {
 
     vi.doMock('../../../../app/src/infrastructure/Features', () => ({
       default: Features,
+    }))
+
+    vi.doMock('../../../../app/src/infrastructure/Modules', () => ({
+      default: ctx.Modules,
     }))
 
     vi.doMock('../../../../app/src/Features/User/UserGetter', () => ({
@@ -540,6 +552,57 @@ describe('SplitTestHandler', function () {
         { ignoreOverrides: true }
       )
       expect(variant).to.equal('variant-1')
+    })
+  })
+
+  describe('malformed query override values', function () {
+    describe('getAssignment', function () {
+      beforeEach(function (ctx) {
+        ctx.AnalyticsManager.getIdsFromSession.returns({
+          userId: 'abc123abc123',
+        })
+        ctx.req.query = { 'active-test': { nested: 'oops' } }
+      })
+
+      it('falls through to the computed assignment', async function (ctx) {
+        const { variant } = await ctx.SplitTestHandler.promises.getAssignment(
+          ctx.req,
+          ctx.res,
+          'active-test'
+        )
+        expect(variant).to.equal('variant-1')
+      })
+    })
+
+    describe('hasUserBeenAssignedToVariant', function () {
+      beforeEach(function (ctx) {
+        ctx.user = {
+          _id: new ObjectId(),
+          analyticsId: 'analytics-id',
+          splitTests: {
+            'active-test': [
+              {
+                variantName: 'variant-1',
+                versionNumber: 2,
+                assignedAt: 'active-test-assigned-at',
+              },
+            ],
+          },
+        }
+        ctx.SplitTestUserGetter.promises.getUser.resolves(ctx.user)
+        ctx.req.query = { 'active-test': { nested: 'oops' } }
+      })
+
+      it('still resolves the recorded assignment', async function (ctx) {
+        const assigned =
+          await ctx.SplitTestHandler.promises.hasUserBeenAssignedToVariant(
+            ctx.req,
+            ctx.user._id,
+            'active-test',
+            'variant-1'
+          )
+        expect(assigned).to.be.true
+      })
     })
   })
 
@@ -1032,6 +1095,108 @@ describe('SplitTestHandler', function () {
         'active-test',
         sinon.match(info => info.labsDetails === undefined)
       )
+    })
+
+    describe('experiment requirements', function () {
+      beforeEach(function (ctx) {
+        ctx.labsSplitTest = {
+          name: 'labs-requirements-test',
+          labsTitle: 'Needs premium compiles',
+          versions: [
+            {
+              active: true,
+              analyticsEnabled: true,
+              phase: 'labs',
+              versionNumber: 1,
+              createdAt: new Date('2024-06-15T12:00:00.000Z'),
+              variants: [
+                {
+                  name: 'variant-1',
+                  rolloutPercent: 100,
+                  rolloutStripes: [{ start: 0, end: 100 }],
+                },
+              ],
+            },
+          ],
+        }
+        ctx.cachedSplitTests.set('labs-requirements-test', ctx.labsSplitTest)
+      })
+
+      it('asks the labs module whether the user meets the requirements', async function (ctx) {
+        await ctx.SplitTestHandler.promises.getAssignment(
+          ctx.req,
+          ctx.res,
+          'labs-requirements-test'
+        )
+
+        expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+          'userMeetsLabsExperimentRequirements',
+          ctx.req.session,
+          ctx.labsSplitTest
+        )
+      })
+
+      it('does not set labsDetails when the user does not meet them', async function (ctx) {
+        ctx.Modules.promises.hooks.fire.resolves([false])
+
+        await ctx.SplitTestHandler.promises.getAssignment(
+          ctx.req,
+          ctx.res,
+          'labs-requirements-test'
+        )
+
+        expect(ctx.LocalsHelper.setSplitTestInfo).to.have.been.calledWith(
+          ctx.res.locals,
+          'labs-requirements-test',
+          sinon.match(info => info.labsDetails === undefined)
+        )
+      })
+
+      it('sets labsDetails when the user meets them', async function (ctx) {
+        ctx.Modules.promises.hooks.fire.resolves([true])
+
+        await ctx.SplitTestHandler.promises.getAssignment(
+          ctx.req,
+          ctx.res,
+          'labs-requirements-test'
+        )
+
+        expect(ctx.LocalsHelper.setSplitTestInfo).to.have.been.calledWith(
+          ctx.res.locals,
+          'labs-requirements-test',
+          sinon.match({
+            labsDetails: sinon.match({ title: 'Needs premium compiles' }),
+          })
+        )
+      })
+
+      // fail closed rather than advertise an experiment the opt-in endpoint
+      // would then refuse
+      it('does not set labsDetails when the check fails', async function (ctx) {
+        ctx.Modules.promises.hooks.fire.rejects(new Error('mongo is down'))
+
+        await ctx.SplitTestHandler.promises.getAssignment(
+          ctx.req,
+          ctx.res,
+          'labs-requirements-test'
+        )
+
+        expect(ctx.LocalsHelper.setSplitTestInfo).to.have.been.calledWith(
+          ctx.res.locals,
+          'labs-requirements-test',
+          sinon.match(info => info.labsDetails === undefined)
+        )
+      })
+
+      it('does not ask about a release-phase split test', async function (ctx) {
+        await ctx.SplitTestHandler.promises.getAssignment(
+          ctx.req,
+          ctx.res,
+          'active-test'
+        )
+
+        expect(ctx.Modules.promises.hooks.fire).to.not.have.been.called
+      })
     })
   })
 

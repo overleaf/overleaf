@@ -14,7 +14,7 @@ import {
 } from '@/shared/components/ol/ol-modal'
 import OLFormGroup from '@/shared/components/ol/ol-form-group'
 import OLButton from '@/shared/components/ol/ol-button'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import OLFormControl from '@/shared/components/ol/ol-form-control'
 import OLFormLabel from '@/shared/components/ol/ol-form-label'
 import OLFormSelect from '@/shared/components/ol/ol-form-select'
@@ -93,7 +93,11 @@ export default function OffboardManagedUserModal({
           <p>
             <span>{t('this_action_cannot_be_reversed')}</span>
             &nbsp;
-            <a href="/learn/how-to/User_Management_in_Overleaf" target="_blank">
+            <a
+              href="https://docs.overleaf.com/groups/user-management/managed-user-accounts"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               {t('learn_more_about_managed_users')}
             </a>
           </p>
@@ -133,7 +137,9 @@ export default function OffboardManagedUserModal({
             />
           </OLFormGroup>
           {error && (
-            <OLNotification type="error" content={error} className="mb-0" />
+            <div className="notification-list">
+              <Notification type="error" content={error} className="mb-0" />
+            </div>
           )}
         </OLModalBody>
         <OLModalFooter>

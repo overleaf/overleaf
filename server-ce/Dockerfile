@@ -10,15 +10,16 @@ WORKDIR /overleaf
 
 # Add required source files for yarn install
 # -------------------------------------------
-COPY --parents libraries/*/package.json .yarn/patches/ services/*/package.json tools/migrations/ package.json yarn.lock .yarnrc.yml /overleaf/
+COPY --parents libraries/*/package.json .yarn/patches/ services/*/package.json tools/migrations/ package.json yarn.lock .yarnrc.yml .pnp.register.mjs /overleaf/
 COPY server-ce/genScript.js server-ce/services.js /overleaf/
 
 # Pre-install yarn via corepack so it is available at runtime for all users
 # -------------------------------------------------------------------------
 # Corepack setup, shared between all the images.
-ENV PATH="/overleaf/node_modules/.bin:$PATH"
+# (Note: the official Dockerfile sets no custom PATH in 6.3.0 — dependency resolution
+# happens through the PnP runtime loaded at runtime via NODE_OPTIONS.)
 ENV COREPACK_HOME=/opt/corepack
-RUN corepack enable && corepack install -g yarn@4.14.1
+RUN corepack enable && corepack install -g yarn@4.18.0
 ENV COREPACK_ENABLE_NETWORK=0
 
 # Install yarn dependencies
@@ -31,12 +32,27 @@ RUN --mount=type=cache,target=/root/.cache \
 # Add the actual source files
 # ---------------------------
 COPY --parents libraries/ services/ tools/migrations/ /overleaf/
+
+# Pre-stage the PnP cache zips for the three git-sourced codemirror dev deps
+# (byte-identical to the zips shipped in the official 6.3.0 image; checksums
+# match yarn.lock, so the compile-time yarn install takes a cache hit and the
+# parallel Yarn-Classic re-pack bootstrap -- which races on the shared classic
+# yarn cache and fails under buildkit with 'cm-buildhelper: not found' (127) --
+# is never triggered).
+COPY .yarn/cache /overleaf/.yarn/cache
+
 RUN --mount=type=cache,target=/root/.cache \
     --mount=type=cache,target=/root/.yarn/berry/cache,id=server-ce-yarn-cache \
     --mount=type=cache,target=/usr/local/share/.cache/yarn,id=server-ce-yarn-fallback-cache \
     --mount=type=cache,target=/overleaf/services/web/node_modules/.cache,id=server-ce-webpack-cache \
+    --mount=type=cache,target=/overleaf/services/web/.cache,id=server-ce-babel-cache \
     --mount=type=tmpfs,target=/tmp \
     node genScript compile | bash
+
+# PnP: official 6.3.0 sets this after the build steps so runtime uses the PnP linker
+# (quoted legacy form: Docker 29's parser mangles the JSON array form, and bare
+# classic form cannot hold a multi-word value)
+ENV NODE_OPTIONS="--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs"
 
 # Copy runit service startup scripts to its location
 # --------------------------------------------------
@@ -111,6 +127,8 @@ ENV ADMIN_PRIVILEGE_AVAILABLE="true"
 ENV OVERLEAF_APP_NAME="Overleaf Community Edition"
 
 ENV OPTIMISE_PDF="true"
+# Official 6.3.0 default for @overleaf/request-validation
+ENV REQ_VALIDATION_MODE=enforce-log
 
 # Phusion Image timeouts before sending SIGKILL to processes
 # ----------------------------------------------------------

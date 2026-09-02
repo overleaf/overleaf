@@ -172,6 +172,173 @@ describe('Bib2JsonTests', function () {
     })
   })
 
+  describe('oversized field values', function () {
+    // overleaf/internal#24246: an oversized field is now truncated to
+    // ~MAX_FIELD_VALUE_LENGTH instead of dropping the whole entry. Braced
+    // values include the opening brace in the raw length, so the final
+    // length can land a character under the limit rather than exactly on it.
+    const MAX_FIELD_VALUE_LENGTH = 1000 * 20
+
+    it('truncates an oversized field but keeps the entry and its other fields', function () {
+      const hugeAuthorList = 'A'.repeat(MAX_FIELD_VALUE_LENGTH + 5000)
+      const text = `@article{ key, title={Some title}, author={${hugeAuthorList}}, year={2024} }`
+      const result = BibtexParser(text)
+      expect(result.entries.length).to.equal(1)
+      expect(result.errors.length).to.equal(0)
+      expect(result.entries[0].Fields.title).to.equal('Some title')
+      expect(result.entries[0].Fields.year).to.equal('2024')
+
+      const author = result.entries[0].Fields.author
+      expect(author.length).to.be.at.most(MAX_FIELD_VALUE_LENGTH)
+      expect(author.length).to.be.lessThan(hugeAuthorList.length)
+      expect(hugeAuthorList.startsWith(author)).to.equal(true)
+    })
+
+    it('keeps parsing later entries after an oversized field', function () {
+      const hugeAuthorList = 'A'.repeat(MAX_FIELD_VALUE_LENGTH + 5000)
+      const text =
+        `@article{ first, title={First}, author={${hugeAuthorList}} }` +
+        '@article{ second, title={Second}, author={Doe, Jane} }'
+      const result = BibtexParser(text)
+      expect(result.entries.length).to.equal(2)
+      expect(result.errors.length).to.equal(0)
+      expect(result.entries[0].Fields.title).to.equal('First')
+      expect(result.entries[0].Fields.author.length).to.be.at.most(
+        MAX_FIELD_VALUE_LENGTH
+      )
+      expect(result.entries[1].Fields.title).to.equal('Second')
+      expect(result.entries[1].Fields.author).to.equal('Doe, Jane')
+    })
+
+    it('does not truncate a field comfortably under the limit', function () {
+      const authorList = 'A'.repeat(MAX_FIELD_VALUE_LENGTH - 100)
+      const text = `@article{ key, author={${authorList}} }`
+      const result = BibtexParser(text)
+      expect(result.entries.length).to.equal(1)
+      expect(result.errors.length).to.equal(0)
+      expect(result.entries[0].Fields.author).to.equal(authorList)
+    })
+
+    it('truncates an oversized quoted field but keeps the entry and its other fields', function () {
+      const hugeAuthorList = 'A'.repeat(MAX_FIELD_VALUE_LENGTH + 5000)
+      const text = `@article{ key, title="Some title", author="${hugeAuthorList}", year="2024" }`
+      const result = BibtexParser(text)
+      expect(result.entries.length).to.equal(1)
+      expect(result.errors.length).to.equal(0)
+      expect(result.entries[0].Fields.title).to.equal('Some title')
+      expect(result.entries[0].Fields.year).to.equal('2024')
+
+      const author = result.entries[0].Fields.author
+      expect(author.length).to.be.at.most(MAX_FIELD_VALUE_LENGTH)
+      expect(author.length).to.be.lessThan(hugeAuthorList.length)
+      expect(hugeAuthorList.startsWith(author)).to.equal(true)
+    })
+
+    it('truncates cleanly through nested braces spanning the length boundary', function () {
+      // cap lands inside a nested {Middle} group
+      const before = 'A'.repeat(MAX_FIELD_VALUE_LENGTH - 3)
+      const text = `@article{ key, title={${before}{Middle} end}, year={2024} }`
+      const result = BibtexParser(text)
+      expect(result.entries.length).to.equal(1)
+      expect(result.errors.length).to.equal(0)
+      expect(result.entries[0].Fields.year).to.equal('2024')
+
+      const title = result.entries[0].Fields.title
+      expect(title.length).to.be.at.most(MAX_FIELD_VALUE_LENGTH)
+      expect(title.startsWith('A'.repeat(100))).to.equal(true)
+      expect(title.endsWith('end')).to.equal(false)
+    })
+
+    it('keeps parsing correctly when the length cap lands right after a backslash', function () {
+      // Regression test: capping the value array mid-parse (instead of
+      // truncating once complete) froze the escape check on a trailing
+      // backslash, permanently misreading later quotes/braces as escaped and
+      // swallowing the rest of the document with no error.
+      const before = 'A'.repeat(MAX_FIELD_VALUE_LENGTH - 1)
+      const text =
+        `@article{ key, title="${before}\\"still inside", year="2024" }` +
+        '@article{ second, title={Second} }'
+      const result = BibtexParser(text)
+      expect(result.entries.length).to.equal(2)
+      expect(result.errors.length).to.equal(0)
+      expect(result.entries[0].Fields.title.length).to.equal(
+        MAX_FIELD_VALUE_LENGTH
+      )
+      // "year" follows the truncated "title" field in the same entry - the
+      // bug above would have swallowed this too.
+      expect(result.entries[0].Fields.year).to.equal('2024')
+      expect(result.entries[1].Fields.title).to.equal('Second')
+    })
+
+    it('does not record parse errors as a side effect of truncation', function () {
+      const hugeAuthorList = 'A'.repeat(MAX_FIELD_VALUE_LENGTH + 5000)
+      const text =
+        `@article{ first, title={First}, author={${hugeAuthorList}} }` +
+        `@article{ second, title={Second}, author="${hugeAuthorList}" }`
+      const result = BibtexParser(text)
+      expect(result.entries.length).to.equal(2)
+      expect(result.errors.length).to.equal(0)
+    })
+  })
+
+  describe('boundary sweep near the truncation cap', function () {
+    // Regression safety net for a planned refactor that will cap
+    // PARSETMP_.Value while parsing (to bound memory on huge fields)
+    // instead of only truncating once the value is complete. That refactor
+    // touches the escape/verbatim-brace detection this suite exercises, so
+    // these tests pin the exact current output at many cap offsets before
+    // the change, using a helper that mirrors processEntry_'s brace/
+    // backslash stripping (bib2json.js) rather than trusting the parser to
+    // grade its own homework.
+    const MAX_FIELD_VALUE_LENGTH = 1000 * 20
+
+    function stripBracesAndBackslashes(raw: string): string {
+      let result = ''
+      for (let i = 0; i < raw.length; i++) {
+        let c = raw[i]
+        if (c === '\\' && i < raw.length - 1) {
+          c = raw[++i]
+        } else if (c === '{' || c === '}') {
+          continue
+        }
+        result += c
+      }
+      return result
+    }
+
+    // decoded from the "handles one backslash {\}" fixture above
+    const oneBackslash = '{\\}{A} \\\\very \\{{Big} \\"Book\\".'
+    // decoded from the "handles two backslashes {\\}" fixture above -
+    // exercises the doubleSlash branch that the single-backslash case doesn't
+    const twoBackslashes = '{\\\\}{A} \\\\very \\{{Big} \\"Book\\".'
+
+    function checkTruncationAtOffset(rawSpecial: string, k: number) {
+      it(`truncates correctly when the cap lands ${k} chars into the sequence`, function () {
+        const paddingLen = MAX_FIELD_VALUE_LENGTH - k
+        const value = 'A'.repeat(paddingLen) + rawSpecial
+        const expectedTitle = stripBracesAndBackslashes(
+          value.slice(0, MAX_FIELD_VALUE_LENGTH)
+        )
+        const text =
+          `@article{ first, title="${value}", year="2024" }` +
+          '@article{ second, title={Second} }'
+        const result = BibtexParser(text)
+        expect(result.entries.length).to.equal(2)
+        expect(result.errors.length).to.equal(0)
+        expect(result.entries[0].Fields.title).to.equal(expectedTitle)
+        expect(result.entries[0].Fields.year).to.equal('2024')
+        expect(result.entries[1].Fields.title).to.equal('Second')
+      })
+    }
+
+    ;[0, 1, 2, 3, 9, 16, 23, 31].forEach(k =>
+      checkTruncationAtOffset(oneBackslash, k)
+    )
+    ;[0, 1, 2, 3, 4, 10, 17].forEach(k =>
+      checkTruncationAtOffset(twoBackslashes, k)
+    )
+  })
+
   return describe('with allowedKeys set', function () {
     it('should skip the unknown key Random', function () {
       const text = '@book{ id, Random = "ABC", title="VALUE" }'

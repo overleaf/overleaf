@@ -1,3 +1,21 @@
+:root {
+  --project-list-upload-modal-hint-color: var(--neutral-60);
+}
+
+@include theme('default') {
+  .modal-themed {
+    --project-list-upload-modal-hint-color: var(--content-secondary-dark);
+  }
+}
+
+.project-list-modal .form-label {
+  color: var(--content-secondary-themed);
+}
+
+.project-list-action-modal {
+  @include themed-links;
+}
+
 .project-list-empty-col {
   display: flex;
   height: 100%;
@@ -142,7 +160,7 @@
   min-height: 36px;
 
   .project-list-title {
-    @include heading-sm;
+    @include heading-md;
 
     color: var(--content-secondary-themed);
     font-weight: bold;
@@ -190,6 +208,10 @@
   right: var(--spacing-09);
   width: initial;
   background-color: transparent;
+
+  .projects-dropdown-menu-library & {
+    right: 0;
+  }
 }
 
 .project-menu-item-tag-name {
@@ -590,7 +612,7 @@ ul.project-list-filters {
   .uppy-Dashboard-AddFiles-title {
     display: flex;
     flex-direction: column;
-    color: var(--neutral-60);
+    color: var(--project-list-upload-modal-hint-color);
     white-space: pre-line;
 
     @include body-base;
@@ -702,7 +724,7 @@ form.project-search {
 
   &:focus-visible {
     box-shadow:
-      0 0 0 2px var(--white),
+      0 0 0 2px var(--bg-primary-themed),
       0 0 0 3px var(--blue-50),
       0 0 0 5px var(--blue-30);
   }

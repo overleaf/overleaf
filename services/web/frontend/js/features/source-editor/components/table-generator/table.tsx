@@ -138,7 +138,7 @@ export const Table: FC = () => {
 
   const isCharacterInput = useCallback((event: KeyboardEvent) => {
     return (
-      Boolean(event.code) && // is a keyboard key
+      Boolean(event.key) && // is a keyboard key
       event.key?.length === 1 &&
       !event.ctrlKey &&
       !event.metaKey &&
@@ -155,7 +155,7 @@ export const Table: FC = () => {
         return
       }
       const commandKey = isMac ? event.metaKey : event.ctrlKey
-      if (event.code === 'Enter' && !event.shiftKey) {
+      if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault()
         event.stopPropagation()
         if (!selection) {
@@ -173,7 +173,7 @@ export const Table: FC = () => {
         setSelection(
           new TableSelection(selection.to, selection.to).explode(tableData)
         )
-      } else if (event.code === 'Escape') {
+      } else if (event.key === 'Escape') {
         event.preventDefault()
         event.stopPropagation()
         if (!cellData) {
@@ -182,7 +182,7 @@ export const Table: FC = () => {
         } else {
           cancelEditing()
         }
-      } else if (event.code === 'Delete' || event.code === 'Backspace') {
+      } else if (event.key === 'Delete' || event.key === 'Backspace') {
         if (cellData) {
           return
         }
@@ -204,12 +204,12 @@ export const Table: FC = () => {
             }
           }
         }, 0)
-      } else if (Object.prototype.hasOwnProperty.call(navigation, event.code)) {
+      } else if (Object.prototype.hasOwnProperty.call(navigation, event.key)) {
         const {
           run: defaultNavigation,
           shift: shiftNavigation,
           canExitEditing,
-        } = navigation[event.code as NavigationKey]
+        } = navigation[event.key as NavigationKey]
         if (cellData) {
           if (!canExitEditing) {
             return

@@ -1,5 +1,13 @@
 import sinon from 'sinon'
-import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
 import {
   connectionPromise,

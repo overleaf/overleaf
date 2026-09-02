@@ -2,8 +2,17 @@ import UserGetter from './UserGetter.mjs'
 import SessionManager from '../Authentication/SessionManager.mjs'
 import mongodb from 'mongodb-legacy'
 import { expressify } from '@overleaf/promise-utils'
+import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
 
 const { ObjectId } = mongodb
+
+// user_id is either a real Mongo ObjectId or a legacy v1-only numeric
+// (overleaf.id) id.
+const getPersonalInfoSchema = z.object({
+  params: z.strictObject({
+    user_id: zz.objectId().or(z.coerce.number()),
+  }),
+})
 
 function getLoggedInUsersPersonalInfo(req, res, next) {
   const userId = SessionManager.getLoggedInUserId(req.session)
@@ -30,8 +39,10 @@ function getLoggedInUsersPersonalInfo(req, res, next) {
 }
 
 function getPersonalInfo(req, res, next) {
+  const { params } = parseReq(req, getPersonalInfoSchema, { logOnly: true })
+
   let query
-  const userId = req.params.user_id
+  const userId = params.user_id
 
   if (/^\d+$/.test(userId)) {
     query = { 'overleaf.id': parseInt(userId, 10) }

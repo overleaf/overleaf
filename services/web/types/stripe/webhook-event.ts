@@ -22,14 +22,7 @@ export interface CustomerSubscriptionUpdatedWebhookEvent
       cancel_at?: number | null // will only be present if the subscription was cancelled or reactivated
       items?: {
         // will be present if the subscription was downgraded, upgraded, or renewed
-        data: [
-          {
-            price: {
-              id: string
-            }
-            quantity: number
-          },
-        ]
+        data: Stripe.SubscriptionItem[]
       }
       status?: Stripe.Subscription.Status
       metadata?: Record<string, string>
@@ -61,6 +54,7 @@ export interface InvoicePaidWebhookEvent extends Stripe.EventBase {
         subscription_details: Stripe.Invoice.Parent.SubscriptionDetails & {
           metadata: {
             billing_migration_id?: string
+            paymentMethodPending?: string
             recurly_to_stripe_migration_status?:
               | 'in_progress'
               | 'completed'
@@ -123,24 +117,18 @@ export interface InvoiceCreatedWebhookEvent extends Stripe.EventBase {
   }
 }
 
-export interface CustomerCreatedWebhookEvent extends Stripe.EventBase {
-  type: 'customer.created'
-  data: {
-    object: Stripe.Customer
-  }
-}
-
 export interface CustomerUpdatedWebhookEvent extends Stripe.EventBase {
   type: 'customer.updated'
   data: {
     object: Stripe.Customer
     previous_attributes?: {
       invoice_settings?: {
-        default_payment_method?: string
+        default_payment_method?: string | null
       }
       address?: Stripe.Address
       name?: string
       email?: string
+      tax?: Stripe.Customer.Tax
     }
   }
 }
@@ -172,7 +160,6 @@ export type WebhookEvent =
   | PaymentIntentPaymentFailedWebhookEvent
   | SetupIntentSetupFailedWebhookEvent
   | InvoiceOverdueWebhookEvent
-  | CustomerCreatedWebhookEvent
   | CustomerUpdatedWebhookEvent
   | CustomerTaxIdUpdatedWebhookEvent
   | MandateUpdatedWebhookEvent

@@ -3,6 +3,7 @@
   --ide-redesign-color: var(--content-primary-dark);
   --ide-redesign-resizing-background: var(--bg-dark-primary);
   --ide-redesign-color-scheme: dark;
+  --editing-paused-banner-background: var(--bg-dark-tertiary);
 }
 
 @include theme('light') {
@@ -10,6 +11,7 @@
   --ide-redesign-color: var(--content-primary);
   --ide-redesign-resizing-background: var(--white);
   --ide-redesign-color-scheme: light;
+  --editing-paused-banner-background: var(--blue-10);
 }
 
 .ide-redesign-body {
@@ -30,6 +32,19 @@
   .ide-panel-group-resizing {
     background-color: var(--ide-redesign-resizing-background);
   }
+}
+
+.editing-paused-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-04);
+  padding: var(--spacing-04) 0;
+  background-color: var(--editing-paused-banner-background);
+  color: var(--content-primary-themed);
+  border-bottom: 1px solid var(--redesign-toolbar-border-divider);
+  font-size: var(--font-size-03);
+  line-height: var(--line-height-03);
 }
 
 .ide-skeleton-block {

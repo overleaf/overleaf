@@ -1,4 +1,4 @@
-import { vi, expect } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import cheerio from 'cheerio'
 import path from 'node:path'
 
@@ -995,6 +995,7 @@ describe('EmailBuilder', function () {
             currentMembers: 9,
             membersLimit: 10,
             remainingSeats: 1,
+            canUseFlexibleLicensing: true,
           }
           ctx.email = ctx.EmailBuilder.buildEmail(
             'groupMemberLimitWarning',
@@ -1013,7 +1014,7 @@ describe('EmailBuilder', function () {
             const dom = cheerio.load(ctx.email.html)
             const plainText = dom.text()
             expect(ctx.email.subject).to.equal(
-              'Action needed: Your Overleaf group is nearly out of licenses'
+              'Action needed: your Overleaf group is nearly out of licenses'
             )
             expect(ctx.email.html).to.exist
             expect(ctx.email.html).to.contain(
@@ -1048,6 +1049,254 @@ describe('EmailBuilder', function () {
             expect(ctx.email.text).to.contain(ctx.expectedUrl)
           })
         })
+
+        describe('without flexible licensing', function () {
+          it('should point the CTA at support instead of add-users', function (ctx) {
+            ctx.opts.canUseFlexibleLicensing = false
+            ctx.email = ctx.EmailBuilder.buildEmail(
+              'groupMemberLimitWarning',
+              ctx.opts
+            )
+            const dom = cheerio.load(ctx.email.html)
+            const buttonLink = dom('a:contains("Contact us")')
+            expect(buttonLink.attr('href')).to.equal(
+              `${ctx.settings.siteUrl}/contact`
+            )
+            expect(ctx.email.html).to.not.contain(ctx.expectedUrl)
+          })
+        })
+      })
+
+      describe('groupMemberLimitReached', function () {
+        beforeEach(function (ctx) {
+          ctx.opts = {
+            to: 'example@overleaf.com',
+            groupName: 'Example Group',
+            firstName: 'Joe',
+            membersLimit: 10,
+            canUseFlexibleLicensing: true,
+          }
+          ctx.email = ctx.EmailBuilder.buildEmail(
+            'groupMemberLimitReached',
+            ctx.opts
+          )
+          ctx.expectedUrl = `${ctx.settings.siteUrl}/user/subscription/group/add-users`
+        })
+
+        it('should build the email', function (ctx) {
+          expect(ctx.email.html).to.exist
+          expect(ctx.email.text).to.exist
+        })
+
+        it('should describe the at-capacity state and CTA', function (ctx) {
+          const dom = cheerio.load(ctx.email.html)
+          expect(ctx.email.subject).to.equal(
+            'Action needed: your Overleaf group is out of licenses'
+          )
+          expect(ctx.email.html).to.contain(
+            `Your Overleaf group <b>${ctx.opts.groupName}</b> has used all ${ctx.opts.membersLimit} of its licenses.`
+          )
+          expect(ctx.email.html).to.contain(
+            'new users from your domain can no longer'
+          )
+          expect(ctx.email.html).to.contain('What you can do now:')
+          const buttonLink = dom('a:contains("Add licenses")')
+          expect(buttonLink.attr('href')).to.equal(ctx.expectedUrl)
+          expect(ctx.email.text).to.contain(ctx.expectedUrl)
+        })
+
+        describe('without flexible licensing', function () {
+          it('should point the CTA at support instead of add-users', function (ctx) {
+            ctx.opts.canUseFlexibleLicensing = false
+            ctx.email = ctx.EmailBuilder.buildEmail(
+              'groupMemberLimitReached',
+              ctx.opts
+            )
+            const dom = cheerio.load(ctx.email.html)
+            const buttonLink = dom('a:contains("Contact us")')
+            expect(buttonLink.attr('href')).to.equal(
+              `${ctx.settings.siteUrl}/contact`
+            )
+            expect(ctx.email.html).to.not.contain(ctx.expectedUrl)
+          })
+        })
+      })
+
+      describe('groupSharedWorkspaceDisabledForOwner', function () {
+        beforeEach(function (ctx) {
+          ctx.emailAddress = 'example@overleaf.com'
+          ctx.opts = {
+            to: ctx.emailAddress,
+            groupName: 'Example Group',
+            firstName: 'Joe',
+          }
+          ctx.email = ctx.EmailBuilder.buildEmail(
+            'groupSharedWorkspaceDisabledForOwner',
+            ctx.opts
+          )
+          ctx.expectedUrl = `${ctx.settings.siteUrl}/project`
+        })
+
+        it('should build the email', function (ctx) {
+          expect(ctx.email.html).to.exist
+          expect(ctx.email.text).to.exist
+        })
+
+        describe('HTML email', function () {
+          it('should include a CTA button and a fallback CTA link', function (ctx) {
+            const dom = cheerio.load(ctx.email.html)
+            expect(ctx.email.subject).to.equal(
+              'Your shared workspace has been disabled'
+            )
+            expect(ctx.email.html).to.contain(
+              'Your projects are back in your personal list.'
+            )
+            expect(ctx.email.html).to.contain(
+              `Your group administrator has disabled the shared workspace for ${ctx.opts.groupName}.`
+            )
+            const buttonLink = dom('a:contains("Open your projects")')
+            expect(buttonLink.length).to.equal(1)
+            expect(buttonLink.attr('href')).to.equal(ctx.expectedUrl)
+            expect(ctx.email.html).to.contain('copy and paste this link')
+            expect(ctx.email.html).to.contain(ctx.expectedUrl)
+          })
+        })
+
+        describe('plain text email', function () {
+          it('should contain the CTA link', function (ctx) {
+            expect(ctx.email.text).to.contain(ctx.expectedUrl)
+          })
+        })
+
+        it('escapes the group name in the HTML email', function (ctx) {
+          const email = ctx.EmailBuilder.buildEmail(
+            'groupSharedWorkspaceDisabledForOwner',
+            { ...ctx.opts, groupName: '<script>alert(1)</script>' }
+          )
+          expect(email.html).to.not.contain('<script>alert(1)</script>')
+          expect(email.html).to.contain('&lt;script&gt;alert(1)&lt;/script&gt;')
+        })
+      })
+
+      describe('groupSharedWorkspaceDisabledForMember', function () {
+        beforeEach(function (ctx) {
+          ctx.emailAddress = 'example@overleaf.com'
+          ctx.opts = {
+            to: ctx.emailAddress,
+            groupName: 'Example Group',
+            firstName: 'Joe',
+          }
+          ctx.email = ctx.EmailBuilder.buildEmail(
+            'groupSharedWorkspaceDisabledForMember',
+            ctx.opts
+          )
+          ctx.expectedUrl = `${ctx.settings.siteUrl}/project`
+        })
+
+        it('should build the email', function (ctx) {
+          expect(ctx.email.html).to.exist
+          expect(ctx.email.text).to.exist
+        })
+
+        describe('HTML email', function () {
+          it('should include a CTA button and a fallback CTA link', function (ctx) {
+            const dom = cheerio.load(ctx.email.html)
+            expect(ctx.email.subject).to.equal(
+              "Your group's shared workspace has been disabled"
+            )
+            expect(ctx.email.html).to.contain(
+              "Here's what's changed for your group."
+            )
+            expect(ctx.email.html).to.contain(
+              `Your group administrator has disabled the shared workspace for ${ctx.opts.groupName}.`
+            )
+            const buttonLink = dom('a:contains("Open your projects")')
+            expect(buttonLink.length).to.equal(1)
+            expect(buttonLink.attr('href')).to.equal(ctx.expectedUrl)
+            expect(ctx.email.html).to.contain('copy and paste this link')
+            expect(ctx.email.html).to.contain(ctx.expectedUrl)
+          })
+        })
+
+        describe('plain text email', function () {
+          it('should contain the CTA link', function (ctx) {
+            expect(ctx.email.text).to.contain(ctx.expectedUrl)
+          })
+        })
+
+        it('escapes the group name in the HTML email', function (ctx) {
+          const email = ctx.EmailBuilder.buildEmail(
+            'groupSharedWorkspaceDisabledForMember',
+            { ...ctx.opts, groupName: '<script>alert(1)</script>' }
+          )
+          expect(email.html).to.not.contain('<script>alert(1)</script>')
+          expect(email.html).to.contain('&lt;script&gt;alert(1)&lt;/script&gt;')
+        })
+      })
+
+      describe('groupSharedWorkspaceDisabledForAdmin', function () {
+        beforeEach(function (ctx) {
+          ctx.emailAddress = 'example@overleaf.com'
+          ctx.opts = {
+            to: ctx.emailAddress,
+            groupName: 'Example Group',
+            firstName: 'Joe',
+          }
+          ctx.email = ctx.EmailBuilder.buildEmail(
+            'groupSharedWorkspaceDisabledForAdmin',
+            ctx.opts
+          )
+          ctx.expectedUrl = `${ctx.settings.siteUrl}/project`
+        })
+
+        it('should build the email', function (ctx) {
+          expect(ctx.email.html).to.exist
+          expect(ctx.email.text).to.exist
+        })
+
+        describe('HTML email', function () {
+          it('should include a CTA button and a fallback CTA link', function (ctx) {
+            const dom = cheerio.load(ctx.email.html)
+            expect(ctx.email.subject).to.equal(
+              `Shared workspace disabled for ${ctx.opts.groupName}`
+            )
+            expect(ctx.email.html).to.contain(
+              "Here's a summary of what changed for your group."
+            )
+            expect(ctx.email.html).to.contain(
+              `You’ve disabled the shared workspace for ${ctx.opts.groupName}. Here's a summary of what happened.`
+            )
+            expect(ctx.email.html).to.contain(
+              'Projects in the workspace have been returned to their owners and are no longer visible to the whole group.'
+            )
+            expect(ctx.email.html).to.contain(
+              'Each project is now shared only with the collaborators the owner had already added.'
+            )
+            expect(ctx.email.html).to.contain(
+              'Group members have been notified of the change.'
+            )
+            const buttonLink = dom('a:contains("Open your projects")')
+            expect(buttonLink.length).to.equal(1)
+            expect(buttonLink.attr('href')).to.equal(ctx.expectedUrl)
+            expect(ctx.email.html).to.contain('copy and paste this link')
+            expect(ctx.email.html).to.contain(ctx.expectedUrl)
+          })
+        })
+
+        describe('plain text email', function () {
+          it('should contain the CTA link', function (ctx) {
+            expect(ctx.email.text).to.contain(ctx.expectedUrl)
+          })
+        })
+
+        it('escapes the group name in the HTML email', function (ctx) {
+          const email = ctx.EmailBuilder.buildEmail(
+            'groupSharedWorkspaceDisabledForAdmin',
+            { ...ctx.opts, groupName: '<script>alert(1)</script>' }
+          )
+          expect(email.html).to.not.contain('<script>alert(1)</script>')
+          expect(email.html).to.contain('&lt;script&gt;alert(1)&lt;/script&gt;')
+        })
       })
 
       describe('groupDomainCapturedByGroupChanged', function () {
@@ -1068,6 +1317,7 @@ describe('EmailBuilder', function () {
           expect(email.html).to.contain(
             'Domain capture is active for example.com'
           )
+          expect(email.text).to.contain('Hi,')
           expect(email.html).to.contain('/manage/groups/group-123/settings')
           expect(email.text).to.contain('/manage/groups/group-123/settings')
         })
@@ -1092,6 +1342,22 @@ describe('EmailBuilder', function () {
           expect(email.html).to.contain('admin@overleaf.test')
           expect(email.text).to.contain('admin@overleaf.test')
         })
+
+        it('should use firstName in greeting when provided', function (ctx) {
+          const email = ctx.EmailBuilder.buildEmail(
+            'groupDomainCapturedByGroupChanged',
+            {
+              to: 'admin@example.com',
+              groupId: 'group-123',
+              domainCapturedByGroup: true,
+              domain: 'example.com',
+              firstName: 'Ada',
+            }
+          )
+
+          expect(email.text).to.contain('Hi Ada,')
+          expect(email.html).to.contain('Hi Ada,')
+        })
       })
 
       describe('domainVerifiedForGroup', function () {
@@ -1103,6 +1369,7 @@ describe('EmailBuilder', function () {
           })
 
           expect(email.subject).to.equal('Your domain is verified')
+          expect(email.text).to.contain('Hi,')
           expect(email.html).to.contain("We've verified")
           expect(email.html).to.contain('<b>example.com</b>')
           expect(email.html).to.contain(
@@ -1126,6 +1393,18 @@ describe('EmailBuilder', function () {
           expect(email.html).to.contain(
             "You'll receive a confirmation email once the capture is active."
           )
+        })
+
+        it('should use firstName in greeting when provided', function (ctx) {
+          const email = ctx.EmailBuilder.buildEmail('domainVerifiedForGroup', {
+            to: 'admin@example.com',
+            domain: 'example.com',
+            capturedByGroup: true,
+            firstName: 'Ada',
+          })
+
+          expect(email.text).to.contain('Hi Ada,')
+          expect(email.html).to.contain('Hi Ada,')
         })
       })
 
@@ -1172,6 +1451,23 @@ describe('EmailBuilder', function () {
             expect(ctx.email.html).to.contain(ctx.opts.domainSettingsUrl)
             expect(ctx.email.text).to.contain(ctx.opts.domainSettingsUrl)
           })
+
+          it('uses the default greeting when firstName is not provided', function (ctx) {
+            expect(ctx.email.text).to.contain('Hi,')
+          })
+
+          it('uses firstName in the greeting when provided', function (ctx) {
+            const email = ctx.EmailBuilder.buildEmail(
+              'domainReverificationFailed',
+              {
+                ...ctx.opts,
+                firstName: 'Ada',
+              }
+            )
+
+            expect(email.text).to.contain('Hi Ada,')
+            expect(email.html).to.contain('Hi Ada,')
+          })
         })
 
         describe('when the domain is not captured by the group', function () {
@@ -1217,6 +1513,114 @@ describe('EmailBuilder', function () {
           expect(ctx.email.html).to.not.contain('a&amp;amp;b.example.com')
         })
       })
+    })
+  })
+
+  describe('accessRequest', function () {
+    beforeEach(function (ctx) {
+      ctx.opts = {
+        to: 'owner@example.com',
+        project: { _id: 'abc123', name: 'My Project' },
+        owner: {
+          email: 'owner@example.com',
+          first_name: 'O',
+          last_name: 'wner',
+        },
+        requester: {
+          email: 'req@example.com',
+          first_name: 'Re',
+          last_name: 'Quester',
+        },
+        privilegeLevel: 'readAndWrite',
+      }
+    })
+
+    it('names the requester and project in the subject', function (ctx) {
+      const email = ctx.EmailBuilder.buildEmail('accessRequest', ctx.opts)
+      expect(email.subject).to.contain('req@example.com')
+      expect(email.subject).to.contain('My Project')
+      expect(email.subject).to.contain('editor')
+    })
+
+    it('says "reviewer" in the subject when the review level was requested', function (ctx) {
+      ctx.opts.privilegeLevel = 'review'
+      const email = ctx.EmailBuilder.buildEmail('accessRequest', ctx.opts)
+      expect(email.subject).to.contain('reviewer')
+      expect(email.subject).to.not.contain('editor access')
+    })
+
+    it('deep-links the CTA back to the share modal via ?share=1', function (ctx) {
+      const email = ctx.EmailBuilder.buildEmail('accessRequest', ctx.opts)
+      expect(email.text).to.contain(
+        'https://www.overleaf.com/project/abc123?share=1'
+      )
+    })
+
+    it('does not leave any "undefined" placeholders', function (ctx) {
+      const email = ctx.EmailBuilder.buildEmail('accessRequest', ctx.opts)
+      expect(email.subject).to.not.contain('undefined')
+      expect(email.html).to.not.contain('undefined')
+      expect(email.text).to.not.contain('undefined')
+    })
+  })
+
+  describe('accessRequestGranted', function () {
+    beforeEach(function (ctx) {
+      ctx.opts = {
+        to: 'req@example.com',
+        project: { _id: 'abc123', name: 'My Project' },
+        requester: {
+          email: 'req@example.com',
+          first_name: 'Re',
+          last_name: 'Quester',
+        },
+        privilegeLevel: 'readAndWrite',
+      }
+    })
+
+    it('mentions the granted role in the message', function (ctx) {
+      const email = ctx.EmailBuilder.buildEmail(
+        'accessRequestGranted',
+        ctx.opts
+      )
+      expect(email.text).to.contain('editor')
+      expect(email.text).to.contain('My Project')
+    })
+
+    it('switches to reviewer wording when the granted level was review', function (ctx) {
+      ctx.opts.privilegeLevel = 'review'
+      const email = ctx.EmailBuilder.buildEmail(
+        'accessRequestGranted',
+        ctx.opts
+      )
+      expect(email.text).to.contain('reviewer')
+    })
+
+    it('points the CTA at the project (no ?share=1, owner does not need it)', function (ctx) {
+      const email = ctx.EmailBuilder.buildEmail(
+        'accessRequestGranted',
+        ctx.opts
+      )
+      expect(email.text).to.contain('https://www.overleaf.com/project/abc123')
+      expect(email.text).to.not.contain('share=1')
+    })
+  })
+
+  describe('accessRequestDeclined', function () {
+    it('is a NoCTA email mentioning the project name', function (ctx) {
+      const email = ctx.EmailBuilder.buildEmail('accessRequestDeclined', {
+        to: 'req@example.com',
+        project: { _id: 'abc123', name: 'My Project' },
+        requester: {
+          email: 'req@example.com',
+          first_name: 'Re',
+          last_name: 'Quester',
+        },
+      })
+      expect(email.subject).to.contain('My Project')
+      expect(email.subject).to.contain('declined')
+      expect(email.text).to.contain('My Project')
+      expect(email.text).to.contain('declined')
     })
   })
 })

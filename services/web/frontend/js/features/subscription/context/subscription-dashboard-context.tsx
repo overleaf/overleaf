@@ -21,6 +21,7 @@ import {
 import { Institution } from '../../../../../types/institution'
 import getMeta from '../../../utils/meta'
 import {
+  formatPriceForDisplayData,
   loadDisplayPriceWithTaxPromise,
   loadGroupDisplayPriceWithTaxForRecurlyPromise,
   loadGroupDisplayPriceWithTaxForStripePromise,
@@ -31,7 +32,7 @@ import { debugConsole } from '@/utils/debugging'
 import { formatCurrency } from '@/shared/utils/currency'
 import { ManagedInstitution } from '../../../../../types/subscription/dashboard/managed-institution'
 import { Publisher } from '../../../../../types/subscription/dashboard/publisher'
-import { formatTime } from '@/features/utils/format-date'
+import { formatPaymentDate, formatPaymentDateTime } from '../util/payment-dates'
 
 type SubscriptionDashboardContextValue = {
   groupPlanToChangeToCode: string
@@ -137,7 +138,9 @@ export function SubscriptionDashboardProvider({
   )
 
   const hasValidActiveSubscription = Boolean(
-    ['active', 'canceled'].includes(personalSubscription?.payment?.state) ||
+    ['active', 'canceled', 'past_due'].includes(
+      personalSubscription?.payment?.state
+    ) ||
     institutionMemberships?.length > 0 ||
     memberGroupSubscriptions?.length > 0
   )
@@ -147,13 +150,14 @@ export function SubscriptionDashboardProvider({
       !personalSubscription.payment.pausedAt ||
       !personalSubscription.payment.remainingPauseCycles
     ) {
-      return personalSubscription.payment.nextPaymentDueAt
+      return formatPaymentDateTime(personalSubscription.payment.periodEnd)!
     }
     const pausedDate = new Date(personalSubscription.payment.pausedAt)
-    pausedDate.setMonth(
-      pausedDate.getMonth() + personalSubscription.payment.remainingPauseCycles
+    pausedDate.setUTCMonth(
+      pausedDate.getUTCMonth() +
+        personalSubscription.payment.remainingPauseCycles
     )
-    return formatTime(pausedDate, 'MMMM Do, YYYY')
+    return formatPaymentDate(pausedDate.toISOString())!
   }, [personalSubscription])
 
   useEffect(() => {
@@ -171,15 +175,25 @@ export function SubscriptionDashboardProvider({
       personalSubscription?.payment
     ) {
       const { currency, taxRate } = personalSubscription.payment
+      // Only Stripe subscriptions can be derived from the price version. Recurly only has one version of each price.
+      const isStripe = Boolean(personalSubscription.service?.includes('stripe'))
       const fetchPlansDisplayPrices = async () => {
         for (const plan of plansWithoutDisplayPrice) {
           try {
-            const priceData = await loadDisplayPriceWithTaxPromise(
-              plan.planCode,
-              currency,
-              taxRate,
-              i18n.language
-            )
+            const priceData =
+              isStripe && plan.listPrice !== undefined
+                ? formatPriceForDisplayData(
+                    plan.listPrice,
+                    taxRate,
+                    currency,
+                    i18n.language
+                  )
+                : await loadDisplayPriceWithTaxPromise(
+                    plan.planCode,
+                    currency,
+                    taxRate,
+                    i18n.language
+                  )
             if (priceData?.totalAsNumber !== undefined) {
               plan.displayPrice = formatCurrency(
                 priceData.totalAsNumber,

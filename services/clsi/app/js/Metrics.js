@@ -18,6 +18,7 @@ const compilesTotal = new prom.Counter({
     'stop_on_first_error',
     'passes',
     'type',
+    'png2pdf',
   ],
 })
 

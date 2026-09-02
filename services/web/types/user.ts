@@ -10,7 +10,6 @@ export type RefProviders = {
 export type UserId = Brand<string, 'UserId'>
 
 export type Features = {
-  aiErrorAssistant?: boolean
   aiUsageQuota?: string
   collaborators?: number
   compileGroup?: 'standard' | 'priority'
@@ -19,6 +18,7 @@ export type Features = {
   gitBridge?: boolean
   github?: boolean
   mendeley?: boolean
+  offlineMode?: boolean
   papers?: boolean
   references?: boolean
   referencesSearch?: boolean

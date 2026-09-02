@@ -34,13 +34,15 @@ const SubscriptionLocator = {
     return subscription
   },
 
-  async getManagedGroupSubscriptions(userOrId) {
+  async getManagedGroupSubscriptions(userOrId, populate = []) {
     if (!Features.hasFeature('saas')) return []
+    // eslint-disable-next-line no-restricted-syntax
     return await Subscription.find({
       manager_ids: userOrId,
       groupPlan: true,
     })
       .populate('admin_id', ['_id', 'email'])
+      .populate(populate)
       .exec()
   },
 

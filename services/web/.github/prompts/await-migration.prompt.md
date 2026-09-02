@@ -247,7 +247,7 @@ const values = await redis.mget(keys)
 Common test running problems:
 
 - Docker containers may need cleanup: `docker system prune -f`
-- Use specific test grep patterns: `MOCHA_GREP="ModuleName" make test_unit_app`
+- Use specific test grep patterns: `TEST_NAME_PATTERN="ModuleName" make test_unit_app`
 - Mock objects must return proper objects for chaining (e.g., `multi()` must return `{method: stub().returnsThis(), ...}`)
 
 ### 2. Method Stubbing for Internal Calls

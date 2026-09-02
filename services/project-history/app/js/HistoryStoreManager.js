@@ -18,6 +18,7 @@ import * as LocalFileWriter from './LocalFileWriter.js'
 import * as HashManager from './HashManager.js'
 import * as HistoryBlobTranslator from './HistoryBlobTranslator.js'
 import { callbackify, promisifyMultiResult } from '@overleaf/promise-utils'
+import { BlobStoreBase } from 'overleaf-editor-core'
 
 const HTTP_REQUEST_TIMEOUT = Settings.overleaf.history.requestTimeout
 
@@ -268,7 +269,7 @@ export function sendChanges(
           endVersion,
           errorCode: error.code,
           statusCode: error.statusCode,
-          body: error.body,
+          errorBody: error.body,
         })
         return callback(error)
       }
@@ -555,18 +556,14 @@ export function deleteProject(projectId, callback) {
 
 const getProjectBlobAsync = promisify(getProjectBlob)
 
-class BlobStore {
+class BlobStore extends BlobStoreBase {
   constructor(projectId) {
+    super()
     this.projectId = projectId
   }
 
-  async getString(hash) {
+  async fetchString(hash) {
     return await getProjectBlobAsync(this.projectId, hash)
-  }
-
-  async getObject(hash) {
-    const string = await this.getString(hash)
-    return JSON.parse(string)
   }
 }
 
@@ -625,10 +622,13 @@ function _requestHistoryService(options, callback) {
     },
     err => {
       if (err instanceof RequestFailedError) {
+        const body = [400, 409, 413, 422].includes(err.response.status)
+          ? err.body
+          : null
         const error = new OError(
           // Keep the status code in the message. It is used by the ErrorRecorder.
           `history store a non-success status code: ${err.response.status}`,
-          { method, url, qs: options.qs, statusCode: err.response.status }
+          { method, url, qs: options.qs, statusCode: err.response.status, body }
         )
         return callback(error)
       }

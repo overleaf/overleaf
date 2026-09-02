@@ -1,4 +1,3 @@
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { Compartment, Transaction, TransactionSpec } from '@codemirror/state'
 import { EditorView } from '@codemirror/view'
 
@@ -19,13 +18,9 @@ const updateListener = EditorView.updateListener.of(update => {
 })
 
 export const tabsListener = (enabled: boolean) => {
-  return tabsListenerCompartment.of(
-    enabled && isSplitTestEnabled('editor-tabs') ? updateListener : []
-  )
+  return tabsListenerCompartment.of(enabled ? updateListener : [])
 }
 
 export const setEditorTabs = (enabled: boolean): TransactionSpec => ({
-  effects: tabsListenerCompartment.reconfigure(
-    enabled && isSplitTestEnabled('editor-tabs') ? updateListener : []
-  ),
+  effects: tabsListenerCompartment.reconfigure(enabled ? updateListener : []),
 })

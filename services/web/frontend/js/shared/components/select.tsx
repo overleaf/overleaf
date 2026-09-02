@@ -10,26 +10,28 @@ import {
 import classNames from 'classnames'
 import { useSelect } from 'downshift'
 import { useTranslation } from 'react-i18next'
-import { Form } from 'react-bootstrap'
-import FormControl from '@/shared/components/form/form-control'
+import { Form, OverlayProps } from 'react-bootstrap'
+import OLFormControl from '@/shared/components/ol/ol-form-control'
 import MaterialIcon from '@/shared/components/material-icon'
 import { CaretUp, CaretDown, Check } from '@phosphor-icons/react'
-import { DropdownItem } from '@/shared/components/dropdown/dropdown-menu'
+import { OLDropdownItem } from '@/shared/components/ol/ol-dropdown-menu'
 import OLOverlay from '@/shared/components/ol/ol-overlay'
 import OLSpinner from './ol/ol-spinner'
 import DSFormLabel from '@/shared/components/ds/ds-form-label'
 import DSFormGroup from '@/shared/components/ds/ds-form-group'
 import DSFormControl from '@/shared/components/ds/ds-form-control'
-import { DropdownItemProps } from '@/shared/components/types/dropdown-menu-props'
+import { OLDropdownItemProps } from '@/shared/components/types/dropdown-menu-props'
 
 function SelectMenuPopover({
   show,
   target,
+  container,
   onHide,
   children,
 }: {
   show: boolean
   target: HTMLElement | null
+  container?: OverlayProps['container']
   onHide: () => void
   children: ReactNode
 }) {
@@ -38,6 +40,7 @@ function SelectMenuPopover({
     <OLOverlay
       show={show}
       target={target}
+      container={container}
       placement="bottom-start"
       rootClose
       onHide={onHide}
@@ -79,7 +82,7 @@ export type SelectProps<T> = {
   // Maps an item to a leading icon.
   itemToLeadingIcon?: (
     item: T | null | undefined
-  ) => DropdownItemProps['leadingIcon']
+  ) => OLDropdownItemProps['leadingIcon']
   // Callback invoked after the selected item is updated.
   onSelectedItemChanged?: (item: T | null | undefined) => void
   // Optionally directly control the selected item.
@@ -98,9 +101,12 @@ export type SelectProps<T> = {
   dataTestId?: string
   // CIAM-specific layout
   isCiam?: boolean
-  size?: React.ComponentProps<typeof FormControl>['size']
+  size?: React.ComponentProps<typeof OLFormControl>['size']
   // Renders the menu in a portal so it escapes overflow-clipping ancestors.
   portal?: boolean
+  // Element the portaled menu is rendered into (only used with `portal`).
+  // Defaults to the document body.
+  menuContainer?: OverlayProps['container']
   // Optional id for the toggle button element. When provided, enables association
   // with an external <label htmlFor="...">
   id?: string
@@ -127,6 +133,7 @@ export const Select = <T,>({
   isCiam,
   size,
   portal = false,
+  menuContainer,
   id,
 }: SelectProps<T>) => {
   const toggleButtonId = id ? { id } : {}
@@ -228,7 +235,7 @@ export const Select = <T,>({
           })
           return (
             <li role="none" key={itemToKey(item)}>
-              <DropdownItem
+              <OLDropdownItem
                 as="button"
                 type="button"
                 className={classNames({
@@ -246,7 +253,7 @@ export const Select = <T,>({
                 disabled={disabled}
               >
                 {itemToString(item)}
-              </DropdownItem>
+              </OLDropdownItem>
             </li>
           )
         })}
@@ -257,6 +264,7 @@ export const Select = <T,>({
     <SelectMenuPopover
       show={isOpen}
       target={rootRef.current}
+      container={menuContainer}
       onHide={closeMenu}
     >
       {menu}
@@ -304,7 +312,7 @@ export const Select = <T,>({
           {loading && <OLSpinner size="sm" />}
         </Form.Label>
       ) : null}
-      <FormControl
+      <OLFormControl
         data-testid={dataTestId}
         {...getToggleButtonProps({
           disabled,

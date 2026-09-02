@@ -103,4 +103,63 @@ describe('DrainManagerTests', function () {
       })
     })
   })
+
+  describe('with three clients in the project', function () {
+    beforeEach(function (done) {
+      async.series(
+        [
+          cb => {
+            this.clientA = RealTimeClient.connect(this.project_id, cb)
+          },
+
+          cb => {
+            this.clientB = RealTimeClient.connect(this.project_id, cb)
+          },
+
+          cb => {
+            this.clientC = RealTimeClient.connect(this.project_id, cb)
+          },
+        ],
+        done
+      )
+    })
+
+    describe('starting to drain with a fractional rate', function () {
+      beforeEach(function (done) {
+        this.timeout(10000)
+        this.reconnectedAt = []
+        const trackReconnect = client => cb =>
+          client.on('reconnectGracefully', () => {
+            this.reconnectedAt.push(Date.now())
+            cb()
+          })
+        async.parallel(
+          [
+            trackReconnect(this.clientA),
+            trackReconnect(this.clientB),
+            trackReconnect(this.clientC),
+
+            cb =>
+              drain(1.5)
+                .then(() => cb())
+                .catch(cb),
+          ],
+          done
+        )
+      })
+
+      afterEach(async function () {
+        // reset drain
+        await drain(0)
+      })
+
+      it('should spread the reconnects over multiple polling intervals', function () {
+        // At a rate of 1.5 clients per second, two clients should be asked to
+        // reconnect in the first 1s polling interval and the third client one
+        // polling interval later.
+        const sorted = this.reconnectedAt.slice().sort((a, b) => a - b)
+        expect(sorted[2] - sorted[0]).to.be.greaterThan(500)
+      })
+    })
+  })
 })

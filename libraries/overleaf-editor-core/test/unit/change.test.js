@@ -38,6 +38,28 @@ describe('Change', function () {
       expect(blobHashes.size).to.equal(1)
       expect(blobHashes.has(File.EMPTY_FILE_HASH)).to.be.true
     })
+
+    it('finds blob hashes from operations with ranges', function () {
+      const blobHashes = new Set()
+      const fileHash = 'a5675307b61ec2517330622a6e649b4ca1ee5612'
+      const rangesHash = '380de212d09bf8498065833dbf242aaf11184316'
+
+      const change = Change.fromRaw({
+        operations: [],
+        timestamp: '2015-03-05T12:03:53.035Z',
+        authors: [null],
+      })
+
+      // AddFile with file and ranges hashes.
+      change.pushOperation(
+        Operation.addFile('c.txt', File.fromHash(fileHash, rangesHash))
+      )
+      change.findBlobHashes(blobHashes)
+      // Both file and ranges hashes should be found
+      expect(blobHashes.size).to.equal(2)
+      expect(blobHashes.has(fileHash)).to.be.true
+      expect(blobHashes.has(rangesHash)).to.be.true
+    })
   })
 
   describe('RestoreFileOrigin', function () {

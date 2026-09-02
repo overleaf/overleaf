@@ -9,7 +9,10 @@ import { User } from '../../../../app/src/models/User.mjs'
 import { callbackify } from '@overleaf/promise-utils'
 import OError from '@overleaf/o-error'
 
-const oauthProviders = settings.oauthProviders || {}
+// Map, not a plain object: providerId is externally supplied, and a plain
+// object lookup is vulnerable to prototype-pollution keys such as
+// '__proto__' or 'constructor' resolving to a truthy inherited value.
+const oauthProviders = new Map(Object.entries(settings.oauthProviders || {}))
 
 async function getUser(providerId, externalUserId) {
   if (providerId == null || externalUserId == null) {
@@ -54,7 +57,7 @@ async function link(
   retry
 ) {
   const accountLinked = true
-  if (!oauthProviders[providerId]) {
+  if (!oauthProviders.get(providerId)) {
     throw new Error('Not a valid provider')
   }
 
@@ -121,7 +124,7 @@ async function link(
 
 async function unlink(userId, providerId, auditLog) {
   const accountLinked = false
-  if (!oauthProviders[providerId]) {
+  if (!oauthProviders.get(providerId)) {
     throw new Error('Not a valid provider')
   }
 
@@ -166,7 +169,7 @@ function _getUserQuery(providerId, externalUserId) {
 }
 
 function _sendSecurityAlert(accountLinked, providerId, user, userId) {
-  const providerName = oauthProviders[providerId].name
+  const providerName = oauthProviders.get(providerId).name
   const emailOptions = EmailOptionsHelper.linkOrUnlink(
     accountLinked,
     providerName,

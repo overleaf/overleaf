@@ -11,7 +11,8 @@ const { setTimeout } = require('node:timers/promises')
 const rclientSub = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.pubsub
 )
-rclientSub.subscribe('applied-ops')
+// applied ops (and errors) are published on the editor-events channel
+rclientSub.subscribe('editor-events')
 rclientSub.setMaxListeners(0)
 
 function getPendingUpdateListKey() {
@@ -36,14 +37,15 @@ module.exports = DocUpdaterClient = {
     rclientSub.on('message', messageHandler)
   },
 
+  // Enqueue an update for the doc-updater: push the payload (tagged with its
+  // doc id) onto the per-project queue, then a bare "<proj>" marker onto the
+  // dispatch list.
   async sendUpdate(projectId, docId, update) {
-    const docKey = `${projectId}:${docId}`
     await rclient.rpush(
-      keys.pendingUpdates({ doc_id: docId }),
-      JSON.stringify(update)
+      keys.pendingProjectUpdates({ project_id: projectId }),
+      JSON.stringify({ ...update, doc: docId })
     )
-    await rclient.sadd('DocsWithPendingUpdates', docKey)
-    await rclient.rpush(getPendingUpdateListKey(), docKey)
+    await rclient.rpush(getPendingUpdateListKey(), projectId)
   },
 
   async sendUpdates(projectId, docId, updates) {
@@ -51,17 +53,19 @@ module.exports = DocUpdaterClient = {
     for (const update of updates) {
       await DocUpdaterClient.sendUpdate(projectId, docId, update)
     }
-    await DocUpdaterClient.waitForPendingUpdates(docId)
+    await DocUpdaterClient.waitForPendingUpdates(projectId, docId)
   },
 
-  async waitForPendingUpdates(docId) {
+  async waitForPendingUpdates(projectId, docId) {
     const maxRetries = 30
     const retryInterval = 100
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
-      const length = await rclient.llen(keys.pendingUpdates({ doc_id: docId }))
+      const projectLength = await rclient.llen(
+        keys.pendingProjectUpdates({ project_id: projectId })
+      )
 
-      if (length === 0) {
+      if (projectLength === 0) {
         return // Success - no pending updates
       }
 
@@ -107,7 +111,15 @@ module.exports = DocUpdaterClient = {
     )
   },
 
-  async setDocLines(projectId, docId, lines, source, userId, undoing) {
+  async setDocLines(
+    projectId,
+    docId,
+    lines,
+    source,
+    userId,
+    undoing,
+    trackChanges
+  ) {
     return await fetchJson(
       `http://127.0.0.1:3003/project/${projectId}/doc/${docId}`,
       {
@@ -117,6 +129,22 @@ module.exports = DocUpdaterClient = {
           source,
           user_id: userId,
           undoing,
+          trackChanges,
+        },
+      }
+    )
+  },
+
+  async appendToDoc(projectId, docId, lines, source, userId, trackChanges) {
+    return await fetchJson(
+      `http://127.0.0.1:3003/project/${projectId}/doc/${docId}/append`,
+      {
+        method: 'POST',
+        json: {
+          lines,
+          source,
+          user_id: userId,
+          trackChanges,
         },
       }
     )
@@ -176,20 +204,30 @@ module.exports = DocUpdaterClient = {
     )
   },
 
-  async rejectChanges(projectId, docId, changeIds, userId) {
+  async getComment(projectId, docId, commentId) {
     return await fetchJson(
-      `http://127.0.0.1:3003/project/${projectId}/doc/${docId}/change/reject`,
-      {
-        method: 'POST',
-        json: { change_ids: changeIds, user_id: userId },
-      }
+      `http://127.0.0.1:3003/project/${projectId}/doc/${docId}/comment/${commentId}`
     )
   },
 
-  async removeComment(projectId, docId, comment) {
+  async resolveComment(projectId, docId, commentId, userId) {
     await fetchNothing(
-      `http://127.0.0.1:3003/project/${projectId}/doc/${docId}/comment/${comment}`,
-      { method: 'DELETE' }
+      `http://127.0.0.1:3003/project/${projectId}/doc/${docId}/comment/${commentId}/resolve`,
+      { method: 'POST', json: { user_id: userId } }
+    )
+  },
+
+  async reopenComment(projectId, docId, commentId, userId) {
+    await fetchNothing(
+      `http://127.0.0.1:3003/project/${projectId}/doc/${docId}/comment/${commentId}/reopen`,
+      { method: 'POST', json: { user_id: userId } }
+    )
+  },
+
+  async removeComment(projectId, docId, commentId, userId) {
+    await fetchNothing(
+      `http://127.0.0.1:3003/project/${projectId}/doc/${docId}/comment/${commentId}`,
+      { method: 'DELETE', json: { user_id: userId } }
     )
   },
 
@@ -199,10 +237,10 @@ module.exports = DocUpdaterClient = {
     )
   },
 
-  async sendProjectUpdate(projectId, userId, updates, version) {
+  async sendProjectUpdate(projectId, userId, updates, version, source) {
     await fetchNothing(`http://127.0.0.1:3003/project/${projectId}`, {
       method: 'POST',
-      json: { userId, updates, version },
+      json: { userId, updates, version, source },
     })
   },
 }

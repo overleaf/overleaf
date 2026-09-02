@@ -1,4 +1,4 @@
-import { vi, expect } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import path from 'node:path'
 
@@ -15,7 +15,7 @@ describe('InstitutionsFeatures', function () {
     ctx.PlansLocator = { findLocalPlanInSettings: sinon.stub() }
     ctx.institutionPlanCode = 'institution_plan_code'
     ctx.InstitutionsGetter = {
-      promises: { getCurrentAffiliations: sinon.stub().resolves([]) },
+      promises: { getCurrentEntitledAffiliations: sinon.stub().resolves([]) },
     }
 
     vi.doMock('../../../../app/src/Features/User/UserGetter', () => ({
@@ -72,14 +72,12 @@ describe('InstitutionsFeatures', function () {
       features: {
         institution: 'all',
         aiUsageQuota: 'unlimited',
-        aiErrorAssistant: true,
       },
     }
     ctx.testFeaturesWithNoAddon = {
       features: {
         institution: 'all',
         aiUsageQuota: 'basic',
-        aiErrorAssistant: false,
       },
     }
   })
@@ -147,10 +145,14 @@ describe('InstitutionsFeatures', function () {
       expect(features).to.deep.equal({})
     })
 
-    it('should return ai features if user has any affiliation with add-on bundle', async function (ctx) {
-      ctx.InstitutionsGetter.promises.getCurrentAffiliations = sinon
-        .stub()
-        .resolves([ctx.affiliateWithoutAiBundle, ctx.affiliateWithAiBundle])
+    it('should return ai features if the user is entitled to an affiliation with the add-on bundle', async function (ctx) {
+      // Only affiliations the user is entitled to reach this point, since the
+      // entitlement filtering lives in getCurrentEntitledAffiliations (covered
+      // by its own unit tests).
+      ctx.InstitutionsGetter.promises.getCurrentEntitledAffiliations.resolves([
+        ctx.affiliateWithoutAiBundle,
+        ctx.affiliateWithAiBundle,
+      ])
       ctx.UserGetter.promises.getUserFullEmails.resolves(
         ctx.emailDataWithLicense
       )
@@ -160,6 +162,25 @@ describe('InstitutionsFeatures', function () {
           ctx.userId
         )
       expect(features).to.deep.equal(ctx.testFeaturesWithAiAddon.features)
+    })
+
+    it('should not return ai features if no entitled affiliation has the add-on bundle', async function (ctx) {
+      // The user is entitled to a licence (so gets the institution plan) but
+      // none of their entitled affiliations provide the AI bundle.
+      ctx.InstitutionsGetter.promises.getCurrentEntitledAffiliations.resolves([
+        ctx.affiliateWithoutAiBundle,
+      ])
+      ctx.UserGetter.promises.getUserFullEmails.resolves(
+        ctx.emailDataWithLicense
+      )
+
+      const features =
+        await ctx.InstitutionsFeatures.promises.getInstitutionsFeatures(
+          ctx.userId
+        )
+      expect(features).to.deep.equal(ctx.testFeatures.features)
+      expect(features).to.not.have.property('aiUsageQuota')
+      expect(features).to.not.have.property('aiErrorAssistant')
     })
 
     it('should return feaures if user has affiliations plan code', async function (ctx) {

@@ -126,6 +126,25 @@ class EditOperationTransformer {
       `Transform not implemented for ${a.constructor.name}￮${b.constructor.name}`
     )
   }
+
+  /**
+   * Transform each operation in `as` against each operation in `bs`, priming
+   * both lists in place.
+   * @param {EditOperation[]} as - modified in place
+   * @param {EditOperation[]} bs - modified in place
+   */
+  static transformMultiple(as, bs) {
+    for (let i = 0; i < as.length; ++i) {
+      for (let j = 0; j < bs.length; ++j) {
+        const [aPrime, bPrime] = EditOperationTransformer.transform(
+          as[i],
+          bs[j]
+        )
+        as[i] = aPrime
+        bs[j] = bPrime
+      }
+    }
+  }
 }
 
 /**

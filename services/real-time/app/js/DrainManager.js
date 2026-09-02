@@ -45,7 +45,8 @@ export default {
         client.emit('reconnectGracefully')
         drainedCount++
       }
-      const haveDrainedNClients = drainedCount === N
+      // the rate may be fractional, e.g. rate=27.04 -> reconnect 28 clients
+      const haveDrainedNClients = drainedCount >= N
       if (haveDrainedNClients) {
         break
       }

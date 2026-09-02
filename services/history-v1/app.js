@@ -12,13 +12,15 @@ const helmet = require('helmet')
 const HTTPStatus = require('http-status')
 const logger = require('@overleaf/logger')
 const Metrics = require('@overleaf/metrics')
-const bodyParser = require('body-parser')
 const security = require('./api/middleware/security')
 const healthChecks = require('./api/controllers/health_checks')
 const { mongodb, loadGlobalBlobs } = require('./storage')
 const projectsRoutes = require('./api/routes/projects')
 const projectImportRoutes = require('./api/routes/project_import')
-const { createHandleValidationError } = require('@overleaf/validation-tools')
+const {
+  createHandleValidationError,
+  getRawReqInput,
+} = require('@overleaf/validation-tools')
 
 Events.setMaxListeners(20)
 const app = express()
@@ -37,9 +39,9 @@ Metrics.leaked_sockets.monitor(logger)
 // We may have fairly large JSON bodies when receiving large Changes. Clients
 // may have to handle 413 status codes and try creating files instead of sending
 // text content in changes.
-app.use(bodyParser.json({ limit: '12MB' }))
+app.use(express.json({ limit: '12MB' }))
 app.use(
-  bodyParser.urlencoded({
+  express.urlencoded({
     extended: false,
   })
 )
@@ -74,7 +76,10 @@ function setupErrorHandling() {
   app.use(handleValidationError)
 
   app.use(function (err, req, res, next) {
-    const projectId = req.params?.project_id || req.body?.projectId
+    // terminal error handler must not throw while extracting log context
+    // (case 2: final error-handler logging)
+    const { params, body } = getRawReqInput(req)
+    const projectId = params?.project_id || body?.projectId
     logger.error({ err, projectId }, err.message)
 
     if (res.headersSent) {

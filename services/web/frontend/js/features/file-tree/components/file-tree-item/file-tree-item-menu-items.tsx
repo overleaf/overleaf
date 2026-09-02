@@ -4,10 +4,11 @@ import * as eventTracking from '../../../../infrastructure/event-tracking'
 import { useProjectContext } from '@/shared/context/project-context'
 
 import {
-  DropdownDivider,
-  DropdownItem,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdownDivider,
+  OLDropdownItem,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
+import useIsNetworkStalled from '@/features/ide-react/hooks/use-is-network-stalled'
 
 function FileTreeItemMenuItems() {
   const { t } = useTranslation()
@@ -47,59 +48,84 @@ function FileTreeItemMenuItems() {
     startUploadingDocOrFile()
   }, [startUploadingDocOrFile])
 
+  const isDisabledDueToNetworkStall = useIsNetworkStalled()
+
   return (
     <>
       {canRename ? (
         <li role="none">
-          <DropdownItem onClick={startRenaming}>{t('rename')}</DropdownItem>
+          <OLDropdownItem
+            onClick={startRenaming}
+            disabled={isDisabledDueToNetworkStall}
+          >
+            {t('rename')}
+          </OLDropdownItem>
         </li>
       ) : null}
       {downloadPath ? (
         <li role="none">
-          <DropdownItem
+          <OLDropdownItem
             href={downloadPath}
             onClick={downloadWithAnalytics}
             download={selectedFileName ?? undefined}
+            disabled={isDisabledDueToNetworkStall}
           >
             {t('download')}
-          </DropdownItem>
+          </OLDropdownItem>
         </li>
       ) : null}
       {canSetRootDocId ? (
         <>
-          <DropdownDivider />
+          <OLDropdownDivider />
           <li role="none">
-            <DropdownItem onClick={setRootDocId}>
+            <OLDropdownItem
+              onClick={setRootDocId}
+              disabled={isDisabledDueToNetworkStall}
+            >
               {t('set_as_main_document')}
-            </DropdownItem>
+            </OLDropdownItem>
           </li>
         </>
       ) : null}
       {canDelete ? (
         <>
-          <DropdownDivider />
+          <OLDropdownDivider />
           <li role="none">
-            <DropdownItem onClick={startDeleting}>{t('delete')}</DropdownItem>
+            <OLDropdownItem
+              onClick={startDeleting}
+              disabled={isDisabledDueToNetworkStall}
+            >
+              {t('delete')}
+            </OLDropdownItem>
           </li>
         </>
       ) : null}
       {canCreate ? (
         <>
-          <DropdownDivider />
+          <OLDropdownDivider />
           <li role="none">
-            <DropdownItem onClick={createWithAnalytics}>
+            <OLDropdownItem
+              onClick={createWithAnalytics}
+              disabled={isDisabledDueToNetworkStall}
+            >
               {t('new_file')}
-            </DropdownItem>
+            </OLDropdownItem>
           </li>
           <li role="none">
-            <DropdownItem onClick={startCreatingFolder}>
+            <OLDropdownItem
+              onClick={startCreatingFolder}
+              disabled={isDisabledDueToNetworkStall}
+            >
               {t('new_folder')}
-            </DropdownItem>
+            </OLDropdownItem>
           </li>
           <li role="none">
-            <DropdownItem onClick={uploadWithAnalytics}>
+            <OLDropdownItem
+              onClick={uploadWithAnalytics}
+              disabled={isDisabledDueToNetworkStall}
+            >
               {t('upload')}
-            </DropdownItem>
+            </OLDropdownItem>
           </li>
         </>
       ) : null}

@@ -1,0 +1,87 @@
+.ol-editor-toolbar-button-group {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  flex-wrap: nowrap;
+  padding: 0 4px;
+  margin: 4px 0;
+  line-height: 1;
+
+  &:not(:first-child) {
+    border-left: 1px solid rgb(125 125 125 / 30%);
+  }
+
+  .ol-cm-toolbar-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0 1px;
+    background-color: transparent;
+    border: none;
+    border-radius: var(--border-radius-base);
+    line-height: 1;
+    width: 24px;
+    height: 24px;
+    overflow: hidden;
+    color: inherit;
+
+    &:hover,
+    &:focus,
+    &:active,
+    &.active {
+      background-color: rgb(125 125 125 / 10%);
+      color: inherit;
+      box-shadow: none;
+
+      &[aria-disabled='true'] {
+        opacity: 0.2;
+      }
+    }
+
+    &.active,
+    &:active {
+      background-color: rgb(125 125 125 / 20%);
+    }
+
+    &[aria-disabled='true'] {
+      opacity: 0.2;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.ol-cm-toolbar-wrapper-needs-border
+  .ol-editor-toolbar-button-group:first-child {
+  border-left: 1px solid rgb(125 125 125 / 30%);
+}
+
+.ol-toolbar-layout-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-03);
+
+  .ol-cm-toolbar-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0 1px;
+    width: 24px;
+    height: 24px;
+  }
+
+  &::before {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 16px;
+    background-color: var(--toolbar-dropdown-divider-color);
+  }
+}
+
+.ol-toolbar-layout-left {
+  display: flex;
+  align-items: center;
+}

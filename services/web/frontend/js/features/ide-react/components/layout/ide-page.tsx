@@ -3,6 +3,7 @@ import { useLayoutEventTracking } from '@/features/ide-react/hooks/use-layout-ev
 import useSocketListeners from '@/features/ide-react/hooks/use-socket-listeners'
 import { useEditingSessionHeartbeat } from '@/features/ide-react/hooks/use-editing-session-heartbeat'
 import { useRegisterUserActivity } from '@/features/ide-react/hooks/use-register-user-activity'
+import useConnectionOutageTracker from '@/features/ide-react/hooks/use-connection-outage-tracker'
 import { useHasLintingError } from '@/features/ide-react/hooks/use-has-linting-error'
 import { Modals } from '@/features/ide-react/components/modals/modals'
 import { GlobalAlertsProvider } from '@/features/ide-react/context/global-alerts-context'
@@ -13,7 +14,7 @@ import { useStatusFavicon } from '@/features/ide-react/hooks/use-status-favicon'
 import useThemedPage from '@/shared/hooks/use-themed-page'
 
 import MainLayout from '@/features/ide-react/components/layout/main-layout'
-import SettingsModalNew from '@/features/settings/components/settings-modal'
+import SettingsModal from '@/features/ide-settings/components/settings-modal'
 import CommandPalette from '@/features/command-palette/components/command-palette'
 
 export default function IdePage() {
@@ -21,6 +22,7 @@ export default function IdePage() {
   useSocketListeners() // listen for project-related websocket messages
   useEditingSessionHeartbeat() // send a batched event when user is active
   useRegisterUserActivity() // record activity and ensure connection when user is active
+  useConnectionOutageTracker() // track offline episodes and emit connection-restored
   useHasLintingError() // pass editor:lint hasLintingError to the compiler
   useStatusFavicon() // update the favicon based on the compile status
   useThemedPage() // set the page theme based on user settings
@@ -32,7 +34,7 @@ export default function IdePage() {
     <GlobalAlertsProvider>
       <Alerts />
       <Modals />
-      <SettingsModalNew />
+      <SettingsModal />
       <MainLayout />
       <GlobalToasts />
       {showCommandPalette && <CommandPalette />}

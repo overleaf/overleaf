@@ -2,11 +2,11 @@ import { useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import {
-  Dropdown,
-  DropdownDivider,
-  DropdownItem,
-  DropdownMenu,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownDivider,
+  OLDropdownItem,
+  OLDropdownMenu,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import { useTabsContext } from '@/features/ide-react/context/tabs-context'
 
 export function TabsContextMenu() {
@@ -73,17 +73,16 @@ export function TabsContextMenu() {
     <div
       ref={menuRef}
       style={{ top: contextMenuTarget.top, left: contextMenuTarget.left }}
-      // TODO ide-redesign-cleanup: remove 'ide-redesign-main' class when old editor is removed
-      className="context-menu ide-redesign-main"
+      className="context-menu"
     >
-      <Dropdown
+      <OLDropdown
         show
         drop="down"
         onKeyDown={handleKeyDown}
         onToggle={handleToggle}
       >
-        <DropdownMenu className="dropdown-menu-sm-width" tabIndex={-1}>
-          <DropdownItem
+        <OLDropdownMenu className="dropdown-menu-sm-width" tabIndex={-1}>
+          <OLDropdownItem
             disabled={tabs.length <= 1}
             as="button"
             onClick={() => {
@@ -92,8 +91,8 @@ export function TabsContextMenu() {
             }}
           >
             {t('close')}
-          </DropdownItem>
-          <DropdownItem
+          </OLDropdownItem>
+          <OLDropdownItem
             disabled={tabs.length <= 1}
             as="button"
             onClick={() => {
@@ -102,8 +101,8 @@ export function TabsContextMenu() {
             }}
           >
             {t('close_other_tabs')}
-          </DropdownItem>
-          <DropdownItem
+          </OLDropdownItem>
+          <OLDropdownItem
             disabled={tabs[tabs.length - 1]?.id === contextMenuTarget.tabId}
             as="button"
             onClick={() => {
@@ -112,9 +111,9 @@ export function TabsContextMenu() {
             }}
           >
             {t('close_tabs_to_the_right')}
-          </DropdownItem>
-          <DropdownDivider />
-          <DropdownItem
+          </OLDropdownItem>
+          <OLDropdownDivider />
+          <OLDropdownItem
             as="button"
             onClick={() => {
               window.dispatchEvent(
@@ -131,9 +130,9 @@ export function TabsContextMenu() {
             leadingIcon="settings"
           >
             {t('tab_settings')}
-          </DropdownItem>
-        </DropdownMenu>
-      </Dropdown>
+          </OLDropdownItem>
+        </OLDropdownMenu>
+      </OLDropdown>
     </div>,
     document.body
   )

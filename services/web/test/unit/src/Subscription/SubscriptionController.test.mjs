@@ -1,10 +1,13 @@
-import { vi, assert, expect } from 'vitest'
+import { afterEach, assert, beforeEach, describe, expect, it, vi } from 'vitest'
+import { EventEmitter } from 'node:events'
 import sinon from 'sinon'
+import { setReqValidationModeForTests } from '@overleaf/validation-tools'
 import MockRequest from '../helpers/MockRequest.mjs'
 import MockResponse from '../helpers/MockResponse.mjs'
 import SubscriptionErrors from '../../../../app/src/Features/Subscription/Errors.mjs'
 import { PaymentServiceResourceNotFoundError } from '../../../../modules/subscriptions/app/src/PaymentServiceErrors.mjs'
 import SubscriptionHelper from '../../../../app/src/Features/Subscription/SubscriptionHelper.mjs'
+import PlansLocator from '../../../../app/src/Features/Subscription/PlansLocator.mjs'
 import { AI_ADD_ON_CODE } from '../../../../app/src/Features/Subscription/AiHelper.mjs'
 
 const modulePath =
@@ -161,6 +164,7 @@ describe('SubscriptionController', function () {
     ctx.SplitTestV2Hander = {
       promises: {
         getAssignment: sinon.stub().resolves({ variant: 'default' }),
+        getAssignmentForUser: sinon.stub().resolves({ variant: 'default' }),
       },
     }
     ctx.Features = {
@@ -357,6 +361,7 @@ describe('SubscriptionController', function () {
 
     vi.doMock('../../../../app/src/Features/Subscription/PlansLocator', () => ({
       default: (ctx.PlansLocator = {
+        getPlanCadence: PlansLocator.getPlanCadence,
         findLocalPlanInSettings: sinon.stub().returns({
           annual: false,
         }),
@@ -373,7 +378,17 @@ describe('SubscriptionController', function () {
     ctx.stubbedCurrencyCode = 'GBP'
   })
 
+  afterEach(function () {
+    setReqValidationModeForTests(null)
+  })
+
   describe('successfulSubscription', function () {
+    beforeEach(function (ctx) {
+      // this route only ever reads `upgrade` from the query -- the shared
+      // `planCode` fixture above belongs to previewSubscription's route.
+      ctx.req.query = {}
+    })
+
     it('without a personal subscription', async function (ctx) {
       await new Promise(resolve => {
         ctx.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel.resolves(
@@ -427,10 +442,53 @@ describe('SubscriptionController', function () {
         )
       })
     })
+
+    it('sets isUpgrade when the upgrade query param is true', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.req.query = { upgrade: 'true' }
+        ctx.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel.resolves(
+          {
+            personalSubscription: 'foo',
+          }
+        )
+        ctx.res.render = (url, variables) => {
+          expect(variables.isUpgrade).to.equal(true)
+          resolve()
+        }
+        ctx.SubscriptionController.successfulSubscription(ctx.req, ctx.res)
+      })
+    })
+
+    it('tolerates an unrecognized extra query param via the fallback schema', async function (ctx) {
+      setReqValidationModeForTests('log')
+      await new Promise(resolve => {
+        ctx.req.query = { upgrade: 'true', promo: 'ABC' }
+        ctx.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel.resolves(
+          {
+            personalSubscription: 'foo',
+          }
+        )
+        ctx.res.render = (url, variables) => {
+          expect(variables.isUpgrade).to.equal(true)
+          resolve()
+        }
+        ctx.SubscriptionController.successfulSubscription(ctx.req, ctx.res)
+      })
+    })
+
+    it('rejects a non-boolean-ish upgrade value', async function (ctx) {
+      ctx.req.query = { upgrade: 'sometimes' }
+      await expect(
+        ctx.SubscriptionController.successfulSubscription(ctx.req, ctx.res)
+      ).to.be.rejected
+    })
   })
 
   describe('userSubscriptionPage', function () {
     beforeEach(async function (ctx) {
+      // this route only ever reads `errorCode` from the query -- the shared
+      // `planCode` fixture above belongs to previewSubscription's route.
+      ctx.req.query = {}
       await new Promise((resolve, reject) => {
         ctx.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel.resolves(
           {
@@ -484,6 +542,25 @@ describe('SubscriptionController', function () {
       expect(ctx.data.plans).to.deep.equal(ctx.plans)
     })
 
+    // The prices quoted in the change plan modal have to come from the same
+    // price version the plan change will be charged at
+    it('should resolve the price version for the plan list by user, not by request', function (ctx) {
+      expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+        'getPriceVersionForUser',
+        ctx.user._id
+      )
+      expect(ctx.Modules.promises.hooks.fire).to.not.have.been.calledWith(
+        'getPriceVersion',
+        sinon.match.any,
+        sinon.match.any
+      )
+      expect(
+        ctx.SubscriptionViewModelBuilder.buildPlansListForSubscriptionDash
+      ).to.have.been.calledWithMatch(sinon.match.any, sinon.match.any, {
+        priceVersion: 'feb2026',
+      })
+    })
+
     it('should load an empty list of groups with settings available', function (ctx) {
       expect(ctx.data.groupSettingsEnabledFor).to.deep.equal([])
     })
@@ -516,7 +593,7 @@ describe('SubscriptionController', function () {
 
     describe('when errorCode query param is present', function () {
       beforeEach(async function (ctx) {
-        ctx.req.query.errorCode = 'payment_failed'
+        ctx.req.query = { errorCode: 'payment_failed' }
         await new Promise((resolve, reject) => {
           ctx.res.render = (view, data) => {
             ctx.data = data
@@ -533,6 +610,127 @@ describe('SubscriptionController', function () {
 
       it('should pass redirectedPaymentErrorCode to the view', function (ctx) {
         expect(ctx.data.redirectedPaymentErrorCode).to.equal('payment_failed')
+      })
+    })
+
+    describe('subscription-page-view event', function () {
+      const renderWithSubscription = async (ctx, personalSubscription) => {
+        ctx.AnalyticsManager.recordEventForSession.resetHistory()
+        ctx.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel.resolves(
+          { personalSubscription, memberGroupSubscriptions: [] }
+        )
+        await new Promise((resolve, reject) => {
+          ctx.res.render = () => resolve()
+          ctx.SubscriptionController.userSubscriptionPage(
+            ctx.req,
+            ctx.res,
+            ctx.rejectOnError(reject)
+          )
+        })
+        return ctx.AnalyticsManager.recordEventForSession.lastCall.args[2]
+      }
+
+      it('should segment a monthly subscription', async function (ctx) {
+        const segmentation = await renderWithSubscription(ctx, {
+          planCode: 'collaborator',
+          plan: { planCode: 'collaborator' },
+          payment: { currency: 'USD', trialEndsAt: null },
+        })
+        expect(segmentation).to.deep.include({
+          plan_code: 'collaborator',
+          billing_cycle: 'monthly',
+          is_trial: false,
+          currency: 'USD',
+        })
+      })
+
+      it('should segment an annual subscription', async function (ctx) {
+        const segmentation = await renderWithSubscription(ctx, {
+          planCode: 'collaborator-annual',
+          plan: { planCode: 'collaborator-annual', annual: true },
+          payment: { currency: 'EUR', trialEndsAt: null },
+        })
+        expect(segmentation).to.deep.include({
+          plan_code: 'collaborator-annual',
+          billing_cycle: 'annual',
+          is_trial: false,
+          currency: 'EUR',
+        })
+      })
+
+      it('should segment a subscription in trial', async function (ctx) {
+        const segmentation = await renderWithSubscription(ctx, {
+          planCode: 'collaborator_free_trial_7_days',
+          plan: { planCode: 'collaborator_free_trial_7_days' },
+          payment: {
+            currency: 'USD',
+            trialEndsAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+          },
+        })
+        expect(segmentation).to.deep.include({
+          plan_code: 'collaborator_free_trial_7_days',
+          billing_cycle: 'monthly',
+          is_trial: true,
+          currency: 'USD',
+        })
+      })
+
+      it('should omit the plan segmentation without a personal subscription', async function (ctx) {
+        const segmentation = await renderWithSubscription(ctx, undefined)
+        expect(segmentation).to.deep.include({
+          plan_code: undefined,
+          billing_cycle: null,
+          is_trial: false,
+          currency: undefined,
+        })
+      })
+    })
+
+    describe('when an unrecognized query param is present', function () {
+      beforeEach(async function (ctx) {
+        setReqValidationModeForTests('log')
+        ctx.req.query = { errorCode: 'payment_failed', promo: 'ABC' }
+        await new Promise((resolve, reject) => {
+          ctx.res.render = (view, data) => {
+            ctx.data = data
+            resolve()
+          }
+          ctx.SubscriptionController.userSubscriptionPage(
+            ctx.req,
+            ctx.res,
+            ctx.rejectOnError(reject)
+          )
+        })
+      })
+
+      it('still renders using the raw query under the log-only rollout', function (ctx) {
+        expect(ctx.data.redirectedPaymentErrorCode).to.equal('payment_failed')
+      })
+    })
+
+    describe('when hasSubscription query param is present', function () {
+      it('does not reject the request', async function (ctx) {
+        ctx.req.query = { hasSubscription: 'true' }
+        await new Promise((resolve, reject) => {
+          ctx.res.render = (view, data) => {
+            expect(view).to.equal('subscriptions/dashboard-react')
+            resolve()
+          }
+          ctx.SubscriptionController.userSubscriptionPage(
+            ctx.req,
+            ctx.res,
+            ctx.rejectOnError(reject)
+          )
+        })
+      })
+    })
+
+    describe('when hasSubscription query param is invalid', function () {
+      it('rejects the request', async function (ctx) {
+        ctx.req.query = { hasSubscription: 'maybe' }
+        await expect(
+          ctx.SubscriptionController.userSubscriptionPage(ctx.req, ctx.res)
+        ).to.be.rejected
       })
     })
   })
@@ -630,6 +828,39 @@ describe('SubscriptionController', function () {
           ctx.res.redirect.calledWith('/user/subscription').should.equal(true)
           resolve()
         })
+      })
+    })
+
+    describe('when the subscription cannot be reactivated due to a pending address', function () {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
+          ctx.json = sinon.stub().callsFake(() => resolve())
+          ctx.res = {
+            status: sinon.stub().returns({ json: ctx.json }),
+          }
+          ctx.req.assertPermission = sinon.stub()
+          ctx.next = sinon.stub().callsFake(error => resolve(error))
+          ctx.SubscriptionHandler.reactivateSubscription = sinon
+            .stub()
+            .callsArgWith(
+              1,
+              new SubscriptionErrors.AddressPendingReactivationError()
+            )
+          ctx.SubscriptionController.reactivateSubscription(
+            ctx.req,
+            ctx.res,
+            ctx.next
+          )
+        })
+      })
+
+      it('should respond with a 422 and an address_pending code', async function (ctx) {
+        ctx.res.status.calledWith(422).should.equal(true)
+        ctx.json.firstCall.args[0].should.have.property(
+          'code',
+          'address_pending'
+        )
+        ctx.next.called.should.equal(false)
       })
     })
 
@@ -732,6 +963,16 @@ describe('SubscriptionController', function () {
       expect(
         ctx.SubscriptionHandler.promises.pauseSubscription.called
       ).to.equal(false)
+    })
+
+    it('rejects an unrecognized extra param', async function (ctx) {
+      ctx.res = new MockResponse(vi)
+      ctx.req = new MockRequest(vi)
+      ctx.req.params = { pauseCycles: '3', unexpected: 'field' }
+      ctx.next = sinon.stub()
+      await expect(
+        ctx.SubscriptionController.pauseSubscription(ctx.req, ctx.res, ctx.next)
+      ).to.be.rejectedWith('Invalid request parameters')
     })
   })
 
@@ -913,149 +1154,50 @@ describe('SubscriptionController', function () {
     })
   })
 
-  describe('purchaseAddon', function () {
+  describe('recurlyNotificationParser', function () {
     beforeEach(function (ctx) {
-      ctx.SessionManager.getSessionUser.returns(ctx.user) // Make sure getSessionUser returns the user
-      ctx.next = sinon.stub()
-      ctx.req.params = { addOnCode: AI_ADD_ON_CODE } // Mock add-on code
-    })
-
-    it('should return 200 on successful purchase of AI add-on', async function (ctx) {
-      await ctx.SubscriptionController.purchaseAddon(ctx.req, ctx.res, ctx.next)
-      ctx.res.sendStatus = sinon.spy()
-
-      await ctx.SubscriptionController.purchaseAddon(ctx.req, ctx.res, ctx.next)
-
-      expect(ctx.SubscriptionHandler.promises.purchaseAddon).to.have.been.called
-      expect(
-        ctx.SubscriptionHandler.promises.purchaseAddon
-      ).to.have.been.calledWith(ctx.user._id, AI_ADD_ON_CODE, 1)
-      expect(
-        ctx.FeaturesUpdater.promises.refreshFeatures
-      ).to.have.been.calledWith(ctx.user._id, 'add-on-purchase')
-      expect(ctx.res.sendStatus).to.have.been.calledWith(200)
-      expect(ctx.logger.debug).to.have.been.calledWith(
-        { userId: ctx.user._id, addOnCode: AI_ADD_ON_CODE },
-        'purchasing add-ons'
-      )
-    })
-
-    it('should return 404 if the add-on code is not AI_ADD_ON_CODE', async function (ctx) {
-      ctx.req.params = { addOnCode: 'some-other-addon' }
-      ctx.res.sendStatus = sinon.spy()
-
-      await ctx.SubscriptionController.purchaseAddon(ctx.req, ctx.res, ctx.next)
-
-      expect(ctx.SubscriptionHandler.promises.purchaseAddon).to.not.have.been
-        .called
-      expect(ctx.FeaturesUpdater.promises.refreshFeatures).to.not.have.been
-        .called
-      expect(ctx.res.sendStatus).to.have.been.calledWith(404)
-    })
-
-    it('should return 404 when plans-2026-phase-1 split test is enabled', async function (ctx) {
-      ctx.SplitTestV2Hander.promises.getAssignment.resolves({
-        variant: 'enabled',
-      })
-      ctx.res.sendStatus = sinon.spy()
-
-      await ctx.SubscriptionController.purchaseAddon(ctx.req, ctx.res, ctx.next)
-
-      expect(ctx.SubscriptionHandler.promises.purchaseAddon).to.not.have.been
-        .called
-      expect(ctx.res.sendStatus).to.have.been.calledWith(404)
-    })
-
-    it('should handle DuplicateAddOnError and send badRequest while sending 200', async function (ctx) {
-      ctx.req.params.addOnCode = AI_ADD_ON_CODE
-      ctx.SubscriptionHandler.promises.purchaseAddon.rejects(
-        new SubscriptionErrors.DuplicateAddOnError()
-      )
-
-      await ctx.SubscriptionController.purchaseAddon(ctx.req, ctx.res, ctx.next)
-
-      expect(ctx.HttpErrorHandler.badRequest).to.have.been.calledWith(
-        ctx.req,
-        ctx.res,
-        'Your subscription already includes this add-on',
-        { addon: AI_ADD_ON_CODE }
-      )
-      expect(
-        ctx.FeaturesUpdater.promises.refreshFeatures
-      ).to.have.been.calledWith(ctx.user._id, 'add-on-purchase')
-      expect(ctx.res.sendStatus).toHaveBeenCalledWith(200)
-    })
-
-    it('should handle PaymentActionRequiredError and return 402 with details', async function (ctx) {
-      ctx.req.params.addOnCode = AI_ADD_ON_CODE
-      const paymentError = new SubscriptionErrors.PaymentActionRequiredError({
-        clientSecret: 'secret123',
-        publicKey: 'pubkey456',
-      })
-      ctx.SubscriptionHandler.promises.purchaseAddon.rejects(paymentError)
-
-      await ctx.SubscriptionController.purchaseAddon(ctx.req, ctx.res, ctx.next)
-
-      expect(ctx.res.status).toHaveBeenCalledWith(402)
-      expect(ctx.res.json).toHaveBeenCalledWith({
-        message: 'Payment action required',
-        clientSecret: 'secret123',
-        publicKey: 'pubkey456',
-      })
-
-      expect(ctx.FeaturesUpdater.promises.refreshFeatures).to.not.have.been
-        .called
-    })
-
-    it('should refresh features', async function (ctx) {
-      ctx.req.params.addOnCode = 'assistant'
-      ctx.SubscriptionHandler.promises.purchaseAddon = sinon.stub().resolves()
-      ctx.FeaturesUpdater.promises.refreshFeatures = sinon.stub().resolves()
-
-      await ctx.SubscriptionController.purchaseAddon(ctx.req, ctx.res)
-
-      expect(
-        ctx.FeaturesUpdater.promises.refreshFeatures.calledWith(
-          ctx.user._id,
-          'add-on-purchase'
-        )
-      ).to.be.true
-    })
-
-    it('should respond with a bad request if the subscription already includes the addOn', async function (ctx) {
-      ctx.req.params.addOnCode = 'assistant'
-      ctx.SubscriptionHandler.promises.purchaseAddon = sinon
+      ctx.RecurlyWrapper._parseXml = sinon
         .stub()
-        .rejects(new SubscriptionErrors.DuplicateAddOnError())
-
-      await ctx.SubscriptionController.purchaseAddon(ctx.req, ctx.res)
-
-      expect(
-        ctx.HttpErrorHandler.badRequest.calledWith(
-          ctx.req,
-          ctx.res,
-          'Your subscription already includes this add-on',
-          { addon: 'assistant' }
-        )
-      ).to.be.true
+        .callsFake((xml, callback) => callback(null, { parsedFrom: xml }))
     })
 
-    it('should handle MultiplePendingChangesError and return 422 with JSON response', async function (ctx) {
-      ctx.req.params.addOnCode = AI_ADD_ON_CODE
-      ctx.SubscriptionHandler.promises.purchaseAddon.rejects(
-        new SubscriptionErrors.MultiplePendingChangesError()
+    it('parses the streamed XML body and calls next', function (ctx) {
+      const fakeReq = new EventEmitter()
+      fakeReq.body = undefined
+      const next = sinon.stub()
+
+      ctx.SubscriptionController.recurlyNotificationParser(
+        fakeReq,
+        ctx.res,
+        next
       )
+      fakeReq.emit('data', '<xml>')
+      fakeReq.emit('data', 'payload</xml>')
+      fakeReq.emit('end')
 
-      await ctx.SubscriptionController.purchaseAddon(ctx.req, ctx.res, ctx.next)
+      expect(ctx.RecurlyWrapper._parseXml).to.have.been.calledWith(
+        '<xml>payload</xml>'
+      )
+      expect(fakeReq.body).to.deep.equal({ parsedFrom: '<xml>payload</xml>' })
+      expect(next).to.have.been.calledWith()
+    })
 
-      expect(ctx.res.status).toHaveBeenCalledWith(422)
-      expect(ctx.res.json).toHaveBeenCalledWith({
-        code: 'multiple_pending_changes',
-        message:
-          'Cannot complete purchase while there are multiple pending subscription changes. Please contact support.',
-      })
-      expect(ctx.FeaturesUpdater.promises.refreshFeatures).to.not.have.been
-        .called
+    it('still parses and calls next under the log-only rollout when the body was already parsed', function (ctx) {
+      setReqValidationModeForTests('log')
+      const fakeReq = new EventEmitter()
+      fakeReq.body = { alreadyParsed: true }
+      const next = sinon.stub()
+
+      ctx.SubscriptionController.recurlyNotificationParser(
+        fakeReq,
+        ctx.res,
+        next
+      )
+      fakeReq.emit('data', '<xml>event</xml>')
+      fakeReq.emit('end')
+
+      expect(next).to.have.been.calledWith()
+      expect(fakeReq.body).to.deep.equal({ parsedFrom: '<xml>event</xml>' })
     })
   })
 
@@ -1122,6 +1264,73 @@ describe('SubscriptionController', function () {
         message:
           'Cannot remove add-on while there are multiple pending subscription changes. Please contact support.',
       })
+    })
+
+    it('rejects an unrecognized extra param', async function (ctx) {
+      ctx.req.params = { addOnCode: AI_ADD_ON_CODE, unexpected: 'field' }
+
+      await expect(
+        ctx.SubscriptionController.removeAddon(ctx.req, ctx.res, ctx.next)
+      ).to.be.rejectedWith('Invalid request parameters')
+
+      expect(ctx.SubscriptionHandler.promises.removeAddon).to.not.have.been
+        .called
+    })
+  })
+
+  describe('reactivateAddon', function () {
+    beforeEach(function (ctx) {
+      ctx.SessionManager.getSessionUser.returns(ctx.user)
+      ctx.req.params = { addOnCode: AI_ADD_ON_CODE }
+      ctx.SubscriptionHandler.promises.reactivateAddon = sinon.stub().resolves()
+    })
+
+    it('should return 200 on successful reactivation of AI add-on', async function (ctx) {
+      ctx.res.sendStatus = sinon.spy()
+
+      await ctx.SubscriptionController.reactivateAddon(ctx.req, ctx.res)
+
+      expect(
+        ctx.SubscriptionHandler.promises.reactivateAddon
+      ).to.have.been.calledWith(ctx.user._id, AI_ADD_ON_CODE)
+      expect(ctx.res.sendStatus).to.have.been.calledWith(200)
+    })
+
+    it('should return 404 if the add-on code is not AI_ADD_ON_CODE', async function (ctx) {
+      ctx.req.params = { addOnCode: 'some-other-addon' }
+      ctx.res.sendStatus = sinon.spy()
+
+      await ctx.SubscriptionController.reactivateAddon(ctx.req, ctx.res)
+
+      expect(ctx.SubscriptionHandler.promises.reactivateAddon).to.not.have.been
+        .called
+      expect(ctx.res.sendStatus).to.have.been.calledWith(404)
+    })
+
+    it('should handle AddOnNotPresentError and send badRequest', async function (ctx) {
+      ctx.SubscriptionHandler.promises.reactivateAddon.rejects(
+        new SubscriptionErrors.AddOnNotPresentError()
+      )
+
+      await ctx.SubscriptionController.reactivateAddon(ctx.req, ctx.res)
+
+      expect(ctx.HttpErrorHandler.badRequest).to.have.been.calledWith(
+        ctx.req,
+        ctx.res,
+        'The requested add-on is not pending cancellation',
+        { addon: AI_ADD_ON_CODE }
+      )
+    })
+
+    it('rejects an unrecognized extra param', async function (ctx) {
+      ctx.req.params = { addOnCode: AI_ADD_ON_CODE, unexpected: 'field' }
+
+      await expect(
+        ctx.SubscriptionController.reactivateAddon(ctx.req, ctx.res)
+      ).to.be.rejectedWith('Invalid request parameters')
+
+      expect(ctx.SubscriptionHandler.promises.reactivateAddon).to.not.have.been
+        .called
     })
   })
 
@@ -1812,21 +2021,12 @@ describe('SubscriptionController', function () {
   describe('previewAddonPurchase', function () {
     beforeEach(function (ctx) {
       ctx.req = new MockRequest(vi)
-      ctx.req.params = { addOnCode: 'assistant' }
-      ctx.req.query = { purchaseReferrer: 'fake-referrer' }
       ctx.res = new MockResponse(vi)
-
-      ctx.Modules.promises.hooks.fire
-        .withArgs('getPaymentMethod')
-        .resolves(['fake-method'])
-      ctx.SubscriptionLocator.promises.getUsersSubscription.resolves(null)
+      ctx.res.redirect = sinon.stub()
     })
 
-    it('should redirect with ai-assist-unavailable when plans-2026-phase-1 is enabled', async function (ctx) {
-      ctx.SplitTestV2Hander.promises.getAssignment.resolves({
-        variant: 'enabled',
-      })
-      ctx.res.redirect = sinon.stub()
+    it('should redirect with ai-assist-unavailable for the AI add-on', async function (ctx) {
+      ctx.req.params = { addOnCode: AI_ADD_ON_CODE }
 
       await ctx.SubscriptionController.previewAddonPurchase(ctx.req, ctx.res)
 
@@ -1835,177 +2035,186 @@ describe('SubscriptionController', function () {
       )
     })
 
-    describe('when user has manual or custom subscription', function () {
-      it('should redirect with ai-assist-unavailable when subscription has customAccount = true', async function (ctx) {
-        const customSubscription = {
-          _id: 'sub-123',
-          customAccount: true,
-          collectionMethod: 'automatic',
-        }
-        ctx.SubscriptionLocator.promises.getUsersSubscription.resolves(
-          customSubscription
-        )
+    it('should 404 for an unknown add-on', async function (ctx) {
+      ctx.req.params = { addOnCode: 'unknown-addon' }
 
-        ctx.res.redirect = sinon.stub()
+      await ctx.SubscriptionController.previewAddonPurchase(ctx.req, ctx.res)
 
-        await ctx.SubscriptionController.previewAddonPurchase(ctx.req, ctx.res)
+      expect(ctx.HttpErrorHandler.notFound).to.have.been.calledWith(
+        ctx.req,
+        ctx.res
+      )
+    })
+  })
 
-        expect(ctx.res.redirect).to.have.been.calledWith(
-          '/user/subscription?redirect-reason=ai-assist-unavailable'
-        )
-      })
+  describe('refreshUserFeatures', function () {
+    beforeEach(function (ctx) {
+      ctx.res.sendStatus = sinon.spy()
+    })
 
-      it('should redirect with ai-assist-unavailable when subscription has collectionMethod = manual', async function (ctx) {
-        const manualSubscription = {
-          _id: 'sub-123',
-          customAccount: false,
-          collectionMethod: 'manual',
-        }
-        ctx.SubscriptionLocator.promises.getUsersSubscription.resolves(
-          manualSubscription
-        )
+    it('should refresh features for a valid user id', async function (ctx) {
+      const userId = '507f1f77bcf86cd799439011'
+      ctx.req.params = { user_id: userId }
 
-        ctx.res.redirect = sinon.stub()
+      await ctx.SubscriptionController.refreshUserFeatures(ctx.req, ctx.res)
 
-        await ctx.SubscriptionController.previewAddonPurchase(ctx.req, ctx.res)
+      expect(
+        ctx.FeaturesUpdater.promises.refreshFeatures
+      ).to.have.been.calledWith(userId, 'acceptance-test')
+      expect(ctx.res.sendStatus).to.have.been.calledWith(200)
+    })
 
-        expect(ctx.res.redirect).to.have.been.calledWith(
-          '/user/subscription?redirect-reason=ai-assist-unavailable'
-        )
-      })
+    it('tolerates a malformed user id under the log-only rollout', async function (ctx) {
+      setReqValidationModeForTests('log')
+      ctx.req.params = { user_id: 'not-a-mongo-id' }
 
-      it('should redirect with ai-assist-unavailable when subscription has both customAccount and manual collection', async function (ctx) {
-        const customManualSubscription = {
-          _id: 'sub-123',
-          customAccount: true,
-          collectionMethod: 'manual',
-        }
-        ctx.SubscriptionLocator.promises.getUsersSubscription.resolves(
-          customManualSubscription
-        )
+      await ctx.SubscriptionController.refreshUserFeatures(ctx.req, ctx.res)
 
-        ctx.res.redirect = sinon.stub()
+      expect(
+        ctx.FeaturesUpdater.promises.refreshFeatures
+      ).to.have.been.calledWith('not-a-mongo-id', 'acceptance-test')
+      expect(ctx.res.sendStatus).to.have.been.calledWith(200)
+    })
+  })
 
-        await ctx.SubscriptionController.previewAddonPurchase(ctx.req, ctx.res)
+  describe('getRecommendedCurrency', function () {
+    beforeEach(function (ctx) {
+      ctx.req.query = {}
+    })
 
-        expect(ctx.res.redirect).to.have.been.calledWith(
-          '/user/subscription?redirect-reason=ai-assist-unavailable'
-        )
+    it('should return the recommended currency using the request ip by default', async function (ctx) {
+      const result = await ctx.SubscriptionController.getRecommendedCurrency(
+        ctx.req,
+        ctx.res
+      )
+
+      expect(ctx.GeoIpLookup.promises.getCurrencyCode).to.have.been.calledWith(
+        ctx.req.ip
+      )
+      expect(result).to.deep.equal({
+        currency: 'USD',
+        recommendedCurrency: 'USD',
+        countryCode: 'US',
       })
     })
 
-    describe('when user has normal subscription', function () {
-      it('should proceed with preview when subscription is not manual or custom', async function (ctx) {
-        const normalSubscription = {
-          _id: 'sub-123',
-          customAccount: false,
-          collectionMethod: 'automatic',
-        }
-        ctx.SubscriptionLocator.promises.getUsersSubscription.resolves(
-          normalSubscription
-        )
-        ctx.PlansLocator.findLocalPlanInSettings.withArgs('assistant').returns({
-          planCode: 'assistant',
-          name: 'AI Assist',
-          annual: false,
-        })
+    it('should use an admin-supplied ip override', async function (ctx) {
+      ctx.AuthorizationManager.promises.isUserSiteAdmin.resolves(true)
+      ctx.req.query = { ip: '1.2.3.4' }
 
-        ctx.res.render = sinon.stub()
+      await ctx.SubscriptionController.getRecommendedCurrency(ctx.req, ctx.res)
 
-        await ctx.SubscriptionController.previewAddonPurchase(ctx.req, ctx.res)
+      expect(ctx.GeoIpLookup.promises.getCurrencyCode).to.have.been.calledWith(
+        '1.2.3.4'
+      )
+    })
 
-        expect(ctx.res.render).to.have.been.calledWith(
-          'subscriptions/preview-change',
-          sinon.match({
-            changePreview: sinon.match({
-              change: {
-                type: 'add-on-purchase',
-                addOn: { code: 'assistant', name: 'AI Assist' },
-              },
-            }),
-            purchaseReferrer: 'fake-referrer',
-            redirectedPaymentErrorCode: undefined,
-          })
-        )
-        expect(
-          ctx.SubscriptionHandler.promises.previewAddonPurchase
-        ).to.have.been.calledWith(ctx.user._id, 'assistant')
-        expect(
-          ctx.PlansLocator.findLocalPlanInSettings
-        ).to.have.been.calledWith('assistant')
-      })
+    it('should ignore an ip override from a non-admin user', async function (ctx) {
+      ctx.AuthorizationManager.promises.isUserSiteAdmin.resolves(false)
+      ctx.req.query = { ip: '1.2.3.4' }
 
-      it('should pass redirectedPaymentErrorCode to the view when errorCode query param is present', async function (ctx) {
-        const normalSubscription = {
-          _id: 'sub-123',
-          customAccount: false,
-          collectionMethod: 'automatic',
-        }
-        ctx.SubscriptionLocator.promises.getUsersSubscription.resolves(
-          normalSubscription
-        )
-        ctx.req.query.errorCode = 'payment_failed'
+      await ctx.SubscriptionController.getRecommendedCurrency(ctx.req, ctx.res)
 
-        ctx.res.render = sinon.stub()
+      expect(ctx.GeoIpLookup.promises.getCurrencyCode).to.have.been.calledWith(
+        ctx.req.ip
+      )
+    })
 
-        await ctx.SubscriptionController.previewAddonPurchase(ctx.req, ctx.res)
+    it('rejects a malformed ip override', async function (ctx) {
+      ctx.AuthorizationManager.promises.isUserSiteAdmin.resolves(true)
+      ctx.req.query = { ip: 'not-an-ip' }
 
-        expect(ctx.res.render).to.have.been.calledWith(
-          'subscriptions/preview-change',
-          sinon.match({
-            changePreview: sinon.match.object,
-            purchaseReferrer: 'fake-referrer',
-            redirectedPaymentErrorCode: 'payment_failed',
-          })
-        )
-      })
+      await expect(
+        ctx.SubscriptionController.getRecommendedCurrency(ctx.req, ctx.res)
+      ).to.be.rejected
+      expect(ctx.GeoIpLookup.promises.getCurrencyCode).to.not.have.been.called
+    })
 
-      it('returns 404 when the add-on code is not in the local plan registry', async function (ctx) {
-        const normalSubscription = {
-          _id: 'sub-123',
-          customAccount: false,
-          collectionMethod: 'automatic',
-        }
-        ctx.SubscriptionLocator.promises.getUsersSubscription.resolves(
-          normalSubscription
-        )
-        ctx.PlansLocator.findLocalPlanInSettings
-          .withArgs('assistant')
-          .returns(null)
+    it('tolerates a non-string ip query value under the log-only rollout', async function (ctx) {
+      setReqValidationModeForTests('log')
+      ctx.AuthorizationManager.promises.isUserSiteAdmin.resolves(true)
+      ctx.req.query = { ip: ['1.2.3.4', '5.6.7.8'] }
 
-        ctx.res.render = sinon.stub()
+      await expect(
+        ctx.SubscriptionController.getRecommendedCurrency(ctx.req, ctx.res)
+      ).to.not.be.rejected
+      expect(ctx.GeoIpLookup.promises.getCurrencyCode).to.have.been.called
+    })
+  })
 
-        await ctx.SubscriptionController.previewAddonPurchase(ctx.req, ctx.res)
+  describe('getLatamCountryBannerDetails', function () {
+    beforeEach(function (ctx) {
+      ctx.req.query = {}
+    })
 
-        expect(ctx.HttpErrorHandler.notFound).to.have.been.calledWith(
+    it('should return an empty object for a non-LATAM country', async function (ctx) {
+      const result =
+        await ctx.SubscriptionController.getLatamCountryBannerDetails(
           ctx.req,
-          ctx.res,
-          'Unknown add-on: assistant'
+          ctx.res
         )
-        expect(ctx.res.render).not.to.have.been.called
+
+      expect(result).to.deep.equal({})
+    })
+
+    it('should return the Mexico banner details', async function (ctx) {
+      ctx.GeoIpLookup.promises.getCurrencyCode.resolves({
+        countryCode: 'MX',
+        currencyCode: 'MXN',
       })
 
-      it('should proceed with preview when customAccount is undefined and collectionMethod is automatic', async function (ctx) {
-        const normalSubscription = {
-          _id: 'sub-123',
-          // customAccount: undefined (not set)
-          collectionMethod: 'automatic',
-        }
-        ctx.SubscriptionLocator.promises.getUsersSubscription.resolves(
-          normalSubscription
+      const result =
+        await ctx.SubscriptionController.getLatamCountryBannerDetails(
+          ctx.req,
+          ctx.res
         )
 
-        ctx.res.render = sinon.stub()
-
-        await ctx.SubscriptionController.previewAddonPurchase(ctx.req, ctx.res)
-
-        expect(ctx.res.render).to.have.been.calledWith(
-          'subscriptions/preview-change'
-        )
-        expect(
-          ctx.SubscriptionHandler.promises.previewAddonPurchase
-        ).to.have.been.calledWith(ctx.user._id, 'assistant')
+      expect(result).to.deep.equal({
+        latamCountryFlag: '🇲🇽',
+        country: 'Mexico',
+        discount: '25%',
+        currency: 'Mexican Pesos',
       })
+    })
+
+    it('should use an admin-supplied ip override', async function (ctx) {
+      ctx.AuthorizationManager.promises.isUserSiteAdmin.resolves(true)
+      ctx.req.query = { ip: '1.2.3.4' }
+
+      await ctx.SubscriptionController.getLatamCountryBannerDetails(
+        ctx.req,
+        ctx.res
+      )
+
+      expect(ctx.GeoIpLookup.promises.getCurrencyCode).to.have.been.calledWith(
+        '1.2.3.4'
+      )
+    })
+
+    it('rejects a malformed ip override', async function (ctx) {
+      ctx.AuthorizationManager.promises.isUserSiteAdmin.resolves(true)
+      ctx.req.query = { ip: 'not-an-ip' }
+
+      await expect(
+        ctx.SubscriptionController.getLatamCountryBannerDetails(
+          ctx.req,
+          ctx.res
+        )
+      ).to.be.rejected
+      expect(ctx.GeoIpLookup.promises.getCurrencyCode).to.not.have.been.called
+    })
+
+    it('tolerates a non-string ip query value under the log-only rollout', async function (ctx) {
+      setReqValidationModeForTests('log')
+      ctx.AuthorizationManager.promises.isUserSiteAdmin.resolves(true)
+      ctx.req.query = { ip: ['1.2.3.4'] }
+
+      await expect(
+        ctx.SubscriptionController.getLatamCountryBannerDetails(
+          ctx.req,
+          ctx.res
+        )
+      ).to.not.be.rejected
     })
   })
 })

@@ -1,0 +1,111 @@
+/*
+ * Styling for the @mention autocomplete tooltip used by the review-panel
+ * comment inputs (see mentions-input.tsx). The tooltip is
+ * parented to `document.body` (via `tooltips({ parent: document.body })`), so it
+ * lives in the light DOM even though the editor itself is mounted in a shadow
+ * root. Its styling must therefore live here, at document level, rather than in
+ * an in-editor CodeMirror theme.
+ *
+ * Because the shadow-hosted editor's CodeMirror base theme cannot reach a
+ * body-parented tooltip, this block is self-contained: it re-declares
+ * CodeMirror's autocomplete `baseTheme` rules for `.cm-tooltip` /
+ * `.cm-tooltip-autocomplete > ul` (z-index, list layout, scrolling), which CM
+ * injects into the editor's root (the shadow root here) and so never reach a
+ * `document.body`-parented tooltip.
+ *
+ * Every rule is scoped under the triple class to both isolate the mentions
+ * styling from the LaTeX autocomplete and win specificity over the source
+ * editor's global `li[role="option"]` / `.cm-completionDetail` rules.
+ */
+.cm-tooltip.cm-tooltip-autocomplete.ol-cm-mentions-autocomplete {
+  // Load-bearing CM base rules, re-declared so the tooltip is self-contained.
+  z-index: 500;
+  box-sizing: border-box;
+  margin-left: 0;
+  border: none;
+  background: transparent;
+  border-radius: var(--border-radius-large);
+
+  > ul {
+    overflow: hidden auto;
+    max-height: 10em;
+    list-style: none;
+    margin: 0;
+    height: 100%;
+    max-width: min(360px, 90vw);
+    white-space: normal;
+    padding: var(--spacing-02);
+    border: 1px solid var(--border-divider);
+    border-radius: var(--border-radius-large);
+    background: var(--bg-light-primary);
+
+    // Matches the `shadow-md` elevation mixin (tooltips/dropdowns).
+    box-shadow:
+      0 4px 12px 0 rgb(30 37 48 / 12%),
+      0 2px 4px rgb(30 37 48 / 8%);
+    font-family: var(--font-sans);
+
+    > li[role='option'] {
+      cursor: pointer;
+      overflow-x: hidden;
+      text-overflow: ellipsis;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      grid-template-rows: auto auto;
+      align-items: center;
+      column-gap: var(--spacing-04);
+      padding: var(--spacing-03) var(--spacing-04);
+      overflow-wrap: anywhere;
+      border-radius: var(--border-radius-medium);
+      line-height: 1.3;
+
+      &[aria-selected] {
+        background: var(--bg-light-secondary);
+      }
+    }
+  }
+
+  .ol-cm-mention-avatar {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    align-self: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: var(--border-radius-full);
+    color: var(--white);
+    font-size: var(--font-size-02);
+    font-weight: 600;
+    text-transform: uppercase;
+    box-sizing: border-box;
+  }
+
+  /* stylelint-disable selector-class-pattern -- CodeMirror completion classes */
+  .cm-completionLabel {
+    @include body-sm;
+
+    grid-column: 2;
+    grid-row: 1;
+    color: var(--content-primary);
+  }
+
+  // The portion of the label matching what the user has typed.
+  .cm-completionMatchedText {
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .cm-completionDetail {
+    @include body-xs;
+
+    grid-column: 2;
+    grid-row: 2;
+    margin: 0;
+    font-family: var(--font-sans);
+    font-style: normal;
+    color: var(--content-secondary);
+  }
+  /* stylelint-enable selector-class-pattern */
+}

@@ -1,131 +1,131 @@
 import {
-  DropdownMenu,
-  DropdownItem,
-  DropdownDivider,
-  DropdownHeader,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdownMenu,
+  OLDropdownItem,
+  OLDropdownDivider,
+  OLDropdownHeader,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import type { Meta } from '@storybook/react-webpack5'
-import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
+import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
 import { IdeRedesign } from '../decorators/ide-redesign'
 
-type Args = React.ComponentProps<typeof DropdownMenu>
+type Args = React.ComponentProps<typeof OLDropdownMenu>
 
 export const Default = (args: Args) => {
   return (
-    <DropdownMenu show>
+    <OLDropdownMenu show>
       <li>
-        <DropdownItem eventKey="1" href="#/action-1">
+        <OLDropdownItem eventKey="1" href="#/action-1">
           Example
-        </DropdownItem>
+        </OLDropdownItem>
       </li>
       <li>
-        <DropdownItem eventKey="2" href="#/action-2">
+        <OLDropdownItem eventKey="2" href="#/action-2">
           Example
-        </DropdownItem>
+        </OLDropdownItem>
       </li>
-      <DropdownDivider />
+      <OLDropdownDivider />
       <li>
-        <DropdownItem eventKey="3" disabled={args.disabled} href="#/action-3">
+        <OLDropdownItem eventKey="3" disabled={args.disabled} href="#/action-3">
           Example
-        </DropdownItem>
+        </OLDropdownItem>
       </li>
-    </DropdownMenu>
+    </OLDropdownMenu>
   )
 }
 
 export const Active = (args: Args) => {
   return (
-    <DropdownMenu show>
+    <OLDropdownMenu show>
       <li>
-        <DropdownItem eventKey="1" href="#/action-1">
+        <OLDropdownItem eventKey="1" href="#/action-1">
           Example
-        </DropdownItem>
+        </OLDropdownItem>
       </li>
       <li>
-        <DropdownItem
+        <OLDropdownItem
           eventKey="2"
           active
           href="#/action-2"
           trailingIcon="check"
         >
           Example
-        </DropdownItem>
+        </OLDropdownItem>
       </li>
-      <DropdownDivider />
+      <OLDropdownDivider />
       <li>
-        <DropdownItem eventKey="3" disabled={args.disabled} href="#/action-3">
+        <OLDropdownItem eventKey="3" disabled={args.disabled} href="#/action-3">
           Example
-        </DropdownItem>
+        </OLDropdownItem>
       </li>
-    </DropdownMenu>
+    </OLDropdownMenu>
   )
 }
 
 export const MultipleSelection = () => {
   return (
-    <DropdownMenu show>
-      <DropdownHeader>Header</DropdownHeader>
+    <OLDropdownMenu show>
+      <OLDropdownHeader>Header</OLDropdownHeader>
       <li>
-        <DropdownItem
+        <OLDropdownItem
           eventKey="1"
           href="#/action-1"
-          leadingIcon={<DropdownItem.EmptyLeadingIcon />}
+          leadingIcon={<OLDropdownItem.EmptyLeadingIcon />}
         >
           Example
-        </DropdownItem>
+        </OLDropdownItem>
       </li>
       <li>
-        <DropdownItem eventKey="2" href="#/action-2" leadingIcon="check">
+        <OLDropdownItem eventKey="2" href="#/action-2" leadingIcon="check">
           Example
-        </DropdownItem>
+        </OLDropdownItem>
       </li>
       <li>
-        <DropdownItem eventKey="3" href="#/action-3" leadingIcon="check">
+        <OLDropdownItem eventKey="3" href="#/action-3" leadingIcon="check">
           Example
-        </DropdownItem>
+        </OLDropdownItem>
       </li>
-    </DropdownMenu>
+    </OLDropdownMenu>
   )
 }
 
 export const Danger = (args: Args) => {
   return (
-    <DropdownMenu show>
+    <OLDropdownMenu show>
       <li>
-        <DropdownItem eventKey="1" disabled={args.disabled} href="#/action-1">
+        <OLDropdownItem eventKey="1" disabled={args.disabled} href="#/action-1">
           Example
-        </DropdownItem>
+        </OLDropdownItem>
       </li>
       <li>
-        <DropdownItem eventKey="2" href="#/action-2">
+        <OLDropdownItem eventKey="2" href="#/action-2">
           Example
-        </DropdownItem>
+        </OLDropdownItem>
       </li>
-      <DropdownDivider />
+      <OLDropdownDivider />
       <li>
-        <DropdownItem eventKey="3" href="#/action-3" variant="danger">
+        <OLDropdownItem eventKey="3" href="#/action-3" variant="danger">
           Example
-        </DropdownItem>
+        </OLDropdownItem>
       </li>
-    </DropdownMenu>
+    </OLDropdownMenu>
   )
 }
 
 export const Description = (args: Args) => {
   return (
-    <DropdownMenu show>
+    <OLDropdownMenu show>
       <li>
-        <DropdownItem
+        <OLDropdownItem
           disabled={args.disabled}
           eventKey="1"
           href="#/action-1"
           description="Description of the menu"
         >
           Example
-        </DropdownItem>
+        </OLDropdownItem>
       </li>
       <li>
-        <DropdownItem
+        <OLDropdownItem
           active
           eventKey="2"
           href="#/action-2"
@@ -133,80 +133,80 @@ export const Description = (args: Args) => {
           trailingIcon="check"
         >
           Example
-        </DropdownItem>
+        </OLDropdownItem>
       </li>
-    </DropdownMenu>
+    </OLDropdownMenu>
   )
 }
 
 export const LeadingIcon = (args: Args) => {
   return (
-    <DropdownMenu show>
-      <OLDropdownMenuItem
+    <OLDropdownMenu show>
+      <DropdownMenuItem
         disabled={args.disabled}
         eventKey="1"
         href="#/action-1"
         leadingIcon="view_column_2"
       >
         Editor & PDF
-      </OLDropdownMenuItem>
-      <OLDropdownMenuItem
+      </DropdownMenuItem>
+      <DropdownMenuItem
         active
         eventKey="2"
         href="#/action-2"
         leadingIcon="terminal"
       >
         Editor only
-      </OLDropdownMenuItem>
-      <OLDropdownMenuItem
+      </DropdownMenuItem>
+      <DropdownMenuItem
         eventKey="3"
         href="#/action-3"
         leadingIcon="picture_as_pdf"
       >
         PDF only
-      </OLDropdownMenuItem>
-      <OLDropdownMenuItem
+      </DropdownMenuItem>
+      <DropdownMenuItem
         eventKey="4"
         href="#/action-4"
         leadingIcon="select_window"
       >
         PDF in separate tab
-      </OLDropdownMenuItem>
-      <OLDropdownMenuItem
+      </DropdownMenuItem>
+      <DropdownMenuItem
         eventKey="5"
         href="#/action-5"
         leadingIcon="align_space_even"
         description="Some description"
       >
         With a description
-      </OLDropdownMenuItem>
-      <OLDropdownMenuItem
+      </DropdownMenuItem>
+      <DropdownMenuItem
         eventKey="6"
         href="#/action-6"
         leadingIcon="align_space_even"
         className="dropdown-item-material-icon-small"
       >
         Small icon
-      </OLDropdownMenuItem>
-    </DropdownMenu>
+      </DropdownMenuItem>
+    </OLDropdownMenu>
   )
 }
 
 export const TrailingIcon = () => {
   return (
-    <DropdownMenu show>
-      <OLDropdownMenuItem eventKey="1" href="#/action-1" trailingIcon="check">
+    <OLDropdownMenu show>
+      <DropdownMenuItem eventKey="1" href="#/action-1" trailingIcon="check">
         Tick
-      </OLDropdownMenuItem>
-      <OLDropdownMenuItem
+      </DropdownMenuItem>
+      <DropdownMenuItem
         eventKey="2"
         href="#/action-2"
         trailingIcon="check"
         description="Some description"
       >
         With a description
-      </OLDropdownMenuItem>
-      <OLDropdownMenuItem
+      </DropdownMenuItem>
+      <DropdownMenuItem
         eventKey="3"
         href="#/action-3"
         leadingIcon="align_space_even"
@@ -214,14 +214,14 @@ export const TrailingIcon = () => {
         description="Some description"
       >
         With a leading icon
-      </OLDropdownMenuItem>
-    </DropdownMenu>
+      </DropdownMenuItem>
+    </OLDropdownMenu>
   )
 }
 
-const meta: Meta<typeof DropdownMenu> = {
-  title: 'Shared / Components / DropdownMenu',
-  component: DropdownMenu,
+const meta: Meta<typeof OLDropdownMenu> = {
+  title: 'Shared / Components / OLDropdownMenu',
+  component: OLDropdownMenu,
   args: {
     disabled: false,
   },

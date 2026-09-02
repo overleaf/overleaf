@@ -417,6 +417,14 @@ describe('PasswordReset', function () {
       })
       expect(response.status).to.equal(400)
     })
+
+    it('should return 200 when a g-recaptcha-response field is included', async function () {
+      response = await userHelper.fetch(`/user/password/reset`, {
+        method: 'POST',
+        body: new URLSearchParams({ email, 'g-recaptcha-response': 'valid' }),
+      })
+      expect(response.status).to.equal(200)
+    })
   })
   describe('password set', function () {
     it('should return 200 if password and passwordResetToken fields are valid', async function () {

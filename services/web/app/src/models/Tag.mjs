@@ -1,7 +1,8 @@
 import mongoose from '../infrastructure/Mongoose.mjs'
 const { Schema } = mongoose
 
-const COLOR_REGEX = /^#[a-fA-F0-9]{6}$/
+// Support hex colours and the auto-generated HSL colours based on IDs
+export const TAG_COLOR_REGEX = /^(#[a-fA-F0-9]{6}|hsl\(\d{1,3}, 70%, 45%\))$/
 
 // Note that for legacy reasons, user_id and project_ids are plain strings,
 // not ObjectIds.
@@ -14,7 +15,7 @@ export const TagSchema = new Schema(
       type: String,
       validate: {
         validator: function (v) {
-          return !v || COLOR_REGEX.test(v)
+          return !v || TAG_COLOR_REGEX.test(v)
         },
         message: 'Provided color code is invalid.',
       },

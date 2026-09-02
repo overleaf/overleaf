@@ -32,6 +32,8 @@ import { S3Persistor } from '@overleaf/object-persistor/src/S3Persistor.js'
 import crypto from 'node:crypto'
 import { WritableBuffer } from '@overleaf/stream-utils'
 import { gzipSync } from 'node:zlib'
+import projectKey from '@overleaf/object-persistor/src/ProjectKey.js'
+import { expectValidationError } from '@overleaf/validation-tools/testUtils.js'
 
 const { expect } = chai
 
@@ -369,6 +371,182 @@ describe('Filestore', function () {
             expect(metric - previousIngress).to.equal(9 + dataEncryptionKeySize)
           })
         }
+      })
+
+      describe('with a sub_type file', function () {
+        // there is no POST route for the /:sub_type variant, so seed
+        // directly via the persistor (same technique used elsewhere in this
+        // file for keys that the HTTP API can't produce).
+        const subType = 'thumbnail'
+        let subTypeContent
+
+        beforeEach('upload file with sub_type', async function () {
+          subTypeContent = `sub_type content ${Math.random()}`
+          await app.persistor.sendStream(
+            Settings.filestore.stores.template_files,
+            `${fileKey}/${subType}`,
+            Stream.Readable.from([subTypeContent])
+          )
+        })
+
+        it('should be able to get the file back', async function () {
+          const response = await fetch(`${fileUrl}/${subType}`)
+          const body = await response.text()
+          expect(body).to.equal(subTypeContent)
+        })
+      })
+
+      describe('history blobs', function () {
+        // a fresh random hash per test, not a shared constant: several
+        // backend variants reuse the same physical bucket (see
+        // TestConfig.js), and mocha shards run in parallel processes, so a
+        // fixed key would race across them.
+        function randomHash() {
+          return crypto.randomBytes(20).toString('hex')
+        }
+
+        // The blob routes always request useSubdirectories: true (blob
+        // keys are namespaced by nested prefixes, not flat ids), but
+        // FSPersistor#sendStream ignores per-call useSubdirectories and
+        // only consults its own construction-time default (false here) --
+        // so seeding through the persistor would flatten '/' to '_' on
+        // write while the read path expects real subdirectories. Write
+        // directly to match what the read path (and real callers, which
+        // never go through filestore's own insertFile for these blobs
+        // anyway) actually expects.
+        async function seedBlob(bucket, key, content) {
+          if (backendSettings.backend === 'fs') {
+            const fsPath = Path.join(bucket, key)
+            await fs.promises.mkdir(Path.dirname(fsPath), {
+              recursive: true,
+            })
+            await fs.promises.writeFile(fsPath, content)
+          } else {
+            await app.persistor.sendStream(
+              bucket,
+              key,
+              Stream.Readable.from([content])
+            )
+          }
+        }
+
+        // Global blobs are keyed purely by hash prefix (no project-folder
+        // concept at all), which is fundamentally incompatible with
+        // PerProjectEncryptedS3Persistor's per-project encryption scheme --
+        // in production, a bucket that isn't per-project (deks/chunks/
+        // project-blobs) is rejected outright by pathToProjectFolder (see
+        // history-v1/storage/lib/backupPersistor.mjs). Project blobs *are*
+        // project-shaped (via projectKey.format()) and are expected to work
+        // under s3SSEC, so only global blobs skip this backend.
+        if (backendSettings.backend !== 's3SSEC') {
+          describe('global blob', function () {
+            let hash, globalBlobContent
+
+            beforeEach('upload global blob', async function () {
+              hash = randomHash()
+              globalBlobContent = `global blob content ${Math.random()}`
+              const globalBlobKey = `${hash.slice(0, 2)}/${hash.slice(2, 4)}/${hash.slice(4)}`
+              await seedBlob(
+                Settings.filestore.stores.global_blobs,
+                globalBlobKey,
+                globalBlobContent
+              )
+            })
+
+            it('should be able to get the blob back', async function () {
+              const response = await fetch(
+                `${filestoreUrl}/history/global/hash/${hash}`
+              )
+              const body = await response.text()
+              expect(body).to.equal(globalBlobContent)
+            })
+
+            it('should return 404 for an unknown hash', async function () {
+              const response = await fetch(
+                `${filestoreUrl}/history/global/hash/${randomHash()}`
+              )
+              expect(response.status).to.equal(404)
+            })
+          })
+        }
+
+        describe('project blob', function () {
+          let hash, historyId, projectBlobContent
+
+          beforeEach('upload project blob', async function () {
+            hash = randomHash()
+            historyId = new ObjectId().toString()
+            projectBlobContent = `project blob content ${Math.random()}`
+            const projectBlobKey = `${projectKey.format(historyId)}/${hash.slice(0, 2)}/${hash.slice(2)}`
+            await seedBlob(
+              Settings.filestore.stores.project_blobs,
+              projectBlobKey,
+              projectBlobContent
+            )
+          })
+
+          it('should be able to get the blob back', async function () {
+            const response = await fetch(
+              `${filestoreUrl}/history/project/${historyId}/hash/${hash}`
+            )
+            const body = await response.text()
+            expect(body).to.equal(projectBlobContent)
+          })
+
+          it('should return 404 for an unknown hash', async function () {
+            const response = await fetch(
+              `${filestoreUrl}/history/project/${historyId}/hash/${randomHash()}`
+            )
+            expect(response.status).to.equal(404)
+          })
+        })
+      })
+
+      // handleValidationError() (@overleaf/validation-tools) composes the
+      // body as { error: fromError(zodError).toString(), statusCode };
+      // fromError() renders each failing issue with its dotted schema path
+      // (e.g. `at "params.template_id"`). Asserting on the body (not just
+      // the status code) confirms the *intended* field is what rejected the
+      // request, not some unrelated bug that happens to also return the
+      // same status. This only needs to run once (per backend, for shard
+      // coverage) since validation happens before any persistor call.
+      describe('validation', function () {
+        it('should return 404 for a malformed template id', async function () {
+          const response = await fetch(
+            `${filestoreUrl}/template/not-an-object-id/v/0/${fileId}`
+          )
+          const body = await response.text()
+          expectValidationError({ response, body }, 404, 'template_id')
+        })
+
+        it('should return 404 for a path traversal payload in the format segment', async function () {
+          // encodeURIComponent so the traversal payload arrives as a
+          // literal path segment (the value of params.format) instead of
+          // being collapsed by fetch()/URL's dot-segment normalization
+          // before the request reaches the wire, or splitting into extra
+          // path segments that wouldn't match this route at all.
+          const response = await fetch(
+            `${filestoreUrl}/template/${templateId}/v/0/${encodeURIComponent('../../etc/passwd')}`
+          )
+          const body = await response.text()
+          expectValidationError({ response, body }, 404, 'format')
+        })
+
+        it('should return 404 for a malformed hash on a global blob', async function () {
+          const response = await fetch(
+            `${filestoreUrl}/history/global/hash/not-a-valid-hash`
+          )
+          const body = await response.text()
+          expectValidationError({ response, body }, 404, 'hash')
+        })
+
+        it('should return 404 for a malformed historyId on a project blob', async function () {
+          const response = await fetch(
+            `${filestoreUrl}/history/project/not-an-object-id/hash/${'a'.repeat(40)}`
+          )
+          const body = await response.text()
+          expectValidationError({ response, body }, 404, 'historyId')
+        })
       })
 
       describe('with multiple files', function () {

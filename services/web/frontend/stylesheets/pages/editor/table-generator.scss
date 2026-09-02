@@ -1,0 +1,25 @@
+.table-generator-help-modal {
+  @include themed-links;
+
+  --bs-code-color: var(--content-secondary-themed);
+}
+
+.table-generator-width-modal {
+  --bs-code-color: var(--content-secondary-themed);
+
+  .form-label {
+    color: var(--content-secondary-themed);
+  }
+
+  .table-generator-width-label {
+    width: 100%;
+  }
+
+  .table-generator-usepackage-copy {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-03) var(--spacing-05);
+    background: var(--bg-secondary-themed);
+    border: 1px solid var(--border-divider-themed);
+  }
+}

@@ -8,6 +8,10 @@ $editor-toggler-bg-dark-color: color.adjust(
 :root {
   --editor-toggler-bg-color: #{$editor-toggler-bg-dark-color};
   --editor-resizer-bg-color: var(--bg-dark-secondary);
+
+  // Deliberately more transparent than $modal-backdrop-opacity so the project
+  // stays readable and selectable behind the modal
+  --editor-lock-modal-backdrop-color: #{rgba($modal-backdrop-bg, 0.3)};
 }
 
 @include theme('light') {
@@ -16,6 +20,12 @@ $editor-toggler-bg-dark-color: color.adjust(
 
   .ide-redesign-main {
     --editor-resizer-bg-color: var(--bg-light-tertiary);
+  }
+}
+
+@include theme('default') {
+  .modal-themed {
+    --editor-lock-modal-backdrop-color: #{rgba($neutral-70, 0.3)};
   }
 }
 
@@ -153,7 +163,7 @@ $editor-toggler-bg-dark-color: color.adjust(
 
 .modal.lock-editor-modal {
   display: flex !important;
-  background-color: rgba($bg-dark-primary, 0.3);
+  background-color: var(--editor-lock-modal-backdrop-color);
   overflow-y: hidden;
   pointer-events: none;
 
@@ -163,6 +173,8 @@ $editor-toggler-bg-dark-color: color.adjust(
 }
 
 .out-of-sync-modal {
+  @include themed-links;
+
   .text-preview {
     margin-top: var(--spacing-05);
 
@@ -171,13 +183,49 @@ $editor-toggler-bg-dark-color: color.adjust(
 
       max-height: 360px;
       width: 100%;
-      background-color: var(--bg-light-primary);
+      color: var(--content-primary-themed);
+      background-color: var(--bg-primary-themed);
       overflow: auto;
       border: 1px solid var(--border-primary-dark);
       padding: var(--spacing-04) var(--spacing-05);
       text-align: left;
       white-space: pre;
       font-family: monospace;
+    }
+  }
+}
+
+.unable-to-sync-modal {
+  .diff-container {
+    @include body-sm;
+    @include font-mono;
+
+    max-height: 400px;
+    width: 100%;
+    background-color: var(--bg-info-03);
+    overflow-y: auto;
+    border: 1px solid var(--border-divider);
+    border-radius: var(--border-radius-base);
+    padding: var(--spacing-04) var(--spacing-05);
+    text-align: left;
+    white-space: pre-wrap;
+
+    ins {
+      background-color: var(--green-10);
+      color: var(--green-70);
+      text-decoration: none;
+    }
+
+    del {
+      color: var(--red-50);
+      text-decoration: line-through;
+    }
+
+    .diff-separator {
+      text-align: center;
+      color: var(--content-secondary);
+      padding: var(--spacing-01) 0;
+      user-select: none;
     }
   }
 }

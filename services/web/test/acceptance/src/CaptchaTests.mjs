@@ -3,6 +3,8 @@ import { expect } from 'chai'
 import Settings from '@overleaf/settings'
 import UserHelper from './helpers/User.mjs'
 import MockHaveIBeenPwnedApiClass from './mocks/MockHaveIBeenPwnedApi.mjs'
+import { expectValidationErrorRaw } from '@overleaf/validation-tools/testUtils.js'
+import { setReqValidationModeForTests } from '@overleaf/validation-tools'
 
 const User = UserHelper.promises
 
@@ -12,6 +14,14 @@ before(function () {
 })
 
 describe('Captcha', function () {
+  beforeEach(function () {
+    setReqValidationModeForTests('enforce')
+  })
+
+  afterEach(function () {
+    setReqValidationModeForTests(null)
+  })
+
   let user
 
   beforeEach('create user', async function () {
@@ -90,6 +100,55 @@ describe('Captcha', function () {
   it('should accept a login with a valid captcha response', async function () {
     const { response, body } = await loginWithCaptcha('valid')
     expectSuccessfulLogin(response, body)
+  })
+
+  it('should reject a non-string g-recaptcha-response', async function () {
+    await user.getCsrfToken()
+    const { response, body } = await user.doRequest('POST', {
+      url: '/login',
+      json: {
+        email: user.email,
+        password: user.password,
+        'g-recaptcha-response': ['not', 'a', 'string'],
+      },
+    })
+    expectValidationErrorRaw(
+      { statusCode: response.statusCode, body },
+      400,
+      'g-recaptcha-response'
+    )
+  })
+
+  it('should accept (and then reject for missing captcha) an explicit null g-recaptcha-response', async function () {
+    // The frontend's ReCaptcha2 component (recaptcha-2.tsx) sends a literal
+    // JSON `null` -- not an omitted field -- whenever it never mounted the
+    // widget (no sitekey, action disabled, or `window.Cypress` in dev E2E
+    // runs). captchaBodySchema must accept that shape (schema-level
+    // regression check); the request should still be treated as "no
+    // captcha provided" downstream, same as the empty-string case above.
+    await user.getCsrfToken()
+    const { response, body } = await user.doRequest('POST', {
+      url: '/login',
+      json: {
+        email: user.email,
+        password: user.password,
+        'g-recaptcha-response': null,
+      },
+    })
+    expectBadCaptchaResponse(response, body)
+  })
+
+  it('should reject a non-string email at can-skip-captcha', async function () {
+    await user.getCsrfToken()
+    const { response, body } = await user.doRequest('POST', {
+      url: '/login/can-skip-captcha',
+      json: { email: ['not', 'a', 'string'] },
+    })
+    expectValidationErrorRaw(
+      { statusCode: response.statusCode, body },
+      400,
+      'email'
+    )
   })
 
   it('should note the solved captcha in audit log', async function () {

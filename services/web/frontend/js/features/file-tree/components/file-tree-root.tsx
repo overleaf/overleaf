@@ -19,6 +19,7 @@ import { useDragLayer } from 'react-dnd'
 import classnames from 'classnames'
 import { pathInFolder } from '@/features/file-tree/util/path'
 import { FileTreeFindResult } from '@/features/ide-react/types/file-tree'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 const FileTreeRoot = React.memo<{
   onSelect: () => void
@@ -42,6 +43,9 @@ const FileTreeRoot = React.memo<{
   const { projectId } = useProjectContext()
   const { fileTreeData } = useFileTreeData()
   const isReady = Boolean(projectId && fileTreeData)
+  const improvedFlakyConnections = useFeatureFlag(
+    'intermittent-connection-improvements'
+  )
 
   useEffect(() => {
     if (fileTreeContainer) {
@@ -83,6 +87,8 @@ const FileTreeRoot = React.memo<{
   }, [isReady, onInit])
   if (!isReady) return null
 
+  const disconnectedOverlay = !improvedFlakyConnections && !isConnected
+
   return (
     <div
       className="file-tree"
@@ -97,7 +103,7 @@ const FileTreeRoot = React.memo<{
           onSelect={onSelect}
           fileTreeContainer={fileTreeContainer}
         >
-          {isConnected ? null : <div className="disconnected-overlay" />}
+          {disconnectedOverlay && <div className="disconnected-overlay" />}
           <FileTreeToolbar />
           <FileTreeContextMenu />
           <FileTreeInner>

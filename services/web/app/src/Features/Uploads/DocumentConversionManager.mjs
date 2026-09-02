@@ -202,7 +202,9 @@ async function streamConvertedProjectDocument({
     clsiServerId ?? undefined
   )
 
-  const { stream, response } = await fetchStreamWithResponse(downloadUrl)
+  const { stream, response } = await fetchStreamWithResponse(downloadUrl, {
+    signal: AbortSignal.timeout(10 * 60_000),
+  })
   const contentLength = parseInt(response.headers.get('Content-Length'), 10)
 
   return { stream, contentLength }

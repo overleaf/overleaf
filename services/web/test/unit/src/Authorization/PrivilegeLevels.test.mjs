@@ -1,4 +1,4 @@
-import { expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
 import PrivilegeLevels, {
   isPrivilegeUpgrade,

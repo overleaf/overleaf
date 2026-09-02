@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 import path from 'node:path'
 import fs from 'node:fs/promises'
 import icons from './unfilled-symbols.mjs'

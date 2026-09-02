@@ -1,6 +1,9 @@
 import classNames from 'classnames'
-import { Toast as BS5Toast } from 'react-bootstrap'
-import { NotificationIcon, NotificationType } from '../notification'
+import { Toast } from 'react-bootstrap'
+import {
+  NotificationIcon,
+  NotificationType,
+} from '@/shared/components/notification'
 import { useTranslation } from 'react-i18next'
 import MaterialIcon from '../material-icon'
 import { ReactNode, useCallback, useState } from 'react'
@@ -73,7 +76,7 @@ export const OLToast = ({
     </div>
   )
   return (
-    <BS5Toast
+    <Toast
       onClose={handleClose}
       autohide={autoHide}
       onExited={handleOnHidden}
@@ -81,6 +84,6 @@ export const OLToast = ({
       show={show}
     >
       {toastElement}
-    </BS5Toast>
+    </Toast>
   )
 }

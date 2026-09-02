@@ -94,6 +94,26 @@ describe('Project CRUD', function () {
     })
   })
 
+  describe('dashboard navigation-state routes', function () {
+    const dashboardRoutes = [
+      '/project',
+      '/project/owned',
+      '/project/shared',
+      '/project/archived',
+      '/project/trashed',
+      '/project/untagged',
+      '/project/tags/aaaaaaaaaaaaaaaaaaaaaaaa',
+    ]
+
+    for (const route of dashboardRoutes) {
+      it(`should render the project dashboard for ${route}`, async function () {
+        const { response, body } = await this.user.doRequest('GET', route)
+        expect(response.statusCode).to.equal(200)
+        expect(body).to.include('name="ol-prefetchedProjectsBlob"')
+      })
+    }
+  })
+
   describe("when project doesn't exist", function () {
     it('should return 404', async function () {
       const { response } = await this.user.doRequest(
@@ -152,6 +172,14 @@ describe('Project CRUD', function () {
         expectObjectIdArrayEqual(trashedProject.archived, [])
       })
     })
+
+    it('should return 404 for a malformed project id', async function () {
+      const { response } = await this.user.doRequest(
+        'POST',
+        '/project/not-an-object-id/trash'
+      )
+      expect(response.statusCode).to.equal(404)
+    })
   })
 
   describe('when untrashing a project', function () {
@@ -190,6 +218,108 @@ describe('Project CRUD', function () {
 
       const trashedProject = await Project.findById(this.projectId).exec()
       expectObjectIdArrayEqual(trashedProject.trashed, [])
+    })
+
+    it('should return 404 for a malformed project id', async function () {
+      const { response } = await this.user.doRequest(
+        'DELETE',
+        '/project/not-an-object-id/trash'
+      )
+      expect(response.statusCode).to.equal(404)
+    })
+  })
+
+  describe('archiving and unarchiving a project', function () {
+    it('should archive the project', async function () {
+      const { response } = await this.user.doRequest(
+        'POST',
+        `/Project/${this.projectId}/archive`
+      )
+      expect(response.statusCode).to.equal(200)
+    })
+
+    it('should unarchive the project', async function () {
+      await this.user.doRequest('POST', `/Project/${this.projectId}/archive`)
+
+      const { response } = await this.user.doRequest(
+        'DELETE',
+        `/Project/${this.projectId}/archive`
+      )
+      expect(response.statusCode).to.equal(200)
+    })
+
+    it('should return 404 for a malformed project id when archiving', async function () {
+      const { response } = await this.user.doRequest(
+        'POST',
+        '/Project/not-an-object-id/archive'
+      )
+      expect(response.statusCode).to.equal(404)
+    })
+
+    it('should return 404 for a malformed project id when unarchiving', async function () {
+      const { response } = await this.user.doRequest(
+        'DELETE',
+        '/Project/not-an-object-id/archive'
+      )
+      expect(response.statusCode).to.equal(404)
+    })
+  })
+
+  describe('deleting and restoring a project', function () {
+    it('should return 404 for a malformed project id when deleting', async function () {
+      const { response } = await this.user.doRequest(
+        'DELETE',
+        '/Project/not-an-object-id'
+      )
+      expect(response.statusCode).to.equal(404)
+    })
+
+    it('should return 404 for a malformed project id when restoring', async function () {
+      const { response } = await this.user.doRequest(
+        'POST',
+        '/Project/not-an-object-id/restore'
+      )
+      expect(response.statusCode).to.equal(404)
+    })
+  })
+
+  describe('renaming a project', function () {
+    it('should return 404 for a malformed project id', async function () {
+      const { response } = await this.user.doRequest('POST', {
+        url: '/project/not-an-object-id/rename',
+        json: { newProjectName: 'a new name' },
+      })
+      expect(response.statusCode).to.equal(404)
+    })
+  })
+
+  describe('project entities', function () {
+    it('should return 404 for a malformed project id', async function () {
+      const { response } = await this.user.doRequest(
+        'GET',
+        '/project/not-an-object-id/entities'
+      )
+      expect(response.statusCode).to.equal(404)
+    })
+  })
+
+  describe('updateProjectSettings', function () {
+    it('should update the compiler', async function () {
+      const { response } = await this.user.doRequest('POST', {
+        url: `/project/${this.projectId}/settings`,
+        json: { compiler: 'pdflatex' },
+      })
+      expect(response.statusCode).to.equal(204)
+      const project = await Project.findById(this.projectId).exec()
+      expect(project.compiler).to.equal('pdflatex')
+    })
+
+    it('should return 400 for a malformed mainBibliographyDocId', async function () {
+      const { response } = await this.user.doRequest('POST', {
+        url: `/project/${this.projectId}/settings`,
+        json: { mainBibliographyDocId: 'not-an-object-id' },
+      })
+      expect(response.statusCode).to.equal(400)
     })
   })
 
@@ -236,6 +366,31 @@ describe('Project CRUD', function () {
       })
       expect(response.statusCode).to.equal(500)
       expect(body).to.equal('Internal Server Error')
+    })
+  })
+
+  describe('cloning a project', function () {
+    it('should create a new project owned by the same user', async function () {
+      const { response, body } = await this.user.doRequest('POST', {
+        url: `/Project/${this.projectId}/clone`,
+        json: { projectName: 'cloned project' },
+      })
+      expect(response.statusCode).to.equal(200)
+      expect(body.project_id).to.exist
+      expect(body.name).to.equal('cloned project')
+
+      const clonedProject = await Project.findById(body.project_id).exec()
+      expect(clonedProject.owner_ref.toString()).to.equal(
+        this.user._id.toString()
+      )
+    })
+
+    it('should return 404 for a malformed project id', async function () {
+      const { response } = await this.user.doRequest('POST', {
+        url: '/Project/not-an-object-id/clone',
+        json: { projectName: 'cloned project' },
+      })
+      expect(response.statusCode).to.equal(404)
     })
   })
 })

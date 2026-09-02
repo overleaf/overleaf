@@ -46,7 +46,7 @@ function SsoLinkingInfo({ domainInfo, email }: SSOLinkingInfoProps) {
           tOptions={{ interpolation: { escapeValue: true } }}
         />{' '}
         <a
-          href="/learn/how-to/Institutional_Login"
+          href="https://docs.overleaf.com/accounts-and-security/email-address-and-login-options/logging-in-with-institutional-sso"
           target="_blank"
           rel="noopener noreferrer"
         >

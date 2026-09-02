@@ -8,7 +8,7 @@ import {
 import useTag from '../hooks/use-tag'
 import { sortBy } from 'lodash'
 import { Tag } from '../../../../../app/src/Features/Tags/types'
-import { DropdownItem } from '@/shared/components/dropdown/dropdown-menu'
+import { OLDropdownItem } from '@/shared/components/ol/ol-dropdown-menu'
 
 type TagsListProps = {
   onTagClick?: () => void
@@ -37,7 +37,7 @@ function TagsList({ onTagClick }: TagsListProps) {
       <>
         {sortBy(tags, ['name']).map((tag, index) => (
           <li role="none" className="position-relative" key={index}>
-            <DropdownItem
+            <OLDropdownItem
               as="button"
               tabIndex={-1}
               onClick={e => handleClick(e as unknown as React.MouseEvent, tag)}
@@ -52,8 +52,8 @@ function TagsList({ onTagClick }: TagsListProps) {
               <span className="project-menu-item-tag-name text-truncate">
                 {tag.name}&nbsp;({tag.project_ids?.length})
               </span>
-            </DropdownItem>
-            <DropdownItem
+            </OLDropdownItem>
+            <OLDropdownItem
               as="button"
               tabIndex={-1}
               className="project-menu-item-edit-btn"
@@ -64,11 +64,11 @@ function TagsList({ onTagClick }: TagsListProps) {
               aria-label={t('edit_tag')}
             >
               <MaterialIcon type="edit" className="align-text-top" />
-            </DropdownItem>
+            </OLDropdownItem>
           </li>
         ))}
         <li role="none">
-          <DropdownItem
+          <OLDropdownItem
             as="button"
             tabIndex={-1}
             onClick={() => selectTag(UNCATEGORIZED_KEY)}
@@ -78,17 +78,20 @@ function TagsList({ onTagClick }: TagsListProps) {
             active={selectedTagId === UNCATEGORIZED_KEY}
           >
             {t('uncategorized')}&nbsp;({untaggedProjectsCount})
-          </DropdownItem>
+          </OLDropdownItem>
         </li>
         <li role="none">
-          <DropdownItem
+          <OLDropdownItem
             as="button"
             tabIndex={-1}
-            onClick={openCreateTagModal}
+            onClick={e => {
+              e.stopPropagation()
+              openCreateTagModal()
+            }}
             leadingIcon="add"
           >
             {t('new_tag')}
-          </DropdownItem>
+          </OLDropdownItem>
         </li>
       </>
       <CreateTagModal id="create-tag-modal-dropdown" disableCustomColor />

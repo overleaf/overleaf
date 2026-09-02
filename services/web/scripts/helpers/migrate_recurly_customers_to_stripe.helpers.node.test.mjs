@@ -35,7 +35,7 @@ import {
   getUkTaxIdType,
   getUzbekistanTaxIdType,
   getTaxIdType,
-  coalesceOrThrowPaymentMethod,
+  matchPaymentMethod,
   normalisedGBVATNumber,
   normalizeComparableString,
   hasAnyAddressValue,
@@ -45,7 +45,8 @@ import {
   addressesEqual,
   resolveCustomerIdentity,
   compareAccountFields,
-  areStripeAndRecurlyCardDetailsEqual,
+  getStripeRecurlyCardMatchType,
+  isCustomerAddressUnrecognized,
 } from './migrate_recurly_customers_to_stripe.helpers.mjs'
 
 test('extractNameFromAccount returns normalized full name when first and last are present', () => {
@@ -295,14 +296,12 @@ test('getTaxIdType pre-validates EU VAT-only countries when enabled', () => {
   assert.equal(validWithPreValidation.reason, null)
 })
 
-test('coalesceOrThrowPaymentMethod throws when payment methods array is empty', () => {
-  assert.throws(
-    () => coalesceOrThrowPaymentMethod([], 'cus_123', {}),
-    /Stripe customer cus_123 has no usable payment method/
-  )
+test('matchPaymentMethod returns null when payment methods array is empty', () => {
+  const result = matchPaymentMethod([], 'cus_123', {})
+  assert.equal(result, null)
 })
 
-test('coalesceOrThrowPaymentMethod throws when no payment methods match billing info', () => {
+test('matchPaymentMethod returns null when no payment methods match billing info', () => {
   const paymentMethods = [
     {
       id: 'pm_1',
@@ -312,13 +311,11 @@ test('coalesceOrThrowPaymentMethod throws when no payment methods match billing 
   const billingInfo = {
     paymentMethod: { lastFour: '5678', expMonth: 12, expYear: 2030 },
   }
-  assert.throws(
-    () => coalesceOrThrowPaymentMethod(paymentMethods, 'cus_123', billingInfo),
-    /Stripe customer cus_123 has no usable payment method/
-  )
+  const result = matchPaymentMethod(paymentMethods, 'cus_123', billingInfo)
+  assert.equal(result, null)
 })
 
-test('coalesceOrThrowPaymentMethod returns matching payment method', () => {
+test('matchPaymentMethod returns matching payment method', () => {
   const paymentMethod = {
     id: 'pm_match',
     type: 'card',
@@ -328,15 +325,69 @@ test('coalesceOrThrowPaymentMethod returns matching payment method', () => {
   const billingInfo = {
     paymentMethod: { lastFour: '1234', expMonth: 12, expYear: 2030 },
   }
-  const result = coalesceOrThrowPaymentMethod(
-    paymentMethods,
-    'cus_123',
-    billingInfo
-  )
+  const result = matchPaymentMethod(paymentMethods, 'cus_123', billingInfo)
   assert.equal(result, paymentMethod)
 })
 
-test('coalesceOrThrowPaymentMethod matches first of multiple matching methods', () => {
+test('matchPaymentMethod accepts a later expiry match', () => {
+  const laterExpiryMethod = {
+    id: 'pm_later',
+    type: 'card',
+    card: { last4: '1234', exp_month: 1, exp_year: 2032 },
+  }
+  const paymentMethods = [laterExpiryMethod]
+  const billingInfo = {
+    paymentMethod: { lastFour: '1234', expMonth: 12, expYear: 2031 },
+  }
+
+  const result = matchPaymentMethod(paymentMethods, 'cus_123', billingInfo)
+
+  assert.equal(result, laterExpiryMethod)
+})
+
+test('matchPaymentMethod accepts an earlier expiry match (last4 only)', () => {
+  const earlierExpiryMethod = {
+    id: 'pm_earlier',
+    type: 'card',
+    card: { last4: '1234', exp_month: 1, exp_year: 2031 },
+  }
+  const paymentMethods = [earlierExpiryMethod]
+  const billingInfo = {
+    paymentMethod: { lastFour: '1234', expMonth: 12, expYear: 2031 },
+  }
+
+  const result = matchPaymentMethod(paymentMethods, 'cus_123', billingInfo)
+
+  assert.equal(result, earlierExpiryMethod)
+})
+
+test('matchPaymentMethod selects latest expiry among last4 matches', () => {
+  const exactMatch = {
+    id: 'pm_exact',
+    type: 'card',
+    card: { last4: '1234', exp_month: 12, exp_year: 2031 },
+  }
+  const laterMatch = {
+    id: 'pm_later',
+    type: 'card',
+    card: { last4: '1234', exp_month: 1, exp_year: 2032 },
+  }
+  const latestLaterMatch = {
+    id: 'pm_latest',
+    type: 'card',
+    card: { last4: '1234', exp_month: 7, exp_year: 2033 },
+  }
+  const paymentMethods = [exactMatch, laterMatch, latestLaterMatch]
+  const billingInfo = {
+    paymentMethod: { lastFour: '1234', expMonth: 12, expYear: 2031 },
+  }
+
+  const result = matchPaymentMethod(paymentMethods, 'cus_123', billingInfo)
+
+  assert.equal(result, latestLaterMatch)
+})
+
+test('matchPaymentMethod matches first of multiple matching methods', () => {
   const paymentMethod1 = {
     id: 'pm_1',
     type: 'card',
@@ -351,15 +402,11 @@ test('coalesceOrThrowPaymentMethod matches first of multiple matching methods', 
   const billingInfo = {
     paymentMethod: { lastFour: '1234', expMonth: 12, expYear: 2030 },
   }
-  const result = coalesceOrThrowPaymentMethod(
-    paymentMethods,
-    'cus_123',
-    billingInfo
-  )
+  const result = matchPaymentMethod(paymentMethods, 'cus_123', billingInfo)
   assert.equal(result, paymentMethod1)
 })
 
-test('coalesceOrThrowPaymentMethod filters out non-matching methods', () => {
+test('matchPaymentMethod filters out non-matching methods', () => {
   const matchingMethod = {
     id: 'pm_match',
     type: 'card',
@@ -374,28 +421,22 @@ test('coalesceOrThrowPaymentMethod filters out non-matching methods', () => {
   const billingInfo = {
     paymentMethod: { lastFour: '1234', expMonth: 12, expYear: 2030 },
   }
-  const result = coalesceOrThrowPaymentMethod(
-    paymentMethods,
-    'cus_123',
-    billingInfo
-  )
+  const result = matchPaymentMethod(paymentMethods, 'cus_123', billingInfo)
   assert.equal(result, matchingMethod)
 })
 
-test('coalesceOrThrowPaymentMethod handles null billingInfo', () => {
+test('matchPaymentMethod returns null for null billingInfo', () => {
   const paymentMethods = [
     {
       id: 'pm_1',
       card: { last4: '1234', exp_month: 12, exp_year: 2030 },
     },
   ]
-  assert.throws(
-    () => coalesceOrThrowPaymentMethod(paymentMethods, 'cus_123', null),
-    /Stripe customer cus_123 has no usable payment method/
-  )
+  const result = matchPaymentMethod(paymentMethods, 'cus_123', null)
+  assert.equal(result, null)
 })
 
-test('coalesceOrThrowPaymentMethod handles missing paymentMethod in billingInfo', () => {
+test('matchPaymentMethod returns null for missing paymentMethod in billingInfo', () => {
   const paymentMethods = [
     {
       id: 'pm_1',
@@ -403,13 +444,11 @@ test('coalesceOrThrowPaymentMethod handles missing paymentMethod in billingInfo'
     },
   ]
   const billingInfo = {}
-  assert.throws(
-    () => coalesceOrThrowPaymentMethod(paymentMethods, 'cus_123', billingInfo),
-    /Stripe customer cus_123 has no usable payment method/
-  )
+  const result = matchPaymentMethod(paymentMethods, 'cus_123', billingInfo)
+  assert.equal(result, null)
 })
 
-test('coalesceOrThrowPaymentMethod handles missing card in payment method', () => {
+test('matchPaymentMethod handles missing card in payment method', () => {
   const paymentMethods = [
     { id: 'pm_1' }, // no card property
     {
@@ -421,11 +460,7 @@ test('coalesceOrThrowPaymentMethod handles missing card in payment method', () =
   const billingInfo = {
     paymentMethod: { lastFour: '1234', expMonth: 12, expYear: 2030 },
   }
-  const result = coalesceOrThrowPaymentMethod(
-    paymentMethods,
-    'cus_123',
-    billingInfo
-  )
+  const result = matchPaymentMethod(paymentMethods, 'cus_123', billingInfo)
   assert.equal(result.id, 'pm_2')
 })
 
@@ -649,48 +684,46 @@ test('addressesEqual normalizes whitespace', () => {
   assert.equal(addressesEqual(a, b), true)
 })
 
-test('areStripeAndRecurlyCardDetailsEqual returns false for null inputs', () => {
-  assert.equal(areStripeAndRecurlyCardDetailsEqual(null, null), false)
+test('getStripeRecurlyCardMatchType returns none for null inputs', () => {
+  assert.equal(getStripeRecurlyCardMatchType(null, null), 'none')
   assert.equal(
-    areStripeAndRecurlyCardDetailsEqual(null, { lastFour: '1234' }),
-    false
+    getStripeRecurlyCardMatchType(null, { lastFour: '1234' }),
+    'none'
   )
   assert.equal(
-    areStripeAndRecurlyCardDetailsEqual(
+    getStripeRecurlyCardMatchType(
       { type: 'card', card: { last4: '1234', exp_month: 12, exp_year: 2030 } },
       null
     ),
-    false
+    'none'
   )
 })
 
-test('areStripeAndRecurlyCardDetailsEqual returns false for non-card type', () => {
+test('getStripeRecurlyCardMatchType returns none for non-card type', () => {
   assert.equal(
-    areStripeAndRecurlyCardDetailsEqual(
-      { type: 'paypal' },
-      { lastFour: '1234' }
-    ),
-    false
+    getStripeRecurlyCardMatchType({ type: 'paypal' }, { lastFour: '1234' }),
+    'none'
   )
 })
 
-test('areStripeAndRecurlyCardDetailsEqual returns true for matching cards', () => {
-  assert.equal(
-    areStripeAndRecurlyCardDetailsEqual(
-      { type: 'card', card: { last4: '4242', exp_month: 6, exp_year: 2025 } },
-      { lastFour: '4242', expMonth: 6, expYear: 2025 }
+test('getStripeRecurlyCardMatchType matches on last4 regardless of expiry', () => {
+  // Same last4 but a different (earlier) expiry still counts as a match.
+  assert.notEqual(
+    getStripeRecurlyCardMatchType(
+      { type: 'card', card: { last4: '4242', exp_month: 6, exp_year: 2030 } },
+      { lastFour: '4242', expMonth: 6, expYear: 2031 }
     ),
-    true
+    'none'
   )
 })
 
-test('areStripeAndRecurlyCardDetailsEqual returns false for mismatched last4', () => {
+test('getStripeRecurlyCardMatchType returns none for mismatched last4', () => {
   assert.equal(
-    areStripeAndRecurlyCardDetailsEqual(
-      { type: 'card', card: { last4: '4242', exp_month: 6, exp_year: 2025 } },
-      { lastFour: '1111', expMonth: 6, expYear: 2025 }
+    getStripeRecurlyCardMatchType(
+      { type: 'card', card: { last4: '4242', exp_month: 6, exp_year: 2030 } },
+      { lastFour: '1111', expMonth: 6, expYear: 2030 }
     ),
-    false
+    'none'
   )
 })
 
@@ -992,6 +1025,154 @@ test('compareAccountFields handles no payment methods on either side without cra
   assert.equal(diffs.default_payment_method, undefined)
 })
 
+test('compareAccountFields suppresses default payment method drift when paymentMethodPending is true', async () => {
+  const account = {
+    email: 'user@example.com',
+    customFields: [],
+    billingInfo: {
+      paymentMethod: {
+        type: 'visa',
+        lastFour: '4242',
+        expMonth: 12,
+        expYear: 2030,
+      },
+      updatedAt: new Date('2026-01-02T00:00:00.000Z'),
+    },
+  }
+
+  const stripeCustomer = {
+    email: 'user@example.com',
+    metadata: {
+      recurlyAccountCode: '',
+      userId: 'user123',
+      taxInfoPending: '',
+    },
+    tax_exempt: 'none',
+    invoice_settings: {
+      default_payment_method: {
+        type: 'card',
+        created: 1704067200,
+        card: {
+          last4: '1111',
+          exp_month: 12,
+          exp_year: 2030,
+        },
+      },
+    },
+  }
+
+  const diffs = await compareAccountFields({
+    account,
+    stripeCustomer,
+    overleafUserId: 'user123',
+    fetchCollectionMethod: async () => null,
+    stripePaymentMethods: [{ id: 'pm_any', type: 'card', card: {} }],
+    stripeServiceName: 'stripe-uk',
+    isPaymentMethodPending: true,
+  })
+
+  assert.equal(diffs.default_payment_method, undefined)
+})
+
+test('compareAccountFields does not flag card drift when only the expiry differs (last4 matches)', async () => {
+  const account = {
+    email: 'user@example.com',
+    customFields: [],
+    billingInfo: {
+      paymentMethod: {
+        type: 'visa',
+        lastFour: '4242',
+        expMonth: 12,
+        expYear: 2031,
+      },
+      // Recurly billing info updated more recently than the Stripe card.
+      updatedAt: new Date('2026-01-02T00:00:00.000Z'),
+    },
+  }
+
+  const stripeCustomer = {
+    email: 'user@example.com',
+    metadata: {
+      recurlyAccountCode: '',
+      userId: 'user123',
+      taxInfoPending: '',
+    },
+    tax_exempt: 'none',
+    invoice_settings: {
+      default_payment_method: {
+        type: 'card',
+        created: 1704067200, // 2024-01-01, older than Recurly updatedAt
+        card: {
+          last4: '4242',
+          exp_month: 6,
+          exp_year: 2030,
+        },
+      },
+    },
+  }
+
+  const diffs = await compareAccountFields({
+    account,
+    stripeCustomer,
+    overleafUserId: 'user123',
+    fetchCollectionMethod: async () => null,
+    stripePaymentMethods: [{ id: 'pm_any', type: 'card', card: {} }],
+    stripeServiceName: 'stripe-uk',
+  })
+
+  assert.equal(diffs.default_payment_method, undefined)
+})
+
+test('compareAccountFields flags card drift when last4 differs, regardless of timing', async () => {
+  const account = {
+    email: 'user@example.com',
+    customFields: [],
+    billingInfo: {
+      paymentMethod: {
+        type: 'visa',
+        lastFour: '4242',
+        expMonth: 12,
+        expYear: 2031,
+      },
+      // Recurly billing info is OLDER than the Stripe card here, to show the
+      // drift no longer depends on which side was updated more recently.
+      updatedAt: new Date('2023-01-01T00:00:00.000Z'),
+    },
+  }
+
+  const stripeCustomer = {
+    email: 'user@example.com',
+    metadata: {
+      recurlyAccountCode: '',
+      userId: 'user123',
+      taxInfoPending: '',
+    },
+    tax_exempt: 'none',
+    invoice_settings: {
+      default_payment_method: {
+        type: 'card',
+        created: 1704067200, // 2024-01-01, newer than Recurly updatedAt
+        card: {
+          last4: '1111',
+          exp_month: 12,
+          exp_year: 2031,
+        },
+      },
+    },
+  }
+
+  const diffs = await compareAccountFields({
+    account,
+    stripeCustomer,
+    overleafUserId: 'user123',
+    fetchCollectionMethod: async () => null,
+    stripePaymentMethods: [{ id: 'pm_any', type: 'card', card: {} }],
+    stripeServiceName: 'stripe-uk',
+  })
+
+  assert.ok(diffs.default_payment_method)
+})
+
 test('compareAccountFields detects metadata drift', async () => {
   const account = {
     email: 'user@example.com',
@@ -1145,4 +1326,31 @@ test('compareAccountFields reports no diff when both are PayPal and Recurly is n
   })
 
   assert.equal(diffs.default_payment_method, undefined)
+})
+
+test('isCustomerAddressUnrecognized is true when tax location is unrecognized', () => {
+  assert.equal(
+    isCustomerAddressUnrecognized({
+      tax: { automatic_tax: 'unrecognized_location' },
+    }),
+    true
+  )
+})
+
+test('isCustomerAddressUnrecognized is false for a supported location', () => {
+  assert.equal(
+    isCustomerAddressUnrecognized({ tax: { automatic_tax: 'supported' } }),
+    false
+  )
+  assert.equal(
+    isCustomerAddressUnrecognized({ tax: { automatic_tax: 'not_collecting' } }),
+    false
+  )
+})
+
+test('isCustomerAddressUnrecognized is false when tax is missing or customer is nullish', () => {
+  assert.equal(isCustomerAddressUnrecognized({}), false)
+  assert.equal(isCustomerAddressUnrecognized({ tax: {} }), false)
+  assert.equal(isCustomerAddressUnrecognized(null), false)
+  assert.equal(isCustomerAddressUnrecognized(undefined), false)
 })

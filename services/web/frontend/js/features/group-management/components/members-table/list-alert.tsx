@@ -1,7 +1,7 @@
 import { Trans } from 'react-i18next'
 import type { GroupUserAlertVariant } from '../../utils/types'
 import NotificationScrolledTo from '@/shared/components/notification-scrolled-to'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 
 type GroupUsersListAlertProps = {
   variant: GroupUserAlertVariant
@@ -85,25 +85,27 @@ function ResendManagedUserInviteSuccess({
   userEmail,
 }: GroupUsersListAlertComponentProps) {
   return (
-    <OLNotification
-      type="success"
-      content={
-        <Trans
-          i18nKey="managed_user_invite_has_been_sent_to_email"
-          values={{
-            email: userEmail,
-          }}
-          shouldUnescape
-          tOptions={{ interpolation: { escapeValue: true } }}
-          components={[
-            // eslint-disable-next-line react/jsx-key
-            <strong />,
-          ]}
-        />
-      }
-      isDismissible
-      onDismiss={onDismiss}
-    />
+    <div className="notification-list">
+      <Notification
+        type="success"
+        content={
+          <Trans
+            i18nKey="managed_user_invite_has_been_sent_to_email"
+            values={{
+              email: userEmail,
+            }}
+            shouldUnescape
+            tOptions={{ interpolation: { escapeValue: true } }}
+            components={[
+              // eslint-disable-next-line react/jsx-key
+              <strong />,
+            ]}
+          />
+        }
+        isDismissible
+        onDismiss={onDismiss}
+      />
+    </div>
   )
 }
 
@@ -112,25 +114,27 @@ function ResendSSOLinkInviteSuccess({
   userEmail,
 }: GroupUsersListAlertComponentProps) {
   return (
-    <OLNotification
-      type="success"
-      content={
-        <Trans
-          i18nKey="sso_link_invite_has_been_sent_to_email"
-          values={{
-            email: userEmail,
-          }}
-          shouldUnescape
-          tOptions={{ interpolation: { escapeValue: true } }}
-          components={[
-            // eslint-disable-next-line react/jsx-key
-            <strong />,
-          ]}
-        />
-      }
-      isDismissible
-      onDismiss={onDismiss}
-    />
+    <div className="notification-list">
+      <Notification
+        type="success"
+        content={
+          <Trans
+            i18nKey="sso_link_invite_has_been_sent_to_email"
+            values={{
+              email: userEmail,
+            }}
+            shouldUnescape
+            tOptions={{ interpolation: { escapeValue: true } }}
+            components={[
+              // eslint-disable-next-line react/jsx-key
+              <strong />,
+            ]}
+          />
+        }
+        isDismissible
+        onDismiss={onDismiss}
+      />
+    </div>
   )
 }
 
@@ -139,25 +143,27 @@ function FailedToResendManagedInvite({
   userEmail,
 }: GroupUsersListAlertComponentProps) {
   return (
-    <OLNotification
-      type="error"
-      content={
-        <Trans
-          i18nKey="failed_to_send_managed_user_invite_to_email"
-          values={{
-            email: userEmail,
-          }}
-          shouldUnescape
-          tOptions={{ interpolation: { escapeValue: true } }}
-          components={[
-            // eslint-disable-next-line react/jsx-key
-            <strong />,
-          ]}
-        />
-      }
-      isDismissible
-      onDismiss={onDismiss}
-    />
+    <div className="notification-list">
+      <Notification
+        type="error"
+        content={
+          <Trans
+            i18nKey="failed_to_send_managed_user_invite_to_email"
+            values={{
+              email: userEmail,
+            }}
+            shouldUnescape
+            tOptions={{ interpolation: { escapeValue: true } }}
+            components={[
+              // eslint-disable-next-line react/jsx-key
+              <strong />,
+            ]}
+          />
+        }
+        isDismissible
+        onDismiss={onDismiss}
+      />
+    </div>
   )
 }
 function FailedToResendSSOLink({
@@ -165,25 +171,27 @@ function FailedToResendSSOLink({
   userEmail,
 }: GroupUsersListAlertComponentProps) {
   return (
-    <OLNotification
-      type="error"
-      content={
-        <Trans
-          i18nKey="failed_to_send_sso_link_invite_to_email"
-          values={{
-            email: userEmail,
-          }}
-          shouldUnescape
-          tOptions={{ interpolation: { escapeValue: true } }}
-          components={[
-            // eslint-disable-next-line react/jsx-key
-            <strong />,
-          ]}
-        />
-      }
-      isDismissible
-      onDismiss={onDismiss}
-    />
+    <div className="notification-list">
+      <Notification
+        type="error"
+        content={
+          <Trans
+            i18nKey="failed_to_send_sso_link_invite_to_email"
+            values={{
+              email: userEmail,
+            }}
+            shouldUnescape
+            tOptions={{ interpolation: { escapeValue: true } }}
+            components={[
+              // eslint-disable-next-line react/jsx-key
+              <strong />,
+            ]}
+          />
+        }
+        isDismissible
+        onDismiss={onDismiss}
+      />
+    </div>
   )
 }
 
@@ -192,25 +200,27 @@ function ResendGroupInviteSuccess({
   userEmail,
 }: GroupUsersListAlertComponentProps) {
   return (
-    <OLNotification
-      type="success"
-      content={
-        <Trans
-          i18nKey="group_invite_has_been_sent_to_email"
-          values={{
-            email: userEmail,
-          }}
-          shouldUnescape
-          tOptions={{ interpolation: { escapeValue: true } }}
-          components={[
-            // eslint-disable-next-line react/jsx-key
-            <strong />,
-          ]}
-        />
-      }
-      isDismissible
-      onDismiss={onDismiss}
-    />
+    <div className="notification-list">
+      <Notification
+        type="success"
+        content={
+          <Trans
+            i18nKey="group_invite_has_been_sent_to_email"
+            values={{
+              email: userEmail,
+            }}
+            shouldUnescape
+            tOptions={{ interpolation: { escapeValue: true } }}
+            components={[
+              // eslint-disable-next-line react/jsx-key
+              <strong />,
+            ]}
+          />
+        }
+        isDismissible
+        onDismiss={onDismiss}
+      />
+    </div>
   )
 }
 
@@ -219,25 +229,27 @@ function FailedToResendGroupInvite({
   userEmail,
 }: GroupUsersListAlertComponentProps) {
   return (
-    <OLNotification
-      type="error"
-      content={
-        <Trans
-          i18nKey="failed_to_send_group_invite_to_email"
-          values={{
-            email: userEmail,
-          }}
-          shouldUnescape
-          tOptions={{ interpolation: { escapeValue: true } }}
-          components={[
-            // eslint-disable-next-line react/jsx-key
-            <strong />,
-          ]}
-        />
-      }
-      isDismissible
-      onDismiss={onDismiss}
-    />
+    <div className="notification-list">
+      <Notification
+        type="error"
+        content={
+          <Trans
+            i18nKey="failed_to_send_group_invite_to_email"
+            values={{
+              email: userEmail,
+            }}
+            shouldUnescape
+            tOptions={{ interpolation: { escapeValue: true } }}
+            components={[
+              // eslint-disable-next-line react/jsx-key
+              <strong />,
+            ]}
+          />
+        }
+        isDismissible
+        onDismiss={onDismiss}
+      />
+    </div>
   )
 }
 
@@ -246,24 +258,26 @@ function TooManyRequests({
   userEmail,
 }: GroupUsersListAlertComponentProps) {
   return (
-    <OLNotification
-      type="error"
-      content={
-        <Trans
-          i18nKey="an_email_has_already_been_sent_to"
-          values={{
-            email: userEmail,
-          }}
-          shouldUnescape
-          tOptions={{ interpolation: { escapeValue: true } }}
-          components={[
-            // eslint-disable-next-line react/jsx-key
-            <strong />,
-          ]}
-        />
-      }
-      isDismissible
-      onDismiss={onDismiss}
-    />
+    <div className="notification-list">
+      <Notification
+        type="error"
+        content={
+          <Trans
+            i18nKey="an_email_has_already_been_sent_to"
+            values={{
+              email: userEmail,
+            }}
+            shouldUnescape
+            tOptions={{ interpolation: { escapeValue: true } }}
+            components={[
+              // eslint-disable-next-line react/jsx-key
+              <strong />,
+            ]}
+          />
+        }
+        isDismissible
+        onDismiss={onDismiss}
+      />
+    </div>
   )
 }

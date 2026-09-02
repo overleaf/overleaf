@@ -1,4 +1,4 @@
-import { vi, expect } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
 const modulePath = '../../../../app/src/Features/Project/ProjectGetter.mjs'
@@ -317,54 +317,8 @@ describe('ProjectGetter', function () {
     })
   })
 
-  describe('findUsersProjectsByName', function () {
-    it('should perform a case-insensitive search', async function (ctx) {
-      ctx.project1 = { _id: 1, name: 'find me!' }
-      ctx.project2 = { _id: 2, name: 'not me!' }
-      ctx.project3 = { _id: 3, name: 'FIND ME!' }
-      ctx.project4 = { _id: 4, name: 'Find Me!' }
-      ctx.Project.find.withArgs({ owner_ref: ctx.userId }).returns({
-        exec: sinon
-          .stub()
-          .resolves([ctx.project1, ctx.project2, ctx.project3, ctx.project4]),
-      })
-      const projects = await ctx.ProjectGetter.promises.findUsersProjectsByName(
-        ctx.userId,
-        ctx.project1.name
-      )
-      const projectNames = projects.map(project => project.name)
-      expect(projectNames).to.have.members([
-        ctx.project1.name,
-        ctx.project3.name,
-        ctx.project4.name,
-      ])
-    })
-
-    it('should search collaborations as well', async function (ctx) {
-      ctx.project1 = { _id: 1, name: 'find me!' }
-      ctx.project2 = { _id: 2, name: 'FIND ME!' }
-      ctx.project3 = { _id: 3, name: 'Find Me!' }
-      ctx.project4 = { _id: 4, name: 'find ME!' }
-      ctx.project5 = { _id: 5, name: 'FIND me!' }
-      ctx.Project.find
-        .withArgs({ owner_ref: ctx.userId })
-        .returns({ exec: sinon.stub().resolves([ctx.project1]) })
-      ctx.CollaboratorsGetter.promises.getProjectsUserIsMemberOf.resolves({
-        readAndWrite: [ctx.project2],
-        readOnly: [ctx.project3],
-        tokenReadAndWrite: [ctx.project4],
-        tokenReadOnly: [ctx.project5],
-      })
-      const projects = await ctx.ProjectGetter.promises.findUsersProjectsByName(
-        ctx.userId,
-        ctx.project1.name
-      )
-      expect(projects.map(project => project.name)).to.have.members([
-        ctx.project1.name,
-        ctx.project2.name,
-      ])
-    })
-  })
+  // findUsersProjectsByName is covered by the TpdsUpdateTests acceptance
+  // tests ("resolving a project by name").
 
   describe('getUsersDeletedProjects', function () {
     it('should look up the deleted projects by deletedProjectOwnerId', async function (ctx) {

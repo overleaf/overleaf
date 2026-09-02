@@ -58,11 +58,23 @@ async function getSharingLinkInvite(projectId) {
   return invite
 }
 
+async function getUsableAnonymousSharingLinkInvite(projectId, tokenString) {
+  const invite = await ProjectInvite.findOne({
+    projectId,
+    reusable: true,
+    tokenHmac: CollaboratorsInviteHelper.hashInviteToken(tokenString),
+    subscriptionId: null,
+    privileges: { $ne: PrivilegeLevels.NONE },
+  }).exec()
+  return invite
+}
+
 export default {
   promises: {
     getAllInvites,
     getEditInviteCount,
     getInviteByToken,
     getSharingLinkInvite,
+    getUsableAnonymousSharingLinkInvite,
   },
 }

@@ -29,7 +29,7 @@ export const scrollPosition = (
   }: {
     currentDoc: { doc_id: string }
   },
-  { visual }: { visual: boolean }
+  visual: boolean
 ) => {
   // store lineInfo for use on unload, when the DOM has already been unmounted
   let lineInfo: LineInfo
@@ -51,13 +51,15 @@ export const scrollPosition = (
     // store/dispatch scroll position
     ViewPlugin.define(
       view => {
-        const unloadListener = () => {
-          if (lineInfo) {
-            storeScrollPosition(lineInfo, view, docId)
+        const handleVisibilityChange = () => {
+          if (document.visibilityState === 'hidden') {
+            if (lineInfo) {
+              storeScrollPosition(lineInfo, view, docId)
+            }
           }
         }
 
-        window.addEventListener('unload', unloadListener)
+        document.addEventListener('visibilitychange', handleVisibilityChange)
 
         return {
           update: (update: ViewUpdate) => {
@@ -82,8 +84,13 @@ export const scrollPosition = (
           },
           destroy: () => {
             scrollHandler.cancel()
-            window.removeEventListener('unload', unloadListener)
-            unloadListener()
+            document.removeEventListener(
+              'visibilitychange',
+              handleVisibilityChange
+            )
+            if (lineInfo) {
+              storeScrollPosition(lineInfo, view, docId)
+            }
           },
         }
       },

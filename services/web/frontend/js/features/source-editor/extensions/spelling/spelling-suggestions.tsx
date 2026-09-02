@@ -16,11 +16,11 @@ import { captureException } from '@/infrastructure/error-reporter'
 import { debugConsole } from '@/utils/debugging'
 import { SpellCheckLanguage } from '../../../../../../types/project-settings'
 import {
-  Dropdown,
-  DropdownDivider,
-  DropdownItem,
-  DropdownMenu,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownDivider,
+  OLDropdownItem,
+  OLDropdownMenu,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import DropdownListItem from '@/shared/components/dropdown/dropdown-list-item'
 
 const ITEMS_TO_SHOW = 8
@@ -124,8 +124,8 @@ const B5SpellingSuggestions: FC<SpellingSuggestionsInnerProps> = ({
   }, [waiting])
 
   return (
-    <Dropdown onToggle={onToggle} show={!waiting}>
-      <DropdownMenu
+    <OLDropdown onToggle={onToggle} show={!waiting}>
+      <OLDropdownMenu
         className={classnames('dropdown-menu-unpositioned', {
           hidden: waiting,
         })}
@@ -133,7 +133,7 @@ const B5SpellingSuggestions: FC<SpellingSuggestionsInnerProps> = ({
         show={!waiting}
         tabIndex={0}
         onKeyDown={event => {
-          switch (event.code) {
+          switch (event.key) {
             case 'Escape':
             case 'Tab':
               event.preventDefault()
@@ -153,7 +153,7 @@ const B5SpellingSuggestions: FC<SpellingSuggestionsInnerProps> = ({
               }}
             />
           ))}
-        {suggestions?.length > 0 && <DropdownDivider />}
+        {suggestions?.length > 0 && <OLDropdownDivider />}
         <SpellingListItem
           content={t('add_to_dictionary')}
           handleClick={event => {
@@ -162,13 +162,13 @@ const B5SpellingSuggestions: FC<SpellingSuggestionsInnerProps> = ({
           }}
         />
 
-        <DropdownDivider />
+        <OLDropdownDivider />
         <SpellingSuggestionsLanguage
           language={language}
           handleClose={handleClose}
         />
-      </DropdownMenu>
-    </Dropdown>
+      </OLDropdownMenu>
+    </OLDropdown>
   )
 }
 
@@ -177,6 +177,6 @@ const SpellingListItem: FC<{
   handleClick: MouseEventHandler<HTMLButtonElement>
 }> = ({ content, handleClick }) => (
   <DropdownListItem>
-    <DropdownItem onClick={handleClick}>{content}</DropdownItem>
+    <OLDropdownItem onClick={handleClick}>{content}</OLDropdownItem>
   </DropdownListItem>
 )

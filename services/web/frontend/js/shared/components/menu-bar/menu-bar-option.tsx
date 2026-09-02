@@ -1,5 +1,5 @@
 import DropdownListItem from '@/shared/components/dropdown/dropdown-list-item'
-import { DropdownItem } from '@/shared/components/dropdown/dropdown-menu'
+import { OLDropdownItem } from '@/shared/components/ol/ol-dropdown-menu'
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 import { useNestableDropdown } from '@/shared/hooks/use-nestable-dropdown'
 import { MouseEventHandler, ReactNode, useCallback } from 'react'
@@ -40,7 +40,7 @@ export const MenuBarOption = ({
   )
   return (
     <DropdownListItem>
-      <DropdownItem
+      <OLDropdownItem
         onMouseEnter={() => setSelected(null)}
         onClick={onClick}
         disabled={disabled}
@@ -51,7 +51,7 @@ export const MenuBarOption = ({
         target={target}
       >
         {title}
-      </DropdownItem>
+      </OLDropdownItem>
     </DropdownListItem>
   )
 }

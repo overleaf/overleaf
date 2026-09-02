@@ -3,6 +3,7 @@ const webpack = require('webpack')
 const { merge } = require('webpack-merge')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin')
+const serveBuiltAssets = require('./webpack-plugins/serve-built-assets')
 
 const base = require('./webpack.config')
 
@@ -44,14 +45,39 @@ module.exports = merge(base, {
   module: {
     rules: [
       {
-        test: /\.(woff|woff2)$/,
+        test: /\.wasm$/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'js/[name][ext]',
+        },
+      },
+      {
+        // ONNX Runtime model files (symbol-recognition)
+        test: /\.ort$/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'js/[name][ext]',
+        },
+      },
+      {
+        // The reduced onnxruntime-web wasm glue (symbol-recognition)
+        test: /ort-wasm-simd-threaded\.mjs$/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'js/[name][ext]',
+        },
+      },
+      {
+        // Load fonts
+        test: /\.(woff2?|ttf|otf)$/,
         type: 'asset/resource',
         generator: {
           filename: 'fonts/[name][ext]',
         },
       },
       {
-        test: /\.(svg|gif|png|jpg|pdf)$/,
+        // Load images and videos (static files)
+        test: /\.(svg|gif|png|jpg|pdf|mp4)$/,
         type: 'asset/resource',
         generator: {
           filename: 'images/[name][ext]',
@@ -92,9 +118,21 @@ module.exports = merge(base, {
       overlay: process.env.DISABLE_WEBPACK_OVERLAY !== 'true',
     },
     hot: true,
-    allowedHosts: '.dev-overleaf.com',
+    allowedHosts: ['.dev-overleaf.com', 'localhost'],
+    // Strong validators, so a browser that already has a chunk revalidates
+    // instead of refetching it. The dev config serves unhashed filenames, so a
+    // rebuild reuses the URL and changes the content - which is exactly what a
+    // validator handles and max-age cannot.
+    devMiddleware: { etag: 'strong', lastModified: true },
     setupMiddlewares(middlewares, devServer) {
       devServer.app.get('/status', (req, res) => res.send('webpack is up'))
+      // Ahead of webpack-dev-middleware, so a repeat request for an unchanged
+      // asset is answered from a prepared buffer instead of being read out of
+      // the in-memory filesystem and re-hashed for its ETag every time.
+      middlewares.unshift({
+        name: 'serve-built-assets',
+        middleware: serveBuiltAssets(devServer),
+      })
       return middlewares
     },
     compress: false,

@@ -5,11 +5,12 @@ import {
 } from '@/features/ide-react/context/tabs-context'
 import { Tab } from './tab'
 import { TabsContextMenu } from './tabs-context-menu'
-import SplitTestBadge from '@/shared/components/split-test-badge'
 import { useCallback, useMemo, useState } from 'react'
 import { throttle } from 'lodash'
 import { debugConsole } from '@/utils/debugging'
 import classNames from 'classnames'
+import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provider'
+import { useTranslation } from 'react-i18next'
 
 export const TabsContainer = () => {
   const {
@@ -20,9 +21,11 @@ export const TabsContainer = () => {
     makeTabPermanent,
     setContextMenuTarget,
     setHeaderSlot,
+    closeOtherTabs,
   } = useTabsContext()
   const { openEntity } = useFileTreeOpenContext()
   const [hovered, setHovered] = useState<boolean>(false)
+  const { t } = useTranslation()
 
   const openContextMenu = useCallback(
     (coords: { top: number; left: number }, tabId: string) => {
@@ -86,6 +89,32 @@ export const TabsContainer = () => {
     }
   }, [])
 
+  useCommandProvider(() => {
+    if (tabs.length === 0) {
+      return
+    }
+    if (!openEntity?.entity._id) {
+      return
+    }
+
+    return [
+      {
+        id: 'close-tab',
+        label: t('close_tab'),
+        handler: () => {
+          closeTab(openEntity.entity._id)
+        },
+      },
+      {
+        id: 'close-other-tabs',
+        label: t('close_other_tabs'),
+        handler: () => {
+          closeOtherTabs(openEntity.entity._id)
+        },
+      },
+    ]
+  }, [tabs, t, openEntity, closeTab, closeOtherTabs])
+
   return (
     <div className="editor-tabs-container">
       <div className="review-panel-header-slot" ref={setHeaderSlot} />
@@ -114,12 +143,6 @@ export const TabsContainer = () => {
             closeContextMenu={closeContextMenu}
           />
         ))}
-      </div>
-      <div className="editor-tabs-labs-icon">
-        <SplitTestBadge
-          splitTestName="editor-tabs"
-          displayOnVariants={['enabled']}
-        />
       </div>
       <TabsContextMenu />
     </div>

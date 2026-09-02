@@ -1,4 +1,4 @@
-import { expect } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 const modulePath = '../../../../app/src/Features/Project/UserSettingsHelper.mjs'
 
 describe('UserSettingsHelper', function () {
@@ -54,6 +54,45 @@ describe('UserSettingsHelper', function () {
       )
 
       expect(settings.overallTheme).toBe('')
+    })
+  })
+
+  describe('reference provider settings', function () {
+    it('should drop the _id from group entries', async function (ctx) {
+      const user = {
+        ace: {
+          zotero: {
+            enabled: true,
+            disablePersonalLibrary: false,
+            groups: [{ _id: 'abc123', id: '123' }],
+          },
+        },
+        signUpDate: new Date('2022-01-01'),
+      }
+
+      const settings = await ctx.UserSettingsHelper.buildUserSettings(
+        ctx.req,
+        ctx.res,
+        user
+      )
+
+      expect(settings.zotero).toEqual({
+        enabled: true,
+        disablePersonalLibrary: false,
+        groups: [{ id: '123' }],
+      })
+    })
+
+    it('should leave unset providers undefined', async function (ctx) {
+      const user = { ace: {}, signUpDate: new Date('2022-01-01') }
+
+      const settings = await ctx.UserSettingsHelper.buildUserSettings(
+        ctx.req,
+        ctx.res,
+        user
+      )
+
+      expect(settings.zotero).toBeUndefined()
     })
   })
 })

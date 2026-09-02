@@ -7,6 +7,7 @@ import moment from 'moment'
 import { fetchJson } from '@overleaf/fetch-utils'
 import contentDisposition from 'content-disposition'
 import Features from './Features.mjs'
+import { getRawReqInput } from './Validation.mjs'
 import SessionManager from '../Features/Authentication/SessionManager.mjs'
 import PackageVersions from './PackageVersions.js'
 import Modules from './Modules.mjs'
@@ -256,8 +257,10 @@ export default async function (webRouter, privateApiRouter, publicApiRouter) {
   })
 
   webRouter.use(function (req, res, next) {
+    // template locals helper predates validation; raw access is allowlisted
+    const { query } = getRawReqInput(req)
     res.locals.getReqQueryParam = field =>
-      req.query != null ? req.query[field] : undefined
+      query != null ? query[field] : undefined
     next()
   })
 
@@ -333,7 +336,8 @@ export default async function (webRouter, privateApiRouter, publicApiRouter) {
   })
 
   webRouter.use(function (req, res, next) {
-    res.locals.websiteRedesignOverride = req.query.redesign === 'enabled'
+    res.locals.websiteRedesignOverride =
+      getRawReqInput(req).query.redesign === 'enabled'
     next()
   })
 
@@ -366,6 +370,7 @@ export default async function (webRouter, privateApiRouter, publicApiRouter) {
   webRouter.use(function (req, res, next) {
     res.locals.ExposedSettings = {
       isOverleaf: Settings.overleaf != null,
+      env: Settings.env,
       appName: Settings.appName,
       adminEmail: Settings.adminEmail,
       dropboxAppName:
@@ -387,6 +392,7 @@ export default async function (webRouter, privateApiRouter, publicApiRouter) {
       projectUploadTimeout: Settings.projectUploadTimeout,
       recaptchaSiteKey: Settings.recaptcha?.siteKey,
       recaptchaSiteKeyV3: Settings.recaptcha?.siteKeyV3,
+      recaptchaEnterpriseSiteKey: Settings.recaptcha?.enterpriseSiteKey,
       recaptchaDisabled: Settings.recaptcha?.disabled,
       textExtensions: Settings.textExtensions,
       editableFilenames: Settings.editableFilenames,

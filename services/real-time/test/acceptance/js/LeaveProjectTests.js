@@ -129,17 +129,6 @@ describe('leaveProject', function () {
       })
       return null
     })
-
-    return it('should remain subscribed to the applied-ops channels', function (done) {
-      rclient.pubsub('CHANNELS', (err, resp) => {
-        if (err) {
-          return done(err)
-        }
-        resp.should.include(`applied-ops:${this.doc_id}`)
-        return done()
-      })
-      return null
-    })
   })
 
   return describe('with no other clients in the project', function () {
@@ -215,17 +204,6 @@ describe('leaveProject', function () {
           return done(err)
         }
         resp.should.not.include(`editor-events:${this.project_id}`)
-        return done()
-      })
-      return null
-    })
-
-    return it('should not subscribe to the applied-ops channels anymore', function (done) {
-      rclient.pubsub('CHANNELS', (err, resp) => {
-        if (err) {
-          return done(err)
-        }
-        resp.should.not.include(`applied-ops:${this.doc_id}`)
         return done()
       })
       return null

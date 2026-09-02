@@ -14,13 +14,15 @@ const redis = RedisWrapper.createClient(Settings.redis.web)
 
 function parseArgs() {
   const args = minimist(process.argv.slice(2), {
-    boolean: ['commit'],
+    boolean: ['commit', 'ignore-pending-updates'],
   })
   const commit = args.commit
   const deleteOversized = args['delete-oversized']
+  const ignorePendingUpdates = args['ignore-pending-updates']
   return {
     commit,
     deleteOversized,
+    ignorePendingUpdates,
     maxDocSize: 2 * 1024 * 1024,
   }
 }
@@ -78,6 +80,28 @@ async function processDoc(docId) {
       'project not present in mongo - could remove doc from redis'
     )
     return
+  }
+  // A doc's pending updates live in the shared
+  // `PendingProjectUpdates:{projectId}` list (on the document-updater redis).
+  // Restoring the doc - or deleting it when oversized - would drop them, so
+  // skip the doc while the project has pending updates: flush/drain the
+  // project first, or override with --ignore-pending-updates.
+  const pendingUpdates = await redis.llen(
+    `PendingProjectUpdates:{${projectId}}`
+  )
+  if (pendingUpdates > 0) {
+    if (opts.ignorePendingUpdates) {
+      logger.warn(
+        { docId, projectId, pendingUpdates },
+        'ignoring pending updates for project'
+      )
+    } else {
+      logger.warn(
+        { docId, projectId, pendingUpdates },
+        'project has pending updates - skipping doc (flush/drain the project or use --ignore-pending-updates)'
+      )
+      return
+    }
   }
   // if the doc is too big we will need to convert it to a file, skip it for now
   // or delete the doc if the --delete-oversized option is used
@@ -166,11 +190,13 @@ async function deleteDocFromRedis(projectId, docId) {
     `UnflushedTime:{${docId}}`,
     `Pathname:{${docId}}`,
     `ProjectHistoryId:{${docId}}`,
-    `PendingUpdates:{${docId}}`,
     `lastUpdatedAt:{${docId}}`,
     `lastUpdatedBy:{${docId}}`
   )
-  await redis.srem(`DocsIn:{${projectId}}`, projectId)
+  // NOTE: the shared `PendingProjectUpdates:{projectId}` list is per-project
+  // and cannot be cleared here without dropping other docs' updates - the
+  // pending-updates check in processDoc guards against this.
+  await redis.srem(`DocsIn:{${projectId}}`, docId)
 }
 
 try {

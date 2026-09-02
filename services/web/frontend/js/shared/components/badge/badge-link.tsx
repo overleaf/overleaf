@@ -1,6 +1,6 @@
 import classNames from 'classnames'
 import type { MergeAndOverride } from '../../../../../types/utils'
-import Badge, { type BadgeProps } from './badge'
+import Badge, { type OLBadgeProps as BadgeProps } from '../ol/ol-badge'
 
 export type BadgeLinkProps = MergeAndOverride<
   BadgeProps,

@@ -1,0 +1,67 @@
+diff --git a/lib/request.js b/lib/request.js
+index f42960ca2b94b784497392cfb85ef31e4e63a1ac..7feea2ed29873e519aee0ba5e1f5b36e09fe865d 100644
+--- a/lib/request.js
++++ b/lib/request.js
+@@ -6,6 +6,30 @@
+ const InvalidArgumentError = require('./errors/invalid-argument-error');
+ /* type-is: https://github.com/jshttp/type-is */
+ const typeis = require('type-is');
++// --- Overleaf patch: request-input lockdown compatibility ---
++// The constructor below destructures query/body directly off the raw
++// framework request object it's handed (see AuthenticationController.mjs's
++// `new Oauth2Server.Request(req)`), which is otherwise indistinguishable
++// from unvalidated application code reading raw request input under
++// Overleaf's request-input lockdown (see libraries/validation-tools and the
++// patched express in .yarn/patches/express-npm-*.patch). The lockdown
++// captures the original parsed values in symbol-keyed fields, registered in
++// the global symbol registry (the same ones @overleaf/validation-tools'
++// lockdown.js reads), and only turns the *public* req.query/req.body
++// properties into throwing accessors -- reading through these raw fields
++// instead sidesteps that, and is identical to plain req.query/req.body when
++// the lockdown isn't installed (i.e. for every consumer of this package
++// outside this monorepo).
++const __overleafLockdownInstalled = Symbol.for('overleaf.lockdown.installed');
++const __overleafLockdownRawQuery = Symbol.for('overleaf.lockdown.rawQuery');
++const __overleafLockdownRawBody = Symbol.for('overleaf.lockdown.rawBody');
++function __overleafRawQuery(req) {
++  return req[__overleafLockdownInstalled] ? req[__overleafLockdownRawQuery] : req.query;
++}
++function __overleafRawBody(req) {
++  return req[__overleafLockdownInstalled] ? req[__overleafLockdownRawBody] : req.body;
++}
++// --- end Overleaf patch ---
+ 
+ /**
+  * Wrapper for webserver's request.
+@@ -29,7 +53,12 @@ class Request {
+      * @param otherOptions {...object} any other properties that should be assigned to the request by your webserver
+      * @throws {InvalidArgumentError} if one of headers, method or query are missing.
+      */
+-  constructor({ headers, method, query, body, ...otherOptions } = {}) {
++  constructor(req = {}) {
++    const headers = req.headers;
++    const method = req.method;
++    const query = __overleafRawQuery(req);
++    const body = __overleafRawBody(req);
++
+     if (!headers) {
+       throw new InvalidArgumentError('Missing parameter: `headers`');
+     }
+@@ -52,7 +81,16 @@ class Request {
+       this.headers[header.toLowerCase()] = value;
+     });
+ 
+-    // Store additional properties of the request object passed in
++    // Store additional properties of the request object passed in (mirrors
++    // the original `...otherOptions` rest destructuring, but built off
++    // Object.assign so query/body -- already handled above via the raw
++    // lockdown fields -- aren't read a second time through the throwing
++    // accessors).
++    const otherOptions = Object.assign({}, req);
++    delete otherOptions.headers;
++    delete otherOptions.method;
++    delete otherOptions.query;
++    delete otherOptions.body;
+     Object.entries(otherOptions)
+       .filter(([property]) => !this[property])
+       .forEach(([property, value]) => {

@@ -41,7 +41,10 @@ export type GroupPlanSubscription = {
 
 export type CommonsPlanSubscription = {
   type: 'commons'
-} & PaidSubscriptionBase
+  subscription: PaidSubscriptionBase['subscription'] & {
+    writefullCommonsAccount?: boolean
+  }
+} & Omit<PaidSubscriptionBase, 'subscription'>
 
 type PaidSubscription =
   | IndividualPlanSubscription

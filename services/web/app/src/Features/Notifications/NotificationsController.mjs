@@ -1,6 +1,13 @@
 import NotificationsHandler from './NotificationsHandler.mjs'
 import SessionManager from '../Authentication/SessionManager.mjs'
 import _ from 'lodash'
+import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
+
+const notificationIdParamsSchema = z.object({
+  params: z.strictObject({
+    notificationId: zz.objectId(),
+  }),
+})
 
 export default {
   getAllUnreadNotifications(req, res, next) {
@@ -28,7 +35,10 @@ export default {
 
   markNotificationAsRead(req, res) {
     const userId = SessionManager.getLoggedInUserId(req.session)
-    const { notificationId } = req.params
+    const { params } = parseReq(req, notificationIdParamsSchema, {
+      logOnly: true,
+    })
+    const { notificationId } = params
     NotificationsHandler.markAsRead(userId, notificationId, () =>
       res.sendStatus(200)
     )
@@ -36,7 +46,10 @@ export default {
 
   getNotification(req, res, next) {
     const userId = SessionManager.getLoggedInUserId(req.session)
-    const { notificationId } = req.params
+    const { params } = parseReq(req, notificationIdParamsSchema, {
+      logOnly: true,
+    })
+    const { notificationId } = params
     NotificationsHandler.getUserNotifications(
       userId,
       function (err, unreadNotifications) {

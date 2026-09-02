@@ -1,6 +1,6 @@
 import Helpers from './lib/helpers.mjs'
 
-const tags = ['saas']
+const tags = ['saas', 'auxiliary']
 
 // Partial indexes so docs without a given match token are not indexed. They
 // back the batch duplicate-detection query in findMatchingReferences.

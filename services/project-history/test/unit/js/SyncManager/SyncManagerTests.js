@@ -11,7 +11,10 @@ import {
 } from 'overleaf-editor-core'
 import { UnprocessableError } from 'overleaf-editor-core/lib/errors.js'
 import { strict as esmock } from 'esmock'
-import { FileContentEmptyError } from '../../../../app/js/Errors.js'
+import {
+  FileContentEmptyError,
+  SyncOngoingError,
+} from '../../../../app/js/Errors.js'
 const { ObjectId } = mongodb
 
 const MODULE_PATH = '../../../../app/js/SyncManager.js'
@@ -242,15 +245,16 @@ describe('SyncManager', function () {
       it('returns an error if already syncing', async function () {
         await expect(
           this.SyncManager.promises.startResync(this.projectId)
-        ).to.be.rejectedWith('sync ongoing')
+        ).to.be.rejectedWith(SyncOngoingError, 'sync ongoing')
       })
     })
 
     describe('if doc content sync in is progress', function () {
       beforeEach(async function () {
+        this.resyncPendingSince = new Date()
         const syncState = {
           resyncDocContents: ['/foo.tex'],
-          resyncPendingSince: new Date(),
+          resyncPendingSince: this.resyncPendingSince,
         }
         this.db.projectHistorySyncState.findOne.resolves(syncState)
       })
@@ -258,7 +262,19 @@ describe('SyncManager', function () {
       it('returns an error if already syncing', async function () {
         await expect(
           this.SyncManager.promises.startResync(this.projectId)
-        ).to.be.rejectedWith('sync ongoing')
+        ).to.be.rejectedWith(SyncOngoingError, 'sync ongoing')
+      })
+
+      it('includes the stuck context in the error', async function () {
+        const error = await this.SyncManager.promises
+          .startResync(this.projectId)
+          .catch(err => err)
+        expect(error.info).to.deep.equal({
+          projectId: this.projectId,
+          stuckClearCount: 1,
+          stuckDocPaths: ['/foo.tex'],
+          resyncPendingSince: this.resyncPendingSince,
+        })
       })
     })
 
@@ -324,7 +340,7 @@ describe('SyncManager', function () {
       it('throws sync ongoing and does not clear', async function () {
         await expect(
           this.SyncManager.promises.startResync(this.projectId)
-        ).to.be.rejectedWith('sync ongoing')
+        ).to.be.rejectedWith(SyncOngoingError, 'sync ongoing')
         expect(
           this.Metrics.inc.calledWith('project_history_sync_stuck_cleared')
         ).to.be.false
@@ -366,6 +382,30 @@ describe('SyncManager', function () {
         }
         expect(this.WebApiManager.promises.requestResync.called).to.be.false
       })
+    })
+  })
+
+  describe('isSyncPermanentlyStuck', function () {
+    it('is false below the auto-clear limit', async function () {
+      this.db.projectHistorySyncState.findOne.resolves({
+        resyncDocContents: ['/foo.tex'],
+        stuckClearCount: 4,
+      })
+      const syncState = await this.SyncManager.promises.getResyncState(
+        this.projectId
+      )
+      expect(syncState.isSyncPermanentlyStuck()).to.be.false
+    })
+
+    it('is true at the auto-clear limit', async function () {
+      this.db.projectHistorySyncState.findOne.resolves({
+        resyncDocContents: ['/foo.tex'],
+        stuckClearCount: 5,
+      })
+      const syncState = await this.SyncManager.promises.getResyncState(
+        this.projectId
+      )
+      expect(syncState.isSyncPermanentlyStuck()).to.be.true
     })
   })
 

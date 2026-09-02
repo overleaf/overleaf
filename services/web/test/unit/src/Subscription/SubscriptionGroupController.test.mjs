@@ -1,5 +1,9 @@
 import { beforeEach, describe, it, vi } from 'vitest'
 import sinon from 'sinon'
+import {
+  InvalidParamsError,
+  InvalidRequestError,
+} from '@overleaf/validation-tools'
 
 const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionGroupController'
@@ -8,7 +12,7 @@ describe('SubscriptionGroupController', function () {
   beforeEach(async function (ctx) {
     ctx.user = { _id: '!@312431', email: 'user@email.com' }
     ctx.adminUserId = '123jlkj'
-    ctx.subscriptionId = '123434325412'
+    ctx.subscriptionId = '123434325412341234123412'
     ctx.user_email = 'bob@gmail.com'
     ctx.req = {
       session: {
@@ -81,6 +85,7 @@ describe('SubscriptionGroupController', function () {
     ctx.SubscriptionLocator = {
       promises: {
         getSubscription: sinon.stub().resolves(ctx.subscription),
+        getUsersSubscription: sinon.stub().resolves(ctx.subscription),
       },
     }
 
@@ -110,6 +115,10 @@ describe('SubscriptionGroupController', function () {
     ctx.UserGetter = {
       promises: {
         getUserEmail: sinon.stub().resolves(ctx.user.email),
+        getUser: sinon.stub().resolves({
+          _id: ctx.user._id,
+          enrollment: { sso: [{ groupId: ctx.subscriptionId }] },
+        }),
       },
     }
 
@@ -233,8 +242,8 @@ describe('SubscriptionGroupController', function () {
   describe('removeUserFromGroup', function () {
     it('should use the subscription id for the logged in user and take the user id from the params', async function (ctx) {
       await new Promise(resolve => {
-        const userIdToRemove = '31231'
-        ctx.req.params = { user_id: userIdToRemove }
+        const userIdToRemove = '222222222222222222222222'
+        ctx.req.params = { id: ctx.subscriptionId, user_id: userIdToRemove }
         ctx.req.entity = ctx.subscription
 
         const res = {
@@ -254,8 +263,8 @@ describe('SubscriptionGroupController', function () {
 
     it('should log that the user has been removed', async function (ctx) {
       await new Promise(resolve => {
-        const userIdToRemove = '31231'
-        ctx.req.params = { user_id: userIdToRemove }
+        const userIdToRemove = '222222222222222222222222'
+        ctx.req.params = { id: ctx.subscriptionId, user_id: userIdToRemove }
         ctx.req.entity = ctx.subscription
 
         const res = {
@@ -275,20 +284,18 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should call the group SSO hooks with group SSO enabled', async function (ctx) {
+    it('should unlink the user from group SSO when they are linked, even if SSO is disabled', async function (ctx) {
       await new Promise(resolve => {
-        const userIdToRemove = '31231'
-        ctx.req.params = { user_id: userIdToRemove }
+        const userIdToRemove = '222222222222222222222222'
+        ctx.req.params = { id: ctx.subscriptionId, user_id: userIdToRemove }
         ctx.req.entity = ctx.subscription
-        ctx.Modules.promises.hooks.fire
-          .withArgs('hasGroupSSOEnabled', ctx.subscription)
-          .resolves([true])
+        ctx.UserGetter.promises.getUser.resolves({
+          _id: userIdToRemove,
+          enrollment: { sso: [{ groupId: ctx.subscriptionId }] },
+        })
 
         const res = {
           sendStatus: () => {
-            ctx.Modules.promises.hooks.fire
-              .calledWith('hasGroupSSOEnabled', ctx.subscription)
-              .should.equal(true)
             ctx.Modules.promises.hooks.fire
               .calledWith(
                 'unlinkUserFromGroupSSO',
@@ -296,7 +303,6 @@ describe('SubscriptionGroupController', function () {
                 ctx.subscriptionId
               )
               .should.equal(true)
-            sinon.assert.calledTwice(ctx.Modules.promises.hooks.fire)
             resolve()
           },
         }
@@ -304,26 +310,38 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should call the group SSO hooks with group SSO disabled', async function (ctx) {
+    it('should not unlink the user when they have no group SSO link', async function (ctx) {
       await new Promise(resolve => {
-        const userIdToRemove = '31231'
-        ctx.req.params = { user_id: userIdToRemove }
+        const userIdToRemove = '222222222222222222222222'
+        ctx.req.params = { id: ctx.subscriptionId, user_id: userIdToRemove }
         ctx.req.entity = ctx.subscription
-        ctx.Modules.promises.hooks.fire
-          .withArgs('hasGroupSSOEnabled', ctx.subscription)
-          .resolves([false])
+        ctx.UserGetter.promises.getUser.resolves({
+          _id: userIdToRemove,
+          enrollment: { sso: [] },
+        })
 
         const res = {
           sendStatus: () => {
             ctx.Modules.promises.hooks.fire
-              .calledWith('hasGroupSSOEnabled', ctx.subscription)
-              .should.equal(true)
-            sinon.assert.calledOnce(ctx.Modules.promises.hooks.fire)
+              .calledWith('unlinkUserFromGroupSSO')
+              .should.equal(false)
             resolve()
           },
         }
         ctx.Controller.removeUserFromGroup(ctx.req, res, resolve)
       })
+    })
+
+    it('rejects a malformed user id', async function (ctx) {
+      ctx.req.params = { id: ctx.subscriptionId, user_id: 'not-an-object-id' }
+      ctx.req.entity = ctx.subscription
+      await ctx.Controller.removeUserFromGroup(
+        ctx.req,
+        {}
+      ).should.be.rejectedWith(InvalidParamsError)
+      ctx.SubscriptionGroupHandler.promises.removeUserFromGroup.called.should.equal(
+        false
+      )
     })
   })
 
@@ -379,21 +397,18 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should call the group SSO hooks with group SSO enabled', async function (ctx) {
+    it('should unlink the user from group SSO when they are linked, even if SSO is disabled', async function (ctx) {
       await new Promise(resolve => {
         ctx.req.query = { subscriptionId: ctx.subscriptionId }
         const memberUserIdToremove = '123456789'
         ctx.req.session.user._id = memberUserIdToremove
-
-        ctx.Modules.promises.hooks.fire
-          .withArgs('hasGroupSSOEnabled', ctx.subscription)
-          .resolves([true])
+        ctx.UserGetter.promises.getUser.resolves({
+          _id: memberUserIdToremove,
+          enrollment: { sso: [{ groupId: ctx.subscriptionId }] },
+        })
 
         const res = {
           sendStatus: () => {
-            ctx.Modules.promises.hooks.fire
-              .calledWith('hasGroupSSOEnabled', ctx.subscription)
-              .should.equal(true)
             ctx.Modules.promises.hooks.fire
               .calledWith(
                 'unlinkUserFromGroupSSO',
@@ -401,7 +416,6 @@ describe('SubscriptionGroupController', function () {
                 ctx.subscriptionId
               )
               .should.equal(true)
-            sinon.assert.calledTwice(ctx.Modules.promises.hooks.fire)
             resolve()
           },
         }
@@ -409,27 +423,37 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should call the group SSO hooks with group SSO disabled', async function (ctx) {
+    it('should not unlink the user when they have no group SSO link', async function (ctx) {
       await new Promise(resolve => {
-        const userIdToRemove = '31231'
-        ctx.req.session.user._id = userIdToRemove
-        ctx.req.params = { user_id: userIdToRemove }
-        ctx.req.entity = ctx.subscription
-        ctx.Modules.promises.hooks.fire
-          .withArgs('hasGroupSSOEnabled', ctx.subscription)
-          .resolves([false])
+        ctx.req.query = { subscriptionId: ctx.subscriptionId }
+        const memberUserIdToremove = '123456789'
+        ctx.req.session.user._id = memberUserIdToremove
+        ctx.UserGetter.promises.getUser.resolves({
+          _id: memberUserIdToremove,
+          enrollment: { sso: [] },
+        })
 
         const res = {
           sendStatus: () => {
             ctx.Modules.promises.hooks.fire
-              .calledWith('hasGroupSSOEnabled', ctx.subscription)
-              .should.equal(true)
-            sinon.assert.calledOnce(ctx.Modules.promises.hooks.fire)
+              .calledWith('unlinkUserFromGroupSSO')
+              .should.equal(false)
             resolve()
           },
         }
         ctx.Controller.removeSelfFromGroup(ctx.req, res, resolve)
       })
+    })
+
+    it('rejects a malformed subscriptionId', async function (ctx) {
+      ctx.req.query = { subscriptionId: 'not-an-object-id' }
+      await ctx.Controller.removeSelfFromGroup(
+        ctx.req,
+        {}
+      ).should.be.rejectedWith(InvalidRequestError)
+      ctx.SubscriptionLocator.promises.getSubscription.called.should.equal(
+        false
+      )
     })
   })
 
@@ -575,6 +599,17 @@ describe('SubscriptionGroupController', function () {
         ctx.Controller.addSeatsToGroupSubscription(ctx.req, res)
       })
     })
+
+    it('rejects an invalid query value', async function (ctx) {
+      ctx.req.query = { errorCode: { foo: 'bar' } }
+      await ctx.Controller.addSeatsToGroupSubscription(
+        ctx.req,
+        {}
+      ).should.be.rejectedWith(InvalidRequestError)
+      ctx.SubscriptionGroupHandler.promises.getUsersGroupSubscriptionDetails.called.should.equal(
+        false
+      )
+    })
   })
 
   describe('previewAddSeatsSubscriptionChange', function () {
@@ -642,6 +677,17 @@ describe('SubscriptionGroupController', function () {
         ctx.Controller.previewAddSeatsSubscriptionChange(ctx.req, res)
       })
     })
+
+    it('rejects adding fewer than one seat', async function (ctx) {
+      ctx.req.body = { adding: 0 }
+      await ctx.Controller.previewAddSeatsSubscriptionChange(
+        ctx.req,
+        {}
+      ).should.be.rejectedWith(InvalidRequestError)
+      ctx.SubscriptionGroupHandler.promises.previewAddSeatsSubscriptionChange.called.should.equal(
+        false
+      )
+    })
   })
 
   describe('createAddSeatsSubscriptionChange', function () {
@@ -665,6 +711,7 @@ describe('SubscriptionGroupController', function () {
 
     it('should fail applying "add seats" change', async function (ctx) {
       await new Promise(resolve => {
+        ctx.req.body = { adding: 2 }
         ctx.SubscriptionGroupHandler.promises.createAddSeatsSubscriptionChange =
           sinon.stub().rejects()
 
@@ -763,6 +810,17 @@ describe('SubscriptionGroupController', function () {
         ctx.Controller.createAddSeatsSubscriptionChange(ctx.req, res)
       })
     })
+
+    it('rejects adding fewer than one seat', async function (ctx) {
+      ctx.req.body = { adding: 0 }
+      await ctx.Controller.createAddSeatsSubscriptionChange(
+        ctx.req,
+        {}
+      ).should.be.rejectedWith(InvalidRequestError)
+      ctx.SubscriptionGroupHandler.promises.createAddSeatsSubscriptionChange.called.should.equal(
+        false
+      )
+    })
   })
 
   describe('submitForm', function () {
@@ -831,6 +889,14 @@ describe('SubscriptionGroupController', function () {
         }
         ctx.Controller.submitForm(ctx.req, res, resolve)
       })
+    })
+
+    it('rejects adding fewer than the minimum increase', async function (ctx) {
+      ctx.req.body = { adding: 5 }
+      await ctx.Controller.submitForm(ctx.req, {}).should.be.rejectedWith(
+        InvalidRequestError
+      )
+      ctx.Modules.promises.hooks.fire.called.should.equal(false)
     })
   })
 
@@ -932,6 +998,17 @@ describe('SubscriptionGroupController', function () {
         ctx.Controller.subscriptionUpgradePage(ctx.req, res)
       })
     })
+
+    it('rejects an invalid query value', async function (ctx) {
+      ctx.req.query = { errorCode: { foo: 'bar' } }
+      await ctx.Controller.subscriptionUpgradePage(
+        ctx.req,
+        {}
+      ).should.be.rejectedWith(InvalidRequestError)
+      ctx.SubscriptionGroupHandler.promises.getGroupPlanUpgradePreview.called.should.equal(
+        false
+      )
+    })
   })
 
   describe('upgradeSubscription', function () {
@@ -1021,6 +1098,111 @@ describe('SubscriptionGroupController', function () {
 
         ctx.Controller.upgradeSubscription(ctx.req, res)
       })
+    })
+  })
+
+  describe('manuallyCollectedSubscription', function () {
+    it('should render the "manually collected subscription" page', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.req.query = { error_type: 'no-additional-license' }
+
+        const res = {
+          render: (page, data) => {
+            ctx.SubscriptionLocator.promises.getUsersSubscription
+              .calledWith(ctx.req.session.user._id)
+              .should.equal(true)
+            page.should.equal('subscriptions/manually-collected-subscription')
+            data.groupName.should.equal(ctx.subscription.teamName)
+            data.errorType.should.equal('no-additional-license')
+            resolve()
+          },
+        }
+
+        ctx.Controller.manuallyCollectedSubscription(ctx.req, res)
+      })
+    })
+
+    it('should redirect to subscription page when loading the subscription fails', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.SubscriptionLocator.promises.getUsersSubscription = sinon
+          .stub()
+          .rejects()
+
+        const res = {
+          redirect: url => {
+            url.should.equal('/user/subscription')
+            resolve()
+          },
+        }
+
+        ctx.Controller.manuallyCollectedSubscription(ctx.req, res)
+      })
+    })
+
+    it('rejects an invalid query value', async function (ctx) {
+      ctx.req.query = { error_type: { foo: 'bar' } }
+      await ctx.Controller.manuallyCollectedSubscription(
+        ctx.req,
+        {}
+      ).should.be.rejectedWith(InvalidRequestError)
+      ctx.SubscriptionLocator.promises.getUsersSubscription.called.should.equal(
+        false
+      )
+    })
+  })
+
+  describe('getGroupPlanPerUserPrices', function () {
+    it('should return the per-user prices for the requested currency', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.req.query = { currency: 'USD' }
+        const prices = [{ USD: { collaborator: 1500 } }]
+        ctx.Modules.promises.hooks.fire
+          .withArgs(
+            'getGroupPlanPerUserPrices',
+            ctx.req.session.user._id,
+            'USD'
+          )
+          .resolves(prices)
+
+        const res = {
+          json: data => {
+            data.should.deep.equal(prices[0])
+            resolve()
+          },
+        }
+
+        ctx.Controller.getGroupPlanPerUserPrices(ctx.req, res)
+      })
+    })
+
+    it('should send a 500 response when the hook fails', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.Modules.promises.hooks.fire
+          .withArgs(
+            'getGroupPlanPerUserPrices',
+            sinon.match.any,
+            sinon.match.any
+          )
+          .rejects()
+
+        const res = {
+          sendStatus: code => {
+            code.should.equal(500)
+            resolve()
+          },
+        }
+
+        ctx.Controller.getGroupPlanPerUserPrices(ctx.req, res)
+      })
+    })
+
+    it('rejects an invalid query value', async function (ctx) {
+      ctx.req.query = { currency: { foo: 'bar' } }
+      await ctx.Controller.getGroupPlanPerUserPrices(
+        ctx.req,
+        {}
+      ).should.be.rejectedWith(InvalidRequestError)
+      ctx.Modules.promises.hooks.fire.called.should.equal(false)
     })
   })
 })

@@ -7,6 +7,7 @@ type LinkedFileAgent = {
     name: string,
     parentFolderId: string,
     userId: string,
+    historySource: boolean,
     callback: () => void
   ) => void
   refreshLinkedFile: (
@@ -15,6 +16,7 @@ type LinkedFileAgent = {
     name: string,
     parentFolderId: string,
     userId: string,
+    historySource: boolean,
     callback: () => void
   ) => void
   promises: {
@@ -23,14 +25,16 @@ type LinkedFileAgent = {
       linkedFileData: object,
       name: string,
       parentFolderId: string,
-      userId: string
+      userId: string,
+      historySource: boolean
     ) => Promise<any>
     refreshLinkedFile: (
       projectId: string,
       linkedFileData: object,
       name: string,
       parentFolderId: string,
-      userId: string
+      userId: string,
+      historySource: boolean
     ) => Promise<any>
   }
 }

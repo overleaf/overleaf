@@ -4,7 +4,7 @@ const _ = require('lodash')
 const logger = require('@overleaf/logger')
 const OError = require('@overleaf/o-error')
 const Errors = require('../app/js/Errors')
-const LockManager = require('../app/js/LockManager')
+const ProjectLockManager = require('../app/js/ProjectLockManager')
 const PersistenceManager = require('../app/js/PersistenceManager')
 const ProjectFlusher = require('../app/js/ProjectFlusher')
 const ProjectManager = require('../app/js/ProjectManager')
@@ -43,13 +43,16 @@ const COMPARE_AND_SET =
 class TryAgainError extends Error {}
 
 /**
+ * @param {string} projectId
  * @param {string} docId
  * @param {Doc} redisDoc
  * @param {Doc} mongoDoc
  * @return {Promise<void>}
  */
-async function updateDocVersionInRedis(docId, redisDoc, mongoDoc) {
-  const lockValue = await LockManager.promises.getLock(docId)
+async function updateDocVersionInRedis(projectId, docId, redisDoc, mongoDoc) {
+  // Take the project lock to serialise with document-updater, which now
+  // processes all of a project's docs under the project lock.
+  const lockValue = await ProjectLockManager.promises.getLock(projectId)
   try {
     const key = Settings.redis.documentupdater.key_schema.docVersion({
       doc_id: docId,
@@ -68,7 +71,7 @@ async function updateDocVersionInRedis(docId, redisDoc, mongoDoc) {
       )
     }
   } finally {
-    await LockManager.promises.releaseLock(docId, lockValue)
+    await ProjectLockManager.promises.releaseLock(projectId, lockValue)
   }
 }
 
@@ -175,7 +178,7 @@ async function processDoc(projectId, docId) {
         console.log(
           `Fixing out of sync doc version for doc ${docId} in project ${projectId}: mongo=${mongoDoc.version} > redis=${redisDoc.version}`
         )
-        await updateDocVersionInRedis(docId, redisDoc, mongoDoc)
+        await updateDocVersionInRedis(projectId, docId, redisDoc, mongoDoc)
         return false
       } else {
         console.error(

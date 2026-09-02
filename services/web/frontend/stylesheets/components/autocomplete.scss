@@ -1,4 +1,9 @@
 .ol-autocomplete {
+  .form-label,
+  .ol-autocomplete-create-prefix {
+    color: var(--content-secondary-themed);
+  }
+
   .dropdown-menu {
     position: relative;
     top: 0;

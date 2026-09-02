@@ -26,9 +26,9 @@ const {
  */
 function useCapabilities() {
   /**
-   * @param {any} req
-   * @param {any} res
-   * @param {any} next
+   * @param {Request} req
+   * @param {Response} res
+   * @param {NextFunction} next
    */
   const middleware = async function (req, res, next) {
     // attach the user's capabilities to the request object
@@ -36,7 +36,7 @@ function useCapabilities() {
     // provide a function to assert that a capability is present
     /** @param {any} capability */
     req.assertPermission = capability => {
-      if (!req.capabilitySet.has(capability)) {
+      if (!req.capabilitySet?.has(capability)) {
         throw new ForbiddenError(
           `user does not have permission for ${capability}`
         )
@@ -64,15 +64,17 @@ function useCapabilities() {
         const combinedGroupPolicy = combineGroupPolicies(groupPolicies)
         // attach the new capabilities to the request object
         for (const cap of getUserCapabilities(combinedGroupPolicy)) {
-          req.capabilitySet.add(cap)
+          req.capabilitySet?.add(cap)
         }
         // also attach the user's restrictions (the capabilities they don't have)
         req.userRestrictions = getUserRestrictions(combinedGroupPolicy)
 
         // attach allowed properties to the request object
         const allowedProperties = combineAllowedProperties(results)
+        /** @type {Record<string, any>} */
+        const reqRecord = req
         for (const [prop, value] of Object.entries(allowedProperties)) {
-          req[prop] = value
+          reqRecord[prop] = value
         }
       }
       next()

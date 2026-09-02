@@ -16,6 +16,12 @@ const { expect } = require('chai')
 describe('index', function () {
   beforeEach(function () {
     let Cluster, IoRedis, ioredisConstructor
+    const loggerMock = {
+      error() {},
+      warn() {},
+      info() {},
+      debug() {},
+    }
     this.settings = {}
     this.ioredisConstructor = ioredisConstructor = sinon.stub()
 
@@ -51,6 +57,7 @@ describe('index', function () {
     this.redis = SandboxedModule.require(modulePath, {
       requires: {
         ioredis: this.ioredis,
+        '@overleaf/logger': loggerMock,
       },
       globals: {
         process,
@@ -64,6 +71,7 @@ describe('index', function () {
         '@overleaf/metrics': {
           inc() {},
         },
+        '@overleaf/logger': loggerMock,
       },
       globals: {
         process,
@@ -105,6 +113,38 @@ describe('index', function () {
       expect(createNewRedisLock).to.throw(
         'redis lock TTL must be at least 30s and below 1000s'
       )
+    })
+  })
+
+  describe('extendLock', function () {
+    beforeEach(function () {
+      this.rclient = { eval: sinon.stub() }
+      this.locker = new this.RedisLocker({
+        rclient: this.rclient,
+        getKey: id => `lock:${id}`,
+        wrapTimeoutError: (err, id) => err,
+        metricsPrefix: 'test',
+        lockTTLSeconds: 30,
+      })
+    })
+
+    it('should extend the lock TTL when we still own it', function (done) {
+      this.rclient.eval.yields(null, 1)
+      this.locker.extendLock('id-1', 'lock-value', err => {
+        expect(err).to.not.exist
+        this.rclient.eval
+          .calledWith(sinon.match.string, 1, 'lock:id-1', 'lock-value', 30)
+          .should.equal(true)
+        done()
+      })
+    })
+
+    it('should error when we no longer hold the lock', function (done) {
+      this.rclient.eval.yields(null, 0)
+      this.locker.extendLock('id-1', 'lock-value', err => {
+        expect(err).to.exist
+        done()
+      })
     })
   })
 

@@ -801,6 +801,69 @@ describe('Sending Updates', function () {
     })
   })
 
+  describe('bisect mode', function () {
+    it('should stop when the queue is empty', async function () {
+      // Regression: the flush reported the queue size of an empty queue as a bare
+      // number, so the `queueSize === 0` check never matched and the bisect kept
+      // processing the empty queue with the same batch size.
+      const { statusCode } = await ProjectHistoryClient.flushProject(
+        this.projectId,
+        { bisect: true }
+      )
+      expect(statusCode).to.equal(204)
+    })
+
+    it('should send updates to the history store', async function () {
+      const fileHash = '0a207c060e61f3b88eaee0a8cd0696f46fb155eb'
+
+      MockHistoryStore()
+        .get(`/api/projects/${historyId}/latest/history`)
+        .reply(200, {
+          chunk: {
+            startVersion: 0,
+            history: {
+              snapshot: {},
+              changes: [],
+            },
+          },
+        })
+
+      const createBlob = MockHistoryStore()
+        .put(`/api/projects/${historyId}/blobs/${fileHash}`, 'a\nb')
+        .reply(201)
+
+      const addFile = MockHistoryStore()
+        .post(`/api/projects/${historyId}/legacy_changes`, body => {
+          expect(body).to.deep.equal([
+            olAddDocUpdate(this.doc, this.userId, this.timestamp, fileHash),
+          ])
+          return true
+        })
+        .query({ end_version: 0 })
+        .reply(204)
+
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slAddDocUpdate(historyId, this.doc, this.userId, this.timestamp, 'a\nb')
+      )
+
+      const { statusCode } = await ProjectHistoryClient.flushProject(
+        this.projectId,
+        { bisect: true }
+      )
+      expect(statusCode).to.equal(204)
+
+      assert(
+        createBlob.isDone(),
+        '/api/projects/:historyId/blobs/:hash should have been called'
+      )
+      assert(
+        addFile.isDone(),
+        `/api/projects/${historyId}/changes should have been called`
+      )
+    })
+  })
+
   describe('compressing updates', function () {
     beforeEach(function () {
       MockHistoryStore()

@@ -3,6 +3,7 @@ import mongodb from 'mongodb-legacy'
 import Features from '../../infrastructure/Features.mjs'
 import CollaboratorsGetter from '../Collaborators/CollaboratorsGetter.mjs'
 import CollaboratorsHandler from '../Collaborators/CollaboratorsHandler.mjs'
+import CollaboratorsInviteGetter from '../Collaborators/CollaboratorsInviteGetter.mjs'
 import ProjectGetter from '../Project/ProjectGetter.mjs'
 import { User } from '../../models/User.mjs'
 import PrivilegeLevels from './PrivilegeLevels.mjs'
@@ -232,8 +233,21 @@ async function _getPrivilegeLevelForProjectWithoutUserWithPublicAccessLevel(
     return await getPrivilegeLevelForProjectWithToken(projectId, token)
   }
 
+  if (!opts.ignorePublicAccess && token) {
+    return await getAnonymousSharingLinkPrivilegeLevel(projectId, token)
+  }
+
   // Deny anonymous user access
   return PrivilegeLevels.NONE
+}
+
+async function getAnonymousSharingLinkPrivilegeLevel(projectId, token) {
+  const invite =
+    await CollaboratorsInviteGetter.promises.getUsableAnonymousSharingLinkInvite(
+      projectId,
+      token
+    )
+  return invite ? PrivilegeLevels.READ_ONLY : PrivilegeLevels.NONE
 }
 
 async function getPrivilegeLevelForProjectWithToken(projectId, token) {

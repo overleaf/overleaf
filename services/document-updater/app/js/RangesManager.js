@@ -167,7 +167,8 @@ const RangesManager = {
     lines,
   }) {
     /** @type {(change: TrackedChange) => boolean} */
-    const isAccepted = change => acceptedChangeIds.includes(change.id)
+    const isAccepted = change =>
+      change.id != null && acceptedChangeIds.includes(change.id)
 
     const historyOps = []
 

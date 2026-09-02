@@ -19,6 +19,8 @@ export const OnlineUsers = () => {
     [openDoc]
   )
 
+  if (!onlineUsersArray.length) return null
+
   return (
     <div className="ide-redesign-online-users">
       <OnlineUsersWidget onlineUsers={onlineUsersArray} goToUser={goToUser} />

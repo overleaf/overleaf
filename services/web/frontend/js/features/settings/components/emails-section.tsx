@@ -8,7 +8,7 @@ import {
 import EmailsHeader from './emails/header'
 import EmailsRow from './emails/row'
 import AddEmail from './emails/add-email'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import LoadingSpinner from '@/shared/components/loading-spinner'
 
 function EmailsSectionContent() {
@@ -51,8 +51,9 @@ function EmailsSectionContent() {
             <strong />,
             // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
             <a
-              href="/learn/how-to/Managing_your_Overleaf_emails"
+              href="https://docs.overleaf.com/accounts-and-security/email-address-and-login-options"
               target="_blank"
+              rel="noopener noreferrer"
             />,
           ]}
         />
@@ -77,10 +78,12 @@ function EmailsSectionContent() {
         )}
         {isInitializingSuccess && !hideAddSecondaryEmail && <AddEmail />}
         {isInitializingError && (
-          <OLNotification
-            type="error"
-            content={t('error_performing_request')}
-          />
+          <div className="notification-list">
+            <Notification
+              type="error"
+              content={t('error_performing_request')}
+            />
+          </div>
         )}
       </>
     </>

@@ -56,7 +56,8 @@ async function addEntity(params) {
       method: 'post',
       headers: {
         'x-entity-id': entityId,
-        'x-entity-rev': rev,
+        // Sent as a string, since that is what a header carries either way
+        ...(rev != null ? { 'x-entity-rev': String(rev) } : {}),
         'x-entity-type': entityType,
         'x-folder-id': folderId,
         'x-project-id': projectId,
@@ -218,7 +219,10 @@ async function moveEntity(params) {
   for (const userId of projectUserIds) {
     const headers = {
       'x-project-id': projectId,
-      'x-entity-rev': rev,
+    }
+    if (rev != null) {
+      // Sent as a string, since that is what a header carries either way
+      headers['x-entity-rev'] = String(rev)
     }
     if (entityId != null) {
       headers['x-entity-id'] = entityId

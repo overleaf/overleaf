@@ -1,9 +1,6 @@
 import { AvailableUnfilledIcon } from '@/shared/components/material-icon'
 
-// TODO ide-redesign-cleanup: Make this the default export and remove the legacy version
-export const newEditorIconTypeFromName = (
-  name: string
-): AvailableUnfilledIcon => {
+const iconTypeFromName = (name: string): AvailableUnfilledIcon => {
   let ext = name.split('.').pop()
   ext = ext ? ext.toLowerCase() : ext
 
@@ -18,3 +15,5 @@ export const newEditorIconTypeFromName = (
   }
   return 'description'
 }
+
+export default iconTypeFromName

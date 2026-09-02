@@ -35,6 +35,8 @@ async function addNotification(userId, notification, callback) {
   if (notification.expires != null) {
     try {
       doc.expires = new Date(notification.expires)
+      // Rollout-temporary fallback (validation of fallback schema); delete
+      // when this route's REQ_VALIDATION_MODE instrumentation is removed.
       // _testValue assignment will throw if `expires` is not a valid date
       // eslint-disable-next-line no-unused-vars
       const _testValue = doc.expires.toISOString()

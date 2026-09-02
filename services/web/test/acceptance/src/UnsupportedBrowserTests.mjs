@@ -1,5 +1,7 @@
 import { expect } from 'chai'
+import { expectValidationErrorRaw } from '@overleaf/validation-tools/testUtils.js'
 import User from './helpers/User.mjs'
+import { setReqValidationModeForTests } from '@overleaf/validation-tools'
 
 const botUserAgents = new Map([
   [
@@ -52,6 +54,14 @@ const supportedUserAgents = new Map([
 ])
 
 describe('UnsupportedBrowsers', function () {
+  beforeEach(function () {
+    setReqValidationModeForTests('enforce')
+  })
+
+  afterEach(function () {
+    setReqValidationModeForTests(null)
+  })
+
   beforeEach(function () {
     this.user = new User()
   })
@@ -197,5 +207,23 @@ describe('UnsupportedBrowsers', function () {
         done()
       }
     )
+  })
+
+  describe('validation errors', function () {
+    it('should reject a malformed fromURL query value', function (done) {
+      this.user.request(
+        {
+          url: '/unsupported-browser?fromURL=a&fromURL=b',
+          headers: {
+            'user-agent': unsupportedUserAgents.get('IE 11'),
+          },
+        },
+        (error, response) => {
+          expect(error).to.not.exist
+          expectValidationErrorRaw(response, 400, 'fromURL')
+          done()
+        }
+      )
+    })
   })
 })

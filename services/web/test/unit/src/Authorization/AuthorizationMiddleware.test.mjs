@@ -1,7 +1,7 @@
-import { vi, expect } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
-import Errors from '../../../../app/src/Features/Errors/Errors.js'
+import { setReqValidationModeForTests } from '@overleaf/validation-tools'
 
 const { ObjectId } = mongodb
 
@@ -15,7 +15,9 @@ describe('AuthorizationMiddleware', function () {
     ctx.doc_id = new ObjectId().toString()
     ctx.thread_id = new ObjectId().toString()
     ctx.token = 'some-token'
-    ctx.AuthenticationController = {}
+    ctx.AuthenticationController = {
+      setRedirectInSession: sinon.stub(),
+    }
     ctx.SessionManager = {
       getSessionUser: sinon.stub().returns(null),
       getLoggedInUserId: sinon.stub().returns(ctx.userId),
@@ -45,10 +47,6 @@ describe('AuthorizationMiddleware', function () {
         getComment: sinon.stub().resolves(),
       },
     }
-
-    vi.doMock('../../../../app/src/Features/Errors/Errors.js', () => ({
-      default: Errors,
-    }))
 
     vi.doMock(
       '../../../../app/src/Features/Authorization/AuthorizationManager',
@@ -118,6 +116,10 @@ describe('AuthorizationMiddleware', function () {
     ctx.next = sinon.stub()
   })
 
+  afterEach(function () {
+    setReqValidationModeForTests(null)
+  })
+
   describe('ensureCanReadProject', function () {
     testMiddleware('ensureUserCanReadProject', 'canUserReadProject')
   })
@@ -184,6 +186,23 @@ describe('AuthorizationMiddleware', function () {
         'ensureUserCanWriteProjectSettings',
         'canUserWriteProjectSettings'
       )
+    })
+
+    describe('request validation', function () {
+      beforeEach(function (ctx) {
+        setReqValidationModeForTests('enforce')
+        ctx.req.body.name = 42
+      })
+
+      invokeMiddleware('ensureUserCanWriteProjectSettings')
+      expectBadRequest()
+
+      it('does not check any write permissions', function (ctx) {
+        expect(ctx.AuthorizationManager.promises.canUserRenameProject).to.not
+          .have.been.called
+        expect(ctx.AuthorizationManager.promises.canUserWriteProjectSettings).to
+          .not.have.been.called
+      })
     })
   })
 
@@ -327,6 +346,73 @@ describe('AuthorizationMiddleware', function () {
         })
       })
     })
+
+    describe('request validation', function () {
+      beforeEach(function (ctx) {
+        setReqValidationModeForTests('enforce')
+        ctx.req.query = { project_ids: ['project1', 'project2'] }
+      })
+
+      invokeMiddleware('ensureUserCanReadMultipleProjects')
+      expectBadRequest()
+
+      it('does not check any project permissions', function (ctx) {
+        expect(ctx.AuthorizationManager.promises.canUserReadProject).to.not.have
+          .been.called
+      })
+    })
+  })
+
+  describe('restricted', function () {
+    setupAnonymousUser()
+
+    describe('with a redirect target', function () {
+      beforeEach(function (ctx) {
+        ctx.req.query = { from: '/project/123' }
+      })
+
+      it('stores the redirect target and sends the user to login', function (ctx) {
+        ctx.AuthorizationMiddleware.restricted(ctx.req, ctx.res, ctx.next)
+        expect(
+          ctx.AuthenticationController.setRedirectInSession
+        ).to.have.been.calledWith(ctx.req, '/project/123')
+        expect(ctx.res.redirect).to.have.been.calledWith('/login')
+      })
+    })
+
+    describe('without a redirect target', function () {
+      beforeEach(function (ctx) {
+        ctx.req.query = {}
+      })
+
+      it('sends the user to login', function (ctx) {
+        ctx.AuthorizationMiddleware.restricted(ctx.req, ctx.res, ctx.next)
+        expect(ctx.AuthenticationController.setRedirectInSession).to.not.have
+          .been.called
+        expect(ctx.res.redirect).to.have.been.calledWith('/login')
+      })
+    })
+
+    describe('request validation', function () {
+      beforeEach(function (ctx) {
+        setReqValidationModeForTests('enforce')
+        ctx.req.query = { from: ['not-a-string'] }
+      })
+
+      it('rejects a non-string from parameter', function (ctx) {
+        let error
+        try {
+          ctx.AuthorizationMiddleware.restricted(ctx.req, ctx.res, ctx.next)
+        } catch (err) {
+          error = err
+        }
+        expect(error).to.exist
+        expect(error.name).to.equal('InvalidRequestError')
+        expect(ctx.AuthenticationController.setRedirectInSession).to.not.have
+          .been.called
+        expect(ctx.res.redirect).to.not.have.been.called
+      })
+    })
   })
 })
 
@@ -467,8 +553,19 @@ function expectError() {
 
 function expectNotFound() {
   it('raises a 404', function (ctx) {
+    // a malformed id fails zz.objectId() validation in parseReq(), which
+    // throws InvalidParamsError (@overleaf/validation-tools) -- handled by
+    // handleValidationError into a 404, same as the old manual check
     expect(ctx.next).to.have.been.calledWith(
-      sinon.match.instanceOf(Errors.NotFoundError)
+      sinon.match.has('name', 'InvalidParamsError')
+    )
+  })
+}
+
+function expectBadRequest() {
+  it('raises a 400', function (ctx) {
+    expect(ctx.next).to.have.been.calledWith(
+      sinon.match.has('name', 'InvalidRequestError')
     )
   })
 }

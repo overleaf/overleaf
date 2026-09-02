@@ -38,6 +38,18 @@ class Blob {
    */
   static MAX_EDITABLE_BYTE_LENGTH_BOUND = 3 * TextOperation.MAX_STRING_LENGTH
 
+  /**
+   * The hash of empty content, which is the same for every project.
+   *
+   * git's hash of an empty blob, as `blobHashFromString` computes it: it is a property of the
+   * content rather than of anything stored, so it can be recognised without looking
+   * anything up. `File.EMPTY_FILE_HASH` is the same value under the name a file's
+   * content goes by.
+   *
+   * @type {string}
+   */
+  static EMPTY_HASH = 'e69de29bb2d1d6434b8b29ae775ad8c2e48c5391'
+
   static NotFoundError = NotFoundError
 
   /**

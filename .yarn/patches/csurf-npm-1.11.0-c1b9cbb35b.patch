@@ -1,0 +1,46 @@
+diff --git a/index.js b/index.js
+index 367bdbafbc71b61daf3907913c3861d155140f07..b31ff2d98186ac29446718edfccc03a3562e796a 100644
+--- a/index.js
++++ b/index.js
+@@ -17,6 +17,30 @@ var Cookie = require('cookie')
+ var createError = require('http-errors')
+ var sign = require('cookie-signature').sign
+ var Tokens = require('csrf')
++// --- Overleaf patch: request-input lockdown compatibility ---
++// The default value getter reads req.body/req.query directly to find the
++// CSRF token submitted alongside a mutating request -- otherwise
++// indistinguishable from unvalidated application code reading raw request
++// input under Overleaf's request-input lockdown (see
++// libraries/validation-tools and the patched express in
++// .yarn/patches/express-npm-*.patch). The lockdown captures the original
++// parsed values in symbol-keyed fields, registered in the global symbol
++// registry (the same ones @overleaf/validation-tools' lockdown.js reads),
++// and only turns the *public* req.query/req.body properties into throwing
++// accessors -- reading through these raw fields instead sidesteps that, and
++// is identical to plain req.query/req.body when the lockdown isn't
++// installed (i.e. for every consumer of this package outside this
++// monorepo).
++var __overleafLockdownInstalled = Symbol.for('overleaf.lockdown.installed')
++var __overleafLockdownRawQuery = Symbol.for('overleaf.lockdown.rawQuery')
++var __overleafLockdownRawBody = Symbol.for('overleaf.lockdown.rawBody')
++function __overleafRawQuery (req) {
++  return req[__overleafLockdownInstalled] ? req[__overleafLockdownRawQuery] : req.query
++}
++function __overleafRawBody (req) {
++  return req[__overleafLockdownInstalled] ? req[__overleafLockdownRawBody] : req.body
++}
++// --- end Overleaf patch ---
+ 
+ /**
+  * Module exports.
+@@ -128,8 +152,8 @@ function csurf (options) {
+  */
+ 
+ function defaultValue (req) {
+-  return (req.body && req.body._csrf) ||
+-    (req.query && req.query._csrf) ||
++  return (__overleafRawBody(req) && __overleafRawBody(req)._csrf) ||
++    (__overleafRawQuery(req) && __overleafRawQuery(req)._csrf) ||
+     (req.headers['csrf-token']) ||
+     (req.headers['xsrf-token']) ||
+     (req.headers['x-csrf-token']) ||

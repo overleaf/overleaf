@@ -1,4 +1,9 @@
 import AbstractMockApi from './AbstractMockApi.mjs'
+import { parseReq, z, zz } from '@overleaf/validation-tools'
+
+const deleteProjectSchema = z.object({
+  params: z.strictObject({ project_id: zz.objectId() }),
+})
 
 class MockHistoryBackupDeletionApi extends AbstractMockApi {
   reset() {
@@ -10,7 +15,8 @@ class MockHistoryBackupDeletionApi extends AbstractMockApi {
   }
 
   deleteProject(req, res) {
-    const projectId = req.params.project_id
+    const { params } = parseReq(req, deleteProjectSchema)
+    const projectId = params.project_id
     const status = this.projects[projectId]
     if (status === 422) {
       return res.sendStatus(422)

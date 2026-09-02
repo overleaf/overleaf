@@ -4,7 +4,7 @@ import { useCombobox } from 'downshift'
 import classnames from 'classnames'
 import countries, { CountryCode } from '../../../data/countries-list'
 import OLFormControl from '@/shared/components/ol/ol-form-control'
-import { DropdownItem } from '@/shared/components/dropdown/dropdown-menu'
+import { OLDropdownItem } from '@/shared/components/ol/ol-dropdown-menu'
 
 type CountryInputProps = {
   setValue: React.Dispatch<React.SetStateAction<CountryCode | null>>
@@ -74,7 +74,7 @@ function Downshift({ setValue, inputRef }: CountryInputProps) {
             {...getItemProps({ item, index })}
             aria-selected={selectedItem?.name === item.name}
           >
-            <DropdownItem
+            <OLDropdownItem
               as="span"
               role={undefined}
               className={classnames({
@@ -86,7 +86,7 @@ function Downshift({ setValue, inputRef }: CountryInputProps) {
               }
             >
               {item.name}
-            </DropdownItem>
+            </OLDropdownItem>
           </li>
         ))}
       </ul>

@@ -68,18 +68,16 @@ describe('DispatchManager', function () {
     describe('_waitForUpdateThenDispatchWorker', function () {
       beforeEach(function () {
         this.project_id = 'project-id-123'
-        this.doc_id = 'doc-id-123'
-        this.doc_key = `${this.project_id}:${this.doc_id}`
         return (this.client.blpop = sinon
           .stub()
-          .callsArgWith(2, null, ['pending-updates-list', this.doc_key]))
+          .callsArgWith(2, null, ['pending-updates-list', this.project_id]))
       })
 
       describe('in the normal case', function () {
         beforeEach(function () {
           this.UpdateManager.processOutstandingUpdatesWithLock = sinon
             .stub()
-            .callsArg(2)
+            .callsArg(1)
           return this.worker._waitForUpdateThenDispatchWorker(this.callback)
         })
 
@@ -91,7 +89,7 @@ describe('DispatchManager', function () {
 
         it('should call processOutstandingUpdatesWithLock', function () {
           return this.UpdateManager.processOutstandingUpdatesWithLock
-            .calledWith(this.project_id, this.doc_id)
+            .calledWith(this.project_id)
             .should.equal(true)
         })
 
@@ -109,7 +107,7 @@ describe('DispatchManager', function () {
         beforeEach(function () {
           this.UpdateManager.processOutstandingUpdatesWithLock = sinon
             .stub()
-            .callsArgWith(2, new Error('a generic error'))
+            .callsArgWith(1, new Error('a generic error'))
           return this.worker._waitForUpdateThenDispatchWorker(this.callback)
         })
 
@@ -126,7 +124,7 @@ describe('DispatchManager', function () {
         beforeEach(function () {
           this.UpdateManager.processOutstandingUpdatesWithLock = sinon
             .stub()
-            .callsArgWith(2, new Errors.DeleteMismatchError())
+            .callsArgWith(1, new Errors.DeleteMismatchError())
           return this.worker._waitForUpdateThenDispatchWorker(this.callback)
         })
 

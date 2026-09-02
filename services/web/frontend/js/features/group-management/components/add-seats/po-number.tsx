@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FormControl, FormGroup, FormLabel } from 'react-bootstrap'
-import FormText from '@/shared/components/form/form-text'
+import OLFormText from '@/shared/components/ol/ol-form-text'
 import OLFormCheckbox from '@/shared/components/ol/ol-form-checkbox'
 
 type PoNumberProps = {
@@ -34,7 +34,7 @@ function PoNumber({ error, validate }: PoNumberProps) {
             onChange={async e => await validate(e.target.value)}
             isInvalid={Boolean(error)}
           />
-          {Boolean(error) && <FormText type="error">{error}</FormText>}
+          {Boolean(error) && <OLFormText type="error">{error}</OLFormText>}
         </FormGroup>
       )}
     </>

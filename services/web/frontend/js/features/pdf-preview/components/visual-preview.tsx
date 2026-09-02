@@ -8,6 +8,10 @@ import { EditorState, StateEffect } from '@codemirror/state'
 import useIsMounted from '@/shared/hooks/use-is-mounted'
 import { docName } from '@/features/source-editor/extensions/doc-name'
 import {
+  filePreview,
+  setFilePreview,
+} from '@/features/source-editor/extensions/file-preview'
+import {
   language,
   Metadata,
   setMetadata,
@@ -88,9 +92,8 @@ export const VisualPreview: FC<{ view: EditorView }> = ({ view }) => {
         visualHighlightStyle,
         tableGeneratorTheme,
         mousedown,
-        atomicDecorations({
-          previewByPath: previewByPathRef.current,
-        }),
+        filePreview(previewByPathRef.current),
+        atomicDecorations,
         markDecorations, // NOTE: must be after atomicDecorations, so that mark decorations wrap inline widgets
         showContentWhenParsed,
         EditorView.contentAttributes.of({ 'aria-label': 'Visual preview' }),
@@ -149,6 +152,16 @@ export const VisualPreview: FC<{ view: EditorView }> = ({ view }) => {
       })
     }
   }, [fileTreeData, view])
+
+  // The ref is what the preview state is built from, so keep it current for the
+  // next time the state is created, and push the new resolver into the existing
+  // state so later decoration rebuilds use it.
+  useEffect(() => {
+    previewByPathRef.current = previewByPath
+    window.setTimeout(() => {
+      viewRef.current?.dispatch(setFilePreview(previewByPath))
+    })
+  }, [previewByPath])
 
   useEffect(() => {
     return () => {

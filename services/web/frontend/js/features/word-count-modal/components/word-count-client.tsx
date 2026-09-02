@@ -3,7 +3,7 @@ import { WordCountData } from '@/features/word-count-modal/components/word-count
 import { WordCountError } from '@/features/word-count-modal/components/word-count-error'
 import { useProjectContext } from '@/shared/context/project-context'
 import useAbortController from '@/shared/hooks/use-abort-controller'
-import { useProjectSettingsContext } from '@/features/editor-left-menu/context/project-settings-context'
+import { useProjectSettingsContext } from '@/features/ide-settings/context/project-settings-context'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'

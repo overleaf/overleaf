@@ -7,6 +7,7 @@ import withContent, { SortBtnProps } from '../sort/with-content'
 import OLTable from '@/shared/components/ol/ol-table'
 import OLFormCheckbox from '@/shared/components/ol/ol-form-checkbox'
 import MaterialIcon from '@/shared/components/material-icon'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 function SortBtn({ onClick, text, iconType, screenReaderText }: SortBtnProps) {
   return (
@@ -30,7 +31,9 @@ function ProjectListTable() {
     sort,
     selectedProjects,
     selectOrUnselectAllProjects,
+    searchText,
   } = useProjectListContext()
+  const isSharedWorkspaceEnabled = useFeatureFlag('shared-workspace')
   const { handleSort } = useSort()
   const checkAllRef = useRef<HTMLInputElement>(null)
 
@@ -150,7 +153,9 @@ function ProjectListTable() {
         ) : (
           <tr className="no-projects">
             <td className="text-center" colSpan={5}>
-              {t('no_projects')}
+              {isSharedWorkspaceEnabled && searchText
+                ? t('no_projects_match_query', { query: searchText })
+                : t('no_projects')}
             </td>
           </tr>
         )}

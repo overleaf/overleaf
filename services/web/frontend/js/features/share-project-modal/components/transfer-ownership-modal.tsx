@@ -10,7 +10,7 @@ import {
   OLModalHeader,
   OLModalTitle,
 } from '@/shared/components/ol/ol-modal'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import OLButton from '@/shared/components/ol/ol-button'
 import { ProjectMember } from '@/shared/context/types/project-metadata'
 import OLSpinner from '@/shared/components/ol/ol-spinner'
@@ -61,11 +61,13 @@ export default function TransferOwnershipModal({
         </p>
         <p>{t('project_ownership_transfer_confirmation_2')}</p>
         {error && (
-          <OLNotification
-            type="error"
-            content={t('generic_something_went_wrong')}
-            className="mb-0 mt-3"
-          />
+          <div className="notification-list">
+            <Notification
+              type="error"
+              content={t('generic_something_went_wrong')}
+              className="mb-0 mt-3"
+            />
+          </div>
         )}
       </OLModalBody>
       <OLModalFooter>

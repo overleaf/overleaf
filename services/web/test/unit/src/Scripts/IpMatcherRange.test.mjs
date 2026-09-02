@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest'
 import { convertCidrRanges } from '../../../../scripts/ip_matcher_ranges.mjs'
 
 describe('IpMatcherRange', function () {

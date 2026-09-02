@@ -1,9 +1,13 @@
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 
 export default function DangerMessage({
   children,
 }: {
   children: React.ReactNode
 }) {
-  return <OLNotification type="error" content={children} />
+  return (
+    <div className="notification-list">
+      <Notification type="error" content={children} />
+    </div>
+  )
 }

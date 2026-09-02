@@ -21,6 +21,7 @@ import {
   TAB_USER_EDIT_EVENT,
   tabsEvents,
 } from '@/features/source-editor/extensions/tabs-listener'
+import useIsNetworkStalled from '@/features/ide-react/hooks/use-is-network-stalled'
 
 type TabProps = {
   tab: EditorFileTab
@@ -65,6 +66,7 @@ export const Tab = memo(function Tab({
   onTabDrop,
 }: TabProps) {
   const { t } = useTranslation()
+  const isDisabledDueToNetworkStall = useIsNetworkStalled()
   const tabRef = useRef<HTMLDivElement>(null)
 
   const [dropTargetPosition, setDropTargetPosition] = useState<
@@ -135,20 +137,20 @@ export const Tab = memo(function Tab({
 
   const onClick = useCallback(
     (e: React.MouseEvent) => {
-      if (e.button === 0) {
+      if (e.button === 0 && !isDisabledDueToNetworkStall) {
         openTab(tab.id)
       }
     },
-    [openTab, tab]
+    [openTab, tab, isDisabledDueToNetworkStall]
   )
 
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.code === 'Enter') {
+      if (e.key === 'Enter' && !isDisabledDueToNetworkStall) {
         openTab(tab.id)
       }
     },
-    [openTab, tab]
+    [openTab, tab, isDisabledDueToNetworkStall]
   )
 
   const onCloseClick = useCallback(
@@ -213,6 +215,7 @@ export const Tab = memo(function Tab({
       onDoubleClick={onDoubleClick}
       role="tab"
       aria-selected={isSelected}
+      aria-disabled={isDisabledDueToNetworkStall}
       key={tab.id}
       onClick={onClick}
       onMouseUp={onMouseUp}
@@ -225,6 +228,7 @@ export const Tab = memo(function Tab({
         'tab-drop-left': dropTargetPosition === 'left',
         'tab-drop-right': dropTargetPosition === 'right',
         'tab-temporary': tab.lifetime === 'temporary',
+        'tab-disabled': isDisabledDueToNetworkStall,
       })}
     >
       <div className="editor-file-tab-content">

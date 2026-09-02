@@ -55,6 +55,20 @@ describe('Flushing old queues', function () {
     nock.cleanAll()
   })
 
+  describe('flushing a project with the background flag', function () {
+    // document-updater's background flush (HistoryManager.js
+    // flushProjectChangesAsync) sends ?background=true on the plain
+    // project flush route; project-history does not read the flag, it
+    // just needs to accept it rather than reject it as an unknown field.
+    it('should accept the background query flag', async function () {
+      const response = await fetchNothing(
+        `http://127.0.0.1:3054/project/${this.projectId}/flush?background=true`,
+        { method: 'POST' }
+      )
+      expect(response.status).to.equal(204)
+    })
+  })
+
   describe('retrying an unflushed project', function () {
     describe('when the update is older than the cutoff', function () {
       beforeEach(async function () {
@@ -165,6 +179,10 @@ describe('Flushing old queues', function () {
           expect(statusCode).to.equal(423)
         } finally {
           await lockRClient.del(key)
+          // the lock timeout above is recorded as a failure (ErrorRecorder
+          // categorizes it as "lock-overrun"); clear it so it doesn't leak
+          // into other tests' failure-count assertions (e.g. RetryTests)
+          await ProjectHistoryClient.clearFailure(this.projectId)
         }
       })
     })

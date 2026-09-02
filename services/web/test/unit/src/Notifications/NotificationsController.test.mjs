@@ -1,5 +1,6 @@
-import { vi } from 'vitest'
+import { afterEach, beforeEach, describe, it, vi } from 'vitest'
 import sinon from 'sinon'
+import { setReqValidationModeForTests } from '@overleaf/validation-tools'
 
 const modulePath = new URL(
   '../../../../app/src/Features/Notifications/NotificationsController.mjs',
@@ -8,7 +9,7 @@ const modulePath = new URL(
 
 describe('NotificationsController', function () {
   const userId = '123nd3ijdks'
-  const notificationId = '123njdskj9jlk'
+  const notificationId = '507f1f77bcf86cd799439011'
 
   beforeEach(async function (ctx) {
     ctx.handler = {
@@ -50,6 +51,10 @@ describe('NotificationsController', function () {
     )
 
     ctx.controller = (await import(modulePath)).default
+  })
+
+  afterEach(function () {
+    setReqValidationModeForTests(null)
   })
 
   it('should ask the handler for all unread notifications', async function (ctx) {
@@ -96,6 +101,28 @@ describe('NotificationsController', function () {
           end: () => {},
         }),
       })
+    })
+  })
+
+  describe('request validation', function () {
+    beforeEach(function () {
+      setReqValidationModeForTests('enforce')
+    })
+
+    it('should reject a malformed notification id on markNotificationAsRead', function (ctx) {
+      ctx.req.params.notificationId = 'not-an-object-id'
+      ;(() =>
+        ctx.controller.markNotificationAsRead(ctx.req, {
+          sendStatus: sinon.stub(),
+        })).should.throw()
+    })
+
+    it('should reject a malformed notification id on getNotification', function (ctx) {
+      ctx.req.params.notificationId = 'not-an-object-id'
+      ;(() =>
+        ctx.controller.getNotification(ctx.req, {
+          json: sinon.stub(),
+        })).should.throw()
     })
   })
 })

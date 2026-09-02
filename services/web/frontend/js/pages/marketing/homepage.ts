@@ -1,5 +1,6 @@
 import '../../marketing'
 import '@/infrastructure/hotjar'
+import getMeta from '@/utils/meta'
 
 interface FrameOptions {
   buildTime: number
@@ -12,7 +13,7 @@ interface Frame {
   time: number
 }
 
-function homepageAnimation(homepageAnimationEl: HTMLElement) {
+function homepageAnimation(homepageAnimationEl: HTMLElement, words: string[]) {
   function createFrames(
     word: string,
     { buildTime, holdTime, breakTime }: FrameOptions
@@ -50,12 +51,13 @@ function homepageAnimation(homepageAnimationEl: HTMLElement) {
   const frames: Frame[] = [
     // 1.5s pause before starting
     { before: '', time: 1500 },
-    ...createFrames('articles', opts),
-    ...createFrames('theses', opts),
-    ...createFrames('reports', opts),
-    ...createFrames('presentations', opts),
-    // 5s pause on 'anything' frame
-    ...createFrames('anything', { ...opts, holdTime: 5000 }),
+    ...words.flatMap((word, index) =>
+      createFrames(
+        word,
+        // 5s pause on the final word
+        index === words.length - 1 ? { ...opts, holdTime: 5000 } : opts
+      )
+    ),
   ]
 
   let index = 0
@@ -63,7 +65,7 @@ function homepageAnimation(homepageAnimationEl: HTMLElement) {
     const frame = frames[index]
     index = (index + 1) % frames.length
 
-    homepageAnimationEl.innerHTML = frame.before
+    homepageAnimationEl.textContent = frame.before
     setTimeout(nextFrame, frame.time)
   }
 
@@ -78,9 +80,13 @@ const reducedMotionReduce: MediaQueryList = window.matchMedia(
 )
 
 if (homepageAnimationEl) {
-  if (reducedMotionReduce.matches) {
-    homepageAnimationEl.innerHTML = 'anything'
-  } else {
-    homepageAnimation(homepageAnimationEl)
+  const animatedWords = getMeta('ol-homepageAnimatedWords') || []
+
+  if (animatedWords.length > 0) {
+    if (reducedMotionReduce.matches) {
+      homepageAnimationEl.textContent = animatedWords[animatedWords.length - 1]
+    } else {
+      homepageAnimation(homepageAnimationEl, animatedWords)
+    }
   }
 }

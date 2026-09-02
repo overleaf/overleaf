@@ -9,8 +9,19 @@ import EntityConfigs from './UserMembershipEntityConfigs.mjs'
 import Errors from '../Errors/Errors.js'
 import HttpErrorHandler from '../Errors/HttpErrorHandler.mjs'
 import TemplatesManager from '../Templates/TemplatesManager.mjs'
-import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
+import {
+  z,
+  zz,
+  parseReq,
+  getRawReqInput,
+} from '../../infrastructure/Validation.mjs'
 import AdminAuthorizationHelper from '../Helpers/AdminAuthorizationHelper.mjs'
+
+/**
+ * @typedef {import('express').Request} Request
+ * @typedef {import('express').Response} Response
+ * @typedef {import('express').NextFunction} NextFunction
+ */
 
 const { useAdminCapabilities, useNonAdminDomainCapabilities } =
   AdminAuthorizationHelper
@@ -286,18 +297,34 @@ const fetchEntitySchema = z.discriminatedUnion('entityName', [
   PostgresIdEntitySchema,
 ])
 
+const requireGraphAccessSchema = z.object({
+  query: z.object({
+    resource_type: z.string().optional(),
+    // interpolated into req.url below to re-dispatch the request
+    // internally -- must not be able to introduce an extra path segment,
+    // query or fragment separator.
+    resource_id: zz.routeSegment().optional(),
+  }),
+  params: z.object({
+    graph: zz.routeSegment().optional(),
+  }),
+})
+
 // graphs access is an edge-case:
 // - the entity id is in `req.query.resource_id`. It must be set as
 // `req.params.id`
 // - the entity name is in `req.query.resource_type` and is used to find the
 // require middleware depending on the entity name
 /**
- * @param {any} req
- * @param {any} res
- * @param {any} next
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 function requireGraphAccess(req, res, next) {
-  const entityName = req.query.resource_type
+  const { query, params } = parseReq(req, requireGraphAccessSchema, {
+    logOnly: true,
+  })
+  const entityName = query.resource_type
   if (!entityName) {
     return HttpErrorHandler.notFound(req, res, 'resource_type param missing')
   }
@@ -316,15 +343,15 @@ function requireGraphAccess(req, res, next) {
   }
 
   // call next router with fixed params to pass it to the correct middleware chain
-  const { graph } = req.params
+  const { graph } = params
   const entityRoute = entityName === 'splitTest' ? 'split-test' : entityName
 
   // all other routes go through analytics, which map undefined graph type to index (to fetch all graphs)
   // conversion still goes directly to v1, which can not handle an undefined graph param
   if (!graph?.length && entityRoute === 'conversion') {
-    req.url = `/graphs/conversion/index/${req.query.resource_id}`
+    req.url = `/graphs/conversion/index/${query.resource_id}`
   } else {
-    req.url = `/graphs/${entityRoute}/${graph}/${req.query.resource_id}`
+    req.url = `/graphs/${entityRoute}/${graph}/${query.resource_id}`
   }
   next('route')
 }
@@ -356,8 +383,12 @@ function fetchPublisherFromTemplate() {
   ) => {
     if (req.template.brand.slug) {
       // set the id as the publisher's id as it's the entity used for access
-      // control
-      req.params.id = req.template.brand.slug
+      // control. The immediately-following fetchEntity() call validates this
+      // aliased value via fetchEntitySchema, so it isn't skipping validation
+      // — it just can't be validated until it's written (case 4:
+      // pre-validation param aliasing; parseReq() returns a decoupled copy,
+      // so fetchEntity()'s later parseReq() call needs the live raw field).
+      getRawReqInput(req).params.id = req.template.brand.slug
       return fetchEntity()(req, res, next)
     } else {
       return next()
@@ -376,8 +407,14 @@ function requireEntity() {
       return next()
     }
 
+    // fetchEntity() (which always runs immediately before this middleware)
+    // already validated params.id via fetchEntitySchema; re-parsing is
+    // idempotent and keeps the two in sync.
+    const { params } = parseReq(req, fetchEntitySchema, {
+      logOnly: true,
+    })
     throw new Errors.NotFoundError(
-      `no '${req.entityName}' entity with '${req.params.id}'`
+      `no '${req.entityName}' entity with '${params.id}'`
     )
   }
 }
@@ -396,16 +433,32 @@ function requireEntityOrCreate() {
       return next()
     }
 
+    // fetchEntity() (which always runs immediately before this middleware)
+    // already validated params.id via fetchEntitySchema; re-parsing is
+    // idempotent and keeps the two in sync.
+    const { params } = parseReq(req, fetchEntitySchema, {
+      logOnly: true,
+    })
     if (UserMembershipAuthorization.hasAdminAccess(req)) {
-      res.redirect(`/entities/${req.entityName}/create/${req.params.id}`)
+      res.redirect(`/entities/${req.entityName}/create/${params.id}`)
       return
     }
 
     throw new Errors.NotFoundError(
-      `no '${req.entityName}' entity with '${req.params.id}'`
+      `no '${req.entityName}' entity with '${params.id}'`
     )
   }
 }
+
+const fetchV1TemplateSchema = z.object({
+  // v1's own docs.doc_id column (Api::V2::TemplatesController#show's
+  // `find_by!(doc_id: params[:id])`) is a Postgres integer -- never a Mongo
+  // ObjectId or slug -- so this is spliced into fetchFromV1's `new URL(...)`
+  // path as a real, bounded integer, not an arbitrary route segment.
+  params: z.object({
+    id: z.coerce.number().int().positive(),
+  }),
+})
 
 // fetch the template from v1, and set it in the request
 function fetchV1Template() {
@@ -415,7 +468,10 @@ function fetchV1Template() {
       /** @type {any} */ res,
       /** @type {any} */ next
     ) => {
-      const templateId = req.params.id
+      const { params } = parseReq(req, fetchV1TemplateSchema, {
+        logOnly: true,
+      })
+      const templateId = params.id
       const body = await TemplatesManager.promises.fetchFromV1(templateId)
       req.template = {
         id: body.id,

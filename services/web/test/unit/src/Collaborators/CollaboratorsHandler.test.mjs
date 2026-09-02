@@ -1,4 +1,4 @@
-import { vi, expect } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import path from 'node:path'
 import sinon from 'sinon'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
@@ -137,6 +137,7 @@ describe('CollaboratorsHandler', function () {
                 readOnly_refs: ctx.userId,
                 pendingEditor_refs: ctx.userId,
                 pendingReviewer_refs: ctx.userId,
+                editAccessRequests: { userId: ctx.userId },
                 tokenAccessReadOnly_refs: ctx.userId,
                 tokenAccessReadAndWrite_refs: ctx.userId,
                 archived: ctx.userId,
@@ -452,6 +453,7 @@ describe('CollaboratorsHandler', function () {
                 readOnly_refs: ctx.userId,
                 pendingEditor_refs: ctx.userId,
                 pendingReviewer_refs: ctx.userId,
+                editAccessRequests: { userId: ctx.userId },
                 tokenAccessReadOnly_refs: ctx.userId,
                 tokenAccessReadAndWrite_refs: ctx.userId,
                 archived: ctx.userId,
@@ -568,6 +570,15 @@ describe('CollaboratorsHandler', function () {
         )
         .chain('exec')
         .resolves()
+      ctx.ProjectMock.expects('updateMany')
+        .withArgs(
+          { 'editAccessRequests.userId': ctx.fromUserId },
+          {
+            $pull: { editAccessRequests: { userId: ctx.fromUserId } },
+          }
+        )
+        .chain('exec')
+        .resolves()
     })
 
     describe('successfully', function () {
@@ -610,6 +621,8 @@ describe('CollaboratorsHandler', function () {
               { collaberator_refs: ctx.userId },
               { readOnly_refs: ctx.userId },
               { reviewer_refs: ctx.userId },
+              { tokenAccessReadOnly_refs: ctx.userId },
+              { tokenAccessReadAndWrite_refs: ctx.userId },
             ],
           },
           {
@@ -618,6 +631,9 @@ describe('CollaboratorsHandler', function () {
               pendingEditor_refs: ctx.userId,
               pendingReviewer_refs: ctx.userId,
               reviewer_refs: ctx.userId,
+              editAccessRequests: { userId: ctx.userId },
+              tokenAccessReadOnly_refs: ctx.userId,
+              tokenAccessReadAndWrite_refs: ctx.userId,
             },
             $addToSet: { readOnly_refs: ctx.userId },
           }
@@ -640,6 +656,8 @@ describe('CollaboratorsHandler', function () {
               { collaberator_refs: ctx.userId },
               { readOnly_refs: ctx.userId },
               { reviewer_refs: ctx.userId },
+              { tokenAccessReadOnly_refs: ctx.userId },
+              { tokenAccessReadAndWrite_refs: ctx.userId },
             ],
           },
           {
@@ -649,6 +667,9 @@ describe('CollaboratorsHandler', function () {
               reviewer_refs: ctx.userId,
               pendingEditor_refs: ctx.userId,
               pendingReviewer_refs: ctx.userId,
+              editAccessRequests: { userId: ctx.userId },
+              tokenAccessReadOnly_refs: ctx.userId,
+              tokenAccessReadAndWrite_refs: ctx.userId,
             },
           }
         )
@@ -679,6 +700,8 @@ describe('CollaboratorsHandler', function () {
                 { collaberator_refs: ctx.userId },
                 { readOnly_refs: ctx.userId },
                 { reviewer_refs: ctx.userId },
+                { tokenAccessReadOnly_refs: ctx.userId },
+                { tokenAccessReadAndWrite_refs: ctx.userId },
               ],
             },
             {
@@ -689,6 +712,9 @@ describe('CollaboratorsHandler', function () {
                 collaberator_refs: ctx.userId,
                 pendingEditor_refs: ctx.userId,
                 pendingReviewer_refs: ctx.userId,
+                editAccessRequests: { userId: ctx.userId },
+                tokenAccessReadOnly_refs: ctx.userId,
+                tokenAccessReadAndWrite_refs: ctx.userId,
               },
             }
           )
@@ -722,6 +748,8 @@ describe('CollaboratorsHandler', function () {
                 { collaberator_refs: ctx.userId },
                 { readOnly_refs: ctx.userId },
                 { reviewer_refs: ctx.userId },
+                { tokenAccessReadOnly_refs: ctx.userId },
+                { tokenAccessReadAndWrite_refs: ctx.userId },
               ],
             },
             {
@@ -732,6 +760,9 @@ describe('CollaboratorsHandler', function () {
                 collaberator_refs: ctx.userId,
                 pendingEditor_refs: ctx.userId,
                 pendingReviewer_refs: ctx.userId,
+                editAccessRequests: { userId: ctx.userId },
+                tokenAccessReadOnly_refs: ctx.userId,
+                tokenAccessReadAndWrite_refs: ctx.userId,
               },
             }
           )
@@ -754,6 +785,8 @@ describe('CollaboratorsHandler', function () {
               { collaberator_refs: ctx.userId },
               { readOnly_refs: ctx.userId },
               { reviewer_refs: ctx.userId },
+              { tokenAccessReadOnly_refs: ctx.userId },
+              { tokenAccessReadAndWrite_refs: ctx.userId },
             ],
           },
           {
@@ -765,6 +798,9 @@ describe('CollaboratorsHandler', function () {
               collaberator_refs: ctx.userId,
               reviewer_refs: ctx.userId,
               pendingReviewer_refs: ctx.userId,
+              editAccessRequests: { userId: ctx.userId },
+              tokenAccessReadOnly_refs: ctx.userId,
+              tokenAccessReadAndWrite_refs: ctx.userId,
             },
           }
         )
@@ -787,6 +823,8 @@ describe('CollaboratorsHandler', function () {
               { collaberator_refs: ctx.userId },
               { readOnly_refs: ctx.userId },
               { reviewer_refs: ctx.userId },
+              { tokenAccessReadOnly_refs: ctx.userId },
+              { tokenAccessReadAndWrite_refs: ctx.userId },
             ],
           },
           {
@@ -798,6 +836,9 @@ describe('CollaboratorsHandler', function () {
               collaberator_refs: ctx.userId,
               reviewer_refs: ctx.userId,
               pendingEditor_refs: ctx.userId,
+              editAccessRequests: { userId: ctx.userId },
+              tokenAccessReadOnly_refs: ctx.userId,
+              tokenAccessReadAndWrite_refs: ctx.userId,
             },
           }
         )
@@ -846,6 +887,126 @@ describe('CollaboratorsHandler', function () {
         auditInfo.ipAddress,
         { userId: ctx.userId, role: 'Viewer' }
       )
+    })
+  })
+
+  describe('requestAccess', function () {
+    it('rebuilds the array via an aggregation pipeline and reports isNew=true', async function (ctx) {
+      ctx.ProjectMock.expects('findOneAndUpdate')
+        .withArgs(
+          { _id: ctx.project._id },
+          sinon.match(update => {
+            // pipeline update: [{ $set: { editAccessRequests: { $concatArrays: [...] } } }]
+            const stage = Array.isArray(update) && update[0]?.$set
+            const concat = stage?.editAccessRequests?.$concatArrays
+            const filter = concat?.[0]?.$filter
+            const appended = concat?.[1]?.[0]
+            return (
+              // the entry is stored as an ObjectId (not a session string) so
+              // later $pulls match — compare by value
+              filter?.cond?.$ne?.[1] instanceof ObjectId &&
+              filter.cond.$ne[1].equals(ctx.userId) &&
+              appended &&
+              appended.userId instanceof ObjectId &&
+              appended.userId.equals(ctx.userId) &&
+              appended.privilegeLevel === 'readAndWrite' &&
+              appended.requestedAt instanceof Date
+            )
+          }),
+          sinon.match({ returnDocument: 'before' })
+        )
+        .chain('exec')
+        // before-doc has no entry for this user -> isNew
+        .resolves({ _id: ctx.project._id, editAccessRequests: [] })
+      const result = await ctx.CollaboratorsHandler.promises.requestAccess(
+        ctx.project._id,
+        ctx.userId,
+        'readAndWrite'
+      )
+      expect(result).to.deep.equal({ isNew: true })
+    })
+
+    it('reports isNew=false when the user already had a request', async function (ctx) {
+      ctx.ProjectMock.expects('findOneAndUpdate')
+        .chain('exec')
+        .resolves({
+          _id: ctx.project._id,
+          editAccessRequests: [
+            { userId: ctx.userId, privilegeLevel: 'readAndWrite' },
+          ],
+        })
+      const result = await ctx.CollaboratorsHandler.promises.requestAccess(
+        ctx.project._id,
+        ctx.userId,
+        'review'
+      )
+      expect(result).to.deep.equal({ isNew: false })
+    })
+
+    it('reports isNew=false when the project was not found', async function (ctx) {
+      ctx.ProjectMock.expects('findOneAndUpdate').chain('exec').resolves(null)
+      const result = await ctx.CollaboratorsHandler.promises.requestAccess(
+        ctx.project._id,
+        ctx.userId,
+        'readAndWrite'
+      )
+      expect(result).to.deep.equal({ isNew: false })
+    })
+
+    it('rejects unsupported privilege levels', async function (ctx) {
+      await expect(
+        ctx.CollaboratorsHandler.promises.requestAccess(
+          ctx.project._id,
+          ctx.userId,
+          'readOnly'
+        )
+      ).to.be.rejected
+      await expect(
+        ctx.CollaboratorsHandler.promises.requestAccess(
+          ctx.project._id,
+          ctx.userId,
+          'owner'
+        )
+      ).to.be.rejected
+    })
+  })
+
+  describe('declineAccessRequest', function () {
+    it('pulls the entry and reports the removed level from the pre-image', async function (ctx) {
+      ctx.ProjectMock.expects('findOneAndUpdate')
+        .withArgs(
+          { _id: ctx.project._id },
+          { $pull: { editAccessRequests: { userId: ctx.userId } } },
+          sinon.match({ returnDocument: 'before' })
+        )
+        .chain('exec')
+        .resolves({
+          _id: ctx.project._id,
+          editAccessRequests: [
+            { userId: ctx.userId, privilegeLevel: 'review' },
+          ],
+        })
+      const result =
+        await ctx.CollaboratorsHandler.promises.declineAccessRequest(
+          ctx.project._id,
+          ctx.userId
+        )
+      expect(result).to.deep.equal({ removed: true, privilegeLevel: 'review' })
+    })
+
+    it('reports removed=false when the user had no pending request', async function (ctx) {
+      ctx.ProjectMock.expects('findOneAndUpdate')
+        .chain('exec')
+        .resolves({ _id: ctx.project._id, editAccessRequests: [] })
+      const result =
+        await ctx.CollaboratorsHandler.promises.declineAccessRequest(
+          ctx.project._id,
+          ctx.userId
+        )
+      expect(result).to.deep.equal({
+        removed: false,
+        privilegeLevel: undefined,
+      })
     })
   })
 })

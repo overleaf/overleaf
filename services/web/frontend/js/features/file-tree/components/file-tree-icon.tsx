@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { newEditorIconTypeFromName } from '../util/icon-type-from-name'
+import iconTypeFromName from '../util/icon-type-from-name'
 import classnames from 'classnames'
 import MaterialIcon from '@/shared/components/material-icon'
 
@@ -20,7 +20,7 @@ function FileTreeIcon({
     <>
       <MaterialIcon
         unfilled
-        type={newEditorIconTypeFromName(name)}
+        type={iconTypeFromName(name)}
         className={className}
       />
       {isLinkedFile && (

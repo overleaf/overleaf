@@ -65,9 +65,6 @@ describe('WorkbenchRateLimiter', function () {
         featureFlagEnabledForMongoUser: sinon.stub().resolves(true),
       },
     }
-    ctx.SplitTestHandler.promises.getAssignmentForUser
-      .withArgs(ctx.alphaUserId, 'ai-workbench-release')
-      .resolves({ variant: 'enabled' })
 
     vi.doMock('../../../../app/src/infrastructure/mongodb', () => ({
       ObjectId,
@@ -339,6 +336,73 @@ describe('WorkbenchRateLimiter', function () {
       const created = await UserFeatureUsage.findById(ctx.alphaUserId).exec()
       expect(created).to.exist
       expect(created.features.aiWorkbench.usage).to.equal(0)
+    })
+  })
+
+  describe('getRemainingTokens', function () {
+    const PERIOD_MS = 24 * 60 * 60 * 1000
+
+    beforeEach(async function () {
+      await UserFeatureUsage.deleteMany({}).exec()
+    })
+
+    it('reports usesLeft and future resetDate inside the period', async function (ctx) {
+      // whole second: `resetDate` round-trips through Date.toString()
+      const periodStart = new Date(
+        Math.floor((Date.now() - PERIOD_MS + 60 * 1000) / 1000) * 1000
+      )
+      await new UserFeatureUsage({
+        _id: ctx.alphaUserId,
+        features: {
+          aiWorkbench: { usage: 3_000_000, periodStart },
+        },
+      }).save()
+
+      const result = await ctx.WorkbenchRateLimiter.getRemainingTokens(
+        ctx.alphaUserId
+      )
+      expect(result.aiWorkbench.remainingTokens).to.equal(5_000_000)
+      expect(new Date(result.aiWorkbench.resetDate).getTime()).to.equal(
+        periodStart.getTime() + PERIOD_MS
+      )
+    })
+
+    it('reports the full allowance and a fresh resetDate once the period has lapsed', async function (ctx) {
+      // whole second: `resetDate` round-trips through Date.toString()
+      const periodStart = new Date(
+        Math.floor((Date.now() - PERIOD_MS - 60 * 1000) / 1000) * 1000
+      )
+      await new UserFeatureUsage({
+        _id: ctx.alphaUserId,
+        features: {
+          aiWorkbench: { usage: 7_000_000, periodStart },
+        },
+      }).save()
+
+      const result = await ctx.WorkbenchRateLimiter.getRemainingTokens(
+        ctx.alphaUserId
+      )
+      expect(result.aiWorkbench.remainingTokens).to.equal(8_000_000)
+      expect(
+        new Date(result.aiWorkbench.resetDate).getTime()
+      ).to.be.approximately(Date.now() + PERIOD_MS, 5000)
+    })
+
+    it('clamps remainingTokens to 0 when usage exceeds the allowance', async function (ctx) {
+      await new UserFeatureUsage({
+        _id: ctx.alphaUserId,
+        features: {
+          aiWorkbench: {
+            usage: 20_000_000,
+            periodStart: new Date(),
+          },
+        },
+      }).save()
+
+      const result = await ctx.WorkbenchRateLimiter.getRemainingTokens(
+        ctx.alphaUserId
+      )
+      expect(result.aiWorkbench.remainingTokens).to.equal(0)
     })
   })
 

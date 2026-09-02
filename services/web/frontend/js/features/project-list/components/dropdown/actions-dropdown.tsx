@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next'
 import {
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownItem,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import CopyProjectButton from '../table/cells/action-buttons/copy-project-button'
 import DownloadProjectButton from '../table/cells/action-buttons/download-project-button'
 import ArchiveProjectButton from '../table/cells/action-buttons/archive-project-button'
@@ -27,60 +27,60 @@ function ActionsDropdown({ project }: ActionDropdownProps) {
   const { t } = useTranslation()
 
   return (
-    <Dropdown align="end">
-      <DropdownToggle
+    <OLDropdown align="end">
+      <OLDropdownToggle
         id={`project-actions-dropdown-toggle-btn-${project.id}`}
         bsPrefix="dropdown-table-button-toggle"
       >
         <MaterialIcon type="more_vert" accessibilityLabel={t('actions')} />
-      </DropdownToggle>
-      <DropdownMenu flip={false}>
+      </OLDropdownToggle>
+      <OLDropdownMenu flip={false}>
         <RenameProjectButton project={project}>
           {(text, handleOpenModal) => (
             <li role="none">
-              <DropdownItem
+              <OLDropdownItem
                 as="button"
                 tabIndex={-1}
                 onClick={handleOpenModal}
                 leadingIcon="edit"
               >
                 {text}
-              </DropdownItem>
+              </OLDropdownItem>
             </li>
           )}
         </RenameProjectButton>
         <CopyProjectButton project={project}>
           {(text, handleOpenModal) => (
             <li role="none">
-              <DropdownItem
+              <OLDropdownItem
                 as="button"
                 tabIndex={-1}
                 onClick={handleOpenModal}
                 leadingIcon="file_copy"
               >
                 {text}
-              </DropdownItem>
+              </OLDropdownItem>
             </li>
           )}
         </CopyProjectButton>
         <DownloadProjectButton project={project}>
           {(text, downloadProject) => (
             <li role="none">
-              <DropdownItem
+              <OLDropdownItem
                 as="button"
                 tabIndex={-1}
                 onClick={downloadProject}
                 leadingIcon="download"
               >
                 {text}
-              </DropdownItem>
+              </OLDropdownItem>
             </li>
           )}
         </DownloadProjectButton>
         <CompileAndDownloadProjectPDFButton project={project}>
           {(text, pendingCompile, downloadProject) => (
             <li role="none">
-              <DropdownItem
+              <OLDropdownItem
                 as="button"
                 tabIndex={-1}
                 onClick={e => {
@@ -99,96 +99,96 @@ function ActionsDropdown({ project }: ActionDropdownProps) {
                 }
               >
                 {text}
-              </DropdownItem>
+              </OLDropdownItem>
             </li>
           )}
         </CompileAndDownloadProjectPDFButton>
         <ArchiveProjectButton project={project}>
           {(text, handleOpenModal) => (
             <li role="none">
-              <DropdownItem
+              <OLDropdownItem
                 as="button"
                 tabIndex={-1}
                 onClick={handleOpenModal}
                 leadingIcon="inbox"
               >
                 {text}
-              </DropdownItem>
+              </OLDropdownItem>
             </li>
           )}
         </ArchiveProjectButton>
         <TrashProjectButton project={project}>
           {(text, handleOpenModal) => (
             <li role="none">
-              <DropdownItem
+              <OLDropdownItem
                 as="button"
                 tabIndex={-1}
                 onClick={handleOpenModal}
                 leadingIcon="delete"
               >
                 {text}
-              </DropdownItem>
+              </OLDropdownItem>
             </li>
           )}
         </TrashProjectButton>
         <UnarchiveProjectButton project={project}>
           {(text, unarchiveProject) => (
             <li role="none">
-              <DropdownItem
+              <OLDropdownItem
                 as="button"
                 tabIndex={-1}
                 onClick={unarchiveProject}
                 leadingIcon="restore_page"
               >
                 {text}
-              </DropdownItem>
+              </OLDropdownItem>
             </li>
           )}
         </UnarchiveProjectButton>
         <UntrashProjectButton project={project}>
           {(text, untrashProject) => (
             <li role="none">
-              <DropdownItem
+              <OLDropdownItem
                 as="button"
                 tabIndex={-1}
                 onClick={untrashProject}
                 leadingIcon="restore_page"
               >
                 {text}
-              </DropdownItem>
+              </OLDropdownItem>
             </li>
           )}
         </UntrashProjectButton>
         <LeaveProjectButton project={project}>
           {(text, handleOpenModal) => (
             <li role="none">
-              <DropdownItem
+              <OLDropdownItem
                 as="button"
                 tabIndex={-1}
                 onClick={handleOpenModal}
                 leadingIcon="logout"
               >
                 {text}
-              </DropdownItem>
+              </OLDropdownItem>
             </li>
           )}
         </LeaveProjectButton>
         <DeleteProjectButton project={project}>
           {(text, handleOpenModal) => (
             <li role="none">
-              <DropdownItem
+              <OLDropdownItem
                 as="button"
                 tabIndex={-1}
                 onClick={handleOpenModal}
                 leadingIcon="block"
               >
                 {text}
-              </DropdownItem>
+              </OLDropdownItem>
             </li>
           )}
         </DeleteProjectButton>
-      </DropdownMenu>
-    </Dropdown>
+      </OLDropdownMenu>
+    </OLDropdown>
   )
 }
 

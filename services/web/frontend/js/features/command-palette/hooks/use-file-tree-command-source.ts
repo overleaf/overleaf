@@ -6,12 +6,17 @@ import MiniSearch from 'minisearch'
 import { findInTree } from '@/features/file-tree/util/find-in-tree'
 import { debugConsole } from '@/utils/debugging'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import useIsNetworkStalled from '@/features/ide-react/hooks/use-is-network-stalled'
 
 type FlatFileTree = { path: string; name: string; id: string }[]
+
+const FILE_POSITION_REGEX = /:(\d+)(?:,(\d+))?$/
 
 const useFileTreeCommandSource = (): CommandPaletteSource => {
   const { fileTreeData } = useFileTreeData()
   const { openDocWithId, openFileWithId } = useEditorManagerContext()
+  const networkStalled = useIsNetworkStalled()
+
   const flatFileTree = useMemo(
     () => flattenFileTree(fileTreeData),
     [fileTreeData]
@@ -22,7 +27,11 @@ const useFileTreeCommandSource = (): CommandPaletteSource => {
   )
 
   const onSelect = useCallback(
-    async (id: string) => {
+    async (
+      id: string,
+      line: number | undefined,
+      column: number | undefined
+    ) => {
       if (!fileTreeData) {
         return
       }
@@ -31,7 +40,10 @@ const useFileTreeCommandSource = (): CommandPaletteSource => {
         return
       }
       if (file.type === 'doc') {
-        await openDocWithId(file.entity._id)
+        await openDocWithId(file.entity._id, {
+          gotoLine: line,
+          gotoColumn: column,
+        })
       } else if (file.type === 'fileRef') {
         openFileWithId(file.entity._id)
       } else {
@@ -42,6 +54,9 @@ const useFileTreeCommandSource = (): CommandPaletteSource => {
   )
 
   const defaults = useCallback((): CommandPaletteSearchResult[] => {
+    if (networkStalled) {
+      return []
+    }
     if (!flatFileTree) {
       return []
     }
@@ -49,35 +64,54 @@ const useFileTreeCommandSource = (): CommandPaletteSource => {
       .slice(0, 10)
       .map(({ path, name, id }) => ({
         title: name,
-        description: path === name ? undefined : path,
-        onSelect: () => onSelect(id),
+        description:
+          path === name ? undefined : path.split('/').slice(0, -1).join('/'),
+        onSelect: () => onSelect(id, undefined, undefined),
         score: 1,
+        eventSegmentation: { source: 'file' },
       }))
 
     return files
-  }, [flatFileTree, onSelect])
+  }, [flatFileTree, onSelect, networkStalled])
 
   const source: CommandPaletteSource = useMemo(
     () => ({
       id: 'file-tree',
       search(query) {
+        if (networkStalled) {
+          return []
+        }
         if (!index) {
           return []
         }
+        const fileLocationMatch = query.match(FILE_POSITION_REGEX)
+        let line: number | undefined = undefined
+        let column: number | undefined = undefined
+        if (fileLocationMatch) {
+          line = parseInt(fileLocationMatch[1], 10)
+          column = fileLocationMatch[2]
+            ? parseInt(fileLocationMatch[2], 10)
+            : undefined
+          query = query.slice(0, fileLocationMatch.index)
+        }
+
         const result = index.search(query, {
           prefix: true,
           fuzzy: term => (term.length > 3 ? 0.2 : false),
         })
+
         return result.map(({ path, name, id, score }) => ({
           title: name,
-          description: path === name ? undefined : path,
-          onSelect: () => onSelect(id),
+          description:
+            path === name ? undefined : path.split('/').slice(0, -1).join('/'),
+          onSelect: () => onSelect(id, line, column),
           score,
+          eventSegmentation: { source: 'file' },
         }))
       },
       defaults,
     }),
-    [index, onSelect, defaults]
+    [index, onSelect, defaults, networkStalled]
   )
   return source
 }

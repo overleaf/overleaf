@@ -8,10 +8,20 @@ const Metrics = require('./Metrics')
 const HistoryManager = require('./HistoryManager')
 const Errors = require('./Errors')
 const RangesManager = require('./RangesManager')
+const HistoryConversions = require('./HistoryConversions')
 const { extractOriginOrSource } = require('./Utils')
 const { getTotalSizeOfLines } = require('./Limits')
 const Settings = require('@overleaf/settings')
-const { StringFileData } = require('overleaf-editor-core')
+const RangesTracker = require('@overleaf/ranges-tracker')
+const { buildSparseChangePreviews } = require('./TrackedChangePreview')
+const {
+  StringFileData,
+  SetCommentStateOperation,
+  DeleteCommentOperation,
+} = require('overleaf-editor-core')
+const {
+  diffAsTextOperation,
+} = require('overleaf-editor-core/lib/diff_as_text_operation')
 
 const MAX_UNFLUSHED_AGE = Settings.maxUnflushedAgeMs // document should be flushed to mongo this time after a change
 
@@ -131,14 +141,20 @@ const DocumentManager = {
     }
   },
 
-  async appendToDoc(projectId, docId, linesToAppend, originOrSource, userId) {
+  async appendToDoc(
+    projectId,
+    docId,
+    linesToAppend,
+    originOrSource,
+    userId,
+    trackChanges
+  ) {
     let { lines: currentLines, type } = await DocumentManager.getDoc(
       projectId,
       docId
     )
     if (type === 'history-ot') {
       const file = StringFileData.fromRaw(currentLines)
-      // TODO(24596): tc support for history-ot
       currentLines = file.getLines()
     }
     const currentLineSize = getTotalSizeOfLines(currentLines)
@@ -158,7 +174,8 @@ const DocumentManager = {
       originOrSource,
       userId,
       false,
-      false
+      false,
+      trackChanges
     )
   },
 
@@ -169,7 +186,8 @@ const DocumentManager = {
     originOrSource,
     userId,
     undoing,
-    external
+    external,
+    trackChanges
   ) {
     if (newLines == null) {
       throw new Error('No lines were provided to setDoc')
@@ -194,9 +212,10 @@ const DocumentManager = {
     let op
     if (type === 'history-ot') {
       const file = StringFileData.fromRaw(oldLines)
-      const operation = DiffCodec.diffAsHistoryOTEditOperation(
+      const operation = diffAsTextOperation(
         file,
-        newLines.join('\n')
+        newLines.join('\n'),
+        trackChanges ? { tracking: { userId, ts: new Date() } } : {}
       )
       if (operation.isNoop()) {
         op = []
@@ -221,6 +240,9 @@ const DocumentManager = {
       meta: {
         user_id: userId,
       },
+    }
+    if (type !== 'history-ot' && trackChanges) {
+      update.meta.tc = RangesTracker.generateIdSeed()
     }
     if (external) {
       update.meta.type = 'external'
@@ -291,9 +313,7 @@ const DocumentManager = {
     logger.debug({ projectId, docId, version }, 'flushing doc')
     Metrics.inc('flush-doc-if-loaded', 1, { status: 'modified' })
     if (!Array.isArray(lines)) {
-      const file = StringFileData.fromRaw(lines)
-      // TODO(24596): tc support for history-ot
-      lines = file.getLines()
+      ;({ lines, ranges } = HistoryConversions.fromHistoryOT(lines))
     }
     const result = await PersistenceManager.promises.setDoc(
       projectId,
@@ -331,7 +351,6 @@ const DocumentManager = {
     if (changeIds == null) {
       changeIds = []
     }
-    let changeContributors = []
 
     const {
       lines,
@@ -340,12 +359,28 @@ const DocumentManager = {
       pathname,
       projectHistoryId,
       historyRangesSupport,
+      type,
     } = await DocumentManager.getDoc(projectId, docId)
     if (lines == null || version == null) {
       throw new Errors.NotFoundError(`document not found: ${docId}`)
     }
+    if (type === 'history-ot') {
+      throw new Errors.OTTypeMismatchError('sharejs-text-ot', 'history-ot')
+    }
 
-    // TODO(24596): tc support for history-ot
+    // Snapshot the accepted change objects and lines before applying the
+    // accept, so we can build the email-notification previews from them.
+    const acceptedChanges = (ranges.changes || []).filter(change =>
+      changeIds.includes(change.id)
+    )
+    const changeContributors = acceptedChanges
+      .map(change => change?.metadata?.user_id)
+      .filter(userId => userId)
+    const previews = buildSparseChangePreviews({
+      changes: acceptedChanges,
+      lines,
+    })
+
     const newRanges = RangesManager.acceptChanges(
       projectId,
       docId,
@@ -374,89 +409,37 @@ const DocumentManager = {
         projectHistoryId,
       })
 
-      if (historyUpdates.length === 0) {
-        return changeContributors
-      }
-
-      await ProjectHistoryRedisManager.promises.queueOps(
-        projectId,
-        ...historyUpdates.map(op => JSON.stringify(op))
-      )
-    }
-    changeContributors = (ranges.changes || [])
-      .filter(change => changeIds.includes(change.id))
-      .map(change => change?.metadata?.user_id)
-      .filter(userId => userId)
-    return changeContributors
-  },
-
-  async rejectChanges(projectId, docId, changeIds, userId) {
-    const UpdateManager = require('./UpdateManager')
-    const HistoryOTUpdateManager = require('./HistoryOTUpdateManager')
-
-    const { lines, version, ranges } = await DocumentManager.getDoc(
-      projectId,
-      docId
-    )
-    if (lines == null || version == null) {
-      throw new Errors.NotFoundError(`document not found: ${docId}`)
-    }
-
-    const changesToReject = ranges.changes
-      ? ranges.changes.filter(change => changeIds.includes(change.id))
-      : []
-
-    // Apply inverted operations for rejected changes (based on reject-changes.ts logic)
-    // Sort changes in reverse order by position to avoid conflicts
-    changesToReject.sort((a, b) => b.op.p - a.op.p)
-
-    const ops = []
-    for (const change of changesToReject) {
-      if (change.op.i) {
-        const deleteOp = {
-          p: change.op.p,
-          d: change.op.i,
-          u: true,
-        }
-        ops.push(deleteOp)
-      } else if (change.op.d) {
-        const insertOp = {
-          p: change.op.p,
-          i: change.op.d,
-          u: true,
-        }
-        ops.push(insertOp)
+      if (historyUpdates.length > 0) {
+        await ProjectHistoryRedisManager.promises.queueOps(
+          projectId,
+          ...historyUpdates.map(op => JSON.stringify(op))
+        )
       }
     }
-
-    const update = {
-      doc: docId,
-      op: ops,
-      v: version,
-      meta: {
-        user_id: userId,
-        ts: new Date().toISOString(),
-      },
-    }
-
-    if (HistoryOTUpdateManager.isHistoryOTEditOperationUpdate(update)) {
-      await HistoryOTUpdateManager.applyUpdate(projectId, docId, update)
-    } else {
-      await UpdateManager.promises.applyUpdate(projectId, docId, update)
-    }
-
-    return { rejectedChangeIds: changesToReject.map(c => c.id) }
+    return { changeContributors, previews }
   },
 
   async updateCommentState(projectId, docId, commentId, userId, resolved) {
-    const { lines, version, pathname, historyRangesSupport } =
+    const { lines, version, pathname, historyRangesSupport, type } =
       await DocumentManager.getDoc(projectId, docId)
 
     if (lines == null || version == null) {
       throw new Errors.NotFoundError(`document not found: ${docId}`)
     }
 
-    if (historyRangesSupport) {
+    if (type === 'history-ot') {
+      // Circular dependencies. Import at runtime.
+      const HistoryOTUpdateManager = require('./HistoryOTUpdateManager')
+
+      const op = new SetCommentStateOperation(commentId, resolved)
+      const update = {
+        doc: docId,
+        op: [op.toJSON()],
+        v: version,
+        meta: { user_id: userId },
+      }
+      await HistoryOTUpdateManager.applyUpdate(projectId, docId, update)
+    } else if (historyRangesSupport) {
       await RedisManager.promises.updateCommentState(docId, commentId, resolved)
 
       await ProjectHistoryRedisManager.promises.queueOps(
@@ -475,8 +458,11 @@ const DocumentManager = {
   },
 
   async getComment(projectId, docId, commentId) {
-    // TODO(24596): tc support for history-ot
-    const { ranges } = await DocumentManager.getDoc(projectId, docId)
+    let { lines, ranges, type } = await DocumentManager.getDoc(projectId, docId)
+
+    if (type === 'history-ot') {
+      ;({ ranges } = HistoryConversions.fromHistoryOT(lines))
+    }
 
     const comment = ranges?.comments?.find(comment => comment.id === commentId)
 
@@ -491,38 +477,51 @@ const DocumentManager = {
   },
 
   async deleteComment(projectId, docId, commentId, userId) {
-    const { lines, version, ranges, pathname, historyRangesSupport } =
+    const { lines, version, ranges, pathname, historyRangesSupport, type } =
       await DocumentManager.getDoc(projectId, docId)
     if (lines == null || version == null) {
       throw new Errors.NotFoundError(`document not found: ${docId}`)
     }
 
-    // TODO(24596): tc support for history-ot
-    const newRanges = RangesManager.deleteComment(commentId, ranges)
+    if (type === 'history-ot') {
+      // Circular dependencies. Import at runtime.
+      const HistoryOTUpdateManager = require('./HistoryOTUpdateManager')
 
-    await RedisManager.promises.updateDocument(
-      projectId,
-      docId,
-      lines,
-      version,
-      [],
-      newRanges,
-      {}
-    )
+      const op = new DeleteCommentOperation(commentId)
+      const update = {
+        doc: docId,
+        op: [op.toJSON()],
+        v: version,
+        meta: { user_id: userId },
+      }
+      await HistoryOTUpdateManager.applyUpdate(projectId, docId, update)
+    } else {
+      const newRanges = RangesManager.deleteComment(commentId, ranges)
 
-    if (historyRangesSupport) {
-      await RedisManager.promises.updateCommentState(docId, commentId, false)
-      await ProjectHistoryRedisManager.promises.queueOps(
+      await RedisManager.promises.updateDocument(
         projectId,
-        JSON.stringify({
-          pathname,
-          deleteComment: commentId,
-          meta: {
-            ts: new Date(),
-            user_id: userId,
-          },
-        })
+        docId,
+        lines,
+        version,
+        [],
+        newRanges,
+        {}
       )
+
+      if (historyRangesSupport) {
+        await RedisManager.promises.updateCommentState(docId, commentId, false)
+        await ProjectHistoryRedisManager.promises.queueOps(
+          projectId,
+          JSON.stringify({
+            pathname,
+            deleteComment: commentId,
+            meta: {
+              ts: new Date(),
+              user_id: userId,
+            },
+          })
+        )
+      }
     }
   },
 
@@ -666,7 +665,8 @@ const DocumentManager = {
     source,
     userId,
     undoing,
-    external
+    external,
+    trackChanges
   ) {
     const UpdateManager = require('./UpdateManager')
     return await UpdateManager.promises.lockUpdatesAndDo(
@@ -677,11 +677,19 @@ const DocumentManager = {
       source,
       userId,
       undoing,
-      external
+      external,
+      trackChanges
     )
   },
 
-  async appendToDocWithLock(projectId, docId, lines, source, userId) {
+  async appendToDocWithLock(
+    projectId,
+    docId,
+    lines,
+    source,
+    userId,
+    trackChanges
+  ) {
     const UpdateManager = require('./UpdateManager')
     return await UpdateManager.promises.lockUpdatesAndDo(
       DocumentManager.appendToDoc,
@@ -689,7 +697,8 @@ const DocumentManager = {
       docId,
       lines,
       source,
-      userId
+      userId,
+      trackChanges
     )
   },
 
@@ -714,23 +723,11 @@ const DocumentManager = {
 
   async acceptChangesWithLock(projectId, docId, changeIds) {
     const UpdateManager = require('./UpdateManager')
-    const changeContributors = await UpdateManager.promises.lockUpdatesAndDo(
+    return await UpdateManager.promises.lockUpdatesAndDo(
       DocumentManager.acceptChanges,
       projectId,
       docId,
       changeIds
-    )
-    return changeContributors
-  },
-
-  async rejectChangesWithLock(projectId, docId, changeIds, userId) {
-    const UpdateManager = require('./UpdateManager')
-    return await UpdateManager.promises.lockUpdatesAndDo(
-      DocumentManager.rejectChanges,
-      projectId,
-      docId,
-      changeIds,
-      userId
     )
   },
 

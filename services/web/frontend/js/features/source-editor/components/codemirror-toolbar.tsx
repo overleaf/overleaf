@@ -17,9 +17,6 @@ import { ToolbarOverflow } from './toolbar/overflow'
 import useDropdown from '../../../shared/hooks/use-dropdown'
 import { getPanel } from '@codemirror/view'
 import { createToolbarPanel } from '../extensions/toolbar/toolbar-panel'
-import EditorSwitch from './editor-switch'
-import ReviewModeSwitcher from '@/features/review-panel/components/review-mode-switcher'
-import SwitchToPDFButton from './switch-to-pdf-button'
 import { DetacherSynctexControl } from '../../pdf-preview/components/detach-synctex-control'
 import DetachCompileButtonWrapper from '../../pdf-preview/components/detach-compile-button-wrapper'
 import { isVisual } from '../extensions/visual/visual'
@@ -27,29 +24,19 @@ import { language } from '@codemirror/language'
 import { minimumListDepthForSelection } from '../utils/tree-operations/ancestors'
 import { debugConsole } from '@/utils/debugging'
 import { useTranslation } from 'react-i18next'
-import { ToggleSearchButton } from '@/features/source-editor/components/toolbar/toggle-search-button'
 import ReviewPanelHeader from '@/features/review-panel/components/review-panel-header'
 import useReviewPanelLayout from '@/features/review-panel/hooks/use-review-panel-layout'
 import Breadcrumbs from '@/features/source-editor/extensions/breadcrumbs'
 import classNames from 'classnames'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
-import { useProjectContext } from '@/shared/context/project-context'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import ReviewPanelHeaderBuffer from '@/features/review-panel/components/review-panel-header-buffer'
 import { useAreTabsEnabled } from '@/features/ide-react/hooks/use-are-tabs-enabled'
-
-const sourceEditorToolbarStartButtons = importOverleafModules(
-  'sourceEditorToolbarStartButtons'
-) as { import: { default: ElementType }; path: string }[]
+import { ToolbarLayout } from './toolbar/toolbar-layout'
 
 const sourceEditorToolbarComponents = importOverleafModules(
   'sourceEditorToolbarComponents'
-) as { import: { default: ElementType }; path: string }[]
-
-const sourceEditorToolbarEndButtons = importOverleafModules(
-  'sourceEditorToolbarEndButtons'
 ) as { import: { default: ElementType }; path: string }[]
 
 export const CodeMirrorToolbar = () => {
@@ -70,9 +57,6 @@ const Toolbar = memo(function Toolbar() {
   const {
     userSettings: { breadcrumbs },
   } = useUserSettingsContext()
-  const visualPreviewEnabled = useFeatureFlag('visual-preview')
-  const isToolbarMigration = useFeatureFlag('writefull-toolbar-migration')
-  const { features } = useProjectContext()
   const { focusMode } = useLayoutContext()
 
   const [overflowed, setOverflowed] = useState(false)
@@ -202,21 +186,19 @@ const Toolbar = memo(function Toolbar() {
           className="ol-cm-toolbar toolbar-editor"
           ref={handleToolbar}
         >
-          {showActions &&
-            sourceEditorToolbarStartButtons.map(
-              ({ import: { default: Component }, path }) => (
-                <Component key={path} />
-              )
+          <ToolbarLayout.Left
+            canEdit={!state.readOnly}
+            showActions={showActions}
+          >
+            {showActions && (
+              <ToolbarItems
+                state={state}
+                languageName={languageName}
+                visual={visual}
+                listDepth={listDepth}
+              />
             )}
-          {showActions && (
-            <ToolbarItems
-              state={state}
-              languageName={languageName}
-              visual={visual}
-              listDepth={listDepth}
-            />
-          )}
-
+          </ToolbarLayout.Left>
           <div className="ol-cm-toolbar-button-group ol-cm-toolbar-stretch">
             {showActions && (
               <ToolbarOverflow
@@ -235,26 +217,10 @@ const Toolbar = memo(function Toolbar() {
               </ToolbarOverflow>
             )}
           </div>
-
-          <div className="ol-cm-toolbar-button-group ol-cm-toolbar-end">
-            {!visualPreviewEnabled && <EditorSwitch />}
-            {/* trackChangesVisible controls provider/UI availability; trackChanges
-                (checked inside the switcher) controls the actual feature entitlement.
-                Users with trackChangesVisible:true but trackChanges:false see the
-                switcher and get an upgrade modal when clicking "Reviewing". */}
-            {isToolbarMigration && features.trackChangesVisible && (
-              <ReviewModeSwitcher />
-            )}
-            {sourceEditorToolbarEndButtons.map(
-              ({ import: { default: Component }, path }) => (
-                <Component key={path} />
-              )
-            )}
-            <ToggleSearchButton state={state} />
-            <SwitchToPDFButton />
+          <ToolbarLayout.Right canSearchInFile={true}>
             <DetacherSynctexControl />
             <DetachCompileButtonWrapper />
-          </div>
+          </ToolbarLayout.Right>
         </div>
         {sourceEditorToolbarComponents.map(
           ({ import: { default: Component }, path }) => (

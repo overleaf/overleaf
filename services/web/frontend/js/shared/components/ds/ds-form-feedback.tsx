@@ -1,5 +1,5 @@
 import { Form } from 'react-bootstrap'
-import FormText from '@/shared/components/form/form-text'
+import OLFormText from '@/shared/components/ol/ol-form-text'
 import { ComponentProps } from 'react'
 
 export type FormFeedbackProps = Pick<
@@ -10,9 +10,9 @@ export type FormFeedbackProps = Pick<
 function DSFormFeedback(props: FormFeedbackProps) {
   return (
     <Form.Control.Feedback {...props}>
-      <FormText type={props.type === 'invalid' ? 'error' : 'success'}>
+      <OLFormText type={props.type === 'invalid' ? 'error' : 'success'}>
         {props.children}
-      </FormText>
+      </OLFormText>
     </Form.Control.Feedback>
   )
 }

@@ -27,7 +27,7 @@ export const defaultSettings: UserSettings = {
   mathPreview: true,
   editorTabs: true,
   referencesSearchMode: 'advanced',
-  breadcrumbs: true,
+  breadcrumbs: false,
   nonBlinkingCursor: false,
   darkModePdf: false,
   floatingMenu: true,

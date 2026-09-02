@@ -9,6 +9,8 @@ import {
   OLModalTitle,
 } from '@/shared/components/ol/ol-modal'
 import OLButton from '@/shared/components/ol/ol-button'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
+import { useActiveOverallTheme } from '@/shared/hooks/use-active-overall-theme'
 
 import '@uppy/core/dist/style.css'
 import '@uppy/dashboard/dist/style.css'
@@ -21,6 +23,8 @@ function UploadProjectModal({
   openProject: (id: string) => void
 }) {
   const { t } = useTranslation()
+  const themed = useFeatureFlag('themed-modals')
+  const uppyTheme = useActiveOverallTheme('themed-modals')
 
   const uppy = useProjectUploader({
     endpoint: '/project/new/upload',
@@ -35,6 +39,7 @@ function UploadProjectModal({
       onHide={onHide}
       id="upload-project-modal"
       backdrop="static"
+      themed={themed}
     >
       <OLModalHeader>
         <OLModalTitle as="h3">{t('upload_zipped_project')}</OLModalTitle>
@@ -54,6 +59,7 @@ function UploadProjectModal({
             },
           }}
           className="project-list-upload-project-modal-uppy-dashboard"
+          theme={uppyTheme}
         />
       </OLModalBody>
       <OLModalFooter>

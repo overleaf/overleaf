@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import getMeta from '@/utils/meta'
 import useWaitForI18n from '@/shared/hooks/use-wait-for-i18n'
 import { Card as BSCard, CardBody, Col, Row } from 'react-bootstrap'
-import IconButton from '@/shared/components/button/icon-button'
+import OLIconButton from '@/shared/components/ol/ol-icon-button'
 
 type CardProps = {
   children: React.ReactNode
@@ -22,7 +22,7 @@ function Card({ children }: CardProps) {
       <Row>
         <Col xl={{ span: 4, offset: 4 }} md={{ span: 6, offset: 3 }}>
           <div className="group-heading" data-testid="group-heading">
-            <IconButton
+            <OLIconButton
               variant="ghost"
               href="/user/subscription"
               size="lg"

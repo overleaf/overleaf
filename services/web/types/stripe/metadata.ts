@@ -18,4 +18,9 @@ export type SubscriptionMetadata = Stripe.Metadata & {
   itm_content?: string
   itm_referrer?: string
   checkoutSource?: 'hosted-checkout' | 'elements-checkout'
+  ip_address_country?: string
+  // Temporary marker used during the Recurly to Stripe migration for manual
+  // subscriptions without a default payment method. Set by the migration
+  // pipeline and cleared by StripeWebhookHandler once a payment method is added.
+  paymentMethodPending?: string
 }

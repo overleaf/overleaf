@@ -1,4 +1,4 @@
-import { vi, expect } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import path from 'node:path'
 
 const modulePath = path.join(
@@ -42,6 +42,28 @@ describe('UrlHelper', function () {
 
       return expect(ctx.UrlHelper.getSafeRedirectPath('.evil.com')).to.equal(
         '/.evil.com'
+      )
+    })
+  })
+
+  describe('getCanonicalURL', function () {
+    it('strips the query string and hash', function (ctx) {
+      const req = {
+        headers: { host: '127.0.0.1:3000' },
+        originalUrl: '/blog/some-post?foo=bar#section',
+      }
+      expect(ctx.UrlHelper.getCanonicalURL(req)).to.equal(
+        'http://127.0.0.1:3000/blog/some-post'
+      )
+    })
+
+    it('strips a trailing slash', function (ctx) {
+      const req = {
+        headers: { host: '127.0.0.1:3000' },
+        originalUrl: '/blog/some-post/',
+      }
+      expect(ctx.UrlHelper.getCanonicalURL(req)).to.equal(
+        'http://127.0.0.1:3000/blog/some-post'
       )
     })
   })

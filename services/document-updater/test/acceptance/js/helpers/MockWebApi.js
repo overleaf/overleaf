@@ -2,11 +2,42 @@ let MockWebApi
 const basicAuth = require('basic-auth')
 const tsscmp = require('tsscmp')
 const express = require('express')
-const bodyParser = require('body-parser')
 const { expressify } = require('@overleaf/promise-utils')
 const Settings = require('@overleaf/settings')
+const {
+  handleValidationError,
+  parseReq,
+  z,
+  zz,
+} = require('@overleaf/validation-tools')
+const { rawStringFileData } = require('overleaf-editor-core/lib/schemas')
+const schemas = require('@overleaf/ranges-tracker/schemas')
 const app = express()
 const MAX_REQUEST_SIZE = 2 * (2 * 1024 * 1024 + 64 * 1024)
+
+const getDocumentSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+    doc_id: zz.objectId(),
+  }),
+})
+
+// the flush payload built by PersistenceManager.setDoc: lines are either
+// sharejs lines or history-ot raw file data; lastUpdatedAt is a redis string
+// (ms since epoch) unless freshly set in-process
+const setDocumentSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+    doc_id: zz.objectId(),
+  }),
+  body: z.strictObject({
+    lines: z.array(z.string()).or(rawStringFileData),
+    version: z.number().int(),
+    ranges: schemas.ranges.nullish(),
+    lastUpdatedAt: z.union([z.string(), z.number()]).nullish(),
+    lastUpdatedBy: z.string().nullish(),
+  }),
+})
 
 module.exports = MockWebApi = {
   docs: {},
@@ -53,11 +84,9 @@ module.exports = MockWebApi = {
   },
 
   async getDocumentController(req, res, next) {
+    const { params } = parseReq(req, getDocumentSchema)
     try {
-      const doc = await this.getDocument(
-        req.params.project_id,
-        req.params.doc_id
-      )
+      const doc = await this.getDocument(params.project_id, params.doc_id)
       if (doc != null) {
         return res.send(JSON.stringify(doc))
       } else {
@@ -69,15 +98,16 @@ module.exports = MockWebApi = {
   },
 
   async setDocumentController(req, res, next) {
+    const { params, body } = parseReq(req, setDocumentSchema)
     try {
       const ok = await this.setDocument(
-        req.params.project_id,
-        req.params.doc_id,
-        req.body.lines,
-        req.body.version,
-        req.body.ranges,
-        req.body.lastUpdatedAt,
-        req.body.lastUpdatedBy
+        params.project_id,
+        params.doc_id,
+        body.lines,
+        body.version,
+        body.ranges,
+        body.lastUpdatedAt,
+        body.lastUpdatedBy
       )
       if (!ok) {
         return res.sendStatus(404)
@@ -113,11 +143,13 @@ module.exports = MockWebApi = {
 
     app.post(
       '/project/:project_id/doc/:doc_id',
-      bodyParser.json({ limit: MAX_REQUEST_SIZE }),
+      express.json({ limit: MAX_REQUEST_SIZE }),
       expressify(async (req, res, next) => {
         await this.setDocumentController(req, res, next)
       })
     )
+
+    app.use(handleValidationError)
 
     return app
       .listen(3000, error => {

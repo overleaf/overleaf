@@ -22,6 +22,15 @@ const {
 const rclient = RedisWrapper.createClient(settings.redis.documentupdater)
 const Keys = settings.redis.documentupdater.key_schema
 
+/**
+ * Fetch a doc's lines, version, ranges and recent ops from the
+ * document-updater.
+ *
+ * @param {string} projectId
+ * @param {string} docId
+ * @param {number} fromVersion - return ops from this version onwards (-1 for
+ *        no ops)
+ */
 async function getDocument(projectId, docId, fromVersion) {
   const timer = new metrics.Timer('get-document')
   const url = `${settings.apis.documentupdater.url}/project/${projectId}/doc/${docId}?fromVersion=${fromVersion}&historyOTSupport=true`
@@ -67,11 +76,12 @@ async function getDocument(projectId, docId, fromVersion) {
   }
 }
 
-async function checkDocument(projectId, docId) {
-  // in this call fromVersion = -1 means get document without docOps
-  return await getDocument(projectId, docId, -1)
-}
-
+/**
+ * Ask the document-updater to flush a project to mongo and remove it from
+ * redis.
+ *
+ * @param {string} projectId
+ */
 async function flushProjectToMongoAndDelete(projectId) {
   // this method is called when the last connected user leaves the project
   logger.debug({ projectId }, 'deleting project from document updater')
@@ -98,6 +108,11 @@ async function flushProjectToMongoAndDelete(projectId) {
   }
 }
 
+/**
+ * Pick a random shard of the document-updater dispatch list.
+ *
+ * @return {string}
+ */
 function _getPendingUpdateListKey() {
   const shard = _.random(0, settings.pendingUpdateListShardCount - 1)
   if (shard === 0) {
@@ -107,6 +122,15 @@ function _getPendingUpdateListKey() {
   }
 }
 
+/**
+ * Queue an update for processing by the document-updater: push the payload
+ * (tagged with its doc id) onto the project queue, then put a bare
+ * `project_id` marker onto pending-updates-list.
+ *
+ * @param {string} projectId
+ * @param {string} docId
+ * @param {Object} change
+ */
 async function queueChange(projectId, docId, change) {
   const allowedKeys = ['doc', 'op', 'v', 'dupIfSource', 'meta', 'lastV', 'hash']
   change = _.pick(change, allowedKeys)
@@ -122,22 +146,27 @@ async function queueChange(projectId, docId, change) {
   }
 
   // record metric for each update added to queue
-  metrics.summary('redis.pendingUpdates', updateSize, { status: 'push' })
+  metrics.summary('redis.pendingUpdates', jsonChange.length, {
+    status: 'push',
+    path: 'project',
+  })
 
-  const docKey = `${projectId}:${docId}`
-  // Push onto pendingUpdates for doc_id first, because once the doc updater
-  // gets an entry on pending-updates-list, it starts processing.
+  // Push onto the project queue first, because once the doc updater gets an
+  // entry on pending-updates-list, it starts processing.
   try {
-    await rclient.rpush(Keys.pendingUpdates({ doc_id: docId }), jsonChange)
+    await rclient.rpush(
+      Keys.pendingProjectUpdates({ project_id: projectId }),
+      jsonChange
+    )
   } catch (error) {
-    throw new OError('error pushing update into redis').withCause(error)
+    throw new OError('error pushing project update into redis').withCause(error)
   }
 
   const queueKey = _getPendingUpdateListKey()
   try {
-    await rclient.rpush(queueKey, docKey)
+    await rclient.rpush(queueKey, projectId)
   } catch (error) {
-    throw new OError('error pushing doc_id into redis')
+    throw new OError('error pushing project_id into redis')
       .withInfo({ queueKey })
       .withCause(error)
   }
@@ -145,13 +174,11 @@ async function queueChange(projectId, docId, change) {
 
 export default {
   getDocument: callbackify(getDocument),
-  checkDocument: callbackify(checkDocument),
   flushProjectToMongoAndDelete: callbackify(flushProjectToMongoAndDelete),
   _getPendingUpdateListKey,
   queueChange: callbackify(queueChange),
   promises: {
     getDocument,
-    checkDocument,
     flushProjectToMongoAndDelete,
     queueChange,
   },

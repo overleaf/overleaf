@@ -32,6 +32,7 @@ import OLCol from '@/shared/components/ol/ol-col'
 import OLRow from '@/shared/components/ol/ol-row'
 import OLForm from '@/shared/components/ol/ol-form'
 import MaterialIcon from '@/shared/components/material-icon'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 type UnitDescription = { label: string; tooltip?: string } | undefined
 
@@ -49,6 +50,7 @@ const ColumnWidthModalBody = () => {
   const { selection } = useSelectionContext()
   const { positions, table } = useTableContext()
   const { t } = useTranslation()
+  const themed = useFeatureFlag('themed-modals')
   const [currentUnit, setCurrentUnit] = useState<WidthUnit | undefined | null>(
     '%'
   )
@@ -137,6 +139,7 @@ const ColumnWidthModalBody = () => {
       show={columnWidthModalShown}
       onHide={closeColumnWidthModal}
       className="table-generator-width-modal"
+      themed={themed}
     >
       <OLModalHeader>
         <OLModalTitle>{t('set_column_width')}</OLModalTitle>

@@ -1,5 +1,9 @@
 const Path = require('node:path')
 const { merge } = require('@overleaf/settings/merge')
+const {
+  DEFAULT_TEXT_EXTENSIONS,
+  DEFAULT_EDITABLE_FILENAMES,
+} = require('overleaf-editor-core/lib/text_file_defaults')
 
 let defaultFeatures, siteUrl
 
@@ -28,51 +32,6 @@ const intFromEnv = function (name, defaultValue) {
   return parseInt(process.env[name], 10) || defaultValue
 }
 
-const defaultTextExtensions = [
-  'tex',
-  'latex',
-  'sty',
-  'cls',
-  'bst',
-  'bib',
-  'bibtex',
-  'txt',
-  'tikz',
-  'mtx',
-  'rtex',
-  'md',
-  'asy',
-  'lbx',
-  'bbx',
-  'cbx',
-  'm',
-  'lco',
-  'dtx',
-  'ins',
-  'ist',
-  'def',
-  'clo',
-  'ldf',
-  'rmd',
-  'qmd',
-  'lua',
-  'py',
-  'gv',
-  'mf',
-  'yml',
-  'yaml',
-  'lhs',
-  'lean',
-  'lean4',
-  'hs',
-  'mk',
-  'xmpdata',
-  'cfg',
-  'rnw',
-  'ltx',
-  'inc',
-]
-
 const parseTextExtensions = function (extensions) {
   if (extensions) {
     return extensions.split(',').map(ext => ext.trim())
@@ -99,7 +58,6 @@ const httpPermissionsPolicy = {
     'magnetometer',
     'midi',
     'otp-credentials',
-    'payment',
     'picture-in-picture',
     'screen-wake-lock',
     'serial',
@@ -112,6 +70,8 @@ const httpPermissionsPolicy = {
     autoplay: 'self "https://videos.ctfassets.net"',
     fullscreen: 'self',
     'on-device-speech-recognition': 'self',
+    // required for Apple Pay / Google Pay
+    payment: 'self "https://js.stripe.com"',
   },
 }
 
@@ -148,6 +108,7 @@ module.exports = {
       process.env.MONGO_URL ||
       `mongodb://${process.env.MONGO_HOST || '127.0.0.1'}/sharelatex`,
     hasSecondaries: process.env.MONGO_HAS_SECONDARIES === 'true',
+    auxUrl: process.env.MONGO_AUX_CONNECTION_STRING,
   },
 
   redis: {
@@ -331,6 +292,10 @@ module.exports = {
   },
 
   splitTests: [],
+  splitTest: {
+    enableSplitTestCalculator:
+      process.env.ENABLE_SPLIT_TEST_CALCULATOR === 'true',
+  },
 
   // Where your instance of Overleaf Community Edition/Server Pro can be found publicly. Used in emails
   // that are sent out, generated links, etc.
@@ -429,6 +394,7 @@ module.exports = {
     compileGroup: 'standard',
     references: true,
     trackChanges: true,
+    offlineMode: false,
   }),
 
   // featuresEpoch: 'YYYY-MM-DD',
@@ -616,7 +582,6 @@ module.exports = {
   ],
 
   translatedLanguages: {
-    cn: '简体中文',
     cs: 'Čeština',
     da: 'Dansk',
     de: 'Deutsch',
@@ -631,11 +596,9 @@ module.exports = {
     no: 'Norsk',
     pl: 'Polski',
     pt: 'Português',
-    ro: 'Română',
     ru: 'Русский',
     sv: 'Svenska',
     tr: 'Türkçe',
-    uk: 'Українська',
     'zh-CN': '简体中文',
   },
 
@@ -895,16 +858,18 @@ module.exports = {
 
   compileBodySizeLimitMb: process.env.COMPILE_BODY_SIZE_LIMIT_MB || 7,
 
-  textExtensions: defaultTextExtensions.concat(
+  // The defaults come from overleaf-editor-core so that every service that
+  // classifies a file as a doc or as a binary file works from the same list.
+  textExtensions: DEFAULT_TEXT_EXTENSIONS.concat(
     parseTextExtensions(process.env.ADDITIONAL_TEXT_EXTENSIONS)
   ),
 
   // case-insensitive file names that is editable (doc) in the editor
-  editableFilenames: ['latexmkrc', '.latexmkrc', 'makefile', 'gnumakefile'],
+  editableFilenames: DEFAULT_EDITABLE_FILENAMES.slice(),
 
   fileIgnorePattern:
     process.env.FILE_IGNORE_PATTERN ||
-    '**/{{__MACOSX,.git,.texpadtmp,.R}{,/**},.!(latexmkrc),*.{dvi,aux,log,toc,out,pdfsync,synctex,synctex(busy),fdb_latexmk,fls,nlo,ind,glo,gls,glg,bbl,blg,doc,docx,gz,swp}}',
+    '**/{{__MACOSX,.git,.texpadtmp,.R,.venv,venv}{,/**},.!(latexmkrc),*.{dvi,aux,log,toc,out,pdfsync,synctex,synctex(busy),fdb_latexmk,fls,nlo,ind,glo,gls,glg,bbl,blg,doc,docx,gz,swp}}',
 
   validRootDocExtensions: ['tex', 'Rtex', 'ltx', 'Rnw'],
 
@@ -1026,8 +991,12 @@ module.exports = {
     //
     createFileModes: [],
     devToolbar: [],
+    dsNavLibraryLink: [],
+    trashPageTabs: [],
+    adminUserLibrary: [],
     gitBridge: [],
-    publishModal: [],
+    publishModalDropdownButton: [],
+    publishModalToolbarButton: [],
     tprFileViewInfo: [],
     tprFileViewRefreshError: [],
     tprFileViewRefreshButton: [],
@@ -1065,6 +1034,8 @@ module.exports = {
     managedGroupSubscriptionEnrollmentNotification: [],
     managedGroupEnrollmentInvite: [],
     ssoCertificateInfo: [],
+    domainVerificationLabel: [],
+    domainVerificationToken: [],
     v1ImportDataScreen: [],
     snapshotUtils: [],
     visualEditorProviders: [],

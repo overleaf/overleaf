@@ -46,7 +46,7 @@ make test_unit
 During development it is often useful to only run a subset of tests, which can be configured with arguments to the mocha CLI:
 
 ```
-make test_unit MOCHA_GREP='AuthorizationManager'
+make test_unit TEST_NAME_PATTERN='AuthorizationManager'
 ```
 
 To run only the unit tests for a single module do:
@@ -55,10 +55,10 @@ To run only the unit tests for a single module do:
 make test_unit_module MODULE=saas-authentication
 ```
 
-Module tests can also use a MOCHA_GREP argument:
+Module tests can also use a TEST_NAME_PATTERN argument:
 
 ```
-make test_unit_module MODULE=saas-authentication MOCHA_GREP=SSO
+make test_unit_module MODULE=saas-authentication TEST_NAME_PATTERN=SSO
 ```
 
 ### Acceptance Tests
@@ -84,7 +84,7 @@ make test_acceptance_app_stop_service
 During development it is often useful to only run a subset of tests, which can be configured with arguments to the mocha CLI:
 
 ```
-make test_acceptance_run MOCHA_GREP='AuthorizationManager'
+make test_acceptance_run TEST_NAME_PATTERN='AuthorizationManager'
 ```
 
 To run only the acceptance tests for a single module do:
@@ -93,10 +93,10 @@ To run only the acceptance tests for a single module do:
 make test_acceptance_module MODULE=saas-authentication
 ```
 
-Module tests can also use a MOCHA_GREP argument:
+Module tests can also use a TEST_NAME_PATTERN argument:
 
 ```
-make test_acceptance_module MODULE=saas-authentication MOCHA_GREP=SSO
+make test_acceptance_module MODULE=saas-authentication TEST_NAME_PATTERN=SSO
 ```
 
 ## Routes

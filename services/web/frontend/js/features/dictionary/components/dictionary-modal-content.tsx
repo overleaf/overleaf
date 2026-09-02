@@ -10,7 +10,7 @@ import {
   OLModalTitle,
 } from '@/shared/components/ol/ol-modal'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import OLButton from '@/shared/components/ol/ol-button'
 import OLIconButton from '@/shared/components/ol/ol-icon-button'
 import { learnedWords as initialLearnedWords } from '@/features/source-editor/extensions/spelling/learned-words'
@@ -55,13 +55,14 @@ export default function DictionaryModalContent({
       <OLModalHeader>
         <OLModalTitle>{t('edit_dictionary')}</OLModalTitle>
       </OLModalHeader>
-
       <OLModalBody>
         {isError ? (
-          <OLNotification
-            type="error"
-            content={t('generic_something_went_wrong')}
-          />
+          <div className="notification-list">
+            <Notification
+              type="error"
+              content={t('generic_something_went_wrong')}
+            />
+          </div>
         ) : null}
 
         {learnedWords.size > 0 ? (
@@ -93,7 +94,6 @@ export default function DictionaryModalContent({
           </p>
         )}
       </OLModalBody>
-
       <OLModalFooter>
         <OLButton variant="secondary" onClick={handleHide}>
           {t('close')}

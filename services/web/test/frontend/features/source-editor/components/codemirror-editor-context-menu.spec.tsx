@@ -65,6 +65,34 @@ const MockFileTreeDataProvider: FC<React.PropsWithChildren> = ({
     value={
       {
         selectedEntities: [{ type: 'doc', id: '_root_doc_id' } as any],
+        fileTreeData: {
+          _id: 'root-folder-id',
+          name: 'rootFolder',
+          docs: [{ _id: docId, name: 'test.tex' }],
+          folders: [],
+          fileRefs: [],
+        },
+      } as any
+    }
+  >
+    {children}
+  </FileTreeDataContext.Provider>
+)
+
+const MockEmptyFileTreeDataProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => (
+  <FileTreeDataContext.Provider
+    value={
+      {
+        selectedEntities: [{ type: 'doc', id: '_root_doc_id' } as any],
+        fileTreeData: {
+          _id: 'root-folder-id',
+          name: 'rootFolder',
+          docs: [],
+          folders: [],
+          fileRefs: [],
+        },
       } as any
     }
   >
@@ -99,9 +127,6 @@ const grantClipboardPermissions = () => {
 describe('editor context menu', { scrollBehavior: false }, function () {
   beforeEach(function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
-    window.metaAttributesCache.set('ol-splitTestVariants', {
-      'editor-context-menu': 'enabled',
-    })
     cy.intercept('POST', '/project/*/track_changes', {
       statusCode: 200,
       body: {},
@@ -337,6 +362,35 @@ describe('editor context menu', { scrollBehavior: false }, function () {
     })
   })
 
+  describe('when in focus mode', function () {
+    it('should hide the Add Comment item but keeps the other actions', function () {
+      const scope = mockScope()
+
+      cy.mount(
+        <TestContainer>
+          <EditorProviders
+            scope={scope}
+            features={{ trackChangesVisible: true }}
+            layoutContext={{ focusMode: true }}
+          >
+            <CodeMirrorEditor />
+          </EditorProviders>
+        </TestContainer>
+      )
+
+      cy.get('.cm-line').eq(10).rightclick()
+
+      cy.findByRole('menu').within(() => {
+        cy.findByRole('menuitem', { name: /cut/i }).should('be.enabled')
+        cy.findByRole('menuitem', { name: /copy/i }).should('be.enabled')
+        cy.findByRole('menuitem', { name: /suggest edits/i }).should(
+          'be.enabled'
+        )
+        cy.findByRole('menuitem', { name: /comment/i }).should('not.exist')
+      })
+    })
+  })
+
   describe('when text is selected', function () {
     it('should enable Cut, Copy, Paste, Delete, Suggest edits, and Comment', function () {
       const scope = mockScope()
@@ -566,7 +620,7 @@ describe('editor context menu', { scrollBehavior: false }, function () {
               ProjectProvider: makeProjectProvider(
                 mockProject({
                   // Re-assigns `withTrackChanges` value in the `track-changes-state-context` useEffect hook
-                  trackChangesState: true,
+                  trackChangesState: { [USER_ID]: true },
                   projectFeatures: {
                     trackChanges: true,
                     trackChangesVisible: true,
@@ -649,27 +703,6 @@ describe('editor context menu', { scrollBehavior: false }, function () {
           'not.exist'
         )
       })
-    })
-  })
-
-  describe('when feature flag is disabled', function () {
-    it('should not show the context menu', function () {
-      window.metaAttributesCache.set('ol-splitTestVariants', {
-        'editor-context-menu': 'default',
-      })
-
-      const scope = mockScope()
-
-      cy.mount(
-        <TestContainer>
-          <EditorProviders scope={scope}>
-            <CodeMirrorEditor />
-          </EditorProviders>
-        </TestContainer>
-      )
-
-      cy.get('.cm-line').eq(10).rightclick()
-      cy.findByRole('menu').should('not.exist')
     })
   })
 
@@ -1008,9 +1041,48 @@ describe('editor context menu', { scrollBehavior: false }, function () {
       })
     })
 
+    it('should close the menu and show an error toast when there is no resolvable file path', function () {
+      const scope = mockScope()
+
+      cy.intercept(
+        'GET',
+        '/project/*/sync/code*',
+        cy.spy().as('syncToPdfRequest')
+      )
+
+      cy.mount(
+        <TestContainer>
+          <EditorProviders
+            scope={scope}
+            providers={{
+              DetachCompileProvider: MockDetachCompileProvider,
+              FileTreeDataProvider: MockEmptyFileTreeDataProvider,
+            }}
+          >
+            <GlobalToasts />
+            <CodeMirrorEditor />
+          </EditorProviders>
+        </TestContainer>
+      )
+
+      cy.get('.cm-line').eq(10).rightclick()
+
+      cy.findByRole('menu').within(() => {
+        cy.findByRole('menuitem', { name: /jump to location in pdf/i }).click()
+      })
+
+      cy.findByRole('menu').should('not.exist')
+
+      cy.get('.global-toasts').should(
+        'contain.text',
+        'That didn’t work. Try switching files and try again.'
+      )
+
+      cy.get('@syncToPdfRequest').should('not.have.been.called')
+    })
+
     it('should hide button when visual preview is enabled', function () {
       window.metaAttributesCache.set('ol-splitTestVariants', {
-        'editor-context-menu': 'enabled',
         'visual-preview': 'enabled',
       })
 
@@ -1268,25 +1340,6 @@ describe('editor context menu', { scrollBehavior: false }, function () {
 
       cy.get('.cm-content').focus()
       cy.get('body').type('{esc}')
-      cy.findByRole('menu').should('not.exist')
-    })
-
-    it('should not show context menu on gutter when feature flag is disabled', function () {
-      window.metaAttributesCache.set('ol-splitTestVariants', {
-        'editor-context-menu': 'default',
-      })
-
-      const scope = mockScope()
-
-      cy.mount(
-        <TestContainer>
-          <EditorProviders scope={scope}>
-            <CodeMirrorEditor />
-          </EditorProviders>
-        </TestContainer>
-      )
-
-      cy.get('.cm-gutterElement').eq(5).rightclick()
       cy.findByRole('menu').should('not.exist')
     })
   })

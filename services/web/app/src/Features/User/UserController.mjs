@@ -7,7 +7,7 @@ import metrics from '@overleaf/metrics'
 import AuthenticationManager from '../Authentication/AuthenticationManager.mjs'
 import SessionManager from '../Authentication/SessionManager.mjs'
 import Features from '../../infrastructure/Features.mjs'
-import { z, parseReq } from '../../infrastructure/Validation.mjs'
+import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
 import UserAuditLogHandler from './UserAuditLogHandler.mjs'
 import UserSessionsManager from './UserSessionsManager.mjs'
 import UserUpdater from './UserUpdater.mjs'
@@ -65,13 +65,22 @@ async function _ensureAffiliation(userId, emailData) {
   }
 }
 
+const changePasswordSchema = z.object({
+  body: z.strictObject({
+    currentPassword: z.string().optional(),
+    newPassword1: z.string().optional(),
+    newPassword2: z.string().optional(),
+  }),
+})
+
 async function changePassword(req, res, next) {
   metrics.inc('user.password-change')
+  const { body } = parseReq(req, changePasswordSchema, { logOnly: true })
   const userId = SessionManager.getLoggedInUserId(req.session)
 
   const { user } = await AuthenticationManager.promises.authenticate(
     { _id: userId },
-    req.body.currentPassword,
+    body.currentPassword,
     null,
     { enforceHIBPCheck: false }
   )
@@ -83,7 +92,7 @@ async function changePassword(req, res, next) {
     )
   }
 
-  if (req.body.newPassword1 !== req.body.newPassword2) {
+  if (body.newPassword1 !== body.newPassword2) {
     return HttpErrorHandler.badRequest(
       req,
       res,
@@ -94,7 +103,7 @@ async function changePassword(req, res, next) {
   try {
     await AuthenticationManager.promises.setUserPassword(
       user,
-      req.body.newPassword1
+      body.newPassword1
     )
   } catch (error) {
     if (error.name === 'InvalidPasswordError') {
@@ -192,9 +201,20 @@ async function ensureAffiliation(user) {
   await _ensureAffiliation(user._id, flaggedEmails[0])
 }
 
+const ensureAffiliationMiddlewareSchema = z.object({
+  query: z.object({
+    // just a truthiness flag on whether to run the affiliation check; the
+    // real caller sends the query string `?ensureAffiliation=true`
+    ensureAffiliation: z.coerce.boolean().optional(),
+  }),
+})
+
 async function ensureAffiliationMiddleware(req, res, next) {
   let user
-  if (!Features.hasFeature('affiliations') || !req.query.ensureAffiliation) {
+  const { query } = parseReq(req, ensureAffiliationMiddlewareSchema, {
+    logOnly: true,
+  })
+  if (!Features.hasFeature('affiliations') || !query.ensureAffiliation) {
     return next()
   }
   const userId = SessionManager.getLoggedInUserId(req.session)
@@ -215,9 +235,17 @@ async function ensureAffiliationMiddleware(req, res, next) {
   return next()
 }
 
+const tryDeleteUserSchema = z.object({
+  body: z.strictObject({
+    password: z.string().optional(),
+  }),
+})
+
 async function tryDeleteUser(req, res, next) {
   const userId = SessionManager.getLoggedInUserId(req.session)
-  const { password } = req.body
+  const { password } = parseReq(req, tryDeleteUserSchema, {
+    logOnly: true,
+  }).body
   req.logger.addFields({ userId })
 
   logger.debug({ userId }, 'trying to delete user account')
@@ -334,6 +362,16 @@ async function unsubscribe(req, res, next) {
 }
 
 const refProviderSettingsSchema = z
+  .strictObject({
+    enabled: z.boolean().optional(),
+    groups: z.array(z.object({ id: z.string() })).optional(),
+    disablePersonalLibrary: z.boolean().optional(),
+  })
+  .optional()
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const refProviderSettingsFallbackSchema = z
   .object({
     enabled: z.boolean().optional(),
     groups: z.array(z.object({ id: z.string() })).optional(),
@@ -342,20 +380,62 @@ const refProviderSettingsSchema = z
   .optional()
 
 const updateUserSettingsSchema = z.object({
+  // the frontend posts one changed setting at a time (`{[key]: value}`), so
+  // every field here is optional
+  body: z.strictObject({
+    first_name: z.string().max(255).nullish(),
+    last_name: z.string().max(255).nullish(),
+    role: z.string().optional(),
+    institution: z.string().optional(),
+    email: z.string().optional(),
+    mode: z.string().optional(),
+    editorTheme: z.string().optional(),
+    editorLightTheme: z.string().optional(),
+    editorDarkTheme: z.string().optional(),
+    overallTheme: z.string().optional(),
+    fontSize: z.number().optional(),
+    autoComplete: z.boolean().optional(),
+    autoPairDelimiters: z.boolean().optional(),
+    spellCheckLanguage: z.string().optional(),
+    pdfViewer: z.string().optional(),
+    syntaxValidation: z.boolean().optional(),
+    // these six settings are cast with `Boolean(...)` below rather than
+    // checked for a strict boolean, so any truthy/falsy value is accepted
+    // here too
+    previewTabs: z.coerce.boolean().optional(),
+    fontFamily: z.string().optional(),
+    lineHeight: z.string().optional(),
+    mathPreview: z.boolean().optional(),
+    breadcrumbs: z.coerce.boolean().optional(),
+    editorTabs: z.coerce.boolean().optional(),
+    nonBlinkingCursor: z.coerce.boolean().optional(),
+    referencesSearchMode: z.string().optional(),
+    darkModePdf: z.coerce.boolean().optional(),
+    floatingMenu: z.coerce.boolean().optional(),
+    zotero: refProviderSettingsSchema,
+    mendeley: refProviderSettingsSchema,
+    papers: refProviderSettingsSchema,
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const updateUserSettingsFallbackSchema = z.object({
   body: z
     .object({
       first_name: z.string().max(255).nullish(),
       last_name: z.string().max(255).nullish(),
-      zotero: refProviderSettingsSchema,
-      mendeley: refProviderSettingsSchema,
-      papers: refProviderSettingsSchema,
+      zotero: refProviderSettingsFallbackSchema,
+      mendeley: refProviderSettingsFallbackSchema,
+      papers: refProviderSettingsFallbackSchema,
     })
     .passthrough(),
-  // TODO: complete the schema and remove the passthrough
 })
 
 async function updateUserSettings(req, res, next) {
-  const { body } = parseReq(req, updateUserSettingsSchema)
+  const { body } = parseReq(req, updateUserSettingsSchema, {
+    fallbackSchema: updateUserSettingsFallbackSchema,
+  })
   const userId = SessionManager.getLoggedInUserId(req.session)
   req.logger.addFields({ userId })
 
@@ -541,9 +621,16 @@ async function doLogout(req) {
   }
 }
 
+const logoutSchema = z.object({
+  body: z.strictObject({
+    redirect: z.string().optional(),
+  }),
+})
+
 async function logout(req, res, next) {
-  const requestedRedirect = req.body.redirect
-    ? UrlHelper.getSafeRedirectPath(req.body.redirect)
+  const { body } = parseReq(req, logoutSchema, { logOnly: true })
+  const requestedRedirect = body.redirect
+    ? UrlHelper.getSafeRedirectPath(body.redirect)
     : undefined
   const redirectUrl = requestedRedirect || '/login'
 
@@ -556,9 +643,17 @@ async function logout(req, res, next) {
   }
 }
 
+const expireDeletedUserSchema = z.object({
+  params: z.strictObject({
+    userId: zz.objectId(),
+  }),
+})
+
 async function expireDeletedUser(req, res, next) {
-  const userId = req.params.userId
-  await UserDeleter.promises.expireDeletedUser(userId)
+  const { params } = parseReq(req, expireDeletedUserSchema, {
+    logOnly: true,
+  })
+  await UserDeleter.promises.expireDeletedUser(params.userId)
   res.sendStatus(204)
 }
 

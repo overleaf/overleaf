@@ -13,7 +13,7 @@ export function useLayoutEventTracking() {
 
   useEffect(() => {
     if (settingsShown) {
-      sendMBOnce(`ide-open-left-menu-once`)
+      sendMBOnce(`ide-open-settings-once`)
     }
   }, [settingsShown])
 

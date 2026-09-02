@@ -20,7 +20,7 @@ import UserGetter from '../User/UserGetter.mjs'
 async function getSurvey(userId) {
   const survey = await SurveyCache.get(true)
   if (survey) {
-    const hasFilters =
+    const hasSubscriptionFilters =
       survey.options.hasFreeSubscription ||
       survey.options.hasIndividualStandardSubscription ||
       survey.options.hasIndividualProfessionalSubscription ||
@@ -28,7 +28,7 @@ async function getSurvey(userId) {
       survey.options.hasGroupProfessionalSubscription ||
       survey.options.hasEnterpriseSubscription
 
-    if (hasFilters) {
+    if (hasSubscriptionFilters) {
       const subscriptions =
         await SubscriptionLocator.promises.getAllAssociatedSubscriptions(
           userId,
@@ -57,12 +57,24 @@ async function getSurvey(userId) {
       return
     }
 
-    const { earliestSignupDate, latestSignupDate, excludeLabsUsers } =
-      survey.options || {}
-    if (earliestSignupDate || latestSignupDate || excludeLabsUsers) {
+    const {
+      earliestSignupDate,
+      latestSignupDate,
+      excludeLabsUsers,
+      excludeBetaUsers,
+      requireBetaParticipation,
+    } = survey.options || {}
+    if (
+      earliestSignupDate ||
+      latestSignupDate ||
+      excludeLabsUsers ||
+      excludeBetaUsers ||
+      requireBetaParticipation
+    ) {
       const user = await UserGetter.promises.getUser(userId, {
         signUpDate: 1,
         labsProgram: 1,
+        betaProgram: 1,
       })
       if (!user) {
         return
@@ -79,6 +91,12 @@ async function getSurvey(userId) {
         return
       }
       if (excludeLabsUsers && user.labsProgram) {
+        return
+      }
+      if (excludeBetaUsers && user.betaProgram) {
+        return
+      }
+      if (requireBetaParticipation && !user.betaProgram) {
         return
       }
     }

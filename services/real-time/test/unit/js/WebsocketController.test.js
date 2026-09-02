@@ -37,7 +37,6 @@ describe('WebsocketController', function () {
       id: (ctx.client_id = 'mock-client-id-123'),
       publicId: `other-id-${Math.random()}`,
       ol_context: {},
-      joinLeaveEpoch: 0,
       join: sinon.stub(),
       leave: sinon.stub(),
     }
@@ -545,9 +544,6 @@ describe('WebsocketController', function () {
       ctx.AuthorizationManager.assertClientCanViewProject = sinon
         .stub()
         .callsArgWith(1, null)
-      ctx.AuthorizationManager.assertClientCanViewProjectAndDoc = sinon
-        .stub()
-        .callsArgWith(2, null)
       ctx.DocumentUpdaterManager.getDocument = sinon
         .stub()
         .callsArgWith(3, null, {
@@ -556,7 +552,6 @@ describe('WebsocketController', function () {
           ranges: ctx.ranges,
           ops: ctx.ops,
         })
-      ctx.RoomManager.joinDoc = sinon.stub().callsArg(2)
     })
 
     describe('works', function () {
@@ -568,10 +563,6 @@ describe('WebsocketController', function () {
           ctx.options,
           ctx.callback
         )
-      })
-
-      it('should inc the joinLeaveEpoch', function (ctx) {
-        expect(ctx.client.joinLeaveEpoch).to.equal(1)
       })
 
       it('should check that the client is authorized to view the project', function (ctx) {
@@ -588,12 +579,6 @@ describe('WebsocketController', function () {
 
       it('should add permissions for the client to access the doc', function (ctx) {
         ctx.AuthorizationManager.addAccessToDoc
-          .calledWith(ctx.client, ctx.doc_id)
-          .should.equal(true)
-      })
-
-      it('should join the client to room for the doc_id', function (ctx) {
-        ctx.RoomManager.joinDoc
           .calledWith(ctx.client, ctx.doc_id)
           .should.equal(true)
       })
@@ -801,10 +786,10 @@ describe('WebsocketController', function () {
     describe('when the client disconnects while auth checks are running', function () {
       beforeEach(async function (ctx) {
         await new Promise((resolve, reject) => {
-          ctx.AuthorizationManager.assertClientCanViewProjectAndDoc.yields(
-            new Error()
-          )
-          ctx.DocumentUpdaterManager.checkDocument = (projectId, docId, cb) => {
+          ctx.AuthorizationManager.assertClientCanViewProject = (
+            client,
+            cb
+          ) => {
             ctx.client.disconnected = true
             cb()
           }
@@ -831,121 +816,6 @@ describe('WebsocketController', function () {
         expect(
           ctx.metrics.inc.calledWith('editor.join-doc.disconnected', 1, {
             status: 'after-client-auth-check',
-          })
-        ).to.equal(true)
-      })
-
-      it('should not get the document', function (ctx) {
-        expect(ctx.DocumentUpdaterManager.getDocument.called).to.equal(false)
-      })
-    })
-
-    describe('when the client starts a parallel joinDoc request', function () {
-      beforeEach(async function (ctx) {
-        await new Promise((resolve, reject) => {
-          ctx.AuthorizationManager.assertClientCanViewProjectAndDoc.yields(
-            new Error()
-          )
-          ctx.DocumentUpdaterManager.checkDocument = (projectId, docId, cb) => {
-            ctx.DocumentUpdaterManager.checkDocument = sinon.stub().yields()
-            ctx.WebsocketController.joinDoc(
-              ctx.client,
-              ctx.doc_id,
-              -1,
-              {},
-              () => {}
-            )
-            cb()
-          }
-
-          ctx.WebsocketController.joinDoc(
-            ctx.client,
-            ctx.doc_id,
-            -1,
-            ctx.options,
-            (...args) => {
-              ctx.callback(...args)
-              // make sure the other joinDoc request completed
-              setTimeout(resolve, 5)
-            }
-          )
-        })
-      })
-
-      it('should call the callback with an error', function (ctx) {
-        expect(ctx.callback.called).to.equal(true)
-        expect(ctx.callback.args[0][0].message).to.equal(
-          'joinLeaveEpoch mismatch'
-        )
-      })
-
-      it('should get the document once (the parallel request wins)', function (ctx) {
-        expect(ctx.DocumentUpdaterManager.getDocument.callCount).to.equal(1)
-      })
-    })
-
-    describe('when the client starts a parallel leaveDoc request', function () {
-      beforeEach(async function (ctx) {
-        await new Promise((resolve, reject) => {
-          ctx.RoomManager.leaveDoc = sinon.stub()
-
-          ctx.AuthorizationManager.assertClientCanViewProjectAndDoc.yields(
-            new Error()
-          )
-          ctx.DocumentUpdaterManager.checkDocument = (projectId, docId, cb) => {
-            ctx.WebsocketController.leaveDoc(ctx.client, ctx.doc_id, () => {})
-            cb()
-          }
-
-          ctx.WebsocketController.joinDoc(
-            ctx.client,
-            ctx.doc_id,
-            -1,
-            ctx.options,
-            (...args) => {
-              ctx.callback(...args)
-              resolve()
-            }
-          )
-        })
-      })
-
-      it('should call the callback with an error', function (ctx) {
-        expect(ctx.callback.called).to.equal(true)
-        expect(ctx.callback.args[0][0].message).to.equal(
-          'joinLeaveEpoch mismatch'
-        )
-      })
-
-      it('should not get the document', function (ctx) {
-        expect(ctx.DocumentUpdaterManager.getDocument.called).to.equal(false)
-      })
-    })
-
-    describe('when the client disconnects while RoomManager.joinDoc is running', function () {
-      beforeEach(function (ctx) {
-        ctx.RoomManager.joinDoc = (client, docId, cb) => {
-          ctx.client.disconnected = true
-          cb()
-        }
-
-        ctx.WebsocketController.joinDoc(
-          ctx.client,
-          ctx.doc_id,
-          -1,
-          ctx.options,
-          ctx.callback
-        )
-      })
-
-      it('should call the callback with no details', function (ctx) {
-        expect(ctx.callback.args[0]).to.deep.equal([])
-      })
-
-      it('should increment the editor.join-doc.disconnected metric with a status', function (ctx) {
-        expect(
-          ctx.metrics.inc.calledWith('editor.join-doc.disconnected', 1, {
-            status: 'after-joining-room',
           })
         ).to.equal(true)
       })
@@ -999,26 +869,11 @@ describe('WebsocketController', function () {
     beforeEach(function (ctx) {
       ctx.doc_id = 'doc-id-123'
       ctx.client.ol_context.project_id = ctx.project_id
-      ctx.RoomManager.leaveDoc = sinon.stub()
       ctx.WebsocketController.leaveDoc(ctx.client, ctx.doc_id, ctx.callback)
-    })
-
-    it('should inc the joinLeaveEpoch', function (ctx) {
-      expect(ctx.client.joinLeaveEpoch).to.equal(1)
-    })
-
-    it('should remove the client from the doc_id room', function (ctx) {
-      ctx.RoomManager.leaveDoc
-        .calledWith(ctx.client, ctx.doc_id)
-        .should.equal(true)
     })
 
     it('should call the callback', function (ctx) {
       ctx.callback.called.should.equal(true)
-    })
-
-    it('should increment the leave-doc metric', function (ctx) {
-      ctx.metrics.inc.calledWith('editor.leave-doc').should.equal(true)
     })
   })
 
@@ -1775,6 +1630,108 @@ describe('WebsocketController', function () {
               resolve()
             }
           )
+        })
+      })
+    })
+
+    describe('with a history-OT client', function () {
+      const tracking = {
+        insert: { type: 'insert', userId: 'user-id-123', ts: '2026-07-15' },
+        delete: { type: 'delete', userId: 'user-id-123', ts: '2026-07-15' },
+        none: { type: 'none' },
+      }
+
+      function expectRoutedTo(ctx, target, update) {
+        return new Promise(resolve => {
+          for (const name of [
+            'assertClientCanViewProjectAndDoc',
+            'assertClientCanReviewProjectAndDoc',
+            'assertClientCanEditProjectAndDoc',
+          ]) {
+            ctx.AuthorizationManager[name].yields(new Error('not authorized'))
+          }
+          ctx.AuthorizationManager[target].yields(null)
+          ctx.WebsocketController._assertClientCanApplyUpdate(
+            ctx.client,
+            ctx.doc_id,
+            update,
+            error => {
+              expect(error).to.be.null
+              expect(ctx.AuthorizationManager[target].calledOnce).to.be.true
+              resolve()
+            }
+          )
+        })
+      }
+
+      it('should route an add-comment op to view access', async function (ctx) {
+        await expectRoutedTo(ctx, 'assertClientCanViewProjectAndDoc', {
+          op: [{ commentId: 'comment-id', ranges: [{ pos: 0, length: 3 }] }],
+        })
+      })
+
+      it('should route a tracked insertion to review access', async function (ctx) {
+        await expectRoutedTo(ctx, 'assertClientCanReviewProjectAndDoc', {
+          op: [{ textOperation: [5, { i: 'x', tracking: tracking.insert }] }],
+        })
+      })
+
+      it('should route a tracked deletion to review access', async function (ctx) {
+        await expectRoutedTo(ctx, 'assertClientCanReviewProjectAndDoc', {
+          op: [{ textOperation: [{ r: 3, tracking: tracking.delete }] }],
+        })
+      })
+
+      it('should route accepting a tracked change (clearing tracking) to edit access', async function (ctx) {
+        await expectRoutedTo(ctx, 'assertClientCanEditProjectAndDoc', {
+          op: [{ textOperation: [{ r: 3, tracking: tracking.none }] }],
+        })
+      })
+
+      it('should route an untracked insertion to edit access', async function (ctx) {
+        await expectRoutedTo(ctx, 'assertClientCanEditProjectAndDoc', {
+          op: [{ textOperation: ['plain'] }],
+        })
+      })
+
+      it('should route an untracked deletion to edit access', async function (ctx) {
+        await expectRoutedTo(ctx, 'assertClientCanEditProjectAndDoc', {
+          op: [{ textOperation: [-3] }],
+        })
+      })
+
+      it('should route a mix of tracked and untracked ops to edit access', async function (ctx) {
+        await expectRoutedTo(ctx, 'assertClientCanEditProjectAndDoc', {
+          op: [
+            { textOperation: [{ i: 'x', tracking: tracking.insert }] },
+            { textOperation: ['plain'] },
+          ],
+        })
+      })
+
+      it('should route a resolve-comment op to edit access', async function (ctx) {
+        // Only add-comment ops (commentId + ranges) are recognised as comment
+        // updates; resolving a comment currently requires edit access.
+        await expectRoutedTo(ctx, 'assertClientCanEditProjectAndDoc', {
+          op: [{ commentId: 'comment-id', resolved: true }],
+        })
+      })
+
+      it('should route a permanent history-OT insertion carrying meta.tc to edit access', async function (ctx) {
+        // meta.tc is a legacy (sharejs) tracked-changes id seed and is
+        // meaningless for history-OT, where tracking is carried by the op.
+        // A review-only client must not be able to make a permanent edit by
+        // attaching it.
+        await expectRoutedTo(ctx, 'assertClientCanEditProjectAndDoc', {
+          op: [{ textOperation: ['permanent untracked text'] }],
+          meta: { tc: 'tracked-change-id' },
+        })
+      })
+
+      it('should route a permanent history-OT deletion carrying meta.tc to edit access', async function (ctx) {
+        await expectRoutedTo(ctx, 'assertClientCanEditProjectAndDoc', {
+          op: [{ textOperation: [-3] }],
+          meta: { tc: 'tracked-change-id' },
         })
       })
     })

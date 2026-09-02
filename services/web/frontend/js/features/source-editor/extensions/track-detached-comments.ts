@@ -1,31 +1,15 @@
-import {
-  EditorState,
-  RangeSet,
-  StateEffect,
-  StateField,
-  Transaction,
-} from '@codemirror/state'
+import { EditorState, StateField, Transaction } from '@codemirror/state'
 import {
   findCommentsInCut,
   findDetachedCommentsInChanges,
   restoreCommentsOnPaste,
   restoreDetachedComments,
+  restoreDetachedCommentsEffect,
   StoredComment,
 } from './changes/comments'
+import { findDetachedHistoryOTCommentsInChanges } from './history-ot'
 import { invertedEffects } from '@codemirror/commands'
 import { DocumentContainer } from '@/features/ide-react/editor/document-container'
-
-const restoreDetachedCommentsEffect = StateEffect.define<RangeSet<any>>({
-  map: (value, mapping) => {
-    return value
-      .update({
-        filter: (from, to) => {
-          return from <= mapping.length && to <= mapping.length
-        },
-      })
-      .map(mapping)
-  },
-})
 
 /**
  * A custom extension that detects detached comments when a comment is cut and pasted,
@@ -43,6 +27,12 @@ export const trackDetachedComments = ({
       return []
     },
     update: (value, transaction) => {
+      // history-OT cut/paste restoration is handled atomically by the
+      // updateSender in the historyOT extension
+      if (currentDoc.isHistoryOT()) {
+        return value
+      }
+
       if (transaction.annotation(Transaction.remote)) {
         return value
       }
@@ -71,10 +61,9 @@ export const trackDetachedComments = ({
         transaction.docChanged &&
         !transaction.annotation(Transaction.remote)
       ) {
-        const detachedComments = findDetachedCommentsInChanges(
-          currentDoc,
-          transaction
-        )
+        const detachedComments = currentDoc.isHistoryOT()
+          ? findDetachedHistoryOTCommentsInChanges(transaction)
+          : findDetachedCommentsInChanges(currentDoc, transaction)
         if (detachedComments.size) {
           return [restoreDetachedCommentsEffect.of(detachedComments)]
         }
@@ -82,8 +71,11 @@ export const trackDetachedComments = ({
       return []
     }),
 
-    // restore any detached comments on undo
+    // restore any detached comments on undo (history-OT does this in updateSender)
     EditorState.transactionExtender.of(transaction => {
+      if (currentDoc.isHistoryOT()) {
+        return null
+      }
       for (const effect of transaction.effects) {
         if (effect.is(restoreDetachedCommentsEffect)) {
           // send the comments to the ShareJS doc

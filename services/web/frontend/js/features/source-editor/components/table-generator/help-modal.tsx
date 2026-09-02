@@ -8,10 +8,12 @@ import {
 import OLButton from '@/shared/components/ol/ol-button'
 import { useTabularContext } from './contexts/tabular-context'
 import { Trans, useTranslation } from 'react-i18next'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export const TableGeneratorHelpModal = () => {
   const { helpShown, hideHelp } = useTabularContext()
   const { t } = useTranslation()
+  const themed = useFeatureFlag('themed-modals')
   if (!helpShown) return null
 
   return (
@@ -19,6 +21,7 @@ export const TableGeneratorHelpModal = () => {
       show={helpShown}
       onHide={hideHelp}
       className="table-generator-help-modal"
+      themed={themed}
     >
       <OLModalHeader>
         <OLModalTitle>{t('help')}</OLModalTitle>
@@ -74,9 +77,9 @@ export const TableGeneratorHelpModal = () => {
               <code />,
               // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
               <a
-                href="https://www.overleaf.com/learn/latex/Inserting_Images#Labels_and_cross-references"
+                href="https://docs.overleaf.com/writing-and-editing/inserting-images/captioning-and-referencing-figures#labels-and-cross-references"
                 target="_blank"
-                rel="noopener"
+                rel="noopener noreferrer"
               />,
             ]}
           />

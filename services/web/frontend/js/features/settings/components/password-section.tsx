@@ -8,7 +8,7 @@ import {
 import getMeta from '../../../utils/meta'
 import useAsync from '../../../shared/hooks/use-async'
 import OLButton from '@/shared/components/ol/ol-button'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import OLFormGroup from '@/shared/components/ol/ol-form-group'
 import OLFormLabel from '@/shared/components/ol/ol-form-label'
 import OLFormControl from '@/shared/components/ol/ol-form-control'
@@ -42,7 +42,7 @@ function CanOnlyLogInThroughSSO() {
         i18nKey="you_cant_add_or_change_password_due_to_sso"
         components={[
           // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
-          <a href="/learn/how-to/Logging_in_with_Group_single_sign-on" />,
+          <a href="https://docs.overleaf.com/accounts-and-security/email-address-and-login-options/logging-in-with-group-sso" />,
         ]}
       />
     </p>
@@ -156,44 +156,48 @@ function PasswordForm() {
       />
       {isSuccess && data?.message?.text ? (
         <OLFormGroup>
-          <OLNotification type="success" content={data.message.text} />
+          <div className="notification-list">
+            <Notification type="success" content={data.message.text} />
+          </div>
         </OLFormGroup>
       ) : null}
       {isError ? (
         <OLFormGroup>
-          <OLNotification
-            type="error"
-            content={
-              getErrorMessageKey(error) === 'password-must-be-strong' ? (
-                <>
-                  <Trans
-                    i18nKey="password_was_detected_on_a_public_list_of_known_compromised_passwords"
-                    components={[
-                      /* eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key */
-                      <a
-                        href="https://haveibeenpwned.com/passwords"
-                        target="_blank"
-                        rel="noreferrer noopener"
-                      />,
-                    ]}
-                  />
-                  {t('use_a_different_password')}.
-                </>
-              ) : getErrorMessageKey(error) === 'password-contains-email' ? (
-                <>
-                  {t('invalid_password_contains_email')}{' '}
-                  {t('use_a_different_password')}.
-                </>
-              ) : getErrorMessageKey(error) === 'password-too-similar' ? (
-                <>
-                  {t('invalid_password_too_similar')}{' '}
-                  {t('use_a_different_password')}.
-                </>
-              ) : (
-                (getUserFacingMessage(error) ?? '')
-              )
-            }
-          />
+          <div className="notification-list">
+            <Notification
+              type="error"
+              content={
+                getErrorMessageKey(error) === 'password-must-be-strong' ? (
+                  <>
+                    <Trans
+                      i18nKey="password_was_detected_on_a_public_list_of_known_compromised_passwords"
+                      components={[
+                        /* eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key */
+                        <a
+                          href="https://haveibeenpwned.com/passwords"
+                          target="_blank"
+                          rel="noreferrer noopener"
+                        />,
+                      ]}
+                    />
+                    {t('use_a_different_password')}.
+                  </>
+                ) : getErrorMessageKey(error) === 'password-contains-email' ? (
+                  <>
+                    {t('invalid_password_contains_email')}{' '}
+                    {t('use_a_different_password')}.
+                  </>
+                ) : getErrorMessageKey(error) === 'password-too-similar' ? (
+                  <>
+                    {t('invalid_password_too_similar')}{' '}
+                    {t('use_a_different_password')}.
+                  </>
+                ) : (
+                  (getUserFacingMessage(error) ?? '')
+                )
+              }
+            />
+          </div>
         </OLFormGroup>
       ) : null}
       <OLFormGroup>

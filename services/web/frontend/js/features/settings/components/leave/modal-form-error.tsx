@@ -1,7 +1,7 @@
 import { useTranslation, Trans } from 'react-i18next'
 import getMeta from '../../../../utils/meta'
 import { FetchError } from '../../../../infrastructure/fetch-json'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 
 type LeaveModalFormErrorProps = {
   error: FetchError
@@ -31,20 +31,22 @@ function LeaveModalFormError({ error }: LeaveModalFormErrorProps) {
   }
 
   return (
-    <OLNotification
-      type="error"
-      content={
-        <>
-          {errorMessage}
-          {errorTip ? (
-            <>
-              <br />
-              {errorTip}
-            </>
-          ) : null}
-        </>
-      }
-    />
+    <div className="notification-list">
+      <Notification
+        type="error"
+        content={
+          <>
+            {errorMessage}
+            {errorTip ? (
+              <>
+                <br />
+                {errorTip}
+              </>
+            ) : null}
+          </>
+        }
+      />
+    </div>
   )
 }
 

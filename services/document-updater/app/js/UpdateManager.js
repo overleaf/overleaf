@@ -1,7 +1,7 @@
 // @ts-check
 
 const { callbackifyAll } = require('@overleaf/promise-utils')
-const LockManager = require('./LockManager')
+const ProjectLockManager = require('./ProjectLockManager')
 const RedisManager = require('./RedisManager')
 const ProjectHistoryRedisManager = require('./ProjectHistoryRedisManager')
 const RealTimeRedisManager = require('./RealTimeRedisManager')
@@ -17,79 +17,81 @@ const WebApiManager = require('./WebApiManager')
 const Profiler = require('./Profiler')
 const { isInsert, isDelete, getDocLength, computeDocHash } = require('./Utils')
 const HistoryOTUpdateManager = require('./HistoryOTUpdateManager')
+const { buildSparseChangePreviews } = require('./TrackedChangePreview')
 
 /**
  * @import { Ranges, Update, HistoryUpdate } from "./types"
  */
 
 const UpdateManager = {
-  async processOutstandingUpdates(projectId, docId) {
-    const timer = new Metrics.Timer('updateManager.processOutstandingUpdates')
-    try {
-      await UpdateManager.fetchAndApplyUpdates(projectId, docId)
-      timer.done({ status: 'success' })
-    } catch (err) {
-      timer.done({ status: 'error' })
-      throw err
-    }
-  },
-
-  async processOutstandingUpdatesWithLock(projectId, docId) {
+  /**
+   * Process the pending updates for a project under the project lock, then
+   * keep going for as long as more updates are queued up.
+   *
+   * @param {string} projectId
+   */
+  async processOutstandingUpdatesWithLock(projectId) {
     const profile = new Profiler('processOutstandingUpdatesWithLock', {
       project_id: projectId,
-      doc_id: docId,
     })
 
-    const lockValue = await LockManager.promises.tryLock(docId)
-    if (lockValue == null) {
-      return
-    }
-    profile.log('tryLock')
+    // Always take the project lock before the per-doc lock to avoid deadlocks.
+    // Wait for the project lock rather than bailing out: another action
+    // holding it (e.g. for a different doc) will not process this doc's queue.
+    const projectLockValue =
+      await ProjectLockManager.promises.getLock(projectId)
+    profile.log('getProjectLock')
 
     try {
-      await UpdateManager.processOutstandingUpdates(projectId, docId)
-      profile.log('processOutstandingUpdates')
+      await UpdateManager.fetchAndApplyProjectUpdates(projectId, profile)
+      profile.log('fetchAndApplyProjectUpdates')
     } finally {
-      await LockManager.promises.releaseLock(docId, lockValue)
-      profile.log('releaseLock').end()
+      await ProjectLockManager.promises.releaseLock(projectId, projectLockValue)
+      profile.log('releaseProjectLock').end()
     }
 
-    await UpdateManager.continueProcessingUpdatesWithLock(projectId, docId)
+    await UpdateManager.continueProcessingUpdatesWithLock(projectId)
   },
 
-  async continueProcessingUpdatesWithLock(projectId, docId) {
-    const length = await RealTimeRedisManager.promises.getUpdatesLength(docId)
-    if (length > 0) {
-      await UpdateManager.processOutstandingUpdatesWithLock(projectId, docId)
-    }
-  },
-
-  async fetchAndApplyUpdates(projectId, docId) {
-    const profile = new Profiler('fetchAndApplyUpdates', {
-      project_id: projectId,
-      doc_id: docId,
-    })
-
+  /**
+   * Apply one batch of updates from the shared per-project queue. We already
+   * hold the project lock, so no per-doc lock is required: the project lock
+   * serialises all processing for the project. Each update carries its `doc`
+   * id - real-time forces `update.doc = docId` before queueing it.
+   *
+   * @param {string} projectId
+   * @param {Profiler} profile - profile started by the caller
+   */
+  async fetchAndApplyProjectUpdates(projectId, profile) {
     const updates =
-      await RealTimeRedisManager.promises.getPendingUpdatesForDoc(docId)
-    logger.debug(
-      { projectId, docId, count: updates.length },
-      'processing updates'
-    )
+      await RealTimeRedisManager.promises.getPendingProjectUpdates(projectId)
+    profile.log('getPendingProjectUpdates')
     if (updates.length === 0) {
       return
     }
-    profile.log('getPendingUpdatesForDoc')
-
     for (const update of updates) {
+      const docId = update.doc
       if (HistoryOTUpdateManager.isHistoryOTEditOperationUpdate(update)) {
         await HistoryOTUpdateManager.applyUpdate(projectId, docId, update)
       } else {
         await UpdateManager.applyUpdate(projectId, docId, update)
       }
-      profile.log('applyUpdate')
+      profile.log('applyProjectUpdate')
     }
-    profile.log('async done').end()
+  },
+
+  /**
+   * Process the project's pending updates under the project lock if any are
+   * queued up.
+   *
+   * @param {string} projectId
+   */
+  async continueProcessingUpdatesWithLock(projectId) {
+    const length =
+      await RealTimeRedisManager.promises.getProjectUpdatesLength(projectId)
+    if (length > 0) {
+      await UpdateManager.processOutstandingUpdatesWithLock(projectId)
+    }
   },
 
   /**
@@ -213,19 +215,27 @@ const UpdateManager = {
       // Look up the authors of those rejected changes from the pre-update
       // ranges so we can notify web below.
       if (removedChangeIds.length > 0) {
-        const rejectedChangeAuthorIds = (ranges?.changes || [])
-          .filter(change => removedChangeIds.includes(change.id))
-          .map(change => change.metadata.user_id)
+        const rejectedChanges = (ranges?.changes || []).filter(change =>
+          removedChangeIds.includes(change.id)
+        )
+        const rejectedChangeAuthorIds = rejectedChanges.map(
+          change => change.metadata.user_id
+        )
+        const previews = buildSparseChangePreviews({
+          changes: rejectedChanges,
+          lines,
+        })
 
         // Fire-and-forget without awaiting because
-        // we hold the doc lock here, and the result of the
+        // we hold the project lock here, and the result of the
         // notification doesn't affect the update
         WebApiManager.promises
           .notifyTrackChangesRejected(
             projectId,
             docId,
             rejectedChangeAuthorIds,
-            update.meta?.user_id
+            update.meta?.user_id,
+            previews
           )
           .catch(err => {
             logger.warn(
@@ -250,7 +260,7 @@ const UpdateManager = {
         )
 
         // Do this last, since it's a mongo call, and so potentially longest running
-        // If it overruns the lock, it's ok, since all of our redis work is done
+        // If it overruns the project lock, it's ok, since all of our redis work is done
         await SnapshotManager.promises.recordSnapshot(
           projectId,
           docId,
@@ -264,7 +274,7 @@ const UpdateManager = {
       RealTimeRedisManager.sendData({
         project_id: projectId,
         doc_id: docId,
-        error: error instanceof Error ? error.message : error,
+        error: error instanceof Error ? error.message : String(error),
       })
       profile.log('sendData')
       throw error
@@ -273,44 +283,64 @@ const UpdateManager = {
     }
   },
 
+  /**
+   * Process the project's pending updates, then run the given method on the
+   * doc, all under the project lock.
+   *
+   * @param {Function} method - called with (projectId, docId, ...args)
+   * @param {string} projectId
+   * @param {string} docId
+   * @param {...any} args
+   * @return {Promise<any>} the return value of `method`
+   */
   async lockUpdatesAndDo(method, projectId, docId, ...args) {
     const profile = new Profiler('lockUpdatesAndDo', {
       project_id: projectId,
       doc_id: docId,
     })
 
-    const lockValue = await LockManager.promises.getLock(docId)
-    profile.log('getLock')
+    // Take the project lock so we can safely drain the shared per-project queue
+    // and then run the operation itself.
+    const projectLockValue =
+      await ProjectLockManager.promises.getLock(projectId)
+    profile.log('getProjectLock')
 
     let result
     try {
-      await UpdateManager.processOutstandingUpdates(projectId, docId)
-      profile.log('processOutstandingUpdates')
+      await UpdateManager.fetchAndApplyProjectUpdates(projectId, profile)
+      profile.log('fetchAndApplyProjectUpdates')
+
+      await ProjectLockManager.promises.extendLock(projectId, projectLockValue)
+      profile.log('extendProjectLock')
 
       result = await method(projectId, docId, ...args)
       profile.log('method')
     } finally {
-      await LockManager.promises.releaseLock(docId, lockValue)
-      profile.log('releaseLock').end()
+      await ProjectLockManager.promises.releaseLock(projectId, projectLockValue)
+      profile.log('releaseProjectLock').end()
     }
 
     // We held the lock for a while so updates might have queued up
-    UpdateManager.continueProcessingUpdatesWithLock(projectId, docId).catch(
-      err => {
-        // The processing may fail for invalid user updates.
-        // This can be very noisy, put them on level DEBUG
-        //  and record a metric.
-        Metrics.inc('background-processing-updates-error')
-        logger.debug(
-          { err, projectId, docId },
-          'error processing updates in background'
-        )
-      }
-    )
+    UpdateManager.continueProcessingUpdatesWithLock(projectId).catch(err => {
+      // The processing may fail for invalid user updates.
+      // This can be very noisy, put them on level DEBUG
+      //  and record a metric.
+      Metrics.inc('background-processing-updates-error')
+      logger.debug(
+        { err, projectId, docId },
+        'error processing updates in background'
+      )
+    })
 
     return result
   },
 
+  /**
+   * Replace unpaired surrogate characters in the update's inserts.
+   *
+   * @param {Update} update
+   * @return {Update}
+   */
   _sanitizeUpdate(update) {
     // In Javascript, characters are 16-bits wide. It does not understand surrogates as characters.
     //
@@ -324,7 +354,7 @@ const UpdateManager = {
     // Something must be going on client side that is screwing up the encoding and splitting the
     // two 16-bit characters so that \uD835 is standalone.
     for (const op of update.op || []) {
-      if (op.i != null) {
+      if (isInsert(op)) {
         // Replace high and low surrogate characters with 'replacement character' (\uFFFD)
         op.i = op.i.replace(/[\uD800-\uDFFF]/g, '\uFFFD')
       }

@@ -2,6 +2,7 @@
   --command-palette-color-scheme: dark;
   --command-palette-selected-bg: var(--green-70);
   --command-palette-selected-color: var(--green-10);
+  --command-palette-description-selected-color: var(--green-20);
   --command-palette-border-color: var(--border-primary);
 }
 
@@ -9,6 +10,7 @@
   --command-palette-color-scheme: light;
   --command-palette-selected-bg: var(--bg-accent-03);
   --command-palette-selected-color: var(--green-70);
+  --command-palette-description-selected-color: var(--green-60);
   --command-palette-border-color: var(--border-divider);
 }
 
@@ -30,18 +32,27 @@
   }
 
   .command-palette-input {
-    width: 100%;
-    padding: var(--spacing-05);
-    border: 0;
-    border-bottom: 1px solid var(--border-divider-themed);
-    background: transparent;
-    color: var(--content-primary-themed);
-    font-size: var(--font-size-04);
-    outline: none;
+    input {
+      flex: 1;
+      background: transparent;
+      color: var(--content-primary-themed);
+      font-size: var(--font-size-03);
+      border: 0;
+      outline: none;
+      border-radius: var(--border-radius-base);
+      padding: var(--spacing-02);
 
-    &::placeholder {
-      color: var(--content-placeholder-themed);
+      &::placeholder {
+        color: var(--content-placeholder-themed);
+      }
     }
+
+    border-bottom: 1px solid var(--border-divider-themed);
+    padding: var(--spacing-03);
+    gap: var(--spacing-02);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
   .command-palette-results {
@@ -82,23 +93,32 @@
     &.command-palette-result-selected button {
       background-color: var(--command-palette-selected-bg);
       color: var(--command-palette-selected-color);
-    }
 
-    &.command-palette-result-selected .command-palette-result-description {
-      color: var(--command-palette-selected-color);
+      .command-palette-result-title {
+        color: var(--command-palette-selected-color);
+      }
+
+      .command-palette-result-description {
+        color: var(--command-palette-description-selected-color);
+      }
     }
   }
 
   .command-palette-result-title {
     color: var(--content-primary-themed);
-    font-size: var(--font-size-03);
-    font-weight: 500;
+    font-size: var(--font-size-02);
+    font-weight: 400;
     line-height: 1.2;
   }
 
+  .command-palette-no-matches {
+    color: var(--content-placeholder-themed);
+    padding: var(--spacing-03) var(--spacing-04);
+  }
+
   .command-palette-result-description {
-    font-size: var(--font-size-02);
-    color: var(--content-secondary-themed);
-    line-height: 1.2;
+    font-size: var(--font-size-01);
+    margin-left: var(--spacing-04);
+    color: var(--content-placeholder-themed);
   }
 }

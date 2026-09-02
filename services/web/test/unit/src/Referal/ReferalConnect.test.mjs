@@ -1,3 +1,8 @@
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import {
+  getRawReqInput,
+  setReqValidationModeForTests,
+} from '@overleaf/validation-tools'
 const modulePath = new URL(
   '../../../../app/src/Features/Referal/ReferalConnect.mjs',
   import.meta.url
@@ -8,6 +13,10 @@ describe('Referal connect middle wear', function () {
     ctx.connect = (await import(modulePath)).default
   })
 
+  afterEach(function () {
+    setReqValidationModeForTests(null)
+  })
+
   it('should take a referal query string and put it on the session if it exists', async function (ctx) {
     await new Promise(resolve => {
       const req = {
@@ -15,7 +24,35 @@ describe('Referal connect middle wear', function () {
         session: {},
       }
       ctx.connect.use(req, {}, () => {
-        req.session.referal_id.should.equal(req.query.referal)
+        // case 3: raw test assertion on the fake req fixture built above
+        req.session.referal_id.should.equal(getRawReqInput(req).query.referal)
+        resolve()
+      })
+    })
+  })
+
+  it('should take the short-hand r referal query param and put it on the session', async function (ctx) {
+    await new Promise(resolve => {
+      const req = {
+        query: { r: '12345' },
+        session: {},
+      }
+      ctx.connect.use(req, {}, () => {
+        // case 3: raw test assertion on the fake req fixture built above
+        req.session.referal_id.should.equal(getRawReqInput(req).query.r)
+        resolve()
+      })
+    })
+  })
+
+  it('should tolerate unrelated query params from the request', async function (ctx) {
+    await new Promise(resolve => {
+      const req = {
+        query: { referal: '12345', utm_source: 'newsletter' },
+        session: {},
+      }
+      ctx.connect.use(req, {}, () => {
+        req.session.referal_id.should.equal('12345')
         resolve()
       })
     })
@@ -41,7 +78,8 @@ describe('Referal connect middle wear', function () {
         session: {},
       }
       ctx.connect.use(req, {}, () => {
-        req.session.referal_id.should.equal(req.query.fb_ref)
+        // case 3: raw test assertion on the fake req fixture built above
+        req.session.referal_id.should.equal(getRawReqInput(req).query.fb_ref)
         resolve()
       })
     })
@@ -148,6 +186,22 @@ describe('Referal connect middle wear', function () {
         req.session.referal_source.should.equal('collaborator_invite')
         resolve()
       })
+    })
+  })
+
+  describe('request validation', function () {
+    beforeEach(function () {
+      setReqValidationModeForTests('enforce')
+    })
+
+    it('rejects a non-string referal query param', function (ctx) {
+      const req = {
+        query: { rm: ['fb', 't'] },
+        session: {},
+      }
+      expect(() => ctx.connect.use(req, {}, () => {})).toThrowError(
+        expect.objectContaining({ name: 'InvalidRequestError' })
+      )
     })
   })
 })

@@ -9,11 +9,14 @@ import {
 import { ModalBodyProps } from 'react-bootstrap/ModalBody'
 import type { Options as FocusTrapOptions } from 'focus-trap'
 import { useTranslation } from 'react-i18next'
+import classNames from 'classnames'
 
 type OLModalProps = ModalProps & {
   size?: 'sm' | 'lg'
   onHide: () => void
   show?: boolean
+  themed?: boolean
+  className?: string
 } & Pick<
     FocusTrapOptions,
     | 'escapeDeactivates'
@@ -34,10 +37,22 @@ export function OLModal({
   escapeDeactivates = false, // Let React-Bootstrap Modal handle Escape key to avoid double Escape key handling
   clickOutsideDeactivates = true, // Allow focus trap to deactivate on outside click and let React-Bootstrap Modal handle it
   initialFocus,
+  themed = false,
+  className,
+  backdropClassName,
   ...props
 }: OLModalProps) {
   return (
-    <Modal show={show} onHide={onHide} {...props}>
+    <Modal
+      show={show}
+      onHide={onHide}
+      className={classNames({ 'modal-themed': themed }, className)}
+      backdropClassName={classNames(
+        { 'modal-backdrop-themed': themed },
+        backdropClassName
+      )}
+      {...props}
+    >
       <FocusTrap
         active={show}
         focusTrapOptions={{

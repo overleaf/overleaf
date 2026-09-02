@@ -21,6 +21,7 @@ const args: Partial<CompileContext> = {
   autoCompile: false,
   compiling: false,
   draft: false,
+  png2pdf: false,
   hasChanges: false,
   stopOnFirstError: false,
   stopOnValidationError: false,

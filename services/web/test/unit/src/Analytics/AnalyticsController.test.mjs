@@ -1,5 +1,6 @@
-import { vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
+import { setReqValidationModeForTests } from '@overleaf/validation-tools'
 import MockResponse from '../helpers/MockResponse.mjs'
 const modulePath = new URL(
   '../../../../app/src/Features/Analytics/AnalyticsController.mjs',
@@ -50,11 +51,17 @@ describe('AnalyticsController', function () {
     ctx.res = new MockResponse(vi)
   })
 
+  afterEach(function () {
+    setReqValidationModeForTests(null)
+  })
+
   describe('updateEditingSession', function () {
     beforeEach(function (ctx) {
+      // projectId is validated as a Mongo ObjectId
+      ctx.projectId = '507f191e810c19729de860ea'
       ctx.req = {
         params: {
-          projectId: 'a project id',
+          projectId: ctx.projectId,
         },
         session: {},
         body: {
@@ -75,7 +82,7 @@ describe('AnalyticsController', function () {
           sinon.assert.calledWith(
             ctx.AnalyticsManager.updateEditingSession,
             '1234',
-            'a project id',
+            ctx.projectId,
             'XY',
             { editorType: 'abc' }
           )
@@ -90,7 +97,6 @@ describe('AnalyticsController', function () {
     beforeEach(function (ctx) {
       const body = {
         foo: 'stuff',
-        _csrf: 'atoken123',
       }
       ctx.req = {
         params: {
@@ -100,9 +106,6 @@ describe('AnalyticsController', function () {
         sessionID: 'sessionIDHere',
         session: {},
       }
-
-      ctx.expectedData = Object.assign({}, body)
-      delete ctx.expectedData._csrf
     })
 
     it('should use the session', async function (ctx) {
@@ -112,23 +115,24 @@ describe('AnalyticsController', function () {
           ctx.AnalyticsManager.recordEventForSession,
           ctx.req.session,
           ctx.req.params.event,
-          ctx.expectedData
+          ctx.req.body
         )
         resolve()
       })
     })
 
-    it('should remove the CSRF token before sending to the manager', async function (ctx) {
-      await new Promise(resolve => {
-        ctx.controller.recordEvent(ctx.req, ctx.res)
-        sinon.assert.calledWith(
-          ctx.AnalyticsManager.recordEventForSession,
-          ctx.req.session,
-          ctx.req.params.event,
-          ctx.expectedData
-        )
-        resolve()
-      })
+    it('should reject an event name containing characters outside [a-z0-9-_]', function (ctx) {
+      setReqValidationModeForTests('enforce')
+      ctx.req.params.event = 'I.did:something,here/now;too'
+      expect(() => ctx.controller.recordEvent(ctx.req, ctx.res)).to.throw()
+      sinon.assert.notCalled(ctx.AnalyticsManager.recordEventForSession)
+    })
+
+    it('should reject an event name containing a disallowed character', function (ctx) {
+      setReqValidationModeForTests('enforce')
+      ctx.req.params.event = 'bad event!'
+      expect(() => ctx.controller.recordEvent(ctx.req, ctx.res)).to.throw()
+      sinon.assert.notCalled(ctx.AnalyticsManager.recordEventForSession)
     })
   })
 })

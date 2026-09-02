@@ -15,7 +15,8 @@ import {
 import { z } from '../app/src/infrastructure/Validation.mjs'
 import { scriptRunner } from './lib/ScriptRunner.mjs'
 import { getRegionClient } from '../modules/subscriptions/app/src/StripeClient.mjs'
-import { ReportError, convertFromMinorUnits } from './stripe/helpers.mjs'
+import { ReportError } from './stripe/helpers.mjs'
+import { convertFromCents } from '../modules/subscriptions/app/src/StripeValues.mjs'
 
 const INPUT_COLUMNS = [
   'user_id',
@@ -250,7 +251,7 @@ async function verifyStripeSubscription(row, subscriptionId, stripeClient) {
   }
 
   const currency = planItem.price.currency
-  const currentUnitPrice = convertFromMinorUnits(
+  const currentUnitPrice = convertFromCents(
     planItem.price.unit_amount,
     currency
   )
@@ -313,7 +314,7 @@ function verifyStripeAiAssist(subscription, row, currency) {
       'AI assist expected but no assistant item found'
     )
   }
-  const aiPrice = convertFromMinorUnits(aiItem.price.unit_amount, currency)
+  const aiPrice = convertFromCents(aiItem.price.unit_amount, currency)
   if (!pricesMatch(aiPrice, row.ai_assist_price)) {
     throw new ReportError(
       'mismatch',
@@ -330,7 +331,7 @@ function verifyStripeSchedulePhase(phase, currency, expectedNewPrice) {
       'no plan item in schedule next phase'
     )
   }
-  const nextPrice = convertFromMinorUnits(planItem.price.unit_amount, currency)
+  const nextPrice = convertFromCents(planItem.price.unit_amount, currency)
   if (!pricesMatch(nextPrice, expectedNewPrice)) {
     throw new ReportError(
       'pending-change',

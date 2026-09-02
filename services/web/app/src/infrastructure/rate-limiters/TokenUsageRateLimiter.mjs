@@ -3,8 +3,10 @@ import { UserFeatureUsage } from '../../models/UserFeatureUsage.mjs'
 import { TooManyRequestsError } from '../../Features/Errors/Errors.js'
 import AnalyticsManager from '../../Features/Analytics/AnalyticsManager.mjs'
 import UserAuditLogHandler from '../../Features/User/UserAuditLogHandler.mjs'
+
 /** @typedef {{usage?: number | null, periodStart?: Date | null}} FeatureUsage */
 /** @typedef {{remainingTokens?: number | null, periodStart?: Date | null}} RemainingTokens */
+/** @typedef {import('express').Response} Response */
 
 const PERIOD = 24 // hours
 const PERIOD_IN_MILLISECONDS = PERIOD * 60 * 60 * 1000
@@ -60,7 +62,7 @@ export default class TokenUsageRateLimiter {
 
   /**
    * @param {any} userId
-   * @param {any} res
+   * @param {Response} res
    * @param {any} amount
    * @param {{ auditLogTool?: string }} [options] - if `auditLogTool` is set, an `ai-quota-breach` audit log entry is written with `{ tool }` in the info payload when this recording crosses or sits past the allowance
    */
@@ -153,12 +155,16 @@ export default class TokenUsageRateLimiter {
       /** @type {any} */ (reportedUsage)?.features?.[this.featureName] ?? {}
     const periodStart = featureUsage.periodStart ?? new Date()
     const usage = featureUsage.usage ?? 0
-    const usesLeft = allowance - usage
     const refreshEpoch = periodStart.getTime() + PERIOD_IN_MILLISECONDS
+    const periodExpired = refreshEpoch <= Date.now()
+    const remainingTokens = periodExpired ? allowance : allowance - usage
+    const resetDate = new Date(
+      periodExpired ? Date.now() + PERIOD_IN_MILLISECONDS : refreshEpoch
+    ).toString()
     return {
       [this.featureName]: {
-        remainingTokens: Date.now() > refreshEpoch ? allowance : usesLeft,
-        resetDate: new Date(refreshEpoch).toString(),
+        remainingTokens: Math.max(remainingTokens, 0),
+        resetDate,
       },
     }
   }

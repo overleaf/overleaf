@@ -18,9 +18,13 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./frontend/js/*"],
+      "@shared/*": ["./shared/*"],
       "@modules/*": ["./modules/*"],
       "@overleaf/o-error": ["../../libraries/o-error"],
       "@overleaf/ranges-tracker": ["../../libraries/ranges-tracker"],
+      "@overleaf/validation-tools": ["../../libraries/validation-tools"],
+      "overleaf-editor-core": ["../../libraries/overleaf-editor-core"],
+      "overleaf-editor-core/*": ["../../libraries/overleaf-editor-core/*"],
 
       "@ol-types/*": ["./types/*"],
       "@ol-storybook/*": ["./.storybook/*"],
@@ -38,6 +42,7 @@
   },
   "include": [
     "frontend/js/**/*.*",
+    "shared/**/*.*",
     "modules/**/frontend/js/**/*.*",
     "modules/*/shared/**/*.*",
     "test/frontend/**/*.*",

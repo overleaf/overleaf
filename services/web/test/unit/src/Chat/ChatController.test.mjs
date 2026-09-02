@@ -1,4 +1,4 @@
-import { vi } from 'vitest'
+import { beforeEach, describe, it, vi } from 'vitest'
 import sinon from 'sinon'
 
 const MODULE_PATH = '../../../../app/src/Features/Chat/ChatController.mjs'
@@ -6,6 +6,9 @@ const MODULE_PATH = '../../../../app/src/Features/Chat/ChatController.mjs'
 describe('ChatController', function () {
   beforeEach(async function (ctx) {
     ctx.user_id = 'mock-user-id'
+    // project_id/message_id are validated as Mongo ObjectIds
+    ctx.project_id = '507f191e810c19729de860ea'
+    ctx.message_id = '507f191e810c19729de860eb'
     ctx.settings = {}
     ctx.ChatApiHandler = { promises: {} }
     ctx.ChatManager = { promises: {} }
@@ -126,10 +129,11 @@ describe('ChatController', function () {
 
   describe('getMessages', function () {
     beforeEach(async function (ctx) {
-      ctx.req.query = {
-        limit: (ctx.limit = '30'),
-        before: (ctx.before = '12345'),
-      }
+      // sent over the wire as query-string values, but coerced to numbers
+      // by the schema before being passed on
+      ctx.req.query = { limit: '30', before: '12345' }
+      ctx.limit = 30
+      ctx.before = 12345
       ctx.ChatManager.promises.injectUserInfoIntoThreads = sinon
         .stub()
         .resolves()
@@ -147,6 +151,62 @@ describe('ChatController', function () {
 
     it('should return the messages', function (ctx) {
       ctx.res.json.calledWith(ctx.messages).should.equal(true)
+    })
+  })
+
+  describe('deleteMessage', function () {
+    beforeEach(async function (ctx) {
+      ctx.req.params.message_id = ctx.message_id
+      ctx.ChatApiHandler.promises.deleteGlobalMessage = sinon.stub().resolves()
+      await ctx.ChatController.deleteMessage(ctx.req, ctx.res)
+    })
+
+    it('should tell the chat handler to delete the message', function (ctx) {
+      ctx.ChatApiHandler.promises.deleteGlobalMessage
+        .calledWith(ctx.project_id, ctx.message_id)
+        .should.equal(true)
+    })
+
+    it('should tell the editor real time controller about the deletion', function (ctx) {
+      ctx.EditorRealTimeController.emitToRoom
+        .calledWith(ctx.project_id, 'delete-global-message', {
+          messageId: ctx.message_id,
+          userId: ctx.user_id,
+        })
+        .should.equal(true)
+    })
+
+    it('should return a 204 status code', function (ctx) {
+      ctx.res.sendStatus.calledWith(204).should.equal(true)
+    })
+  })
+
+  describe('editMessage', function () {
+    beforeEach(async function (ctx) {
+      ctx.req.params.message_id = ctx.message_id
+      ctx.req.body = { content: (ctx.content = 'edited-content') }
+      ctx.ChatApiHandler.promises.editGlobalMessage = sinon.stub().resolves()
+      await ctx.ChatController.editMessage(ctx.req, ctx.res, sinon.stub())
+    })
+
+    it('should tell the chat handler to edit the message', function (ctx) {
+      ctx.ChatApiHandler.promises.editGlobalMessage
+        .calledWith(ctx.project_id, ctx.message_id, ctx.user_id, ctx.content)
+        .should.equal(true)
+    })
+
+    it('should tell the editor real time controller about the edit', function (ctx) {
+      ctx.EditorRealTimeController.emitToRoom
+        .calledWith(ctx.project_id, 'edit-global-message', {
+          messageId: ctx.message_id,
+          userId: ctx.user_id,
+          content: ctx.content,
+        })
+        .should.equal(true)
+    })
+
+    it('should return a 204 status code', function (ctx) {
+      ctx.res.sendStatus.calledWith(204).should.equal(true)
     })
   })
 })

@@ -6,27 +6,17 @@ import OError from '@overleaf/o-error'
 const IdMap = new Map() // keep track of whether ids are from projects or docs
 const RoomEvents = new EventEmitter() // emits {project,doc}-active and {project,doc}-empty events
 
-// Manage socket.io rooms for individual projects and docs
+// Manage socket.io rooms for individual projects.
 //
-// The first time someone joins a project or doc we emit a 'project-active' or
-// 'doc-active' event.
+// The first time someone joins a project we emit a 'project-active' event.
 //
-// When the last person leaves a project or doc, we emit 'project-empty' or
-// 'doc-empty' event.
+// When the last person leaves a project, we emit a 'project-empty' event.
 //
 // The pubsub side is handled by ChannelManager
 
 export default {
   joinProject(client, projectId, callback) {
     this.joinEntity(client, 'project', projectId, callback)
-  },
-
-  joinDoc(client, docId, callback) {
-    this.joinEntity(client, 'doc', docId, callback)
-  },
-
-  leaveDoc(client, docId) {
-    this.leaveEntity(client, 'doc', docId)
   },
 
   leaveProjectAndDocs(client) {

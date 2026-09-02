@@ -4,8 +4,20 @@ import logger from '@overleaf/logger'
 import loggerSerializers from '@overleaf/logger/serializers.js'
 import { callbackify } from 'node:util'
 import Settings from '@overleaf/settings'
+import {
+  z,
+  parseReq,
+  getRawReqInput,
+} from '../../infrastructure/Validation.mjs'
 
 const ALLOWED_PATHS = Settings.saml?.logAllowList || ['/saml/']
+
+const samlLogBodySchema = z.object({
+  body: z.object({
+    email: z.string().optional(),
+    SAMLResponse: z.string().optional(),
+  }),
+})
 
 async function log(req, data, samlAssertion) {
   let providerId, sessionId
@@ -13,7 +25,10 @@ async function log(req, data, samlAssertion) {
   data = data || {}
 
   try {
-    const { path, query } = req
+    const { path } = req
+    // audit log stores the full raw query verbatim; not read by field name
+    // here (case 1: verbatim forwarding)
+    const { query } = getRawReqInput(req)
     if (!ALLOWED_PATHS.some(allowedPath => path.startsWith(allowedPath))) {
       return
     }
@@ -51,12 +66,13 @@ async function log(req, data, samlAssertion) {
     }
 
     if (data.error) {
+      const { body } = parseReq(req, samlLogBodySchema, { logOnly: true })
       data.body = {}
-      if (req.body.email) {
-        data.body.email = req.body.email
+      if (body.email) {
+        data.body.email = body.email
       }
-      if (req.body.SAMLResponse) {
-        data.body.SAMLResponse = req.body.SAMLResponse
+      if (body.SAMLResponse) {
+        data.body.SAMLResponse = body.SAMLResponse
       }
     }
 

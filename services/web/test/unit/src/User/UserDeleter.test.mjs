@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, vi, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import tk from 'timekeeper'
 import moment from 'moment'
@@ -22,6 +22,13 @@ describe('UserDeleter', function () {
 
     ctx.UserMock = sinon.mock(User)
     ctx.DeletedUserMock = sinon.mock(DeletedUser)
+
+    ctx.settings = {
+      shuttingDown: false,
+      userHardDeletionDelay: 1000 * 60 * 60 * 24 * 90, // 90 days
+      overleaf: {}, // needed for Features.hasFeature('saas') to return true
+    }
+    vi.doMock('@overleaf/settings', () => ({ default: ctx.settings }))
 
     tk.freeze(Date.now())
 
@@ -680,6 +687,65 @@ describe('UserDeleter', function () {
           userId: deletedUser.deleterData.deletedUserId,
         })
       }
+    })
+  })
+
+  describe('expireDeletedUsersAfterDuration when graceful shutdown is in progress', function () {
+    const userId1 = new ObjectId()
+    const userId2 = new ObjectId()
+
+    beforeEach(async function (ctx) {
+      ctx.settings.shuttingDown = true
+
+      ctx.deletedUsers = [
+        {
+          user: { _id: userId1 },
+          deleterData: { deletedUserId: userId1 },
+          save: sinon.stub().resolves(),
+        },
+        {
+          user: { _id: userId2 },
+          deleterData: { deletedUserId: userId2 },
+          save: sinon.stub().resolves(),
+        },
+      ]
+
+      ctx.DeletedUserMock.expects('find')
+        .withArgs({
+          'deleterData.deletedAt': {
+            $lt: new Date(moment().subtract(90, 'days')),
+          },
+          user: {
+            $type: 'object',
+          },
+        })
+        .chain('exec')
+        .resolves(ctx.deletedUsers)
+
+      // Only set up findOne for the first user since shutdown stops after it
+      ctx.DeletedUserMock.expects('findOne')
+        .withArgs({
+          'deleterData.deletedUserId': userId1,
+        })
+        .chain('exec')
+        .resolves(ctx.deletedUsers[0])
+
+      await ctx.UserDeleter.promises.expireDeletedUsersAfterDuration()
+    })
+
+    it('should stop processing after the first user deletion', function (ctx) {
+      expect(ctx.deletedUsers[0].save).to.have.been.called
+      expect(ctx.deletedUsers[1].save).not.to.have.been.called
+    })
+
+    it('should log a warning about the early termination due to graceful shutdown', function (ctx) {
+      expect(ctx.logger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userCount: ctx.deletedUsers.length,
+          processedCount: 1,
+        }),
+        'graceful shutdown in progress, stopping batch of deleted users early'
+      )
     })
   })
 

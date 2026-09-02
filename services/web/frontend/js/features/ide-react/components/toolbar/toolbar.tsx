@@ -5,6 +5,7 @@ import { OnlineUsers } from './online-users'
 import ShareProjectButton from './share-project-button'
 import ChangeLayoutButton from './change-layout-button'
 import ShowHistoryButton from './show-history-button'
+import RequestAccessButton from './request-access-button'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import BackToEditorButton from '@/features/editor-navigation-toolbar/components/back-to-editor-button'
 import { useCallback } from 'react'
@@ -16,12 +17,13 @@ import UpgradeButton from './upgrade-button'
 import getMeta from '@/utils/meta'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
+import useIsNetworkStalled from '@/features/ide-react/hooks/use-is-network-stalled'
 import OLIconButton from '@/shared/components/ol/ol-icon-button'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
-import SplitTestBadge from '@/shared/components/split-test-badge'
+import OfflineIndicator from './offline-indicator'
 
-const [publishModalModules] = importOverleafModules('publishModal')
-const SubmitProjectButton = publishModalModules?.import.NewPublishToolbarButton
+const [publishModalModules] = importOverleafModules('publishModalToolbarButton')
+const SubmitProjectButton = publishModalModules?.import.default
 
 export const Toolbar = () => {
   const { view, restoreView, focusMode, setFocusMode, pdfLayout, setView } =
@@ -29,10 +31,12 @@ export const Toolbar = () => {
   const { cobranding, isRestrictedTokenMember } = useEditorContext()
   const { permissionsLevel } = useIdeReactContext()
   const showUpgradePrompt = getMeta('ol-showUpgradePrompt')
-  const upgradeButtonRelocation = useFeatureFlag(
-    'editor-upgrade-button-relocation'
+  const improvedFlakyConnections = useFeatureFlag(
+    'intermittent-connection-improvements'
   )
   const { t } = useTranslation()
+
+  const isOfflineDueToNetworkStall = useIsNetworkStalled()
   const shouldDisplaySubmitButton =
     (permissionsLevel === 'owner' || permissionsLevel === 'readAndWrite') &&
     SubmitProjectButton
@@ -65,43 +69,42 @@ export const Toolbar = () => {
           <ToolbarLogos cobranding={cobranding} />
         </div>
         <ToolbarProjectTitle />
-        <div className="ide-redesign-toolbar-actions">
-          <div className="ide-redesign-toolbar-button-container">
-            <SplitTestBadge
-              splitTestName="focus-mode"
-              displayOnVariants={['enabled']}
-            />
-          </div>
-          {showViewSwitcher && (
+        <div className="ide-redesign-toolbar-actions-wrapper">
+          {improvedFlakyConnections && (
+            <OfflineIndicator isOffline={isOfflineDueToNetworkStall} />
+          )}
+          <div className="ide-redesign-toolbar-actions">
+            {showViewSwitcher && (
+              <div className="ide-redesign-toolbar-button-container">
+                <OLTooltip
+                  id="tooltip-switch-view"
+                  description={switchTooltip}
+                  overlayProps={{ delay: 0, placement: 'bottom' }}
+                >
+                  <OLIconButton
+                    icon={switchIcon}
+                    className="ide-redesign-toolbar-button-subdued ide-redesign-toolbar-button-icon"
+                    onClick={handleSwitchView}
+                    accessibilityLabel={switchTooltip}
+                  />
+                </OLTooltip>
+              </div>
+            )}
+            <ChangeLayoutButton />
             <div className="ide-redesign-toolbar-button-container">
               <OLTooltip
-                id="tooltip-switch-view"
-                description={switchTooltip}
+                id="tooltip-exit-focus-mode"
+                description={t('exit_focus_mode')}
                 overlayProps={{ delay: 0, placement: 'bottom' }}
               >
                 <OLIconButton
-                  icon={switchIcon}
+                  icon="close_fullscreen"
                   className="ide-redesign-toolbar-button-subdued ide-redesign-toolbar-button-icon"
-                  onClick={handleSwitchView}
-                  accessibilityLabel={switchTooltip}
+                  onClick={handleExitFocusMode}
+                  accessibilityLabel={t('exit_focus_mode')}
                 />
               </OLTooltip>
             </div>
-          )}
-          <ChangeLayoutButton />
-          <div className="ide-redesign-toolbar-button-container">
-            <OLTooltip
-              id="tooltip-exit-focus-mode"
-              description={t('exit_focus_mode')}
-              overlayProps={{ delay: 0, placement: 'bottom' }}
-            >
-              <OLIconButton
-                icon="close_fullscreen"
-                className="ide-redesign-toolbar-button-subdued ide-redesign-toolbar-button-icon"
-                onClick={handleExitFocusMode}
-                accessibilityLabel={t('exit_focus_mode')}
-              />
-            </OLTooltip>
           </div>
         </div>
       </nav>
@@ -125,18 +128,23 @@ export const Toolbar = () => {
       <div className="ide-redesign-toolbar-menu">
         <ToolbarLogos cobranding={cobranding} />
         <ToolbarMenuBar />
-        {showUpgradePrompt && upgradeButtonRelocation && <UpgradeButton />}
+        {showUpgradePrompt && <UpgradeButton />}
       </div>
       <ToolbarProjectTitle />
-      <div className="ide-redesign-toolbar-actions">
-        <OnlineUsers />
-        {!isRestrictedTokenMember && <ShowHistoryButton />}
-        <ChangeLayoutButton />
-        {shouldDisplaySubmitButton && cobranding && (
-          <SubmitProjectButton cobranding={cobranding} />
+      <div className="ide-redesign-toolbar-actions-wrapper">
+        {improvedFlakyConnections && (
+          <OfflineIndicator isOffline={isOfflineDueToNetworkStall} />
         )}
-        <ShareProjectButton />
-        {showUpgradePrompt && !upgradeButtonRelocation && <UpgradeButton />}
+        <div className="ide-redesign-toolbar-actions">
+          {!isOfflineDueToNetworkStall && <OnlineUsers />}
+          <RequestAccessButton />
+          {!isRestrictedTokenMember && <ShowHistoryButton />}
+          <ChangeLayoutButton />
+          {shouldDisplaySubmitButton && cobranding && (
+            <SubmitProjectButton cobranding={cobranding} />
+          )}
+          <ShareProjectButton />
+        </div>
       </div>
     </nav>
   )

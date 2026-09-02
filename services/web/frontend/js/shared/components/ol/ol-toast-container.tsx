@@ -1,5 +1,5 @@
 import { CSSProperties, FC } from 'react'
-import { ToastContainer as BS5ToastContainer } from 'react-bootstrap'
+import { ToastContainer } from 'react-bootstrap'
 
 type OLToastContainerProps = {
   style?: CSSProperties
@@ -10,8 +10,8 @@ export const OLToastContainer: FC<
   React.PropsWithChildren<OLToastContainerProps>
 > = ({ children, className, style }) => {
   return (
-    <BS5ToastContainer className={className} style={style}>
+    <ToastContainer className={className} style={style}>
       {children}
-    </BS5ToastContainer>
+    </ToastContainer>
   )
 }

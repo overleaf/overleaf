@@ -158,14 +158,7 @@ describe('EarlyDisconnect', function () {
               return done(err)
             }
             expect(resp).to.not.include(`editor-events:${this.project_id}`)
-
-            return rclient.pubsub('CHANNELS', (err, resp) => {
-              if (err) {
-                return done(err)
-              }
-              expect(resp).to.not.include(`applied-ops:${this.doc_id}`)
-              return done()
-            })
+            return done()
           })
           return null
         })

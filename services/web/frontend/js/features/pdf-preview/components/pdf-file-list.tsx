@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next'
 import { memo } from 'react'
 import {
-  DropdownDivider,
-  DropdownHeader,
-  DropdownItem,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdownDivider,
+  OLDropdownHeader,
+  OLDropdownItem,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import { PdfFileData, PdfFileDataList } from '../util/types'
 
 function PdfFileList({ fileList }: { fileList: PdfFileDataList }) {
@@ -20,46 +20,46 @@ function PdfFileList({ fileList }: { fileList: PdfFileDataList }) {
 
   return (
     <>
-      <DropdownHeader>{t('other_output_files')}</DropdownHeader>
+      <OLDropdownHeader>{t('other_output_files')}</OLDropdownHeader>
 
       {fileList.top.map(file => (
         <li key={file.path} role="menuitem">
-          <DropdownItem
+          <OLDropdownItem
             role="link"
             download={basename(file)}
             href={file.downloadURL || file.url}
           >
             {file.path}
-          </DropdownItem>
+          </OLDropdownItem>
         </li>
       ))}
 
       {fileList.other.length > 0 && fileList.top.length > 0 && (
-        <DropdownDivider />
+        <OLDropdownDivider />
       )}
 
       {fileList.other.map(file => (
         <li key={file.path} role="menuitem">
-          <DropdownItem
+          <OLDropdownItem
             role="link"
             download={basename(file)}
             href={file.downloadURL || file.url}
           >
             {file.path}
-          </DropdownItem>
+          </OLDropdownItem>
         </li>
       ))}
 
       {fileList.archive?.fileCount !== undefined &&
         fileList.archive?.fileCount > 0 && (
           <li role="menuitem">
-            <DropdownItem
+            <OLDropdownItem
               role="link"
               download={basename(fileList.archive)}
               href={fileList.archive.url}
             >
               {t('download_all')} ({fileList.archive.fileCount})
-            </DropdownItem>
+            </OLDropdownItem>
           </li>
         )}
     </>

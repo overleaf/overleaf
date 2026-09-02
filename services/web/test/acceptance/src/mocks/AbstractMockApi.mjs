@@ -1,6 +1,10 @@
+import logger from '@overleaf/logger'
 import OError from '@overleaf/o-error'
 import express from 'express'
-import bodyParser from 'body-parser'
+import {
+  getRawReqInput,
+  handleValidationError,
+} from '@overleaf/validation-tools'
 
 /**
  * Abstract class for running a mock API via Express. Handles setting up of
@@ -49,8 +53,8 @@ class AbstractMockApi {
     this.debug = debug
     this.port = port
     this.app = express()
-    this.app.use(bodyParser.json())
-    this.app.use(bodyParser.urlencoded({ extended: true }))
+    this.app.use(express.json())
+    this.app.use(express.urlencoded({ extended: true }))
   }
 
   /**
@@ -59,7 +63,11 @@ class AbstractMockApi {
   applyDebugRoutes() {
     if (!this.debug) return
     this.app.use((req, res, next) => {
-      const { method, path, query, params, body } = req
+      const { method, path } = req
+      // Debug-only wire dump: this prints exactly what was sent on the
+      // wire for troubleshooting acceptance test failures (case 3: raw
+      // test assertions), not a functional read of a named field.
+      const { query, params, body } = getRawReqInput(req)
       // eslint-disable-next-line no-console
       console.log(`${this.constructor.name} REQUEST`, {
         method,
@@ -114,15 +122,23 @@ class AbstractMockApi {
    *                                  Set this to 'true' from the constructor of your derived class
    */
   static initialize(port, { debug } = {}) {
+    /* eslint-disable mocha/no-mocha-arrows */
     // `this` refers to the derived class
     this._fromInit = true
     this._obj = new this(port, { debug })
+    const name = this._obj.constructor.name
 
     this._obj.applyDebugRoutes()
     this._obj.applyRoutes()
+    // Every mock is a real Express app running in-process during
+    // acceptance tests, so it needs the same validation error handling
+    // as production routes for parseReq() schemas added in applyRoutes().
+    this._obj.app.use((err, req, res, next) => {
+      logger.fatal({ mockName: name, err, req }, 'request failed')
+      next(err)
+    })
+    this._obj.app.use(handleValidationError)
 
-    /* eslint-disable mocha/no-mocha-arrows */
-    const name = this.constructor.name
     before(`starting mock ${name}`, () => this._obj.start())
     after(`stopping mock ${name}`, () => this._obj.stop())
     beforeEach(`resetting mock ${name}`, () => this._obj.reset())

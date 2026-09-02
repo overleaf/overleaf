@@ -1,4 +1,4 @@
-import { vi, expect } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
 import Crypto from 'node:crypto'
@@ -235,6 +235,49 @@ describe('CollaboratorsInviteGetter', function () {
     })
 
     describe('when no reusable invite exists', function () {
+      beforeEach(function (ctx) {
+        ctx.ProjectInvite.findOne.returns({
+          exec: sinon.stub().resolves(null),
+        })
+      })
+
+      it('returns null', async function (ctx) {
+        const invite = await ctx.call()
+        expect(invite).to.be.null
+      })
+    })
+  })
+
+  describe('getUsableAnonymousSharingLinkInvite', function () {
+    beforeEach(function (ctx) {
+      ctx.ProjectInvite.findOne.returns({
+        exec: sinon.stub().resolves(ctx.fakeInvite),
+      })
+      ctx.call = async () => {
+        return await ctx.CollaboratorsInviteGetter.promises.getUsableAnonymousSharingLinkInvite(
+          ctx.projectId,
+          ctx.token
+        )
+      }
+    })
+
+    it('returns the invite', async function (ctx) {
+      const invite = await ctx.call()
+      expect(invite).to.deep.equal(ctx.fakeInvite)
+    })
+
+    it('queries for an active, non-group reusable invite matching the token hash', async function (ctx) {
+      await ctx.call()
+      ctx.ProjectInvite.findOne.should.have.been.calledWith({
+        projectId: ctx.projectId,
+        reusable: true,
+        tokenHmac: ctx.tokenHmac,
+        subscriptionId: null,
+        privileges: { $ne: false },
+      })
+    })
+
+    describe('when no matching invite exists', function () {
       beforeEach(function (ctx) {
         ctx.ProjectInvite.findOne.returns({
           exec: sinon.stub().resolves(null),

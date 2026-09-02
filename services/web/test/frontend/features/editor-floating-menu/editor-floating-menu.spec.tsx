@@ -28,11 +28,13 @@ describe('<EditorFloatingMenu />', function () {
     trackChangesVisible = true,
     floatingMenu = true,
     withSettingsToggle = false,
+    focusMode = false,
   }: {
     migrationEnabled: boolean
     trackChangesVisible?: boolean
     floatingMenu?: boolean
     withSettingsToggle?: boolean
+    focusMode?: boolean
   }) {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     window.metaAttributesCache.set('ol-splitTestVariants', {
@@ -49,6 +51,7 @@ describe('<EditorFloatingMenu />', function () {
           scope={scope}
           features={{ trackChangesVisible }}
           userSettings={{ floatingMenu }}
+          layoutContext={{ focusMode }}
         >
           <CodeMirrorEditor />
           {withSettingsToggle && <FloatingMenuToggle />}
@@ -150,6 +153,14 @@ describe('<EditorFloatingMenu />', function () {
     })
   })
 
+  describe('when in focus mode', function () {
+    it('does not show the floating menu', function () {
+      mountEditor({ migrationEnabled: true, focusMode: true })
+
+      cy.get('.editor-floating-menu').should('not.exist')
+    })
+  })
+
   describe('when the migration split test is disabled (control)', function () {
     it('keeps the legacy review tooltip and does not render the unified menu', function () {
       mountEditor({ migrationEnabled: false })
@@ -214,6 +225,38 @@ describe('<EditorFloatingMenu />', function () {
       )
 
       cy.get('.editor-floating-menu').should('exist')
+    })
+  })
+
+  describe('adding a comment with the floating menu disabled', function () {
+    describe('when migrationEnabled is true', function () {
+      it('still creates a pending comment via the command', function () {
+        mountEditor({ migrationEnabled: true, floatingMenu: false })
+
+        // The quick-actions popup stays hidden...
+        cy.get('.editor-floating-menu').should('not.exist')
+
+        // The toolbar / menu / shortcut path (all dispatch this event) works.
+        cy.window().then(win => {
+          win.dispatchEvent(new Event('add-new-review-comment'))
+        })
+
+        cy.get('.ol-cm-change-c').should('exist')
+      })
+    })
+
+    describe('when migrationEnabled is false', function () {
+      it('still creates a pending comment via the command (legacy tooltip)', function () {
+        mountEditor({ migrationEnabled: false, floatingMenu: false })
+
+        cy.get('.review-tooltip-menu').should('not.exist')
+
+        cy.window().then(win => {
+          win.dispatchEvent(new Event('add-new-review-comment'))
+        })
+
+        cy.get('.ol-cm-change-c').should('exist')
+      })
     })
   })
 

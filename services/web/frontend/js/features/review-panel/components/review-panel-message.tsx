@@ -1,4 +1,4 @@
-import { FC, useCallback, useState } from 'react'
+import { FC, useCallback, useRef, useState } from 'react'
 import {
   CommentId,
   ReviewPanelCommentThreadMessage,
@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { FormatTimeBasedOnYear } from '@/shared/components/format-time-based-on-year'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import MaterialIcon from '@/shared/components/material-icon'
-import AutoExpandingTextArea from '@/shared/components/auto-expanding-text-area'
+import { MentionsInput } from '@/shared/components/mentions-input'
 import ReviewPanelCommentOptions from './review-panel-comment-options'
 import { ExpandableContent } from './review-panel-expandable-content'
 import ReviewPanelDeleteCommentModal from './review-panel-delete-comment-modal'
@@ -15,7 +15,6 @@ import { useUserContext } from '@/shared/context/user-context'
 import ReviewPanelEntryUser from './review-panel-entry-user'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import { PreventSelectingEntry } from './review-panel-prevent-selecting'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
 export const ReviewPanelMessage: FC<{
   message: ReviewPanelCommentThreadMessage
@@ -39,12 +38,11 @@ export const ReviewPanelMessage: FC<{
   const { t } = useTranslation()
   const [editing, setEditing] = useState(false)
   const [deleting, setDeleting] = useState(false)
-  const [content, setContent] = useState(message.content)
+  // Guards against a double submit when Enter submits and the subsequent
+  // unmount of the editor also fires its blur handler.
+  const hasSubmittedRef = useRef(false)
   const user = useUserContext()
   const permissions = usePermissionsContext()
-  const mentionsEnabled =
-    isSplitTestEnabled('email-notifications') &&
-    isSplitTestEnabled('comment-mentions')
 
   const isCommentAuthor = Boolean(message.user && user.id === message.user.id)
   const canEdit = isCommentAuthor && permissions.comment
@@ -53,14 +51,27 @@ export const ReviewPanelMessage: FC<{
     (permissions.resolveOwnComments && isCommentAuthor)
   const canDelete = canResolve
 
-  const handleEditOption = useCallback(() => setEditing(true), [])
+  const handleEditOption = useCallback(() => {
+    hasSubmittedRef.current = false
+    setEditing(true)
+  }, [])
   const showDeleteModal = useCallback(() => setDeleting(true), [])
   const hideDeleteModal = useCallback(() => setDeleting(false), [])
 
-  const handleSubmit = useCallback(() => {
-    onEdit?.(message.id, content)
-    setEditing(false)
-  }, [content, message.id, onEdit])
+  const handleSubmit = useCallback(
+    (value: string) => {
+      if (hasSubmittedRef.current) {
+        return
+      }
+      hasSubmittedRef.current = true
+      // An emptied comment cancels the edit rather than saving a blank message.
+      if (value.trim().length > 0) {
+        onEdit?.(message.id, value)
+      }
+      setEditing(false)
+    },
+    [message.id, onEdit]
+  )
 
   const handleDelete = useCallback(() => {
     onDelete?.()
@@ -119,23 +130,12 @@ export const ReviewPanelMessage: FC<{
         </div>
       </div>
       {editing ? (
-        <AutoExpandingTextArea
-          className="review-panel-comment-input review-panel-comment-edit"
+        <MentionsInput
+          className="review-panel-add-comment-editor review-panel-comment-input review-panel-comment-edit"
+          label={t('edit_comment')}
+          initialValue={message.content}
+          onSubmit={handleSubmit}
           onBlur={handleSubmit}
-          onChange={e => setContent(e.target.value)}
-          onKeyPress={e => {
-            if (
-              e.key === 'Enter' &&
-              !e.shiftKey &&
-              !e.ctrlKey &&
-              !e.metaKey &&
-              content
-            ) {
-              e.preventDefault()
-              ;(e.target as HTMLTextAreaElement).blur()
-            }
-          }}
-          value={content}
           autoFocus // eslint-disable-line jsx-a11y/no-autofocus
         />
       ) : (
@@ -145,7 +145,6 @@ export const ReviewPanelMessage: FC<{
           checkNewLines
           content={message.content}
           translate="no"
-          displayMentions={mentionsEnabled}
         />
       )}
 

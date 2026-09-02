@@ -1,4 +1,4 @@
-import { vi, expect } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import _ from 'lodash'
 
@@ -518,7 +518,9 @@ describe('CompileManager', function () {
       result = await ctx.CompileManager.promises.wordCount(
         ctx.project_id,
         ctx.user_id,
-        false
+        false,
+        undefined,
+        'main.tex'
       )
     })
 
@@ -532,6 +534,19 @@ describe('CompileManager', function () {
       ctx.ClsiManager.promises.wordCount
         .calledWith(ctx.project_id, ctx.user_id, false, ctx.limits)
         .should.equal(true)
+    })
+
+    it('should pass the root doc path from the client through', function (ctx) {
+      expect(ctx.ClsiManager.promises.wordCount.lastCall.args[5]).to.deep.equal(
+        {
+          rootResourcePath: 'main.tex',
+        }
+      )
+    })
+
+    it('should not look the root doc up itself', function (ctx) {
+      expect(ctx.ProjectRootDocManager.promises.ensureRootDocumentIsValid).not
+        .to.exist
     })
 
     it('should resolve with the wordCount from the ClsiManager', function () {

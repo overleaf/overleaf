@@ -24,6 +24,7 @@ import { sendMB } from '@/infrastructure/event-tracking'
 import { FileRef } from '../../../../../types/file-ref'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { isVisualEditorAvailable } from '@/features/source-editor/utils/visual-editor'
+import { isMarkdownFile } from '@/features/source-editor/utils/file'
 
 const FileTreeOpenContext = createContext<
   | {
@@ -105,6 +106,12 @@ export const FileTreeOpenProvider: FC<React.PropsWithChildren> = ({
             projectOwner,
             isSampleFile: selected.entity.name === 'sample.bib',
             linkedFileProvider: null,
+            editorMode,
+          })
+        }
+        if (isMarkdownFile(selected.entity.name)) {
+          sendMB('open-md-file', {
+            projectOwner,
             editorMode,
           })
         }

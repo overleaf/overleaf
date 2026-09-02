@@ -11,7 +11,7 @@
   "version": "1.0.0",
   "scripts": {
     "test": "yarn run lint && yarn run types:check && yarn run test:unit",
-    "lint": "eslint --cache --cache-location ../../.cache/eslint/ --ext .cjs,.js,.jsx,.mjs,.ts --max-warnings 0 --format unix .",
+    "lint": "eslint --cache --cache-location ../../.cache/eslint/ --ext .cjs,.js,.jsx,.mjs,.ts --max-warnings 0 .",
     "lint:fix": "eslint --cache --cache-location ../../.cache/eslint/ --fix --ext .cjs,.js,.jsx,.mjs,.ts .",
     "test:ci": "yarn run test:unit",
     "test:unit": "vitest --config vitest.config.ts",
@@ -24,6 +24,10 @@
     "zod-validation-error": "^4.0.1"
   },
   "devDependencies": {
+    "@overleaf/logger": "workspace:*",
+    "@types/express": "4.17.23",
+    "@types/node": "^24.5.2",
+    "eslint": "^10.4.0",
     "typescript": "^5.0.4",
     "vitest": "4.1.5"
   }

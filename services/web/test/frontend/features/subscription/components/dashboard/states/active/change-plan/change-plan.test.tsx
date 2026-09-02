@@ -61,6 +61,37 @@ describe('<ChangePlanModal />', function () {
     expect(screen.queryByText('loading', { exact: false })).to.be.null
   })
 
+  it('shows the price of the assigned price version for Stripe subscriptions', async function () {
+    const stripeSubscription = {
+      ...annualActiveSubscription,
+      service: 'stripe-us' as const,
+    }
+    // the backend resolves listPrice from the user's assigned price version;
+    // the Recurly stub prices this plan at $23.00
+    const plansWithListPrice = plans.map(plan => ({
+      ...plan,
+      displayPrice: undefined,
+      ...(plan.planCode === 'collaborator' ? { listPrice: 25 } : {}),
+    }))
+    renderWithSubscriptionDashContext(
+      <ActiveSubscription subscription={stripeSubscription} />,
+      {
+        metaTags: [
+          { name: 'ol-plans', value: plansWithListPrice },
+          { name: 'ol-groupPlans', value: groupPlans },
+          { name: 'ol-subscription', value: stripeSubscription },
+          { name: 'ol-recommendedCurrency', value: 'USD' },
+        ],
+      }
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Change plan' }))
+
+    const priceCell = await screen.findByText('$25.00 / month')
+    const row = priceCell.closest('tr') as HTMLTableRowElement
+    within(row).getByText('Standard monthly')
+  })
+
   it('renders "Your new plan" and "Keep current plan" when there is a pending plan change', async function () {
     renderActiveSubscription(pendingSubscriptionChange)
 

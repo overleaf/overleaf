@@ -1,4 +1,4 @@
-import { vi, expect } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import mongodb from 'mongodb-legacy'
 
 const { ObjectId } = mongodb
@@ -130,6 +130,67 @@ describe('ProjectHelper', function () {
           false
         )
       })
+    })
+  })
+
+  describe('isTrackChangesEnabledForUser', function () {
+    const userId = '588f3ddae8ebc1bac07c9fa4'
+
+    it('returns true for the legacy on-for-everyone format', function (ctx) {
+      expect(
+        ctx.ProjectHelper.isTrackChangesEnabledForUser(true, userId)
+      ).to.equal(true)
+    })
+
+    it('returns true when enabled for the user', function (ctx) {
+      expect(
+        ctx.ProjectHelper.isTrackChangesEnabledForUser(
+          { [userId]: true },
+          userId
+        )
+      ).to.equal(true)
+    })
+
+    it('supports ObjectId user ids', function (ctx) {
+      expect(
+        ctx.ProjectHelper.isTrackChangesEnabledForUser(
+          { [userId]: true },
+          new ObjectId(userId)
+        )
+      ).to.equal(true)
+    })
+
+    it('returns false when only enabled for another user', function (ctx) {
+      expect(
+        ctx.ProjectHelper.isTrackChangesEnabledForUser(
+          { '5c41deb2b4ca500153340809': true },
+          userId
+        )
+      ).to.equal(false)
+    })
+
+    it('returns false when only enabled for guests', function (ctx) {
+      expect(
+        ctx.ProjectHelper.isTrackChangesEnabledForUser(
+          { __guests__: true },
+          userId
+        )
+      ).to.equal(false)
+    })
+
+    it('returns false when disabled', function (ctx) {
+      expect(
+        ctx.ProjectHelper.isTrackChangesEnabledForUser(false, userId)
+      ).to.equal(false)
+      expect(
+        ctx.ProjectHelper.isTrackChangesEnabledForUser(undefined, userId)
+      ).to.equal(false)
+    })
+
+    it('returns false without a user id', function (ctx) {
+      expect(
+        ctx.ProjectHelper.isTrackChangesEnabledForUser({ [userId]: true }, null)
+      ).to.equal(false)
     })
   })
 

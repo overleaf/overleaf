@@ -6,6 +6,7 @@ import {
   buildSearchTokens,
   buildMatchTokens,
   docSchema,
+  docToEntry,
 } from '../modules/library/app/src/LibraryReferenceRepository.mts'
 import { tokenize } from '../modules/library/app/src/bibtex-search-tokens.mts'
 import { scriptRunner } from './lib/ScriptRunner.mjs'
@@ -67,11 +68,13 @@ async function backfill(trackProgress) {
   }
 
   for await (const doc of cursor) {
-    const entry = docSchema.parse({
-      ...doc,
-      type: doc.type ?? 'misc',
-      updatedAt: doc.updatedAt ?? new Date(0),
-    })
+    const entry = docToEntry(
+      docSchema.parse({
+        ...doc,
+        type: doc.type ?? 'misc',
+        updatedAt: doc.updatedAt ?? new Date(0),
+      })
+    )
     const searchKey = tokenize(doc.key)
     const searchTokens = buildSearchTokens(entry)
     const matchTokens = buildMatchTokens(entry)

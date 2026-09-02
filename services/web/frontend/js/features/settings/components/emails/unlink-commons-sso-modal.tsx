@@ -5,7 +5,7 @@ import {
   OLModalHeader,
   OLModalTitle,
 } from '@/shared/components/ol/ol-modal'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import OLButton from '@/shared/components/ol/ol-button'
 import { postJSON } from '@/infrastructure/fetch-json'
 import { debugConsole } from '@/utils/debugging'
@@ -69,10 +69,12 @@ export default function UnlinkCommonsSSOModal({
         {hasLicence && <p>{t('unlink_commons_sso_lose_licence')}</p>}
         {!hasPassword && <p>{t('unlink_commons_sso_no_login')}</p>}
         {isError && (
-          <OLNotification
-            type="error"
-            content={t('unlink_commons_sso_error')}
-          />
+          <div className="notification-list">
+            <Notification
+              type="error"
+              content={t('unlink_commons_sso_error')}
+            />
+          </div>
         )}
       </OLModalBody>
       <OLModalFooter>

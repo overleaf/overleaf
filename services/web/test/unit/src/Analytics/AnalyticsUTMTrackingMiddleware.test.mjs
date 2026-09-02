@@ -1,5 +1,6 @@
-import { assert, vi } from 'vitest'
+import { afterEach, assert, beforeEach, describe, it, vi } from 'vitest'
 import sinon from 'sinon'
+import { setReqValidationModeForTests } from '@overleaf/validation-tools'
 import MockRequest from '../helpers/MockRequest.mjs'
 import MockResponse from '../helpers/MockResponse.mjs'
 
@@ -42,6 +43,10 @@ describe('AnalyticsUTMTrackingMiddleware', function () {
     ctx.AnalyticsUTMTrackingMiddleware = (await import(MODULE_PATH)).default
 
     ctx.middleware = ctx.AnalyticsUTMTrackingMiddleware.recordUTMTags()
+  })
+
+  afterEach(function () {
+    setReqValidationModeForTests(null)
   })
 
   describe('without UTM tags in query', function () {
@@ -214,6 +219,52 @@ describe('AnalyticsUTMTrackingMiddleware', function () {
         'utm-tags',
         'N/A;Facebook;Some Campaign;N/A'
       )
+    })
+  })
+
+  describe('with a non-string UTM parameter', function () {
+    beforeEach(function (ctx) {
+      ctx.req.url = '/project?utm_source=Organic&utm_source=Direct'
+      ctx.req.query = {
+        utm_source: ['Organic', 'Direct'],
+      }
+      ctx.req.headers = {
+        host: 'test-domain.overleaf.com',
+      }
+    })
+
+    it('still processes the request without throwing', function (ctx) {
+      setReqValidationModeForTests('log')
+      ctx.middleware(ctx.req, ctx.res, ctx.next)
+
+      assert.isTrue(ctx.res.redirected)
+      assert.equal('/project', ctx.res.redirectedTo)
+      sinon.assert.calledWith(
+        ctx.AnalyticsManager.recordEventForSession,
+        ctx.req.session,
+        'page-view',
+        {
+          path: '/project',
+          utm_source: ['Organic', 'Direct'],
+          domain: 'test-domain',
+        }
+      )
+    })
+
+    describe('request validation', function () {
+      beforeEach(function (ctx) {
+        setReqValidationModeForTests('enforce')
+      })
+
+      it('does not throw', function (ctx) {
+        assert.doesNotThrow(() => {
+          ctx.middleware(ctx.req, ctx.res, ctx.next)
+        })
+
+        assert.isTrue(ctx.res.redirected)
+        assert.equal('/project', ctx.res.redirectedTo)
+        sinon.assert.notCalled(ctx.AnalyticsManager.recordEventForSession)
+      })
     })
   })
 })

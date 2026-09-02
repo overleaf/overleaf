@@ -198,7 +198,8 @@ const SHORT_ERROR_NAMES = {
   'Error: failed to extend lock': 'lock-overrun',
   'Error: tried to release timed out lock': 'lock-overrun',
   'Error: Timeout': 'lock-overrun',
-  'Error: sync ongoing': 'sync-ongoing',
+  'Error: sync ongoing': 'sync-ongoing', // pre-SyncOngoingError entries
+  'SyncOngoingError: sync ongoing': 'sync-ongoing',
   'SyncError: unexpected resyncProjectStructure update': 'sync-error',
   '[object Error]': 'unknown-error-object',
   'UpdateWithUnknownFormatError: update with unknown format': 'unknown-format',

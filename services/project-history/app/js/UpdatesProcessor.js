@@ -121,16 +121,47 @@ export function startResyncAndProcessUpdatesUnderLock(
 
 // Process all updates for a project, only check project-level information once
 export function processUpdatesForProject(projectId, callback) {
+  _processUpdatesForProjectWithLock(
+    projectId,
+    { checkResyncState: true },
+    callback
+  )
+}
+
+// Process all updates for a project without asserting the resync state afterwards.
+// Used right after starting a resync, where a pending resync is the expected state.
+export function flushResyncUpdates(projectId, callback) {
+  _processUpdatesForProjectWithLock(
+    projectId,
+    { checkResyncState: false },
+    callback
+  )
+}
+
+function _processUpdatesForProjectWithLock(
+  projectId,
+  { checkResyncState },
+  callback
+) {
   const startTimeMs = Date.now()
   LockManager.runWithLock(
     keys.projectHistoryLock({ project_id: projectId }),
     (extendLock, releaseLock) => {
-      _countAndProcessUpdates(
-        projectId,
-        extendLock,
-        REDIS_READ_BATCH_SIZE,
-        releaseLock
-      )
+      if (checkResyncState) {
+        _flushAndCheckResyncState(
+          projectId,
+          extendLock,
+          REDIS_READ_BATCH_SIZE,
+          releaseLock
+        )
+      } else {
+        _countAndProcessUpdates(
+          projectId,
+          extendLock,
+          REDIS_READ_BATCH_SIZE,
+          releaseLock
+        )
+      }
     },
     (flushError, { queueSize, resyncNeeded } = {}) => {
       if (flushError) {
@@ -379,13 +410,70 @@ _mocks._countAndProcessUpdates = (
       )
     } else {
       logger.debug({ projectId }, 'no updates to process')
-      callback(null, queueSize)
+      callback(null, { queueSize, resyncNeeded: false })
     }
   })
 }
 
 function _countAndProcessUpdates(...args) {
   _mocks._countAndProcessUpdates(...args)
+}
+
+// Never rejects: the caller needs the flush result even when the flush failed, in
+// order to record the queue size in projectHistoryFailures.
+function _countAndProcessUpdatesAsync(projectId, extendLock, batchSize) {
+  return new Promise(resolve => {
+    _countAndProcessUpdates(projectId, extendLock, batchSize, (error, result) =>
+      resolve({ error, result })
+    )
+  })
+}
+
+function _syncOngoingError(projectId, syncState) {
+  return new Errors.SyncOngoingError(Errors.SYNC_ONGOING_ERROR_MESSAGE, {
+    projectId,
+    stuckClearCount: syncState.stuckClearCount,
+    stuckDocPaths: Array.from(syncState.resyncDocContents),
+    resyncPendingSince: syncState.resyncPendingSince,
+    resyncProjectStructure: syncState.resyncProjectStructure,
+  })
+}
+
+// Runs under the project lock, after the queue has been drained. A resync that is
+// still pending at this point never received its updates: web queues them all before
+// the resync request returns. Fail the flush, the history may be inconsistent and
+// callers must not rely on it.
+async function _flushAndCheckResyncStateAsync(
+  projectId,
+  extendLock,
+  batchSize
+) {
+  const extendLockAsync = promisify(extendLock)
+  let result
+  try {
+    const flush = await _countAndProcessUpdatesAsync(
+      projectId,
+      extendLock,
+      batchSize
+    )
+    result = flush.result
+    if (flush.error) return { error: flush.error, result }
+
+    await extendLockAsync()
+    const syncState = await SyncManager.promises.getResyncState(projectId)
+    if (syncState.isSyncOngoing()) {
+      return { error: _syncOngoingError(projectId, syncState), result }
+    }
+    return { result }
+  } catch (error) {
+    return { error: OError.tag(error), result }
+  }
+}
+
+function _flushAndCheckResyncState(projectId, extendLock, batchSize, callback) {
+  _flushAndCheckResyncStateAsync(projectId, extendLock, batchSize).then(
+    ({ error, result }) => callback(error || null, result)
+  )
 }
 
 function _processUpdatesBatch(projectId, updates, extendLock, callback) {

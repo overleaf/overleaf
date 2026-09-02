@@ -1,7 +1,17 @@
 const sinon = require('sinon')
 const { expect } = require('chai')
 const { setTimeout } = require('node:timers/promises')
+const Settings = require('@overleaf/settings')
+const docUpdaterRedis = require('@overleaf/redis-wrapper').createClient(
+  Settings.redis.documentupdater
+)
+const Keys = Settings.redis.documentupdater.key_schema
+const projectHistoryRedis = require('@overleaf/redis-wrapper').createClient(
+  Settings.redis.project_history
+)
+const ProjectHistoryKeys = Settings.redis.project_history.key_schema
 
+const { RequestFailedError } = require('@overleaf/fetch-utils')
 const { db, ObjectId } = require('../../../app/js/mongodb')
 const MockWebApi = require('./helpers/MockWebApi')
 const DocUpdaterClient = require('./helpers/DocUpdaterClient')
@@ -297,9 +307,9 @@ describe('Ranges', function () {
         historyRangesSupport: true,
       })
       await DocUpdaterClient.preloadDoc(this.project_id, this.doc.id)
-      this.id_seed_1 = 'tc_1'
-      this.id_seed_2 = 'tc_2'
-      this.id_seed_3 = 'tc_3'
+      this.id_seed_1 = '587357bd35e64f6151'
+      this.id_seed_2 = '587357bd35e64f6152'
+      this.id_seed_3 = '587357bd35e64f6153'
 
       this.updates = [
         {
@@ -444,6 +454,60 @@ describe('Ranges', function () {
     })
   })
 
+  describe('accepting changes in a history-ot doc', function () {
+    beforeEach(async function () {
+      this.project_id = DocUpdaterClient.randomId()
+      this.user_id = DocUpdaterClient.randomId()
+      this.doc = {
+        id: DocUpdaterClient.randomId(),
+        lines: ['one', 'one and a half', 'two', 'three'],
+      }
+      this.update = {
+        doc: this.doc.id,
+        op: [
+          {
+            textOperation: [
+              4,
+              {
+                r: 'one and a half\n'.length,
+                tracking: {
+                  type: 'delete',
+                  userId: this.user_id,
+                  ts: new Date().toISOString(),
+                },
+              },
+              9,
+            ],
+          },
+        ],
+        v: 0,
+        meta: { source: 'random-publicId' },
+      }
+      MockWebApi.insertDoc(this.project_id, this.doc.id, {
+        lines: this.doc.lines,
+        version: 0,
+        otMigrationStage: 1,
+      })
+      await DocUpdaterClient.preloadDoc(this.project_id, this.doc.id)
+      await DocUpdaterClient.sendUpdate(
+        this.project_id,
+        this.doc.id,
+        this.update
+      )
+      await DocUpdaterClient.waitForPendingUpdates(this.project_id, this.doc.id)
+    })
+
+    it('should refuse to accept changes with a 422', async function () {
+      const doc = await DocUpdaterClient.getDoc(this.project_id, this.doc.id)
+      const changeIds = doc.ranges.changes.map(change => change.id)
+      await expect(
+        DocUpdaterClient.acceptChanges(this.project_id, this.doc.id, changeIds)
+      )
+        .to.be.rejectedWith(RequestFailedError)
+        .and.eventually.have.nested.property('response.status', 422)
+    })
+  })
+
   describe('deleting a comment range', function () {
     before(async function () {
       this.project_id = DocUpdaterClient.randomId()
@@ -486,11 +550,175 @@ describe('Ranges', function () {
     })
   })
 
+  describe('comments (history-ot)', function () {
+    beforeEach(async function () {
+      this.project_id = DocUpdaterClient.randomId()
+      this.user_id = DocUpdaterClient.randomId()
+      this.tid = DocUpdaterClient.randomId()
+      this.doc = {
+        id: DocUpdaterClient.randomId(),
+        lines: ['foo bar baz'],
+      }
+      MockWebApi.insertDoc(this.project_id, this.doc.id, {
+        lines: this.doc.lines,
+        version: 0,
+        otMigrationStage: 1,
+        ranges: {
+          comments: [{ id: this.tid, op: { c: 'bar', p: 4, t: this.tid } }],
+        },
+        resolvedCommentIds: [],
+      })
+      await DocUpdaterClient.preloadDoc(this.project_id, this.doc.id)
+    })
+
+    async function getDocLinesFromRedis(docId) {
+      return JSON.parse(
+        await docUpdaterRedis.get(Keys.docLines({ doc_id: docId }))
+      )
+    }
+
+    async function getHistoryUpdates(projectId) {
+      const ops = await projectHistoryRedis.lrange(
+        ProjectHistoryKeys.projectHistoryOps({ project_id: projectId }),
+        0,
+        -1
+      )
+      return ops.map(op => JSON.parse(op))
+    }
+
+    it('should load the comment into the history-ot doc', async function () {
+      const raw = await getDocLinesFromRedis(this.doc.id)
+      expect(raw).to.deep.equal({
+        content: 'foo bar baz',
+        comments: [{ id: this.tid, ranges: [{ pos: 4, length: 3 }] }],
+      })
+    })
+
+    it('should return the comment', async function () {
+      const comment = await DocUpdaterClient.getComment(
+        this.project_id,
+        this.doc.id,
+        this.tid
+      )
+      expect(comment).to.deep.equal({
+        id: this.tid,
+        op: { p: 4, c: 'bar', t: this.tid, resolved: false },
+      })
+    })
+
+    describe('after resolving the comment', function () {
+      beforeEach(async function () {
+        await DocUpdaterClient.resolveComment(
+          this.project_id,
+          this.doc.id,
+          this.tid,
+          this.user_id
+        )
+      })
+
+      it('should resolve the comment in the history-ot doc', async function () {
+        const raw = await getDocLinesFromRedis(this.doc.id)
+        expect(raw.comments).to.deep.equal([
+          { id: this.tid, ranges: [{ pos: 4, length: 3 }], resolved: true },
+        ])
+      })
+
+      it('should bump the doc version', async function () {
+        const doc = await DocUpdaterClient.getDoc(this.project_id, this.doc.id)
+        expect(doc.version).to.equal(1)
+      })
+
+      it('should return the resolved comment', async function () {
+        const comment = await DocUpdaterClient.getComment(
+          this.project_id,
+          this.doc.id,
+          this.tid
+        )
+        expect(comment.op.resolved).to.equal(true)
+      })
+
+      it('should queue the operation for the history', async function () {
+        const updates = await getHistoryUpdates(this.project_id)
+        expect(updates).to.have.length(1)
+        expect(updates[0].op).to.deep.equal([
+          { commentId: this.tid, resolved: true },
+        ])
+        expect(updates[0].v).to.equal(0)
+        expect(updates[0].meta.pathname).to.equal('/a/b/c.tex')
+        expect(updates[0].meta.user_id).to.equal(this.user_id)
+      })
+
+      describe('after reopening the comment', function () {
+        beforeEach(async function () {
+          await DocUpdaterClient.reopenComment(
+            this.project_id,
+            this.doc.id,
+            this.tid,
+            this.user_id
+          )
+        })
+
+        it('should reopen the comment in the history-ot doc', async function () {
+          const raw = await getDocLinesFromRedis(this.doc.id)
+          expect(raw.comments).to.deep.equal([
+            { id: this.tid, ranges: [{ pos: 4, length: 3 }] },
+          ])
+        })
+
+        it('should queue the operation for the history', async function () {
+          const updates = await getHistoryUpdates(this.project_id)
+          expect(updates).to.have.length(2)
+          expect(updates[1].op).to.deep.equal([
+            { commentId: this.tid, resolved: false },
+          ])
+          expect(updates[1].v).to.equal(1)
+        })
+      })
+    })
+
+    describe('after deleting the comment', function () {
+      beforeEach(async function () {
+        await DocUpdaterClient.removeComment(
+          this.project_id,
+          this.doc.id,
+          this.tid,
+          this.user_id
+        )
+      })
+
+      it('should remove the comment from the history-ot doc', async function () {
+        const raw = await getDocLinesFromRedis(this.doc.id)
+        expect(raw).to.deep.equal({ content: 'foo bar baz' })
+      })
+
+      it('should bump the doc version', async function () {
+        const doc = await DocUpdaterClient.getDoc(this.project_id, this.doc.id)
+        expect(doc.version).to.equal(1)
+      })
+
+      it('should return a 404 for the comment', async function () {
+        const err = await expect(
+          DocUpdaterClient.getComment(this.project_id, this.doc.id, this.tid)
+        ).to.be.rejected
+        expect(err.info.status).to.equal(404)
+      })
+
+      it('should queue the operation for the history', async function () {
+        const updates = await getHistoryUpdates(this.project_id)
+        expect(updates).to.have.length(1)
+        expect(updates[0].op).to.deep.equal([{ deleteComment: this.tid }])
+        expect(updates[0].v).to.equal(0)
+        expect(updates[0].meta.pathname).to.equal('/a/b/c.tex')
+        expect(updates[0].meta.user_id).to.equal(this.user_id)
+      })
+    })
+  })
+
   describe('tripping range size limit', function () {
     before(async function () {
       this.project_id = DocUpdaterClient.randomId()
       this.user_id = DocUpdaterClient.randomId()
-      this.id_seed = DocUpdaterClient.randomId()
+      this.id_seed = '587357bd35e64f6157'
       this.doc = {
         id: DocUpdaterClient.randomId(),
         lines: ['aaa'],
@@ -535,7 +763,7 @@ describe('Ranges', function () {
               op: {
                 c: 'a',
                 p: 5,
-                tid: (this.tid = DocUpdaterClient.randomId()),
+                t: (this.tid = DocUpdaterClient.randomId()),
               },
               metadata: {
                 user_id: this.user_id,
@@ -581,7 +809,7 @@ describe('Ranges', function () {
       expect(docSnapshots[0].ranges.comments[0].op).to.deep.equal({
         c: 'a',
         p: 1,
-        tid: this.tid,
+        t: new ObjectId(this.tid),
       })
     })
   })

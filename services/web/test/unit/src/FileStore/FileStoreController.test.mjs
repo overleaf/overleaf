@@ -1,4 +1,4 @@
-import { expect, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
 import MockResponse from '../helpers/MockResponse.mjs'
@@ -38,14 +38,15 @@ describe('FileStoreController', function () {
 
     ctx.controller = (await import(MODULE_PATH)).default
     ctx.stream = {}
-    ctx.projectId = '2k3j1lk3j21lk3j'
-    ctx.fileId = '12321kklj1lk3jk12'
+    // Project_id/File_id are validated as Mongo ObjectIds
+    ctx.projectId = '507f191e810c19729de860ea'
+    ctx.fileId = '507f191e810c19729de860eb'
     ctx.req = {
       params: {
         Project_id: ctx.projectId,
         File_id: ctx.fileId,
       },
-      query: 'query string here',
+      query: { foo: 'bar' },
       get(key) {
         return undefined
       },

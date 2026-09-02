@@ -149,4 +149,193 @@ describe('Sharing', function () {
       expect(project.readOnly_refs).to.deep.equal([this.reviewer._id])
     })
   })
+
+  describe('validation', function () {
+    it('rejects an unrecognized field in the body when setting collaborator info', async function () {
+      await this.ownerSession.addUserToProject(
+        this.projectId,
+        this.collaborator,
+        'readOnly'
+      )
+      await expect(
+        this.ownerSession.setCollaboratorInfo(
+          this.projectId,
+          this.collaborator._id,
+          { privilegeLevel: 'readOnly', notARealField: 'nope' }
+        )
+      ).to.be.rejectedWith(/failed: status=400 /)
+    })
+
+    it('rejects an unrecognized field in the body when transferring ownership', async function () {
+      await this.ownerSession.addUserToProject(
+        this.projectId,
+        this.collaborator,
+        'readAndWrite'
+      )
+      const { response } = await this.ownerSession.doRequest('POST', {
+        url: `/project/${this.projectId}/transfer-ownership`,
+        json: {
+          user_id: this.collaborator._id.toString(),
+          notARealField: 'nope',
+        },
+      })
+      expect(response.statusCode).to.equal(400)
+    })
+  })
+
+  describe('removing a collaborator', function () {
+    beforeEach(async function () {
+      await this.ownerSession.addUserToProject(
+        this.projectId,
+        this.collaborator,
+        'readAndWrite'
+      )
+    })
+
+    it('lets the owner remove a collaborator', async function () {
+      const { response } = await this.ownerSession.doRequest('DELETE', {
+        url: `/project/${this.projectId}/users/${this.collaborator._id}`,
+      })
+      expect(response.statusCode).to.equal(204)
+      const project = await this.ownerSession.getProject(this.projectId)
+      expect(project.collaberator_refs).to.deep.equal([])
+    })
+
+    it('prevents non-owners from removing a collaborator', async function () {
+      const { response } = await this.collaboratorSession.doRequest('DELETE', {
+        url: `/project/${this.projectId}/users/${this.collaborator._id}`,
+      })
+      expect(response.statusCode).to.equal(403)
+    })
+  })
+
+  describe('leaving a project', function () {
+    beforeEach(async function () {
+      await this.ownerSession.addUserToProject(
+        this.projectId,
+        this.collaborator,
+        'readAndWrite'
+      )
+    })
+
+    it('lets a collaborator leave the project', async function () {
+      const { response } = await this.collaboratorSession.doRequest('POST', {
+        url: `/project/${this.projectId}/leave`,
+      })
+      expect(response.statusCode).to.equal(204)
+      const project = await this.ownerSession.getProject(this.projectId)
+      expect(project.collaberator_refs).to.deep.equal([])
+    })
+
+    it('rejects a malformed project id', async function () {
+      const { response } = await this.collaboratorSession.doRequest('POST', {
+        url: '/project/not-a-valid-project-id/leave',
+      })
+      expect(response.statusCode).to.equal(404)
+    })
+  })
+
+  describe('listing project members', function () {
+    beforeEach(async function () {
+      await this.ownerSession.addUserToProject(
+        this.projectId,
+        this.collaborator,
+        'readAndWrite'
+      )
+    })
+
+    it('lists invited members for a collaborator', async function () {
+      const { response, body } = await this.collaboratorSession.doRequest(
+        'GET',
+        { url: `/project/${this.projectId}/members`, json: true }
+      )
+      expect(response.statusCode).to.equal(200)
+      expect(body.members.map(member => member._id.toString())).to.have.members(
+        [this.collaborator._id.toString()]
+      )
+    })
+  })
+
+  describe('access requests', function () {
+    beforeEach(async function () {
+      await this.ownerSession.addUserToProject(
+        this.projectId,
+        this.stranger,
+        'readOnly'
+      )
+    })
+
+    it('lets a viewer request edit access, visible to the owner', async function () {
+      const requested = await this.strangerSession.doRequest('POST', {
+        url: `/project/${this.projectId}/request-access`,
+        json: { privilegeLevel: 'readAndWrite' },
+      })
+      expect(requested.response.statusCode).to.equal(204)
+
+      const { response, body } = await this.ownerSession.doRequest('GET', {
+        url: `/project/${this.projectId}/access-requests`,
+        json: true,
+      })
+      expect(response.statusCode).to.equal(200)
+      expect(
+        body.editAccessRequests.map(request => request._id.toString())
+      ).to.have.members([this.stranger._id.toString()])
+    })
+
+    it('prevents non-owners from listing access requests', async function () {
+      const { response } = await this.collaboratorSession.doRequest('GET', {
+        url: `/project/${this.projectId}/access-requests`,
+        json: true,
+      })
+      expect(response.statusCode).to.equal(403)
+    })
+
+    it('lets the owner grant a pending access request', async function () {
+      await this.strangerSession.doRequest('POST', {
+        url: `/project/${this.projectId}/request-access`,
+        json: { privilegeLevel: 'readAndWrite' },
+      })
+      const { response } = await this.ownerSession.doRequest('POST', {
+        url: `/project/${this.projectId}/access-requests/${this.stranger._id}/grant`,
+        json: { privilegeLevel: 'readAndWrite' },
+      })
+      expect(response.statusCode).to.equal(204)
+      const project = await this.ownerSession.getProject(this.projectId)
+      expect(project.collaberator_refs.map(id => id.toString())).to.include(
+        this.stranger._id.toString()
+      )
+    })
+
+    it('lets the owner decline a pending access request', async function () {
+      await this.strangerSession.doRequest('POST', {
+        url: `/project/${this.projectId}/request-access`,
+        json: { privilegeLevel: 'readAndWrite' },
+      })
+      const declined = await this.ownerSession.doRequest('DELETE', {
+        url: `/project/${this.projectId}/access-requests/${this.stranger._id}`,
+      })
+      expect(declined.response.statusCode).to.equal(204)
+
+      const { body } = await this.ownerSession.doRequest('GET', {
+        url: `/project/${this.projectId}/access-requests`,
+        json: true,
+      })
+      expect(body.editAccessRequests).to.deep.equal([])
+    })
+
+    it('rejects a malformed user id when declining an access request', async function () {
+      const { response } = await this.ownerSession.doRequest('DELETE', {
+        url: `/project/${this.projectId}/access-requests/not-a-valid-user-id`,
+      })
+      expect(response.statusCode).to.equal(404)
+    })
+
+    it('rejects a malformed user id when granting an access request', async function () {
+      const { response } = await this.ownerSession.doRequest('POST', {
+        url: `/project/${this.projectId}/access-requests/not-a-valid-user-id/grant`,
+        json: { privilegeLevel: 'readAndWrite' },
+      })
+      expect(response.statusCode).to.equal(404)
+    })
+  })
 })

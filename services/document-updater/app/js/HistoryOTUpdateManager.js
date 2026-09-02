@@ -30,7 +30,8 @@ function isHistoryOTEditOperationUpdate(update) {
     'op' in update &&
     'v' in update &&
     Array.isArray(update.op) &&
-    EditOperationBuilder.isValid(update.op[0])
+    update.op.length > 0 &&
+    update.op.every(op => EditOperationBuilder.isValid(op))
   )
 }
 
@@ -54,7 +55,10 @@ async function tryApplyUpdate(projectId, docId, update, profiler) {
     throw new Errors.OTTypeMismatchError(type, 'history-ot')
   }
 
-  let op = EditOperationBuilder.fromJSON(update.op[0])
+  // An update carries a list of sequential ops (e.g. a text edit composed
+  // with a comment op). Keep the sequential apply in step with the frontend's
+  // historyOTType.apply and HistoryOTAdapter.onRemoteOp.
+  let ops = update.op.map(EditOperationBuilder.fromJSON)
   if (version !== update.v) {
     const transformUpdates = await RedisManager.promises.getPreviousDocOps(
       docId,
@@ -73,15 +77,19 @@ async function tryApplyUpdate(projectId, docId, update, profiler) {
         update.dup = true
         break
       }
-      const other = EditOperationBuilder.fromJSON(transformUpdate.op[0])
-      op = EditOperationTransformer.transform(op, other)[0]
+
+      // Rebase our ops onto the concurrent update.
+      const transformOps = transformUpdate.op.map(EditOperationBuilder.fromJSON)
+      EditOperationTransformer.transformMultiple(ops, transformOps)
     }
-    update.op = [op.toJSON()]
+    update.op = ops.map(op => op.toJSON())
   }
 
   if (!update.dup) {
     const file = StringFileData.fromRaw(lines)
-    file.edit(op)
+    for (const op of ops) {
+      file.edit(op)
+    }
     version += 1
     update.meta.ts = Date.now()
     await RedisManager.promises.updateDocument(
@@ -151,7 +159,7 @@ async function applyUpdate(projectId, docId, update) {
     RealTimeRedisManager.sendData({
       project_id: projectId,
       doc_id: docId,
-      error: error instanceof Error ? error.message : error,
+      error: error instanceof Error ? error.message : String(error),
     })
     profiler.log('sendData')
     throw error

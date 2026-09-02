@@ -1,3 +1,4 @@
+import { beforeEach, describe } from 'vitest'
 const modulePath = '../../../../app/src/Features/Referal/ReferalController.js'
 
 describe.todo('Referal controller', function () {

@@ -11,7 +11,7 @@ import OLCard from '@/shared/components/ol/ol-card'
 import OLCol from '@/shared/components/ol/ol-col'
 import OLFormCheckbox from '@/shared/components/ol/ol-form-checkbox'
 import OLFormSelect from '@/shared/components/ol/ol-form-select'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import OLRow from '@/shared/components/ol/ol-row'
 import OLTable from '@/shared/components/ol/ol-table'
 import OLTag from '@/shared/components/ol/ol-tag'
@@ -160,31 +160,33 @@ export default function GroupUsers() {
         </OLRow>
 
         <OLRow className="license-info">
-          <OLNotification
-            type="info"
-            content={
-              allocatedLicenses === 1
-                ? t('you_have_1_license_and_your_plan_supports_up_to_y', {
-                    groupSize,
-                  })
-                : t('you_have_x_licenses_and_your_plan_supports_up_to_y', {
-                    addedUsersSize: allocatedLicenses,
-                    groupSize,
-                  })
-            }
-            action={
-              canUseAddSeatsFeature ? (
-                <a
-                  href="/user/subscription/group/add-users"
-                  className={classNames({
-                    'btn btn-premium': allocatedLicenses === groupSize,
-                  })}
-                >
-                  {t('buy_more_licenses')}
-                </a>
-              ) : undefined
-            }
-          />
+          <div className="notification-list">
+            <Notification
+              type="info"
+              content={
+                allocatedLicenses === 1
+                  ? t('you_have_1_license_and_your_plan_supports_up_to_y', {
+                      groupSize,
+                    })
+                  : t('you_have_x_licenses_and_your_plan_supports_up_to_y', {
+                      addedUsersSize: allocatedLicenses,
+                      groupSize,
+                    })
+              }
+              action={
+                canUseAddSeatsFeature ? (
+                  <a
+                    href="/user/subscription/group/add-users"
+                    className={classNames({
+                      'btn btn-premium': allocatedLicenses === groupSize,
+                    })}
+                  >
+                    {t('buy_more_licenses')}
+                  </a>
+                ) : undefined
+              }
+            />
+          </div>
         </OLRow>
 
         <OLRow>

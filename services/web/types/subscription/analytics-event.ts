@@ -3,12 +3,14 @@ import {
   PaymentProvider,
   StripePaymentProviderService,
 } from './dashboard/subscription'
+import { AnalyticsPaymentMethod, PaymentMethod } from './payment-method'
 import { RecurlyPlanCode } from './plan'
 
 type PaymentPageFormSubmitEventBaseSegmentation = {
   currencyCode: CurrencyCode
   plan_code?: string
   isPaypal: boolean
+  paymentMethod: PaymentMethod
   upgradeType: 'standalone'
   referrer?: string
 }
@@ -46,6 +48,7 @@ type PaymentPageFormSuccessEventStripeSegmentation =
     payment_provider: StripePaymentProviderService
     stripe_price_id: string
     stripe_price_lookup_key: string
+    paymentMethod: AnalyticsPaymentMethod
   }
 
 type PaymentPageFormSuccessEventRecurlySegmentation =

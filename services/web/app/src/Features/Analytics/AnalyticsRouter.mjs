@@ -1,6 +1,5 @@
 import AuthenticationController from './../Authentication/AuthenticationController.mjs'
 import AnalyticsController from './AnalyticsController.mjs'
-import AnalyticsProxy from './AnalyticsProxy.mjs'
 import { RateLimiter } from '../../infrastructure/RateLimiter.mjs'
 import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.mjs'
 
@@ -13,8 +12,8 @@ const rateLimiters = {
     points: 20,
     duration: 60,
   }),
-  uniExternalCollabProxy: new RateLimiter(
-    'analytics-uni-external-collab-proxy',
+  uniExternalCollaboration: new RateLimiter(
+    'analytics-uni-external-collaboration',
     { points: 20, duration: 60 }
   ),
 }
@@ -35,11 +34,11 @@ export default {
       AnalyticsController.updateEditingSession
     )
 
-    publicApiRouter.use(
+    publicApiRouter.get(
       '/analytics/uniExternalCollaboration',
       AuthenticationController.requirePrivateApiAuth(),
-      RateLimiterMiddleware.rateLimit(rateLimiters.uniExternalCollabProxy),
-      AnalyticsProxy.call('/uniExternalCollaboration')
+      RateLimiterMiddleware.rateLimit(rateLimiters.uniExternalCollaboration),
+      AnalyticsController.uniExternalCollaboration
     )
 
     publicApiRouter.post(

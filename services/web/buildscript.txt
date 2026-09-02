@@ -1,8 +1,10 @@
 web
 --dependencies=mongo
---docker-repos=us-east1-docker.pkg.dev/overleaf-ops/ol-docker
---env-add=
+--env-add-acceptance=REQ_LOCKDOWN_MODE=throw,REQ_VALIDATION_MODE=enforce
+--env-add-unit=REQ_VALIDATION_MODE=enforce
 --env-pass-through=
 --esmock-loader=False
---node-version=24.14.1
+--extra-jenkins-includes=google-ops/kubernetes/kustomize/base/cron-scripts/**
+--jenkins-include-kustomize-app=web
+--node-version=24.18.1
 --public-repo=False

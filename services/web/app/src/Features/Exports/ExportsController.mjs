@@ -9,9 +9,34 @@ import { isTrustedConversionJobUrl } from '../V1/V1ConversionHelper.mjs'
 import { pipeline } from 'node:stream/promises'
 import { parseReq, z, zz } from '../../infrastructure/Validation.mjs'
 
+const exportProjectSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+    // opaque: v1's export API accepts and forwards this verbatim, not
+    // necessarily a real brand_variations.id (see ExportsTests.mjs's
+    // "non-numeric brand variation id" coverage)
+    brand_variation_id: z.string(),
+  }),
+  body: z.strictObject({
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+    // additional parameters for gallery exports
+    title: z.string().optional(),
+    description: z.string().optional(),
+    author: z.string().optional(),
+    license: z.string().optional(),
+    // sent as a genuine JSON boolean by the publish modal frontend
+    // (gallery-export.jsx posts via postJSON), not a query-string value —
+    // z.stringbool() would reject it, since it only accepts strings.
+    showSource: z.boolean().optional(),
+  }),
+})
+
 async function exportProject(req, res, next) {
-  const { project_id: projectId, brand_variation_id: brandVariationId } =
-    req.params
+  const { params, body } = parseReq(req, exportProjectSchema, {
+    logOnly: true,
+  })
+  const { project_id: projectId, brand_variation_id: brandVariationId } = params
   const userId = SessionManager.getLoggedInUserId(req.session)
   const exportParams = {
     project_id: projectId,
@@ -19,29 +44,27 @@ async function exportProject(req, res, next) {
     user_id: userId,
   }
 
-  if (req.body) {
-    if (req.body.firstName) {
-      exportParams.first_name = req.body.firstName.trim()
-    }
-    if (req.body.lastName) {
-      exportParams.last_name = req.body.lastName.trim()
-    }
-    // additional parameters for gallery exports
-    if (req.body.title) {
-      exportParams.title = req.body.title.trim()
-    }
-    if (req.body.description) {
-      exportParams.description = req.body.description.trim()
-    }
-    if (req.body.author) {
-      exportParams.author = req.body.author.trim()
-    }
-    if (req.body.license) {
-      exportParams.license = req.body.license.trim()
-    }
-    if (req.body.showSource != null) {
-      exportParams.show_source = req.body.showSource
-    }
+  if (body.firstName) {
+    exportParams.first_name = body.firstName.trim()
+  }
+  if (body.lastName) {
+    exportParams.last_name = body.lastName.trim()
+  }
+  // additional parameters for gallery exports
+  if (body.title) {
+    exportParams.title = body.title.trim()
+  }
+  if (body.description) {
+    exportParams.description = body.description.trim()
+  }
+  if (body.author) {
+    exportParams.author = body.author.trim()
+  }
+  if (body.license) {
+    exportParams.license = body.license.trim()
+  }
+  if (body.showSource != null) {
+    exportParams.show_source = body.showSource
   }
 
   try {
@@ -74,9 +97,33 @@ async function exportProject(req, res, next) {
   }
 }
 
+const exportStatusSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+    export_id: zz.submissionId(),
+  }),
+  query: z.object({
+    token: z.string().optional(),
+  }),
+})
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const exportStatusFallbackSchema = z.object({
+  params: z.object({
+    export_id: zz.submissionId(),
+  }),
+  query: z.object({
+    token: z.string().optional(),
+  }),
+})
+
 async function exportStatus(req, res) {
-  const { export_id: exportId } = req.params
-  const { token } = req.query
+  const {
+    params: { export_id: exportId },
+    query: { token },
+  } = parseReq(req, exportStatusSchema, {
+    fallbackSchema: exportStatusFallbackSchema,
+  })
   if (!token && settings.exports?.requireToken) {
     return res.status(403).json({
       export_json: {
@@ -110,6 +157,18 @@ async function exportStatus(req, res) {
 }
 
 const exportDownloadSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+    export_id: zz.submissionId(),
+    type: z.enum(['pdf', 'zip']),
+  }),
+  query: z.object({
+    token: z.string().optional(),
+  }),
+})
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const exportDownloadFallbackSchema = z.object({
   params: z.object({
     export_id: zz.submissionId(),
     type: z.enum(['pdf', 'zip']),
@@ -123,7 +182,9 @@ async function exportDownload(req, res, next) {
   const {
     params: { type, export_id: exportId },
     query: { token },
-  } = parseReq(req, exportDownloadSchema)
+  } = parseReq(req, exportDownloadSchema, {
+    fallbackSchema: exportDownloadFallbackSchema,
+  })
   if (!token && settings.exports?.requireToken) {
     return res.sendStatus(403)
   }

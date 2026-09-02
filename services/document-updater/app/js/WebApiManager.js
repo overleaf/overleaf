@@ -9,12 +9,14 @@ const MAX_HTTP_REQUEST_LENGTH = 5000
  * @param {string} docId
  * @param {string[]} rejectedChangeAuthorIds
  * @param {string | undefined} userId
+ * @param {object[]} [previews] sparse change previews from TrackedChangePreview.buildSparseChangePreviews
  */
 async function notifyTrackChangesRejected(
   projectId,
   docId,
   rejectedChangeAuthorIds,
-  userId
+  userId,
+  previews
 ) {
   const url = new URL(
     `/project/${projectId}/doc/${docId}/changes/reject`,
@@ -23,7 +25,11 @@ async function notifyTrackChangesRejected(
 
   await fetchNothing(url, {
     method: 'POST',
-    json: { rejectedChangeAuthorIds, userId },
+    json: {
+      rejectedChangeAuthorIds,
+      userId,
+      previews,
+    },
     basicAuth: {
       user: Settings.apis.web.user,
       password: Settings.apis.web.pass,

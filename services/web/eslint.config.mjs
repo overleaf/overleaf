@@ -3,6 +3,7 @@
 // Mirrors what services/web/.eslintrc.js used to provide before the
 // flat-config migration.
 
+import path from 'node:path'
 import { defineConfig, globalIgnores } from 'eslint/config'
 import tsParser from '@typescript-eslint/parser'
 import overleaf from '@overleaf/eslint-plugin'
@@ -55,16 +56,20 @@ export default defineConfig([
   // Replaces the previous `--ext .js,.jsx,.mjs,.ts,.tsx` CLI flag, which is
   // silently ignored under ESLint v9 + flat config.
   {
-    files: ['**/*.{js,jsx,mjs,cjs,ts,tsx}'],
+    files: ['**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}'],
   },
   {
     // Scope JS/TS-specific config to JS/TS files only so that built-in
     // rules like `no-irregular-whitespace` aren't applied to JSON files
     // linted via @eslint/json elsewhere in this config.
-    files: ['**/*.{js,jsx,mjs,cjs,ts,tsx}'],
+    files: ['**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}'],
 
     languageOptions: {
       parser: tsParser,
+      // Node 24 implements all of ES2025. Pin it rather than inheriting
+      // eslint's default of `latest`, which floats ahead of the runtime as
+      // new spec years land. The frontend block below opts back out.
+      ecmaVersion: 2025,
       // Default to node globals for all backend-style files; the
       // frontend block below replaces with browser globals where
       // appropriate. Matches what the old monorepo-root .eslintrc
@@ -170,10 +175,10 @@ export default defineConfig([
   {
     // Node
     files: [
-      '**/app/src/**/*.{js,mjs}',
-      'app.{js,mjs}',
+      '**/app/src/**/*.{js,cjs,mjs}',
+      'app.{js,cjs,mjs}',
       'i18next-scanner.config.js',
-      'scripts/**/*.{js,mjs}',
+      'scripts/**/*.{js,cjs,mjs}',
       'webpack.config*.js',
     ],
 
@@ -185,7 +190,7 @@ export default defineConfig([
   },
   {
     // Test specific rules
-    files: ['**/test/**/*.{js,jsx,mjs,cjs,ts,tsx}'],
+    files: ['**/test/**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}'],
     ignores: ['**/test/unit/src/**/*.test.mjs', 'test/unit/bootstrap.mjs'], // exclude vitest files
 
     plugins: {
@@ -289,7 +294,12 @@ export default defineConfig([
         {
           // eslint-plugin-import does not support exports directive in package.json
           // https://github.com/import-js/eslint-plugin-import/issues/1810
-          ignore: ['^p-queue$'],
+          ignore: [
+            '^p-queue$',
+            // lezer-latex and lezer-bibtex are generated build artifacts
+            'lezer-latex/latex\\.mjs',
+            'lezer-bibtex/bibtex\\.mjs',
+          ],
         },
       ],
 
@@ -310,8 +320,32 @@ export default defineConfig([
     },
   },
   {
+    // Bans reading raw req.body/req.query/req.params directly; use
+    // parseReq() instead, or getRawReqInput() for allowlisted infrastructure
+    // middleware. The glob below covers all backend source in services/web
+    // -- application code plus its backend (unit/acceptance) tests,
+    // excluding frontend code and frontend tests, which never see a real
+    // Express req -- as a blanket glob (mirrored in the root
+    // eslint.config.mjs) rather than a file-by-file allowlist: new files
+    // created under these paths are covered automatically. A genuine future
+    // carve-out belongs in an `ignores:` list on this block, not a
+    // reversion to enumeration.
+    files: [
+      'app/src/**/*.{js,cjs,mjs,ts,cts,mts}',
+      'modules/*/app/src/**/*.{js,cjs,mjs,ts,cts,mts}',
+      'app.mjs',
+      'test/unit/**/*.{js,cjs,mjs,ts,cts,mts}',
+      'test/acceptance/**/*.{js,cjs,mjs,ts,cts,mts}',
+      'modules/*/test/unit/**/*.{js,cjs,mjs,ts,cts,mts}',
+      'modules/*/test/acceptance/**/*.{js,cjs,mjs,ts,cts,mts}',
+    ],
+    rules: {
+      '@overleaf/no-raw-req-access': 'error',
+    },
+  },
+  {
     // Backend specific rules
-    files: ['**/app/src/**/*.{js,mjs}', 'app.{js,mjs}'],
+    files: ['**/app/src/**/*.{js,cjs,mjs}', 'app.{js,cjs,mjs}'],
 
     languageOptions: {
       parserOptions: TYPE_AWARE
@@ -383,7 +417,7 @@ export default defineConfig([
   },
   {
     // Backend scripts specific rules
-    files: ['**/scripts/**/*.{js,mjs}'],
+    files: ['**/scripts/**/*.{js,cjs,mjs}'],
 
     rules: {
       'no-restricted-syntax': [
@@ -450,6 +484,7 @@ export default defineConfig([
       'scripts/bench_bcrypt.mjs',
       'scripts/check_institution_users.mjs',
       'scripts/check_overleafModuleImports.mjs',
+      'scripts/check_pug_docs_link_rel.mjs',
       'scripts/check_saml_emails.mjs',
       'scripts/clear_feedback_collection.mjs',
       'scripts/clear_sessions_set_must_reconfirm.mjs',
@@ -510,8 +545,10 @@ export default defineConfig([
       'scripts/sync-user-entitlements/sync-user-entitlements.mjs',
       'scripts/update_project_image_name.mjs',
       'scripts/user-export/analytics.mjs',
+      'scripts/user-export/customerio.mjs',
       'scripts/user-export/fs.mjs',
       'scripts/user-export/http.mjs',
+      'scripts/user-export/library.mjs',
       'scripts/user-export/observer.mjs',
       'scripts/user-export/options.mjs',
       'scripts/user-export/project.mjs',
@@ -524,8 +561,8 @@ export default defineConfig([
   {
     // Cypress specific rules
     files: [
-      'cypress/**/*.{js,jsx,ts,tsx}',
-      '**/test/frontend/**/*.spec.{js,jsx,ts,tsx}',
+      'cypress/**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}',
+      '**/test/frontend/**/*.spec.{js,cjs,mjs,jsx,ts,cts,mts,tsx}',
     ],
 
     plugins: {
@@ -538,7 +575,7 @@ export default defineConfig([
   },
   {
     // Frontend test specific rules
-    files: ['**/frontend/**/*.test.{js,jsx,ts,tsx}'],
+    files: ['**/frontend/**/*.test.{js,cjs,mjs,jsx,ts,cts,mts,tsx}'],
 
     plugins: {
       'testing-library': testingLibrary,
@@ -561,11 +598,11 @@ export default defineConfig([
   {
     // Frontend specific rules
     files: [
-      '**/frontend/js/**/*.{js,jsx,ts,tsx}',
-      '**/frontend/stories/**/*.{js,jsx,ts,tsx}',
-      '**/*.stories.{js,jsx,ts,tsx}',
-      '**/test/frontend/**/*.{js,jsx,ts,tsx}',
-      '**/test/frontend/components/**/*.spec.{js,jsx,ts,tsx}',
+      '**/frontend/js/**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}',
+      '**/frontend/stories/**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}',
+      '**/*.stories.{js,cjs,mjs,jsx,ts,cts,mts,tsx}',
+      '**/test/frontend/**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}',
+      '**/test/frontend/components/**/*.spec.{js,cjs,mjs,jsx,ts,cts,mts,tsx}',
     ],
 
     languageOptions: {
@@ -576,6 +613,10 @@ export default defineConfig([
         ga: true,
       },
 
+      // Frontend code is transpiled and targets browsers, not the Node
+      // runtime, so the backend's ES2025 pin doesn't describe it. Stay on
+      // `latest`, matching this tree's `"target": "esnext"` in tsconfig.json.
+      ecmaVersion: 'latest',
       sourceType: 'module',
       parserOptions: {},
     },
@@ -717,14 +758,15 @@ export default defineConfig([
     // React component specific rules
     //
     files: [
-      '**/frontend/js/**/components/**/*.{js,jsx,ts,tsx}',
-      '**/frontend/js/**/hooks/**/*.{js,jsx,ts,tsx}',
+      '**/frontend/js/**/components/**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}',
+      '**/frontend/js/**/hooks/**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}',
     ],
 
     rules: {
       '@overleaf/no-unnecessary-trans': 'error',
       '@overleaf/should-unescape-trans': 'error',
       '@overleaf/require-loading-label': 'error',
+      '@overleaf/require-rel-for-docs-links': 'error',
 
       // https://astexplorer.net/
       'no-restricted-syntax': [
@@ -801,7 +843,10 @@ export default defineConfig([
       'import/no-extraneous-dependencies': [
         'error',
         {
-          packageDir: ['.', 'scripts/ukamf'],
+          packageDir: [
+            import.meta.dirname,
+            path.join(import.meta.dirname, 'scripts/ukamf'),
+          ],
         },
       ],
     },
@@ -815,7 +860,10 @@ export default defineConfig([
         'error',
         {
           devDependencies: true,
-          packageDir: ['.', '../../'],
+          packageDir: [
+            import.meta.dirname,
+            path.join(import.meta.dirname, '../../'),
+          ],
         },
       ],
     },
@@ -825,23 +873,23 @@ export default defineConfig([
       // Backend: Use @overleaf/logger
       //          Docs: https://manual.dev-overleaf.com/development/code/logging/#structured-logging
       '**/app/**/*.{js,cjs,mjs}',
-      'app.{js,mjs}',
-      'modules/*/*.{js,mjs}',
+      'app.{js,cjs,mjs}',
+      'modules/*/*.{js,cjs,mjs}',
       // Frontend: Prefer debugConsole over bare console
       //           Docs: https://manual.dev-overleaf.com/development/code/logging/#frontend
-      '**/frontend/**/*.{js,jsx,ts,tsx}',
+      '**/frontend/**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}',
       // Tests
-      '**/test/**/*.{js,cjs,mjs,jsx,ts,tsx}',
+      '**/test/**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}',
     ],
 
     ignores: [
       // Allow console logs in scripts
       '**/scripts/**/*.js',
       // Allow console logs in stories
-      '**/stories/**/*.{js,jsx,ts,tsx}',
+      '**/stories/**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}',
       // Workers do not have access to the search params for enabling ?debug=true.
       // self.location.url is the URL of the worker script.
-      '**/*.worker.{js,ts}',
+      '**/*.worker.{js,cjs,mjs,ts,cts,mts}',
     ],
 
     rules: {
@@ -849,7 +897,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['**/*.worker.{js,ts}'],
+    files: ['**/*.worker.{js,cjs,mjs,ts,cts,mts}'],
 
     rules: {
       'no-restricted-globals': [
@@ -873,7 +921,7 @@ export default defineConfig([
     // tolerance. To match the user-reported v8 zero-error baseline
     // without touching the imported source, disable the rules that
     // fire here.
-    files: ['modules/writefull/**/*.{js,jsx,ts,tsx,mjs,cjs}'],
+    files: ['modules/writefull/**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}'],
     rules: {
       'no-console': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
@@ -901,7 +949,7 @@ export default defineConfig([
     // identical `destructuring: 'all'` options. Disable to match v8
     // behaviour on the existing TS source -- the actual let-vs-const
     // intent is preserved by the source code.
-    files: ['**/*.{ts,tsx}'],
+    files: ['**/*.{ts,cts,mts,tsx}'],
     rules: {
       'prefer-const': 'off',
     },
@@ -911,7 +959,7 @@ export default defineConfig([
     // migration; the newer release enabled / tightened several rules
     // that fire on pre-existing test code. Disable to preserve v8
     // behaviour; revisit in a follow-up cleanup PR.
-    files: ['**/frontend/**/*.test.{js,jsx,ts,tsx}'],
+    files: ['**/frontend/**/*.test.{js,cjs,mjs,jsx,ts,cts,mts,tsx}'],
     rules: {
       'testing-library/no-debugging-utils': 'off',
       'testing-library/prefer-presence-queries': 'off',
@@ -929,9 +977,9 @@ export default defineConfig([
     // APIs; v8 effectively tolerated these (the user-reported zero
     // baseline). Disable for test files.
     files: [
-      '**/test/frontend/**/*.{js,jsx,ts,tsx}',
-      '**/frontend/**/*.test.{js,jsx,ts,tsx}',
-      '**/frontend/**/*.spec.{js,jsx,ts,tsx}',
+      '**/test/frontend/**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}',
+      '**/frontend/**/*.test.{js,cjs,mjs,jsx,ts,cts,mts,tsx}',
+      '**/frontend/**/*.spec.{js,cjs,mjs,jsx,ts,cts,mts,tsx}',
     ],
     rules: {
       'react-hooks/rules-of-hooks': 'off',

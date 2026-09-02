@@ -9,8 +9,9 @@ import {
   OLModalTitle,
 } from '@/shared/components/ol/ol-modal'
 import OLButton from '@/shared/components/ol/ol-button'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import { useFileTreeSelectable } from '../../contexts/file-tree-selectable'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 function FileTreeModalDelete() {
   const { t } = useTranslation()
@@ -26,6 +27,8 @@ function FileTreeModalDelete() {
 
   const { select } = useFileTreeSelectable()
 
+  const themed = useFeatureFlag('themed-modals')
+
   if (!isDeleting) return null // the modal will not be rendered; return early
 
   function handleHide() {
@@ -38,11 +41,10 @@ function FileTreeModalDelete() {
   }
 
   return (
-    <OLModal show onHide={handleHide}>
+    <OLModal show onHide={handleHide} themed={themed}>
       <OLModalHeader>
         <OLModalTitle>{t('delete')}</OLModalTitle>
       </OLModalHeader>
-
       <OLModalBody>
         <p>{t('sure_you_want_to_delete')}</p>
         <ul>
@@ -51,13 +53,14 @@ function FileTreeModalDelete() {
           ))}
         </ul>
         {error && (
-          <OLNotification
-            type="error"
-            content={t('generic_something_went_wrong')}
-          />
+          <div className="notification-list">
+            <Notification
+              type="error"
+              content={t('generic_something_went_wrong')}
+            />
+          </div>
         )}
       </OLModalBody>
-
       <OLModalFooter>
         {inFlight ? (
           <OLButton

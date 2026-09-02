@@ -15,7 +15,7 @@
   word-break: break-all;
   display: flex;
   padding: var(--spacing-04);
-  border-bottom: solid 1px var(--border-divider);
+  border-bottom: solid 1px var(--border-divider-themed);
   align-items: center;
 
   &:last-child {

@@ -1,3 +1,5 @@
+import Path from 'node:path'
+
 /**
  * Converts a time string in seconds to an integer number of milliseconds.
  *
@@ -100,9 +102,46 @@ const LATEX_MK_METRICS_STDOUT = [
   ],
 ]
 
+/**
+ * Normalise a filename from latexmk stderr to a project-relative path so it can
+ * be matched against history snapshot pathnames. Strips a leading `/compile/`
+ * (see parseFdbContent) and a leading `./`.
+ *
+ * @param {string} filename
+ * @returns {string}
+ */
+function normalizeImageFilename(filename) {
+  return filename.replace(/^\/compile\//, '').replace(/^\.\//, '')
+}
+
+// A PNG that could not be fast-copied, and the reason it was included the slow
+// way. Group 1 is the category, group 2 is the filename.
+const PNG_COPY_SKIPPED_RE =
+  /^PNG copy skipped \((alpha|gamma|palette|interlaced|other)\): (.*)$/gm
+
 const LATEX_MK_METRICS_STDERR = [
+  // The project-relative paths of PNGs that could not be fast-copied and were
+  // therefore included the slow way (transparency/alpha/gamma/palette/interlaced).
+  // These are exactly the PNGs that benefit from png2pdf conversion.
+  [
+    'latexmk-png-slow',
+    s => {
+      // Only the filename (group 2) matters here; the category is ignored.
+      const normalizedFiles = Array.from(
+        s.matchAll(PNG_COPY_SKIPPED_RE),
+        match => normalizeImageFilename(match[2])
+      )
+      // deduplicate
+      const files = [...new Set(normalizedFiles)]
+      return files.length > 0 ? files : null
+    },
+  ],
   [
     'latexmk-img-times',
+    /**
+     * @param {string} s
+     * @returns {Array<{type: string, count: number, time_ms: number}>}
+     */
     s => {
       const pngCategoriesByFile = new Map()
       const pngCopyMatches = s.matchAll(/^PNG copy: (.*)$/gm)
@@ -111,9 +150,7 @@ const LATEX_MK_METRICS_STDERR = [
         pngCategoriesByFile.set(filename, 'fast-copy')
       }
 
-      const pngCopySkipMatches = s.matchAll(
-        /^PNG copy skipped \((alpha|gamma|palette|interlaced)\): (.*)$/gm
-      )
+      const pngCopySkipMatches = s.matchAll(PNG_COPY_SKIPPED_RE)
       for (const match of pngCopySkipMatches) {
         const category = match[1]
         const filename = match[2]
@@ -124,12 +161,16 @@ const LATEX_MK_METRICS_STDERR = [
         /^Image written \((PNG|JPG|JBIG2|PDF), (\d+) ms\): (.*)$/gm
       )
       const timingsByType = new Map()
+      const countByType = new Map()
       for (const match of timingMatches) {
         let type = match[1]
         const timeMs = parseInt(match[2], 10)
         const filename = match[3]
+        const extension = Path.extname(filename).toLowerCase()
 
-        if (type === 'PNG') {
+        if (type === 'PDF' && extension === '.png') {
+          type = `PNG-png2pdf`
+        } else if (type === 'PNG') {
           const pngCategory = pngCategoriesByFile.get(filename)
           if (pngCategory != null) {
             type = `PNG-${pngCategory}`
@@ -138,9 +179,12 @@ const LATEX_MK_METRICS_STDERR = [
 
         const accumulatedTime = timingsByType.get(type) ?? 0
         timingsByType.set(type, accumulatedTime + timeMs)
+        const accumulatedCount = countByType.get(type) ?? 0
+        countByType.set(type, accumulatedCount + 1)
       }
       return Array.from(timingsByType.entries()).map(([type, timeMs]) => ({
         type,
+        count: countByType.get(type) || 0,
         time_ms: timeMs,
       }))
     },
@@ -154,9 +198,10 @@ const LATEX_MK_METRICS_STDERR = [
  * `stats.latexmk` object.
  *
  * @param {{stdout?: string, stderr?: string}} output - The output from the latexmk process.
- * @param {{latexmk: object}} stats - The statistics object to update. This object is mutated.
+ * @param {object} stats - The statistics object to update. This object is mutated.
+ * @param {object} [timings] - The timings object to update. This object is mutated.
  */
-function addLatexMkMetrics(output, stats) {
+function addLatexMkMetrics(output, stats, timings) {
   for (const [stat, matcher] of LATEX_MK_METRICS_STDOUT) {
     const match = matcher(output?.stdout || '', stats.latexmk)
     if (match) {
@@ -167,6 +212,27 @@ function addLatexMkMetrics(output, stats) {
     const match = matcher(output?.stderr || '', stats.latexmk)
     if (match) {
       stats.latexmk[stat] = match
+    }
+  }
+  const imgTimings = stats.latexmk['latexmk-img-times']
+  if (imgTimings) {
+    let totalImageIncludeTime = 0
+    let optimisedImageIncludeTime = 0
+    let totalImageIncludeCount = 0
+    let optimisedImageIncludeCount = 0
+    for (const { type, count, time_ms } of imgTimings) {
+      totalImageIncludeCount += count
+      totalImageIncludeTime += time_ms
+      if (type === 'PNG-png2pdf') {
+        optimisedImageIncludeCount += count
+        optimisedImageIncludeTime += time_ms
+      }
+    }
+    stats['include-image-all'] = totalImageIncludeCount
+    stats['include-image-optimised'] = optimisedImageIncludeCount
+    if (timings) {
+      timings['include-image-optimised'] = optimisedImageIncludeTime
+      timings['include-image-all'] = totalImageIncludeTime
     }
   }
 }

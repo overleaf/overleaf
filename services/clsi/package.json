@@ -7,11 +7,11 @@
   "scripts": {
     "start": "node app.js",
     "test:acceptance:_run": "mocha --recursive --timeout 15000 --exit --retries=$RETRIES $@ test/acceptance/js",
-    "test:acceptance": "yarn run test:acceptance:_run -- --grep=$MOCHA_GREP",
+    "test:acceptance": "yarn run test:acceptance:_run -- --grep=$TEST_NAME_PATTERN",
     "test:unit:_run": "vitest --config ./vitest.config.unit.cjs",
     "test:unit": "yarn run test:unit:_run",
     "nodemon": "node --watch app.js",
-    "lint": "eslint --cache --cache-location ../../.cache/eslint/ --max-warnings 0 --format unix .",
+    "lint": "eslint --cache --cache-location ../../.cache/eslint/ --max-warnings 0 .",
     "lint:fix": "eslint --cache --cache-location ../../.cache/eslint/ --fix .",
     "types:check": "tsc --noEmit"
   },
@@ -26,13 +26,12 @@
     "@overleaf/validation-tools": "workspace:*",
     "archiver": "5.3.2",
     "async": "^3.2.5",
-    "body-parser": "1.20.4",
     "bunyan": "^1.8.15",
     "dockerode": "^4.0.9",
     "express": "4.22.1",
     "lodash": "^4.18.1",
     "minimatch": "^10.2.5",
-    "multer": "2.1.1",
+    "multer": "2.2.0",
     "overleaf-editor-core": "workspace:*",
     "p-limit": "^3.1.0",
     "send": "^0.19.0",
@@ -41,8 +40,10 @@
   },
   "devDependencies": {
     "@istanbuljs/esm-loader-hook": "^0.3.0",
+    "@types/node": "^24.5.2",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
+    "eslint": "^10.4.0",
     "form-data": "^4.0.5",
     "mocha": "^11.1.0",
     "mocha-junit-reporter": "^2.2.1",
@@ -54,6 +55,6 @@
     "timekeeper": "2.2.0",
     "typescript": "^5.0.4",
     "vitest": "4.1.5",
-    "yauzl": "^2.10.0"
+    "yauzl": "^3.4.0"
   }
 }

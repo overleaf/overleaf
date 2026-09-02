@@ -4,20 +4,21 @@ import { processNotifications } from '../modules/notifications/app/src/ProcessNo
 
 async function main() {
   logger.info({}, 'Processing notifications...')
+  const startTime = performance.now()
   const {
     notificationsFound,
     notificationsReady,
     emailsSent,
-    dryRunProcessed,
-    dryRunWouldHaveSent,
+    pendingCountsByType,
   } = await processNotifications()
+  const durationMs = Math.round(performance.now() - startTime)
   logger.info(
     {
       notificationsFound,
       notificationsReady,
       emailsSent,
-      dryRunProcessed,
-      dryRunWouldHaveSent,
+      pendingCountsByType,
+      durationMs,
     },
     'Notifications processed successfully.'
   )

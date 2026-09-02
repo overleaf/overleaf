@@ -13,20 +13,23 @@ services:
       target: base
     volumes:
       - .:/overleaf/services/filestore
-      - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
       - ../../package.json:/overleaf/package.json
       - ../../.yarnrc.yml:/overleaf/.yarnrc.yml
       - ../../yarn.lock:/overleaf/yarn.lock
       - ../../.yarn:/overleaf/.yarn
+      - ../../.pnp.cjs:/overleaf/.pnp.cjs
+      - ../../.pnp.loader.mjs:/overleaf/.pnp.loader.mjs
+      - ../../.pnp.register.mjs:/overleaf/.pnp.register.mjs
       - ../../tsconfig.backend.json:/overleaf/tsconfig.backend.json
     working_dir: /overleaf/services/filestore
     environment:
-      MOCHA_GREP: ${MOCHA_GREP}
+      TEST_NAME_PATTERN: ${TEST_NAME_PATTERN}
       LOG_LEVEL: ${LOG_LEVEL:-}
       MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       NODE_ENV: test
-      NODE_OPTIONS: "--unhandled-rejections=strict"
+      NODE_OPTIONS: "--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --unhandled-rejections=strict"
+      REQ_VALIDATION_MODE: enforce
     command: yarn run --silent test:unit
     user: node
 
@@ -37,12 +40,14 @@ services:
       target: base
     volumes:
       - .:/overleaf/services/filestore
-      - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
       - ../../package.json:/overleaf/package.json
       - ../../.yarnrc.yml:/overleaf/.yarnrc.yml
       - ../../yarn.lock:/overleaf/yarn.lock
       - ../../.yarn:/overleaf/.yarn
+      - ../../.pnp.cjs:/overleaf/.pnp.cjs
+      - ../../.pnp.loader.mjs:/overleaf/.pnp.loader.mjs
+      - ../../.pnp.register.mjs:/overleaf/.pnp.register.mjs
       - minio-certs:/certs
     working_dir: /overleaf/services/filestore
     environment:
@@ -59,10 +64,10 @@ services:
       GCS_API_ENDPOINT: http://gcs:9090
       GCS_PROJECT_ID: fake
       STORAGE_EMULATOR_HOST: http://gcs:9090/storage/v1
-      MOCHA_GREP: ${MOCHA_GREP}
+      TEST_NAME_PATTERN: ${TEST_NAME_PATTERN}
       LOG_LEVEL: ${LOG_LEVEL:-}
       NODE_ENV: test
-      NODE_OPTIONS: "--unhandled-rejections=strict"
+      NODE_OPTIONS: "--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --unhandled-rejections=strict"
       ENABLE_CONVERSIONS: true
       USE_PROM_METRICS: true
       AWS_S3_USER_FILES_STORAGE_CLASS: REDUCED_REDUNDANCY
@@ -71,6 +76,8 @@ services:
       AWS_S3_TEMPLATE_FILES_BUCKET_NAME: fake-template-files
       GCS_USER_FILES_BUCKET_NAME: fake-gcs-user-files
       GCS_TEMPLATE_FILES_BUCKET_NAME: fake-gcs-template-files
+      REQ_LOCKDOWN_MODE: throw
+      REQ_VALIDATION_MODE: enforce
     user: node
     depends_on:
       certs:
@@ -86,7 +93,7 @@ services:
   certs:
     build:
       dockerfile_inline: |
-        FROM node:24.14.1
+        FROM node:24.18.1
         RUN wget -O /certgen "https://github.com/minio/certgen/releases/download/v1.3.0/certgen-linux-"`dpkg --print-architecture`
         RUN chmod +x /certgen
     volumes:
@@ -106,6 +113,9 @@ services:
   minio:
     image: minio/minio:RELEASE.2024-10-13T13-34-11Z
     command: server /data
+    # Throw-away test data in tmpfs: the image declares a VOLUME here, which would otherwise leave an anonymous volume behind after every run.
+    tmpfs:
+      - /data
     volumes:
       - minio-certs:/root/.minio/certs
     environment:
@@ -124,17 +134,12 @@ services:
     image: minio/mc:RELEASE.2024-10-08T09-37-26Z
     volumes:
       - minio-certs:/root/.mc/certs/CAs
-    entrypoint: sh
+      - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
+    entrypoint: /overleaf/bin/shared/wait_for_it minio:9000 --timeout=60 --
     command:
+      - sh
       - "-cex"
       - |
-        sleep 1
-        mc alias set s3 https://minio:9000 MINIO_ROOT_USER MINIO_ROOT_PASSWORD \
-        || sleep 3 && \
-        mc alias set s3 https://minio:9000 MINIO_ROOT_USER MINIO_ROOT_PASSWORD \
-        || sleep 3 && \
-        mc alias set s3 https://minio:9000 MINIO_ROOT_USER MINIO_ROOT_PASSWORD \
-        || sleep 3 && \
         mc alias set s3 https://minio:9000 MINIO_ROOT_USER MINIO_ROOT_PASSWORD
         mc mb --ignore-existing s3/fake-user-files
         mc mb --ignore-existing s3/fake-user-files-dek

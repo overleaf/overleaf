@@ -16,6 +16,7 @@ services:
       MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
+      REQ_VALIDATION_MODE: enforce
     depends_on:
       mongo:
         condition: service_started
@@ -27,9 +28,11 @@ services:
       RETRIES:
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
-      MOCHA_GREP: ${MOCHA_GREP}
+      TEST_NAME_PATTERN: ${TEST_NAME_PATTERN}
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
+      REQ_LOCKDOWN_MODE: throw
+      REQ_VALIDATION_MODE: enforce
     volumes:
       - ./reports:/overleaf/services/chat/reports
       - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
@@ -54,6 +57,10 @@ services:
     volumes:
       - ../../bin/shared/mongodb-init-replica-set.js:/docker-entrypoint-initdb.d/mongodb-init-replica-set.js
       - ../../bin/shared/mongodb-docker-entrypoint-wait.sh:/mongodb-docker-entrypoint-wait.sh
+    # Throw-away test data in tmpfs: the image declares a VOLUME here, which would otherwise leave an anonymous volume behind after every run.
+    tmpfs:
+      - /data/db
+      - /data/configdb
     entrypoint: /mongodb-docker-entrypoint-wait.sh
     environment:
       MONGO_INITDB_DATABASE: sharelatex

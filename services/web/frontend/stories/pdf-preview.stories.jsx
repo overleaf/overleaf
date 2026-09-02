@@ -23,9 +23,9 @@ import { cloneDeep } from 'lodash'
 import { ScopeDecorator } from './decorators/scope'
 import { PdfPreviewProvider } from '@/features/pdf-preview/components/pdf-preview-provider'
 import {
-  Dropdown,
-  DropdownMenu,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownMenu,
+} from '@/shared/components/ol/ol-dropdown-menu'
 
 export default {
   title: 'Editor / PDF Preview',
@@ -323,11 +323,11 @@ export const FileList = () => {
   }, [])
 
   return (
-    <Dropdown>
-      <DropdownMenu id="dropdown-files-logs-pane-list" show>
+    <OLDropdown>
+      <OLDropdownMenu id="dropdown-files-logs-pane-list" show>
         <PdfFileList fileList={fileList} />
-      </DropdownMenu>
-    </Dropdown>
+      </OLDropdownMenu>
+    </OLDropdown>
   )
 }
 

@@ -21,6 +21,7 @@
 @import 'editor/file-view';
 @import 'editor/figure-modal';
 @import 'editor/chat';
+@import 'editor/mentions-autocomplete';
 @import 'editor/toast';
 @import 'editor/history';
 @import 'editor/write-and-cite';
@@ -33,7 +34,7 @@
 @import 'editor/tags-input';
 @import 'editor/review-panel';
 @import 'editor/editor-floating-menu';
-@import 'editor/table-generator-column-width-modal';
+@import 'editor/table-generator';
 @import 'editor/math-preview';
 @import 'editor/references-search';
 @import 'editor/editor-survey';

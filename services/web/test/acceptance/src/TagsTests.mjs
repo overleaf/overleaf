@@ -4,6 +4,7 @@ import { expect } from 'chai'
 import _ from 'lodash'
 import request from './helpers/request.js'
 import expectErrorResponse from './helpers/expectErrorResponse.mjs'
+import { expectValidationErrorRaw } from '@overleaf/validation-tools/testUtils.js'
 
 const _initUser = (user, callback) => {
   async.series([cb => user.login(cb), cb => user.getCsrfToken(cb)], callback)
@@ -177,6 +178,41 @@ describe('Tags', function () {
         )
       })
     })
+
+    it('should reject a malformed userId', function (done) {
+      authedRequest.get(
+        { url: `/user/not-an-object-id/tag`, json: true },
+        (err, response) => {
+          expect(err).to.not.exist
+          expectValidationErrorRaw(response, 404, 'userId')
+          done()
+        }
+      )
+    })
+  })
+
+  describe('create tag validation', function () {
+    it('should reject an empty name', function (done) {
+      this.user.request.post(
+        { url: `/tag`, json: { name: '' } },
+        (err, response) => {
+          expect(err).to.not.exist
+          expectValidationErrorRaw(response, 400, 'name')
+          done()
+        }
+      )
+    })
+
+    it('should reject an invalid color', function (done) {
+      this.user.request.post(
+        { url: `/tag`, json: { name: 'a-tag', color: 'red' } },
+        (err, response) => {
+          expect(err).to.not.exist
+          expectValidationErrorRaw(response, 400, 'color')
+          done()
+        }
+      )
+    })
   })
 
   describe('rename tag', function () {
@@ -185,7 +221,7 @@ describe('Tags', function () {
         { url: `/tag/lol/rename`, json: { name: 'five' } },
         (err, response) => {
           expect(err).to.not.exist
-          expect(response.statusCode).to.equal(500)
+          expectValidationErrorRaw(response, 404, 'tagId')
           done()
         }
       )
@@ -253,7 +289,7 @@ describe('Tags', function () {
         { url: `/tag/lol`, json: { name: 'five' } },
         (err, response) => {
           expect(err).to.not.exist
-          expect(response.statusCode).to.equal(500)
+          expectValidationErrorRaw(response, 404, 'tagId')
           done()
         }
       )
@@ -298,7 +334,7 @@ describe('Tags', function () {
         { url: `/tag/lol/project/bad` },
         (err, response) => {
           expect(err).to.not.exist
-          expect(response.statusCode).to.equal(500)
+          expectValidationErrorRaw(response, 404, 'tagId')
           done()
         }
       )
@@ -382,6 +418,239 @@ describe('Tags', function () {
             }
           )
         })
+      })
+    })
+
+    it('should reject malformed tag id when removing a project', function (done) {
+      this.user.request.delete(
+        { url: `/tag/lol/project/${this.projectId}` },
+        (err, response) => {
+          expect(err).to.not.exist
+          expectValidationErrorRaw(response, 404, 'tagId')
+          done()
+        }
+      )
+    })
+  })
+
+  describe('add projects to tag, bulk', function () {
+    beforeEach(function (done) {
+      async.series(
+        [
+          cb =>
+            this.user.createProject('bulk 1', (err, id) => {
+              this.projectId1 = id
+              cb(err)
+            }),
+          cb =>
+            this.user.createProject('bulk 2', (err, id) => {
+              this.projectId2 = id
+              cb(err)
+            }),
+        ],
+        done
+      )
+    })
+
+    it('should reject malformed tag id', function (done) {
+      this.user.request.post(
+        { url: `/tag/lol/projects`, json: { projectIds: [] } },
+        (err, response) => {
+          expect(err).to.not.exist
+          expectValidationErrorRaw(response, 404, 'tagId')
+          done()
+        }
+      )
+    })
+
+    it('should reject a malformed project id in the list', function (done) {
+      _createTags(this.user, ['bulk-tag'], (err, tags) => {
+        expect(err).to.not.exist
+        const tagId = tags[0]._id
+        this.user.request.post(
+          {
+            url: `/tag/${tagId}/projects`,
+            json: { projectIds: ['not-an-object-id'] },
+          },
+          (err, response) => {
+            expect(err).to.not.exist
+            expectValidationErrorRaw(response, 400, 'projectIds')
+            done()
+          }
+        )
+      })
+    })
+
+    it('should add multiple projects to a tag', function (done) {
+      _createTags(this.user, ['bulk-tag'], (err, tags) => {
+        expect(err).to.not.exist
+        const tagId = tags[0]._id
+        this.user.request.post(
+          {
+            url: `/tag/${tagId}/projects`,
+            json: { projectIds: [this.projectId1, this.projectId2] },
+          },
+          (err, response) => {
+            _expect204(err, response)
+            _getTags(this.user, (err, response, body) => {
+              _expect200(err, response)
+              const tag = _.find(body, t => t.name === 'bulk-tag')
+              expect(_.sortBy(tag.project_ids)).to.deep.equal(
+                _.sortBy([this.projectId1, this.projectId2])
+              )
+              done()
+            })
+          }
+        )
+      })
+    })
+  })
+
+  describe('remove projects from tag, bulk', function () {
+    beforeEach(function (done) {
+      async.series(
+        [
+          cb =>
+            this.user.createProject('bulk-remove 1', (err, id) => {
+              this.projectId1 = id
+              cb(err)
+            }),
+          cb =>
+            this.user.createProject('bulk-remove 2', (err, id) => {
+              this.projectId2 = id
+              cb(err)
+            }),
+        ],
+        done
+      )
+    })
+
+    it('should reject malformed tag id', function (done) {
+      this.user.request.post(
+        { url: `/tag/lol/projects/remove`, json: { projectIds: [] } },
+        (err, response) => {
+          expect(err).to.not.exist
+          expectValidationErrorRaw(response, 404, 'tagId')
+          done()
+        }
+      )
+    })
+
+    it('should reject a malformed project id in the list', function (done) {
+      _createTags(this.user, ['bulk-remove-tag'], (err, tags) => {
+        expect(err).to.not.exist
+        const tagId = tags[0]._id
+        this.user.request.post(
+          {
+            url: `/tag/${tagId}/projects/remove`,
+            json: { projectIds: ['not-an-object-id'] },
+          },
+          (err, response) => {
+            expect(err).to.not.exist
+            expectValidationErrorRaw(response, 400, 'projectIds')
+            done()
+          }
+        )
+      })
+    })
+
+    it('should remove multiple projects from a tag', function (done) {
+      _createTags(this.user, ['bulk-remove-tag'], (err, tags) => {
+        expect(err).to.not.exist
+        const tagId = tags[0]._id
+        this.user.request.post(
+          {
+            url: `/tag/${tagId}/projects`,
+            json: { projectIds: [this.projectId1, this.projectId2] },
+          },
+          (err, response) => {
+            _expect204(err, response)
+            this.user.request.post(
+              {
+                url: `/tag/${tagId}/projects/remove`,
+                json: { projectIds: [this.projectId1] },
+              },
+              (err, response) => {
+                _expect204(err, response)
+                _getTags(this.user, (err, response, body) => {
+                  _expect200(err, response)
+                  const tag = _.find(body, t => t.name === 'bulk-remove-tag')
+                  expect(tag.project_ids).to.deep.equal([this.projectId2])
+                  done()
+                })
+              }
+            )
+          }
+        )
+      })
+    })
+  })
+
+  describe('edit tag', function () {
+    it('should reject malformed tag id', function (done) {
+      this.user.request.post(
+        { url: `/tag/lol/edit`, json: { name: 'five' } },
+        (err, response) => {
+          expect(err).to.not.exist
+          expectValidationErrorRaw(response, 404, 'tagId')
+          done()
+        }
+      )
+    })
+
+    it('should reject an empty name', function (done) {
+      _createTags(this.user, ['editable'], (err, tags) => {
+        expect(err).to.not.exist
+        const tagId = tags[0]._id
+        this.user.request.post(
+          { url: `/tag/${tagId}/edit`, json: { name: '' } },
+          (err, response) => {
+            expect(err).to.not.exist
+            expectValidationErrorRaw(response, 400, 'name')
+            done()
+          }
+        )
+      })
+    })
+
+    it('should reject an invalid color', function (done) {
+      _createTags(this.user, ['editable'], (err, tags) => {
+        expect(err).to.not.exist
+        const tagId = tags[0]._id
+        this.user.request.post(
+          {
+            url: `/tag/${tagId}/edit`,
+            json: { name: 'editable', color: 'blue' },
+          },
+          (err, response) => {
+            expect(err).to.not.exist
+            expectValidationErrorRaw(response, 400, 'color')
+            done()
+          }
+        )
+      })
+    })
+
+    it('should allow user to edit a tag name and color', function (done) {
+      _createTags(this.user, ['editable'], (err, tags) => {
+        expect(err).to.not.exist
+        const tagId = tags[0]._id
+        this.user.request.post(
+          {
+            url: `/tag/${tagId}/edit`,
+            json: { name: 'edited', color: '#abcdef' },
+          },
+          (err, response) => {
+            _expect204(err, response)
+            _getTags(this.user, (err, response, body) => {
+              _expect200(err, response)
+              const tag = _.find(body, t => t._id === tagId)
+              expect(tag.name).to.equal('edited')
+              expect(tag.color).to.equal('#abcdef')
+              done()
+            })
+          }
+        )
       })
     })
   })

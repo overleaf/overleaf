@@ -133,9 +133,15 @@ export default ExportsHandler = {
           { export: exportData },
           `v1 export returned failure; forwarding: ${err.body}`
         )
+        let forwardResponse
+        try {
+          forwardResponse = JSON.parse(err.body)
+        } catch (parseError) {
+          forwardResponse = { status: err.response.status, message: err.body }
+        }
         // pass the v1 error along for the publish modal to handle
         throw OError.tag(err, 'v1 export returned failure', {
-          forwardResponse: err.body,
+          forwardResponse,
         })
       }
       throw OError.tag(err, 'error making request to v1 export', {

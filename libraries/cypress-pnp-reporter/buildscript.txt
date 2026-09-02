@@ -1,0 +1,10 @@
+cypress-pnp-reporter
+--dependencies=None
+--env-pass-through=
+--esmock-loader=False
+--is-library=True
+--node-version=24.18.1
+--pipeline-owner=44
+--public-repo=False
+--test-acceptance-runner=mocha
+--test-unit-runner=mocha

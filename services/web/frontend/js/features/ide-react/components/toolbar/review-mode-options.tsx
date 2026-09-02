@@ -1,7 +1,7 @@
-import { DropdownDivider } from '@/shared/components/dropdown/dropdown-menu'
+import { OLDropdownDivider } from '@/shared/components/ol/ol-dropdown-menu'
 import { useTranslation } from 'react-i18next'
 import { useEditorPropertiesContext } from '../../context/editor-properties-context'
-import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
+import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
 import { sendMB } from '@/infrastructure/event-tracking'
 import { useIdeReactContext } from '../../context/ide-react-context'
 import { usePermissionsContext } from '../../context/permissions-context'
@@ -41,9 +41,9 @@ const ReviewModeOptions: React.FC = () => {
 
   return (
     <>
-      <DropdownDivider />
+      <OLDropdownDivider />
       <NestedMenuBarDropdown id="editing-mode-group" title={t('editing_mode')}>
-        <OLDropdownMenuItem
+        <DropdownMenuItem
           as="button"
           disabled={!write || !user.id}
           onClick={() => {
@@ -61,8 +61,8 @@ const ReviewModeOptions: React.FC = () => {
           active={write && mode === 'edit'}
         >
           {t('editing')}
-        </OLDropdownMenuItem>
-        <OLDropdownMenuItem
+        </DropdownMenuItem>
+        <DropdownMenuItem
           as="button"
           disabled={permissionsLevel === 'readOnly' || !user.id}
           onClick={() => {
@@ -87,15 +87,15 @@ const ReviewModeOptions: React.FC = () => {
           active={trackedWrite && mode === 'review'}
         >
           {t('reviewing')}
-        </OLDropdownMenuItem>
+        </DropdownMenuItem>
         {showViewOption && (
-          <OLDropdownMenuItem
+          <DropdownMenuItem
             as="button"
             leadingIcon="visibility"
             active={mode === 'view'}
           >
             {t('viewing')}
-          </OLDropdownMenuItem>
+          </DropdownMenuItem>
         )}
       </NestedMenuBarDropdown>
     </>

@@ -1,9 +1,12 @@
-import { memo, useCallback, useState } from 'react'
+import { memo, useCallback, useRef, useState } from 'react'
 import { Change, CommentOperation } from '../../../../../types/change'
 import { ReviewPanelMessage } from './review-panel-message'
 import { useTranslation } from 'react-i18next'
 import { useThreadsContext } from '../context/threads-context'
-import AutoExpandingTextArea from '@/shared/components/auto-expanding-text-area'
+import {
+  MentionsInput,
+  MentionsInputHandle,
+} from '@/shared/components/mentions-input'
 import ReviewPanelResolvedMessage from './review-panel-resolved-message'
 import { ReviewPanelResolvedCommentThread } from '../../../../../types/review-panel/comment-thread'
 import {
@@ -11,7 +14,6 @@ import {
   ThreadId,
 } from '../../../../../types/review-panel/review-panel'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
-import { isFormSubmitKeypressEvent } from '@/features/review-panel/utils/form-events'
 
 export const ReviewPanelCommentContent = memo<{
   comment: Change<CommentOperation>
@@ -40,44 +42,32 @@ export const ReviewPanelCommentContent = memo<{
     const permissions = usePermissionsContext()
     const [submitting, setSubmitting] = useState(false)
     const [content, setContent] = useState('')
+    const commentInputRef = useRef<MentionsInputHandle | null>(null)
 
     const hasActiveContent = content.trim().length > 0
 
-    const handleSubmit = useCallback(() => {
-      if (!onReply || submitting) {
-        return
-      }
-
-      if (!hasActiveContent) {
-        return
-      }
-
-      setSubmitting(true)
-
-      return onReply(content)
-        .then(() => {
-          setContent('')
-        })
-        .finally(() => {
-          setSubmitting(false)
-        })
-    }, [onReply, submitting, content, hasActiveContent])
-
-    const handleKeyPress = useCallback(
-      (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        if (isFormSubmitKeypressEvent(event)) {
-          event.preventDefault()
-          handleSubmit()
+    const handleSubmit = useCallback(
+      (value: string) => {
+        if (!onReply || submitting) {
+          return
         }
-      },
-      [handleSubmit]
-    )
 
-    const handleChange = useCallback(
-      (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setContent(e.target.value)
+        if (value.trim().length === 0) {
+          return
+        }
+
+        setSubmitting(true)
+
+        // Clearing the editor fires its change handler, which resets `content`.
+        return onReply(value)
+          .then(() => {
+            commentInputRef.current?.clear()
+          })
+          .finally(() => {
+            setSubmitting(false)
+          })
       },
-      []
+      [onReply, submitting]
     )
 
     const thread = threads?.[comment.op.t]
@@ -127,13 +117,13 @@ export const ReviewPanelCommentContent = memo<{
         )}
 
         {permissions.comment && !isResolved && (
-          <AutoExpandingTextArea
-            name="content"
-            className="review-panel-comment-input"
-            onChange={handleChange}
-            onKeyPress={handleKeyPress}
+          <MentionsInput
+            ref={commentInputRef}
+            className="review-panel-add-comment-editor review-panel-comment-input"
+            onChange={setContent}
+            onSubmit={handleSubmit}
             placeholder={t('reply')}
-            value={content}
+            disabled={submitting}
           />
         )}
       </div>

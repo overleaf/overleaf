@@ -46,7 +46,7 @@ describe('<WelcomeMessage />', function () {
 
     screen.getByText('Blank project')
     screen.getByText('Example project')
-    screen.getByText('Upload project')
+    screen.getByText('Existing project (.zip)')
     screen.getByText('Import Word document')
     screen.getByText('Import from GitHub')
   })
@@ -83,7 +83,7 @@ describe('<WelcomeMessage />', function () {
     // static menu
     screen.getByText('Blank project')
     screen.getByText('Example project')
-    screen.getByText('Upload project')
+    screen.getByText('Existing project (.zip)')
     screen.getByText('Import from GitHub')
 
     // static text for institution templates
@@ -110,7 +110,7 @@ describe('<WelcomeMessage />', function () {
 
     screen.getByText('Blank project')
     screen.getByText('Example project')
-    screen.getByText('Upload project')
+    screen.getByText('Existing project (.zip)')
     screen.getByText('Import from GitHub')
   })
 
@@ -161,7 +161,7 @@ describe('<WelcomeMessage />', function () {
 
       screen.getByText('Blank project')
       screen.getByText('Example project')
-      screen.getByText('Upload project')
+      screen.getByText('Existing project (.zip)')
       expect(screen.queryByText('Import from GitHub')).to.not.exist
     })
 

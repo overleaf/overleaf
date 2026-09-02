@@ -194,6 +194,39 @@ describe('RequestParser', () => {
     })
   })
 
+  describe('with enableCheckpoint set', () => {
+    beforeEach(async ctx => {
+      await new Promise((resolve, reject) => {
+        ctx.validRequest.compile.options.enableCheckpoint = true
+        ctx.RequestParser.parse(ctx.validRequest, (error, data) => {
+          if (error) return reject(error)
+          ctx.data = data
+          resolve()
+        })
+      })
+    })
+
+    it('should set the enableCheckpoint attribute', ctx => {
+      expect(ctx.data.enableCheckpoint).to.equal(true)
+    })
+  })
+
+  describe('with enableCheckpoint not specified', () => {
+    beforeEach(async ctx => {
+      await new Promise((resolve, reject) => {
+        ctx.RequestParser.parse(ctx.validRequest, (error, data) => {
+          if (error) return reject(error)
+          ctx.data = data
+          resolve()
+        })
+      })
+    })
+
+    it('should default the enableCheckpoint attribute to false', ctx => {
+      expect(ctx.data.enableCheckpoint).to.equal(false)
+    })
+  })
+
   describe('without a timeout specified', () => {
     beforeEach(async ctx => {
       await new Promise((resolve, reject) => {

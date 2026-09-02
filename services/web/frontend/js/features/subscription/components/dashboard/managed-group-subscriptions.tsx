@@ -97,6 +97,11 @@ export default function ManagedGroupSubscriptions() {
   const combinedUserManagement = useFeatureFlag('combined-user-management')
 
   const isSharingUpdatesEnabled = useFeatureFlag('sharing-updates')
+  const isSharingPermissionsEnabled = useFeatureFlag(
+    'sharing-updates-sharing-permissions'
+  )
+  const isSharedWorkspaceEnabled = useFeatureFlag('shared-workspace')
+  const aiTogglingSplitTestEnabled = useFeatureFlag('ai-toggling')
 
   if (!managedGroupSubscriptions) {
     return null
@@ -110,6 +115,24 @@ export default function ManagedGroupSubscriptions() {
     <>
       {managedGroupSubscriptions.map(subscription => {
         const isAdmin = usersEmail === subscription.admin_id.email
+
+        // Shared Workspace is available to both managed and non-managed groups, so while the
+        // `shared-workspace` split test has the group opted in, the section is rendered whenever
+        // Overleaf Support hasn't disabled the feature for them.
+        // AI Features toggling is narrower: it's only interactive for managed groups, so for
+        // non-managed groups the section falls back to displaying notifications for features that
+        // have been disabled by Overleaf Support. When the `ai-toggling` split test is enabled,
+        // it's also displayed for non-managed groups that have the feature on. Both flags will be
+        // deleted once their features are available to all groups.
+        const shouldDisplayFeatureControls =
+          (isSharedWorkspaceEnabled &&
+            subscription.planLevelName === 'Pro' &&
+            subscription.features?.sharedWorkspace !== false) ||
+          (subscription.features?.aiToggling && aiTogglingSplitTestEnabled) ||
+          subscription.managedUsersEnabled ||
+          subscription.groupPolicy?.userCannotUseAIFeatures ||
+          subscription.groupPolicy?.userCannotUseChat ||
+          subscription.groupPolicy?.userCannotUseDropbox
 
         return (
           <div key={`managed-group-${subscription._id}`}>
@@ -151,6 +174,7 @@ export default function ManagedGroupSubscriptions() {
               {isAdmin && (
                 <>
                   {isSharingUpdatesEnabled &&
+                    isSharingPermissionsEnabled &&
                     subscription.planLevelName === 'Pro' && (
                       <RowLink
                         href={`/manage/groups/${subscription._id}/sharing-permissions`}
@@ -159,6 +183,14 @@ export default function ManagedGroupSubscriptions() {
                         icon="share"
                       />
                     )}
+                  {shouldDisplayFeatureControls && (
+                    <RowLink
+                      href={`/manage/groups/${subscription._id}/feature-settings`}
+                      heading={t('feature_controls')}
+                      subtext={t('feature_settings_subtext')}
+                      icon="toggle_off"
+                    />
+                  )}
                   <RowLink
                     href={`/manage/groups/${subscription._id}/audit-logs`}
                     heading={t('audit_logs')}

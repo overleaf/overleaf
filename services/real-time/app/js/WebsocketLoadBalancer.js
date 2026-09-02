@@ -8,6 +8,7 @@ import HealthCheckManager from './HealthCheckManager.js'
 import RoomManager from './RoomManager.js'
 import ChannelManager from './ChannelManager.js'
 import ConnectedUsersManager from './ConnectedUsersManager.js'
+import DocumentUpdaterController from './DocumentUpdaterController.js'
 
 const RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST = [
   'otUpdateApplied',
@@ -25,12 +26,6 @@ const RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST = [
   'toggle-track-changes',
   'projectRenamedOrDeletedByExternalSource',
 ]
-const BANDWIDTH_BUCKETS = [0]
-// 64 bytes ... 8MB
-for (let i = 5; i <= 22; i++) {
-  BANDWIDTH_BUCKETS.push(2 << i)
-}
-
 let WebsocketLoadBalancer
 
 export default WebsocketLoadBalancer = {
@@ -146,31 +141,28 @@ export default WebsocketLoadBalancer = {
         for (const client of clientList) {
           ConnectedUsersManager.refreshClient(message.room_id, client.publicId)
         }
-      } else if (message.message === 'canary-applied-op') {
-        const { ack, broadcast, source, projectId, docId } = message.payload
-
-        const estimateBandwidth = (room, path) => {
-          const seen = new Set()
-          for (const client of io.sockets.clients(room)) {
-            if (seen.has(client.id)) continue
-            seen.add(client.id)
-            let v = client.id === source ? ack : broadcast
-            if (v === 0) {
-              // Acknowledgements with update.dup===true will not get sent to other clients.
-              continue
-            }
-            v += `5:::{"name":"otUpdateApplied","args":[]}`.length
-            Metrics.histogram(
-              'estimated-applied-ops-bandwidth',
-              v,
-              BANDWIDTH_BUCKETS,
-              { path }
-            )
-          }
+      } else if (
+        message.message === 'otUpdateApplied' ||
+        message.message === 'otUpdateError'
+      ) {
+        // An applied op (or error) from document-updater, published on the
+        // per-project editor-events channel instead of the legacy per-doc
+        // applied-ops channel. Forward it for broadcasting to the project
+        // room.
+        const status = message.message === 'otUpdateApplied' ? 'op' : 'error'
+        Metrics.inc('applied-ops-via-editor-events', 1, { status })
+        if (!message.project_id) {
+          logger.error(
+            { channel, message },
+            'applied-ops message without project_id'
+          )
+        } else {
+          DocumentUpdaterController.handleAppliedOpMessage(
+            io,
+            message,
+            message.project_id
+          )
         }
-
-        estimateBandwidth(projectId, 'per-project')
-        estimateBandwidth(docId, 'per-doc')
       } else if (message.room_id) {
         if (message._id && Settings.checkEventOrder) {
           const status = EventLogger.checkEventOrder(

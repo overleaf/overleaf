@@ -1,9 +1,9 @@
 import React, { ReactNode } from 'react'
 import {
-  Dropdown,
-  DropdownMenu,
-  DropdownToggle,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
 
 type ActionDropdownProps = {
@@ -19,7 +19,7 @@ function ActionsDropdown(props: ActionDropdownProps) {
   const { id, children, isOpened, iconTag, setIsOpened, tooltipDescription } =
     props
   return (
-    <Dropdown
+    <OLDropdown
       align="end"
       className="float-end"
       show={isOpened}
@@ -33,19 +33,19 @@ function ActionsDropdown(props: ActionDropdownProps) {
       >
         {/* OverlayTrigger won't fire unless the child is a non-react html element (e.g div, span) */}
         <span>
-          <DropdownToggle
+          <OLDropdownToggle
             id={`history-version-dropdown-toggle-${id}`}
             className="history-version-dropdown-menu-btn"
             as="button"
           >
             {iconTag}
-          </DropdownToggle>
+          </OLDropdownToggle>
         </span>
       </OLTooltip>
-      <DropdownMenu className="history-version-dropdown-menu">
+      <OLDropdownMenu className="history-version-dropdown-menu">
         {children}
-      </DropdownMenu>
-    </Dropdown>
+      </OLDropdownMenu>
+    </OLDropdown>
   )
 }
 

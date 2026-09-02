@@ -1,11 +1,18 @@
 // @ts-check
 
 const _ = require('lodash')
-const { isDelete } = require('./Utils')
+const RangesTracker = require('@overleaf/ranges-tracker')
+const {
+  File,
+  StringFileData,
+  getDocUpdaterCompatibleRanges,
+} = require('overleaf-editor-core')
+const { addTrackedDeletesToContent, isDelete } = require('./Utils')
 
 /**
  * @import { Comment, HistoryComment, HistoryRanges, HistoryTrackedChange } from './types'
  * @import { Ranges, TrackedChange } from './types'
+ * @import { CommentRawData, StringFileRawData, TrackedChangeRawData } from 'overleaf-editor-core/lib/types'
  */
 
 /**
@@ -174,6 +181,98 @@ function toHistoryComment(comment, offset) {
   return historyComment
 }
 
+/**
+ * Convert a history-OT doc into editor lines and ranges
+ *
+ * Tracked deletes are removed from the content and the ranges use editor
+ * positions (as maintained by the RangesTracker).
+ *
+ * @param {StringFileRawData} raw
+ * @return {{lines: string[], ranges: Ranges}}
+ */
+function fromHistoryOT(raw) {
+  const fileData = StringFileData.fromRaw(raw)
+  const { changes, comments } = getDocUpdaterCompatibleRanges(
+    new File(fileData)
+  )
+  /** @type {Ranges} */
+  const ranges = {}
+  if (changes.length > 0) {
+    ranges.changes = changes.map(change => ({
+      ...change,
+      id: RangesTracker.generateId(),
+    }))
+  }
+  if (comments.length > 0) {
+    ranges.comments = comments.map(comment => ({
+      ...comment,
+      id: comment.op.t,
+    }))
+  }
+  return { lines: fileData.getLines(), ranges }
+}
+
+/**
+ * Convert editor lines and ranges into a history-OT doc
+ *
+ * Tracked deletes are added back to the content and the ranges use history
+ * positions.
+ *
+ * @param {string[]} lines
+ * @param {Ranges} ranges
+ * @param {string[]} resolvedCommentIds
+ * @return {StringFileRawData}
+ */
+function toHistoryOT(lines, ranges, resolvedCommentIds) {
+  const historyRanges = toHistoryRanges(ranges)
+
+  /** @type {StringFileRawData} */
+  const raw = {
+    content: addTrackedDeletesToContent(lines.join('\n'), ranges.changes ?? []),
+  }
+
+  const comments = (historyRanges.comments ?? []).map(comment => {
+    const length = comment.op.hlen ?? comment.op.c.length
+    /** @type {CommentRawData} */
+    const rawComment = {
+      id: comment.op.t,
+      // Translate zero length comments into detached comments
+      ranges:
+        length > 0 ? [{ pos: comment.op.hpos ?? comment.op.p, length }] : [],
+    }
+    if (resolvedCommentIds.includes(comment.op.t)) {
+      rawComment.resolved = true
+    }
+    return rawComment
+  })
+  if (comments.length > 0) {
+    raw.comments = comments
+  }
+
+  const trackedChanges = (historyRanges.changes ?? []).map(change => {
+    /** @type {TrackedChangeRawData} */
+    const trackedChange = {
+      range: {
+        pos: change.op.hpos ?? change.op.p,
+        length: isDelete(change.op) ? change.op.d.length : change.op.i.length,
+      },
+      tracking: {
+        type: isDelete(change.op) ? 'delete' : 'insert',
+        userId: change.metadata.user_id,
+        ts: new Date(change.metadata.ts).toISOString(),
+      },
+    }
+    return trackedChange
+  })
+  if (trackedChanges.length > 0) {
+    raw.trackedChanges = trackedChanges
+  }
+
+  return raw
+}
+
 module.exports = {
   toHistoryRanges,
+  toHistoryOT,
+  fromHistoryOT,
 }

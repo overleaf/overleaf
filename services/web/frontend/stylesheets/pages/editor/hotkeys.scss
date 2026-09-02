@@ -1,4 +1,8 @@
 .hotkeys-modal {
+  @include themed-links;
+
+  --bs-code-color: var(--content-secondary-themed);
+
   font-size: var(--font-size-02);
 
   h3:first-child {
@@ -23,7 +27,7 @@
   }
 
   .hotkeys-modal-bottom-text {
-    background-color: var(--bg-light-secondary);
+    background-color: var(--bg-secondary-themed);
     padding: var(--spacing-04);
     border-radius: var(--border-radius-base);
   }

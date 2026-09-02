@@ -11,8 +11,30 @@
  */
 import sinon from 'sinon'
 import express from 'express'
+import { z, zz, parseReq } from '@overleaf/validation-tools'
 
 let MockDocUpdaterServer
+
+// Mirrors the request shape of document-updater's real routes (see
+// services/document-updater/app/js/HttpController.js).
+const getDocumentRequestSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+    doc_id: zz.objectId(),
+  }),
+  query: z.strictObject({
+    fromVersion: z.coerce.number().int().optional(),
+    // sent by real-time's DocumentUpdaterManager.getDocument alongside
+    // fromVersion; unused here since this mock only reads fromVersion.
+    historyOTSupport: z.stringbool().optional(),
+  }),
+})
+
+const deleteProjectRequestSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+  }),
+})
 
 export default MockDocUpdaterServer = {
   docs: {},
@@ -31,9 +53,9 @@ export default MockDocUpdaterServer = {
   deleteProject: sinon.stub().callsArg(1),
 
   getDocumentRequest(req, res, next) {
-    const { project_id: projectId, doc_id: docId } = req.params
-    let { fromVersion } = req.query
-    fromVersion = parseInt(fromVersion, 10)
+    const { params, query } = parseReq(req, getDocumentRequestSchema)
+    const { project_id: projectId, doc_id: docId } = params
+    const { fromVersion } = query
     return MockDocUpdaterServer.getDocument(
       projectId,
       docId,
@@ -51,7 +73,8 @@ export default MockDocUpdaterServer = {
   },
 
   deleteProjectRequest(req, res, next) {
-    const { project_id: projectId } = req.params
+    const { params } = parseReq(req, deleteProjectRequestSchema)
+    const { project_id: projectId } = params
     return MockDocUpdaterServer.deleteProject(projectId, error => {
       if (error != null) {
         return next(error)

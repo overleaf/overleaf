@@ -45,7 +45,7 @@ export default function AdminMenu({
       ) : null}
       {canDisplayProjectUrlLookup ? (
         <NavDropdownLinkItem href="/admin/project">
-          Project URL Lookup
+          Project/Object Lookup
         </NavDropdownLinkItem>
       ) : null}
       {canDisplayAdminRedirect && adminUrl ? (

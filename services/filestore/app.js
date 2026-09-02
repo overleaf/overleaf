@@ -9,6 +9,7 @@ import express from 'express'
 import fileController from './app/js/FileController.js'
 import keyBuilder from './app/js/KeyBuilder.js'
 import RequestLogger from './app/js/RequestLogger.js'
+import { handleValidationError } from '@overleaf/validation-tools'
 
 logger.initialize(process.env.METRICS_APP_NAME || 'filestore')
 
@@ -69,7 +70,7 @@ if (settings.filestore.stores.template_files) {
 }
 
 app.get(
-  '/bucket/:bucket/key/*',
+  '/bucket/:bucket/key/:key(.+)',
   keyBuilder.bucketFileKeyMiddleware,
   fileController.getFile
 )
@@ -97,6 +98,7 @@ app.get('/health_check', (req, res) => {
   res.sendStatus(200)
 })
 
+app.use(handleValidationError)
 app.use(RequestLogger.errorHandler)
 
 const port = settings.internal.filestore.port || 3009

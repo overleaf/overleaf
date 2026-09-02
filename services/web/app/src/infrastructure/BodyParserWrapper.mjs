@@ -1,4 +1,4 @@
-import bodyParser from 'body-parser'
+import express from 'express'
 import HttpErrorHandler from '../Features/Errors/HttpErrorHandler.mjs'
 
 function isBodyParserError(nextArg) {
@@ -13,7 +13,7 @@ function isBodyParserError(nextArg) {
 }
 
 const wrapBodyParser = method => opts => {
-  const middleware = bodyParser[method](opts)
+  const middleware = express[method](opts)
   return function bodyParser(req, res, next) {
     middleware(req, res, nextArg => {
       if (isBodyParserError(nextArg)) {

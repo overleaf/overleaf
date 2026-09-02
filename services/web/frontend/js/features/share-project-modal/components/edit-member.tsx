@@ -17,11 +17,11 @@ import { useUserContext } from '@/shared/context/user-context'
 import { upgradePlan } from '@/main/account-upgrade'
 import ShareProjectModalRow from '@/features/share-project-modal/components/share-project-modal-row'
 import {
-  Dropdown,
-  DropdownMenu,
-  DropdownToggle,
-} from '@/shared/components/dropdown/dropdown-menu'
-import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
+  OLDropdown,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
+import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import classnames from 'classnames'
 
@@ -247,7 +247,7 @@ export default function EditMember({
         </div>
       </div>
       <div className="text-end">
-        <Dropdown
+        <OLDropdown
           align="end"
           onSelect={(eventKey: PermissionsOption) => {
             if (eventKey) {
@@ -259,16 +259,16 @@ export default function EditMember({
             {hasBeenDowngraded && !confirmRemoval && (
               <MaterialIcon type="warning" unfilled className="text-warning" />
             )}
-            <DropdownToggle
+            <OLDropdownToggle
               variant="ghost"
               className="d-flex align-items-center gap-2 no-default-caret"
             >
               {getDropdownLabel()}
               <MaterialIcon type="keyboard_arrow_down" />
-            </DropdownToggle>
+            </OLDropdownToggle>
           </div>
-          <DropdownMenu>
-            <OLDropdownMenuItem
+          <OLDropdownMenu>
+            <DropdownMenuItem
               as="button"
               eventKey="owner"
               leadingIcon={<MaterialIcon type="person_edit" unfilled />}
@@ -276,8 +276,8 @@ export default function EditMember({
               trailingIcon={privileges === 'owner' ? 'check' : undefined}
             >
               {t('make_owner')}
-            </OLDropdownMenuItem>
-            <OLDropdownMenuItem
+            </DropdownMenuItem>
+            <DropdownMenuItem
               as="button"
               eventKey="readAndWrite"
               leadingIcon={<MaterialIcon type="edit" unfilled />}
@@ -287,9 +287,9 @@ export default function EditMember({
               description={getPrivilegeSubtitle('readAndWrite')}
             >
               {t('editor')}
-            </OLDropdownMenuItem>
+            </DropdownMenuItem>
             {features.trackChangesVisible && (
-              <OLDropdownMenuItem
+              <DropdownMenuItem
                 as="button"
                 eventKey="review"
                 leadingIcon={<MaterialIcon type="mode_comment" unfilled />}
@@ -299,9 +299,9 @@ export default function EditMember({
                 description={getPrivilegeSubtitle('review')}
               >
                 {t('reviewer')}
-              </OLDropdownMenuItem>
+              </DropdownMenuItem>
             )}
-            <OLDropdownMenuItem
+            <DropdownMenuItem
               as="button"
               eventKey="readOnly"
               leadingIcon={<MaterialIcon type="visibility" unfilled />}
@@ -309,8 +309,8 @@ export default function EditMember({
               trailingIcon={privileges === 'readOnly' ? 'check' : undefined}
             >
               {t('viewer')}
-            </OLDropdownMenuItem>
-            <OLDropdownMenuItem
+            </DropdownMenuItem>
+            <DropdownMenuItem
               as="button"
               eventKey="removeAccess"
               variant="danger"
@@ -319,9 +319,9 @@ export default function EditMember({
               trailingIcon={privileges === 'removeAccess' ? 'check' : undefined}
             >
               {t('remove_access')}
-            </OLDropdownMenuItem>
-          </DropdownMenu>
-        </Dropdown>
+            </DropdownMenuItem>
+          </OLDropdownMenu>
+        </OLDropdown>
         {confirmRemoval && (
           <form
             onSubmit={e => {

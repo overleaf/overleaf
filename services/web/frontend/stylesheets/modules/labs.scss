@@ -91,11 +91,115 @@
   }
 }
 
+// Markdown rendered from an experiment description, see labs-description.tsx.
+// Shown in the labs page widget, the experiment detail panel, and the split
+// test admin preview, so the styles are not scoped to any of them.
+.labs-description {
+  // Body text here is --font-size-02, and the experiment's own title is 18-20px,
+  // so the scale has to stay compact. There are not six distinct sizes to spend
+  // below the title, so the lower levels are separated by weight and colour
+  // instead — every level still differs from its neighbours.
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin: var(--spacing-04) 0 var(--spacing-01);
+    color: var(--content-primary-themed);
+
+    &:first-child {
+      margin-top: 0;
+    }
+
+    // Both the `code` rule below and `.labs-opt-in-wrapper strong` pin a size,
+    // which would otherwise shrink inline markup inside a heading
+    code,
+    strong {
+      font-size: inherit;
+    }
+  }
+
+  h1 {
+    font-size: var(--font-size-04);
+    line-height: var(--line-height-03);
+    font-weight: 600;
+  }
+
+  h2 {
+    font-size: var(--font-size-03);
+    line-height: var(--line-height-03);
+    font-weight: 600;
+  }
+
+  h3 {
+    font-size: var(--font-size-02);
+    line-height: var(--line-height-02);
+    font-weight: 700;
+  }
+
+  h4 {
+    font-size: var(--font-size-02);
+    line-height: var(--line-height-02);
+    font-weight: 600;
+  }
+
+  h5 {
+    font-size: var(--font-size-01);
+    line-height: var(--line-height-01);
+    font-weight: 700;
+    color: var(--content-secondary-themed);
+  }
+
+  h6 {
+    font-size: var(--font-size-01);
+    line-height: var(--line-height-01);
+    font-weight: 600;
+    color: var(--content-secondary-themed);
+  }
+
+  code {
+    padding: 0 var(--spacing-02);
+    border-radius: var(--border-radius-base);
+    background-color: var(--bg-secondary-themed);
+    color: var(--content-primary-themed);
+    font-size: var(--font-size-02);
+    word-break: break-word;
+  }
+
+  pre {
+    margin: 0 0 var(--spacing-04);
+    padding: var(--spacing-04);
+    border-radius: var(--border-radius-base);
+    background-color: var(--bg-secondary-themed);
+    overflow-x: auto;
+
+    code {
+      padding: 0;
+      background-color: transparent;
+    }
+  }
+}
+
 // Feature Preview Modal
+:root {
+  --labs-sidebar-item-active-color: var(--green-70);
+  --labs-sidebar-item-active-bg-color: var(--bg-accent-03);
+}
+
+@include theme('default') {
+  .modal-themed {
+    --labs-sidebar-item-active-color: var(--green-10);
+    --labs-sidebar-item-active-bg-color: var(--green-70);
+  }
+}
+
 .labs-feature-preview-modal {
+  @include themed-links;
+
   .modal-header {
     padding-bottom: var(--spacing-04);
-    border-bottom: 1px solid var(--border-divider);
+    border-bottom: 1px solid var(--border-divider-themed);
   }
 
   .modal-body {
@@ -108,7 +212,7 @@
   align-items: center;
   justify-content: center;
   padding: var(--spacing-09);
-  color: var(--content-secondary);
+  color: var(--content-secondary-themed);
 }
 
 // Experiment Browser (two-panel layout)
@@ -134,7 +238,7 @@
 
 .labs-experiment-sidebar {
   width: 320px;
-  border-right: 1px solid var(--border-divider);
+  border-right: 1px solid var(--border-divider-themed);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -146,22 +250,22 @@
   gap: var(--spacing-04);
   padding: var(--spacing-04) var(--spacing-05);
   text-align: left;
-  color: var(--content-primary);
+  color: var(--content-primary-themed);
   font-size: var(--font-size-02);
   min-height: 44px;
   text-decoration: none;
 
   &:hover {
-    background: var(--bg-light-secondary);
-    color: var(--content-primary);
+    background: var(--bg-secondary-themed);
+    color: var(--content-primary-themed);
   }
 
   &.active {
-    background: var(--bg-accent-03);
-    color: var(--content-primary);
+    background: var(--labs-sidebar-item-active-bg-color);
+    color: var(--content-primary-themed);
 
     .labs-experiment-sidebar-title {
-      color: var(--green-70);
+      color: var(--labs-sidebar-item-active-color);
       font-weight: 600;
     }
   }
@@ -169,7 +273,7 @@
 
 .labs-experiment-sidebar-icon {
   font-size: 20px;
-  color: var(--content-primary);
+  color: var(--content-primary-themed);
 }
 
 .labs-experiment-sidebar-title {
@@ -192,25 +296,25 @@
   gap: var(--spacing-04);
   padding: var(--spacing-04) var(--spacing-05);
   text-align: left;
-  color: var(--content-primary);
+  color: var(--content-primary-themed);
   font-size: var(--font-size-02);
   min-height: 44px;
   width: 100%;
   text-decoration: none;
 
   &:visited {
-    color: var(--content-primary);
+    color: var(--content-primary-themed);
   }
 
   &:hover {
-    background: var(--bg-light-secondary);
-    color: var(--content-primary);
+    background: var(--bg-secondary-themed);
+    color: var(--content-primary-themed);
   }
 }
 
 .labs-settings-link-external-icon {
   font-size: 20px;
-  color: var(--content-secondary);
+  color: var(--content-secondary-themed);
 }
 
 .labs-badge {
@@ -223,7 +327,7 @@
 .labs-experiment-sidebar-arrow {
   display: none;
   font-size: 18px;
-  color: var(--content-secondary);
+  color: var(--content-secondary-themed);
 }
 
 // !important needed to override Bootstrap's d-inline-grid utility on OLIconButton
@@ -266,7 +370,7 @@
 
 .labs-experiment-detail-description {
   margin-bottom: var(--spacing-06);
-  color: var(--content-secondary);
+  color: var(--content-secondary-themed);
   font-size: var(--font-size-02);
   line-height: var(--line-height-03);
 }

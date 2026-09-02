@@ -1,4 +1,4 @@
-import { expect, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import MockRequest from '../helpers/MockRequest.mjs'
 import MockResponse from '../helpers/MockResponse.mjs'
@@ -155,6 +155,10 @@ describe('CollaboratorsInviteController', function () {
       },
     }
 
+    ctx.TokenAccessHandler = {
+      grantSessionTokenAccess: sinon.stub(),
+    }
+
     ctx.SplitTestHandler = {
       promises: {
         getAssignment: sinon.stub().resolves({ variant: 'default' }),
@@ -267,6 +271,13 @@ describe('CollaboratorsInviteController', function () {
       '../../../../app/src/Features/Subscription/SubscriptionLocator.mjs',
       () => ({
         default: ctx.SubscriptionLocator,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/TokenAccess/TokenAccessHandler.mjs',
+      () => ({
+        default: ctx.TokenAccessHandler,
       })
     )
 
@@ -1978,6 +1989,62 @@ describe('CollaboratorsInviteController', function () {
     })
   })
 
+  describe('viewSharingLink', function () {
+    beforeEach(function (ctx) {
+      ctx.req.params = { Project_id: ctx.projectId }
+      ctx.ProjectGetter.promises.getProject.resolves({ name: 'Project' })
+    })
+
+    it('renders the invite page for a logged-in user', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.res.callback = () => resolve()
+        ctx.CollaboratorsInviteController.viewSharingLink(ctx.req, ctx.res)
+      })
+      expect(ctx.res.renderedTemplate).to.equal('project/invite/show')
+    })
+
+    describe('for a logged-out (anonymous) user', function () {
+      beforeEach(function (ctx) {
+        ctx.SessionManager.getSessionUser.returns(null)
+      })
+
+      it('renders the invite page when there is a public sharing link', async function (ctx) {
+        ctx.CollaboratorsInviteGetter.promises.getSharingLinkInvite.resolves({
+          privileges: 'readOnly',
+          subscriptionId: undefined,
+        })
+        await new Promise(resolve => {
+          ctx.res.callback = () => resolve()
+          ctx.CollaboratorsInviteController.viewSharingLink(ctx.req, ctx.res)
+        })
+        expect(ctx.res.renderedTemplate).to.equal('project/invite/show')
+      })
+
+      it('redirects to register for a group-restricted sharing link', async function (ctx) {
+        ctx.CollaboratorsInviteGetter.promises.getSharingLinkInvite.resolves({
+          privileges: 'readOnly',
+          subscriptionId: new ObjectId().toString(),
+        })
+        await new Promise(resolve => {
+          ctx.res.callback = () => resolve()
+          ctx.CollaboratorsInviteController.viewSharingLink(ctx.req, ctx.res)
+        })
+        expect(ctx.res.redirectedTo).to.equal('/register')
+      })
+
+      it('redirects to register when there is no sharing link', async function (ctx) {
+        ctx.CollaboratorsInviteGetter.promises.getSharingLinkInvite.resolves(
+          null
+        )
+        await new Promise(resolve => {
+          ctx.res.callback = () => resolve()
+          ctx.CollaboratorsInviteController.viewSharingLink(ctx.req, ctx.res)
+        })
+        expect(ctx.res.redirectedTo).to.equal('/register')
+      })
+    })
+  })
+
   describe('validateSharingLink', function () {
     beforeEach(function (ctx) {
       ctx.req.params = { Project_id: ctx.projectId }
@@ -2017,6 +2084,73 @@ describe('CollaboratorsInviteController', function () {
         ctx.CollaboratorsInviteController.validateSharingLink(ctx.req, ctx.res)
       })
       expect(ctx.res.json).toHaveBeenCalledWith({ valid: false })
+    })
+
+    describe('for a logged-out (anonymous) user', function () {
+      beforeEach(function (ctx) {
+        ctx.SessionManager.getSessionUser.returns(null)
+      })
+
+      it('grants read-only access and redirects for a public sharing link', async function (ctx) {
+        ctx.invite.reusable = true
+        ctx.invite.privileges = 'readAndWrite'
+        ctx.invite.subscriptionId = undefined
+        await new Promise(resolve => {
+          ctx.CollaboratorsInviteGetter.promises.getInviteByToken.resolves(
+            ctx.invite
+          )
+          ctx.res.callback = () => resolve()
+          ctx.CollaboratorsInviteController.validateSharingLink(
+            ctx.req,
+            ctx.res
+          )
+        })
+        expect(
+          ctx.TokenAccessHandler.grantSessionTokenAccess
+        ).to.have.been.calledWith(ctx.req, ctx.projectId, ctx.token)
+        expect(ctx.res.json).toHaveBeenCalledWith({
+          valid: true,
+          redirect: true,
+        })
+      })
+
+      it('returns valid false for a group-restricted sharing link', async function (ctx) {
+        ctx.invite.reusable = true
+        ctx.invite.privileges = 'readOnly'
+        ctx.invite.subscriptionId = new ObjectId().toString()
+        await new Promise(resolve => {
+          ctx.CollaboratorsInviteGetter.promises.getInviteByToken.resolves(
+            ctx.invite
+          )
+          ctx.res.callback = () => resolve()
+          ctx.CollaboratorsInviteController.validateSharingLink(
+            ctx.req,
+            ctx.res
+          )
+        })
+        expect(ctx.TokenAccessHandler.grantSessionTokenAccess).to.not.have.been
+          .called
+        expect(ctx.res.json).toHaveBeenCalledWith({ valid: false })
+      })
+
+      it('returns valid false for a one-time (non-reusable) invite', async function (ctx) {
+        ctx.invite.reusable = false
+        ctx.invite.privileges = 'readOnly'
+        ctx.invite.subscriptionId = undefined
+        await new Promise(resolve => {
+          ctx.CollaboratorsInviteGetter.promises.getInviteByToken.resolves(
+            ctx.invite
+          )
+          ctx.res.callback = () => resolve()
+          ctx.CollaboratorsInviteController.validateSharingLink(
+            ctx.req,
+            ctx.res
+          )
+        })
+        expect(ctx.TokenAccessHandler.grantSessionTokenAccess).to.not.have.been
+          .called
+        expect(ctx.res.json).toHaveBeenCalledWith({ valid: false })
+      })
     })
   })
 

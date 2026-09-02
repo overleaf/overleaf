@@ -1,4 +1,4 @@
-import { expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import EmailHelper from '../../../../app/src/Features/Helpers/EmailHelper.mjs'
 
 describe('EmailHelper', function () {

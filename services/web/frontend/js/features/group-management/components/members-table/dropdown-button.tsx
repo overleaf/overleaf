@@ -6,11 +6,11 @@ import {
 } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownItem,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import { User } from '../../../../../../types/group-management/user'
 import useAsync from '@/shared/hooks/use-async'
 import { type FetchError, postJSON } from '@/infrastructure/fetch-json'
@@ -318,30 +318,30 @@ export default function DropdownButton({
   if (buttons.length === 0) {
     buttons.push(
       <DropdownListItem key="no-actions-available">
-        <DropdownItem
+        <OLDropdownItem
           as="button"
           tabIndex={-1}
           data-testid="no-actions-available"
           disabled
         >
           {t('no_actions')}
-        </DropdownItem>
+        </OLDropdownItem>
       </DropdownListItem>
     )
   }
 
   return (
-    <Dropdown align="end">
-      <DropdownToggle
+    <OLDropdown align="end">
+      <OLDropdownToggle
         id={`managed-user-dropdown-${user.email}`}
         bsPrefix="dropdown-table-button-toggle"
       >
         <MaterialIcon type="more_vert" accessibilityLabel={t('actions')} />
-      </DropdownToggle>
-      <DropdownMenu flip renderOnMount popperConfig={{ strategy: 'fixed' }}>
+      </OLDropdownToggle>
+      <OLDropdownMenu flip renderOnMount popperConfig={{ strategy: 'fixed' }}>
         {buttons}
-      </DropdownMenu>
-    </Dropdown>
+      </OLDropdownMenu>
+    </OLDropdown>
   )
 }
 
@@ -349,7 +349,7 @@ type MenuItemButtonProps = {
   isLoading?: boolean
   'data-testid'?: string
 } & Pick<ComponentProps<'button'>, 'children' | 'onClick' | 'className'> &
-  Pick<ComponentProps<typeof DropdownItem>, 'variant'>
+  Pick<ComponentProps<typeof OLDropdownItem>, 'variant'>
 
 function MenuItemButton({
   children,
@@ -360,7 +360,7 @@ function MenuItemButton({
 }: MenuItemButtonProps) {
   return (
     <DropdownListItem>
-      <DropdownItem
+      <OLDropdownItem
         as="button"
         tabIndex={-1}
         onClick={onClick}
@@ -369,7 +369,7 @@ function MenuItemButton({
         variant={variant}
       >
         {children}
-      </DropdownItem>
+      </OLDropdownItem>
     </DropdownListItem>
   )
 }

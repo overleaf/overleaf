@@ -1,4 +1,17 @@
 import express from 'express'
+import {
+  handleValidationError,
+  parseReq,
+  z,
+  zz,
+} from '@overleaf/validation-tools'
+
+const getFileSchema = z.object({
+  params: z.strictObject({
+    projectId: zz.objectId(),
+    fileId: zz.objectId(),
+  }),
+})
 
 class MockFilestore {
   constructor() {
@@ -10,11 +23,12 @@ class MockFilestore {
     this.app = express()
 
     this.app.get('/project/:projectId/file/:fileId', (req, res) => {
-      const { projectId, fileId } = req.params
+      const { projectId, fileId } = parseReq(req, getFileSchema).params
       const content = this.files[projectId]?.[fileId]
       if (!content) return res.status(404).end()
       res.status(200).end(content)
     })
+    this.app.use(handleValidationError)
   }
 
   start() {

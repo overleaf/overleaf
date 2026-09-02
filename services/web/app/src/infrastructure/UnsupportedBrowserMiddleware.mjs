@@ -2,8 +2,23 @@ import Bowser from 'bowser'
 import Settings from '@overleaf/settings'
 import Url from 'node:url'
 import UrlHelper from '../Features/Helpers/UrlHelper.mjs'
+import { z, parseReq } from './Validation.mjs'
 
 const { getSafeRedirectPath } = UrlHelper
+
+// middleware schema is non-strict: it validates only the header this
+// middleware consumes, applied globally to every route
+const unsupportedBrowserMiddlewareSchema = z.object({
+  headers: z.object({
+    'user-agent': z.string().optional(),
+  }),
+})
+
+const renderUnsupportedBrowserPageSchema = z.object({
+  query: z.object({
+    fromURL: z.string().optional(),
+  }),
+})
 
 function unsupportedBrowserMiddleware(req, res, next) {
   if (!Settings.unsupportedBrowsers) return next()
@@ -12,7 +27,10 @@ function unsupportedBrowserMiddleware(req, res, next) {
   const path = req.path
   if (path === '/unsupported-browser') return next()
 
-  const userAgent = req.headers['user-agent']
+  const { headers } = parseReq(req, unsupportedBrowserMiddlewareSchema, {
+    logOnly: true,
+  })
+  const userAgent = headers['user-agent']
 
   if (!userAgent) return next()
 
@@ -36,11 +54,13 @@ function unsupportedBrowserMiddleware(req, res, next) {
 }
 
 function renderUnsupportedBrowserPage(req, res) {
+  const { query } = parseReq(req, renderUnsupportedBrowserPageSchema, {
+    logOnly: true,
+  })
   let fromURL
-  if (typeof req.query.fromURL === 'string') {
+  if (typeof query.fromURL === 'string') {
     try {
-      fromURL =
-        Settings.siteUrl + (getSafeRedirectPath(req.query.fromURL) || '/')
+      fromURL = Settings.siteUrl + (getSafeRedirectPath(query.fromURL) || '/')
     } catch (e) {}
   }
   res.render('general/unsupported-browser', { fromURL })

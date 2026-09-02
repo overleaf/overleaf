@@ -1,16 +1,17 @@
 import metrics from '@overleaf/metrics'
 import logger from '@overleaf/logger'
 import settings from '@overleaf/settings'
+import express from 'express'
 import WebsocketController from './WebsocketController.js'
 import HttpController from './HttpController.js'
 import HttpApiController from './HttpApiController.js'
 import WebsocketAddressManager from './WebsocketAddressManager.js'
-import bodyParser from 'body-parser'
 import base64id from 'base64id'
 import Errors from './Errors.js'
 import { z, zz } from '@overleaf/validation-tools'
 import { isZodErrorLike } from 'zod-validation-error'
 import os from 'node:os'
+import schemas from 'overleaf-editor-core/lib/schemas.js'
 
 const { UnexpectedArgumentsError } = Errors
 
@@ -18,16 +19,93 @@ const HOSTNAME = os.hostname()
 const SERVER_PING_INTERVAL = 15000
 const SERVER_PING_LATENCY_THRESHOLD = 5000
 
-const joinDocSchema = z.object({
+const joinDocSchema = z.strictObject({
   doc_id: zz.objectId(),
   fromVersion: z.number().int().optional(),
-  options: z.object(),
+  // known fields read by WebsocketController.joinDoc; see
+  // document-container.ts's joinDoc() call sites on the frontend
+  options: z.strictObject({
+    age: z.number().optional(),
+    supportsHistoryOT: z.boolean().optional(),
+    encodeRanges: z.boolean().optional(),
+  }),
 })
 
-const applyOtUpdateSchema = z.object({
+const applyOtUpdateSchema = z.strictObject({
   doc_id: zz.objectId(),
-  update: z.object(),
+  update: z.strictObject({
+    doc: zz.objectId().optional(),
+    dupIfSource: z.array(z.string()).optional(),
+    hash: schemas.rawBlobHash.optional(),
+    lastV: z.number().optional(),
+    meta: z
+      .strictObject({
+        // the seed RangesTracker builds tracked-change ids from: the first 18
+        // characters of an ObjectId, leaving 6 for the increment part, see
+        // RangesTracker.generateIdSeed
+        tc: zz.hex().length(18).optional(),
+      })
+      .optional(),
+    op: z
+      .array(
+        z
+          .strictObject({
+            i: z.string(),
+            p: z.number().int().min(0),
+            u: z.boolean().optional(),
+          })
+          .or(
+            z.strictObject({
+              d: z.string(),
+              p: z.number().int().min(0),
+              u: z.boolean().optional(),
+            })
+          )
+          .or(
+            z.strictObject({
+              c: z.string(),
+              p: z.number().int().min(0),
+              t: zz.objectId(),
+              u: z.boolean().optional(),
+            })
+          )
+      )
+      .min(1)
+      .or(z.array(schemas.rawEditOperation).min(1)),
+    v: z.number().int().min(0),
+  }),
 })
+
+// Fields the client actually sends; see online-users-context.tsx's
+// clientTracking.updatePosition emit call. The server then mutates this
+// object in place to add its own fields (id/user_id/email/name) before
+// broadcasting it on, so those must NOT be accepted from the client.
+const cursorDataSchema = z.strictObject({
+  row: z.number().optional(),
+  column: z.number().optional(),
+  doc_id: zz.objectId().nullish(),
+})
+
+// A diagnostic echo channel (see use-socket-manager.ts): the payload is
+// never read by name, only reflected back to the caller, so this is a
+// genuinely open map rather than a fixed shape to approximate. `data` is a
+// top-level positional socket.io argument, so an omitted value is
+// JSON-encoded as `null`, not `undefined` -- hence .nullish().
+const debugDataSchema = z.record(z.string(), z.unknown()).nullish()
+
+// Positional args the client echoes back from a 'serverPing' (see the
+// serverPing emit below and connection-manager.ts's sendPingResponse, whose
+// params are all optionally-typed); used only for logging/latency metrics.
+// A socket.io array of positional args is JSON-encoded, so an omitted
+// trailing value arrives as `null`, not `undefined` -- hence .nullish().
+const clientPongArgsSchema = z.tuple([
+  z.number().nullish(),
+  z.number().nullish(),
+  z.string().nullish(),
+  z.string().nullish(),
+  z.string().nullish(),
+  z.string().nullish(),
+])
 
 let Router
 
@@ -71,7 +149,6 @@ export default Router = {
     } else if (
       [
         'not authorized',
-        'joinLeaveEpoch mismatch',
         'doc updater could not load requested ops',
         'no project_id found on client',
         'cannot join multiple projects',
@@ -121,7 +198,7 @@ export default Router = {
 
     app.post(
       '/project/:project_id/message/:message',
-      bodyParser.json({ limit: '5mb' }),
+      express.json({ limit: '5mb' }),
       HttpApiController.sendMessage
     )
     app.get(
@@ -139,8 +216,6 @@ export default Router = {
       // init client context, we may access it in Router._handleError before
       //  setting any values
       client.ol_context = {}
-      // bail out from joinDoc when a parallel joinDoc or leaveDoc is running
-      client.joinLeaveEpoch = 0
 
       if (client) {
         client.on('error', function (err) {
@@ -299,6 +374,21 @@ export default Router = {
           clientTransport,
           clientSessionId
         ) {
+          try {
+            clientPongArgsSchema.parse([
+              receivedPingId,
+              sentTimestamp,
+              serverTransport,
+              serverSessionId,
+              clientTransport,
+              clientSessionId,
+            ])
+          } catch (error) {
+            // fire-and-forget message, no callback to report back to
+            return Router._handleError(() => {}, error, client, 'clientPong', {
+              validation: 1,
+            })
+          }
           pongId = receivedPingId
           const receivedTimestamp = Date.now()
           if (
@@ -356,6 +446,13 @@ export default Router = {
       client.on('debug', (data, callback) => {
         if (typeof callback !== 'function') {
           return Router._handleInvalidArguments(client, 'debug', arguments)
+        }
+        try {
+          data = debugDataSchema.parse(data)
+        } catch (error) {
+          return Router._handleError(callback, error, client, 'debug', {
+            validation: 1,
+          })
         }
 
         logger.info(
@@ -538,6 +635,17 @@ export default Router = {
               client,
               'clientTracking.updatePosition',
               arguments
+            )
+          }
+          try {
+            cursorDataSchema.parse(cursorData)
+          } catch (error) {
+            return Router._handleError(
+              callback,
+              error,
+              client,
+              'clientTracking.updatePosition',
+              { validation: 1, disconnect: 1 }
             )
           }
 

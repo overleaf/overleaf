@@ -778,7 +778,7 @@ class User {
           url: `/project/${projectId}/doc`,
           json: {
             name,
-            parentFolderId,
+            parent_folder_id: parentFolderId,
           },
         },
         (error, response, body) => {
@@ -976,22 +976,26 @@ class User {
   }
 
   addUserToProject(projectId, user, privileges, callback) {
+    // NOTE: user._id is a string; convert it to an ObjectId so that the
+    // stored refs match production data and reverse queries (e.g.
+    // { collaberator_refs: userId }) find the project.
+    const userId = new ObjectId(user._id)
     let updateOp
     if (privileges === 'readAndWrite') {
-      updateOp = { $addToSet: { collaberator_refs: user._id } }
+      updateOp = { $addToSet: { collaberator_refs: userId } }
     } else if (privileges === 'readOnly') {
-      updateOp = { $addToSet: { readOnly_refs: user._id } }
+      updateOp = { $addToSet: { readOnly_refs: userId } }
     } else if (privileges === 'pendingEditor') {
       updateOp = {
-        $addToSet: { readOnly_refs: user._id, pendingEditor_refs: user._id },
+        $addToSet: { readOnly_refs: userId, pendingEditor_refs: userId },
       }
     } else if (privileges === 'pendingReviewer') {
       updateOp = {
-        $addToSet: { readOnly_refs: user._id, pendingReviewer_refs: user._id },
+        $addToSet: { readOnly_refs: userId, pendingReviewer_refs: userId },
       }
     } else if (privileges === 'review') {
       updateOp = {
-        $addToSet: { reviewer_refs: user._id },
+        $addToSet: { reviewer_refs: userId },
       }
     }
     db.projects.updateOne({ _id: new ObjectId(projectId) }, updateOp, callback)
@@ -1301,11 +1305,46 @@ class User {
       )
     })
   }
+
+  /**
+   * Submit a real application/x-www-form-urlencoded body over the shared
+   * session cookie jar, the way a plain HTML form (no JS) does: the csrf
+   * token only ever travels as a `_csrf` field, never as a header. Bypasses
+   * `this.request`, whose defaults bake in an `x-csrf-token` header once
+   * `getCsrfToken` has run, which a genuine native-form submission never
+   * sends.
+   */
+  submitNativeForm(url, fields, callback) {
+    request.post(
+      { url, jar: this.jar, form: { _csrf: this.csrfToken, ...fields } },
+      callback
+    )
+  }
 }
 
 User.promises = promisifyClass(User, {
-  without: ['setExtraAttributes', 'sessionCookie', 'setSessionCookie'],
+  without: [
+    'setExtraAttributes',
+    'sessionCookie',
+    'setSessionCookie',
+    'submitNativeForm',
+  ],
 })
+
+User.promises.prototype.submitNativeForm = async function (url, fields) {
+  return new Promise((resolve, reject) => {
+    request.post(
+      { url, jar: this.jar, form: { _csrf: this.csrfToken, ...fields } },
+      (err, response, body) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve({ response, body })
+        }
+      }
+    )
+  })
+}
 
 User.promises.prototype.doRequest = async function (method, params) {
   return new Promise((resolve, reject) => {

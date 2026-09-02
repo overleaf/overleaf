@@ -1,5 +1,6 @@
 import { ObjectId } from '../../../app/js/mongodb.js'
 import { expect } from 'chai'
+import { expectValidationErrorRaw } from '@overleaf/validation-tools/testUtils.js'
 
 import * as ChatClient from './helpers/ChatClient.js'
 import * as ChatApp from './helpers/ChatApp.js'
@@ -62,6 +63,26 @@ describe('Getting a thread', async function () {
         nonExistentThreadId
       )
       expect(response.statusCode).to.equal(404)
+    })
+  })
+
+  describe('with a malformed threadId', function () {
+    it('should return a not found error naming the field', async function () {
+      const { response } = await ChatClient.getThread(
+        projectId,
+        'malformed-thread-id'
+      )
+      expectValidationErrorRaw(response, 404, 'threadId')
+    })
+  })
+
+  describe('with a malformed projectId', function () {
+    it('should return a not found error naming the field', async function () {
+      const { response } = await ChatClient.getThread(
+        'malformed-project',
+        threadId
+      )
+      expectValidationErrorRaw(response, 404, 'projectId')
     })
   })
 })

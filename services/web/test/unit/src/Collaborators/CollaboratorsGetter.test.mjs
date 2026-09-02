@@ -1,4 +1,4 @@
-import { vi, expect } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Path from 'node:path'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
@@ -639,6 +639,151 @@ describe('CollaboratorsGetter', function () {
 
         expect(privilegeLevel).to.equal(false)
       })
+    })
+  })
+
+  describe('ProjectAccess access-request helpers', function () {
+    beforeEach(function (ctx) {
+      ctx.requestedAt = new Date()
+      ctx.requesterA = new ObjectId()
+      ctx.requesterB = new ObjectId()
+      ctx.projectWithRequests = {
+        ...ctx.project,
+        owner_ref: ctx.ownerRef,
+        editAccessRequests: [
+          {
+            userId: ctx.requesterA,
+            privilegeLevel: 'readAndWrite',
+            requestedAt: ctx.requestedAt,
+          },
+          {
+            userId: ctx.requesterB,
+            privilegeLevel: 'review',
+            requestedAt: ctx.requestedAt,
+          },
+        ],
+      }
+    })
+
+    it('returns the count of pending requests', function (ctx) {
+      const access = new ctx.CollaboratorsGetter.ProjectAccess(
+        ctx.projectWithRequests
+      )
+      expect(access.accessRequestCount()).to.equal(2)
+    })
+
+    it('treats an empty/missing array as zero requests', function (ctx) {
+      const access = new ctx.CollaboratorsGetter.ProjectAccess({
+        ...ctx.project,
+        owner_ref: ctx.ownerRef,
+      })
+      expect(access.accessRequestCount()).to.equal(0)
+      expect(access.getAccessRequestForUser(ctx.requesterA)).to.be.null
+    })
+
+    it('looks up a single request without firing a user fetch', function (ctx) {
+      const access = new ctx.CollaboratorsGetter.ProjectAccess(
+        ctx.projectWithRequests
+      )
+      const result = access.getAccessRequestForUser(ctx.requesterB)
+      expect(result).to.deep.equal({
+        privilegeLevel: 'review',
+        requestedAt: ctx.requestedAt,
+      })
+      expect(ctx.UserGetter.promises.getUsers).to.not.have.been.called
+    })
+
+    it('returns null when the user has no pending request', function (ctx) {
+      const access = new ctx.CollaboratorsGetter.ProjectAccess(
+        ctx.projectWithRequests
+      )
+      expect(access.getAccessRequestForUser(ctx.nonMemberRef)).to.be.null
+      expect(access.getAccessRequestForUser(null)).to.be.null
+    })
+
+    it('batches user lookups and threads privilege/requestedAt through', async function (ctx) {
+      const userA = {
+        _id: ctx.requesterA,
+        email: 'a@example.com',
+        first_name: 'A',
+        last_name: 'One',
+      }
+      const userB = {
+        _id: ctx.requesterB,
+        email: 'b@example.com',
+        first_name: 'B',
+        last_name: 'Two',
+      }
+      ctx.UserGetter.promises.getUsers.resolves([userA, userB])
+      const access = new ctx.CollaboratorsGetter.ProjectAccess(
+        ctx.projectWithRequests
+      )
+      const loaded = await access.loadAccessRequests()
+      expect(ctx.UserGetter.promises.getUsers).to.have.been.calledOnce
+      expect(loaded).to.have.lengthOf(2)
+      expect(loaded[0]).to.deep.equal({
+        user: userA,
+        privilegeLevel: 'readAndWrite',
+        requestedAt: ctx.requestedAt,
+      })
+      expect(loaded[1]).to.deep.equal({
+        user: userB,
+        privilegeLevel: 'review',
+        requestedAt: ctx.requestedAt,
+      })
+    })
+
+    it('drops requests whose user was deleted in the meantime', async function (ctx) {
+      ctx.UserGetter.promises.getUsers.resolves([
+        {
+          _id: ctx.requesterA,
+          email: 'a@example.com',
+          first_name: 'A',
+          last_name: 'One',
+        },
+      ])
+      const access = new ctx.CollaboratorsGetter.ProjectAccess(
+        ctx.projectWithRequests
+      )
+      const loaded = await access.loadAccessRequests()
+      expect(loaded).to.have.lengthOf(1)
+      expect(loaded[0].privilegeLevel).to.equal('readAndWrite')
+    })
+
+    it('builds the owner view with each requester’s current privilege level', async function (ctx) {
+      const projectForView = {
+        ...ctx.project,
+        owner_ref: ctx.ownerRef,
+        readOnly_refs: [ctx.requesterA],
+        editAccessRequests: [
+          {
+            userId: ctx.requesterA,
+            privilegeLevel: 'readAndWrite',
+            requestedAt: ctx.requestedAt,
+          },
+        ],
+      }
+      ctx.UserGetter.promises.getUsers.resolves([
+        {
+          _id: ctx.requesterA,
+          email: 'a@example.com',
+          first_name: 'A',
+          last_name: 'One',
+        },
+      ])
+      const access = new ctx.CollaboratorsGetter.ProjectAccess(projectForView)
+      const view = await access.loadAccessRequestsView()
+      expect(view).to.deep.equal([
+        {
+          _id: ctx.requesterA,
+          email: 'a@example.com',
+          first_name: 'A',
+          last_name: 'One',
+          privilegeLevel: 'readAndWrite',
+          currentPrivilegeLevel: 'readOnly',
+          requestedAt: ctx.requestedAt,
+        },
+      ])
     })
   })
 })

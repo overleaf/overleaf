@@ -1,5 +1,9 @@
-import { ShareLatexOTShareDoc } from '../../../../../types/share-doc'
+import {
+  HistoryOTShareDoc,
+  ShareLatexOTShareDoc,
+} from '../../../../../types/share-doc'
 import { EventEmitter } from 'events'
+import { StringFileData } from 'overleaf-editor-core'
 
 export const docId = 'test-doc'
 
@@ -60,15 +64,39 @@ class MockShareDoc extends EventEmitter {
   }
 }
 
+class MockHistoryOTShareDoc extends EventEmitter {
+  otType = 'history-ot' as const
+  snapshot: StringFileData
+  submitOp: (op: any[]) => void
+
+  constructor(public text: string) {
+    super()
+    this.snapshot = new StringFileData(text)
+    // Stubbed so tests can assert whether an op was submitted for the open doc
+    // instead of going through the HTTP API.
+    this.submitOp = cy.stub().as('historyOTSubmitOp')
+  }
+
+  getText() {
+    return this.text
+  }
+}
+
 export const mockDoc = (
   content = defaultContent,
-  { rangesOptions = {} } = {}
+  { rangesOptions = {}, historyOT = false } = {}
 ) => {
-  const mockShareJSDoc: ShareLatexOTShareDoc = new MockShareDoc(content)
+  const mockShareJSDoc: ShareLatexOTShareDoc | HistoryOTShareDoc = historyOT
+    ? new MockHistoryOTShareDoc(content)
+    : new MockShareDoc(content)
 
   return {
     doc_id: docId,
-    getType: () => 'sharejs-text-ot',
+    getType: () => (historyOT ? 'history-ot' : 'sharejs-text-ot'),
+    historyOTShareDoc: mockShareJSDoc,
+    // The history-ot CodeMirror extension reads the share doc through
+    // `doc._doc` rather than through `historyOTShareDoc`.
+    doc: historyOT ? { _doc: mockShareJSDoc } : undefined,
     getSnapshot: () => {
       return content
     },
@@ -115,6 +143,6 @@ export const mockDoc = (
     getPendingOp: () => null,
     hasBufferedOps: () => false,
     leaveAndCleanUpPromise: () => false,
-    isHistoryOT: () => false,
+    isHistoryOT: () => historyOT,
   }
 }

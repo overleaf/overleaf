@@ -89,6 +89,10 @@ function parse(body, callback) {
       default: false,
       type: 'boolean',
     })
+    response.png2pdf = _parseAttribute('png2pdf', compile.options.png2pdf, {
+      default: false,
+      type: 'boolean',
+    })
     response.stopOnFirstError = _parseAttribute(
       'stopOnFirstError',
       compile.options.stopOnFirstError,

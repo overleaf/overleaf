@@ -6,9 +6,43 @@ import settings from '@overleaf/settings'
 import CollaboratorsEmailHandler from '../../../app/src/Features/Collaborators/CollaboratorsEmailHandler.mjs'
 import CollaboratorsInviteHelper from '../../../app/src/Features/Collaborators/CollaboratorsInviteHelper.mjs'
 import Features from '../../../app/src/infrastructure/Features.mjs'
+import { db } from '../../../app/src/infrastructure/mongodb.mjs'
+import { CacheFlow } from 'cache-flow'
 import sinon from 'sinon'
 
 let generateTokenSpy
+
+// The reusable sharing-link routes are gated behind the `sharing-updates-new-link`
+// split test. In saas, assignments come from the database, so seed a fully
+// rolled-out "enabled" version. In non-saas, splitTestOverrides in the test
+// settings handle it (see settings.test.defaults.js).
+const enableNewLinkSplitTest = async () => {
+  await db.splittests.updateOne(
+    { name: 'sharing-updates-new-link' },
+    {
+      $set: {
+        versions: [
+          {
+            versionNumber: 1,
+            createdAt: new Date(),
+            active: true,
+            analyticsEnabled: false,
+            phase: 'release',
+            variants: [
+              {
+                name: 'enabled',
+                rolloutPercent: 100,
+                rolloutStripes: [{ start: 0, end: 100 }],
+              },
+            ],
+          },
+        ],
+      },
+    },
+    { upsert: true }
+  )
+  await CacheFlow.reset('split-test')
+}
 
 const createInvite = (sendingUser, projectId, email, callback) => {
   sendingUser.getCsrfToken(err => {
@@ -498,6 +532,112 @@ describe('ProjectInviteTests', function () {
         })
       })
 
+      it('should reject an unrecognized field in the invite request body', function (done) {
+        this.sendingUser.getCsrfToken(err => {
+          if (err) {
+            return done(err)
+          }
+          this.sendingUser.request.post(
+            {
+              uri: `/project/${this.projectId}/invite`,
+              json: {
+                email: this.email,
+                privileges: 'readAndWrite',
+                notARealField: 'nope',
+              },
+            },
+            (err, response) => {
+              if (err) {
+                return done(err)
+              }
+              expect(response.statusCode).to.equal(400)
+              done()
+            }
+          )
+        })
+      })
+
+      it('should reject an invalid invite id when revoking an invite', function (done) {
+        this.sendingUser.getCsrfToken(err => {
+          if (err) {
+            return done(err)
+          }
+          this.sendingUser.request.delete(
+            {
+              uri: `/project/${this.projectId}/invite/not-a-valid-invite-id`,
+            },
+            (err, response) => {
+              if (err) {
+                return done(err)
+              }
+              expect(response.statusCode).to.equal(404)
+              done()
+            }
+          )
+        })
+      })
+
+      it('should reject an invalid invite id when resending an invite', function (done) {
+        this.sendingUser.getCsrfToken(err => {
+          if (err) {
+            return done(err)
+          }
+          this.sendingUser.request.post(
+            {
+              uri: `/project/${this.projectId}/invite/not-a-valid-invite-id/resend`,
+            },
+            (err, response) => {
+              if (err) {
+                return done(err)
+              }
+              expect(response.statusCode).to.equal(404)
+              done()
+            }
+          )
+        })
+      })
+
+      it('should allow the project owner to resend an invite', function (done) {
+        Async.series(
+          [
+            cb => {
+              createInvite(
+                this.sendingUser,
+                this.projectId,
+                this.email,
+                (err, invite) => {
+                  if (err) {
+                    return cb(err)
+                  }
+                  this.invite = invite
+                  cb()
+                }
+              )
+            },
+            cb => {
+              this.sendingUser.getCsrfToken(err => {
+                if (err) {
+                  return cb(err)
+                }
+                this.sendingUser.request.post(
+                  {
+                    uri: `/project/${this.projectId}/invite/${this.invite._id}/resend`,
+                  },
+                  (err, response) => {
+                    if (err) {
+                      return cb(err)
+                    }
+                    expect(response.statusCode).to.equal(201)
+                    cb()
+                  }
+                )
+              })
+            },
+          ],
+          done
+        )
+      })
+
       it('should allow the project owner to create and remove invites', function (done) {
         Async.series(
           [
@@ -801,6 +941,70 @@ describe('ProjectInviteTests', function () {
             done
           )
         })
+
+        it('should reject a malformed project id when viewing the invite', function (done) {
+          const link = this.link.replace(
+            this.projectId,
+            'not-a-valid-project-id'
+          )
+          tryFollowInviteLink(this.user, link, (err, response) => {
+            if (err) {
+              return done(err)
+            }
+            expect(response.statusCode).to.equal(404)
+            done()
+          })
+        })
+
+        it('should accept a genuine native HTML form submission (form-encoded body, no CSRF header)', function (done) {
+          // views/project/invite/show-legacy.pug submits this as a plain
+          // native HTML form (data-ol-regular-form): no JS involved, so
+          // the token only ever travels as a hidden _csrf form field,
+          // never as a header.
+          this.user.getCsrfToken(err => {
+            if (err) {
+              return done(err)
+            }
+            this.user.submitNativeForm(
+              `/project/${this.projectId}/invite/token/${this.invite.token}/accept`,
+              { token: this.invite.token },
+              (err, response) => {
+                if (err) {
+                  return done(err)
+                }
+                expect(response.statusCode).to.equal(302)
+                expect(response.headers.location).to.equal(
+                  `/project/${this.projectId}`
+                )
+                done()
+              }
+            )
+          })
+        })
+
+        it('should still reject an unrecognized field in the body', function (done) {
+          this.user.getCsrfToken(err => {
+            if (err) {
+              return done(err)
+            }
+            this.user.request.post(
+              {
+                uri: `/project/${this.projectId}/invite/token/${this.invite.token}/accept`,
+                json: {
+                  token: this.invite.token,
+                  notARealField: 'nope',
+                },
+              },
+              (err, response) => {
+                if (err) {
+                  return done(err)
+                }
+                expect(response.statusCode).to.equal(400)
+                done()
+              }
+            )
+          })
+        })
       })
     })
 
@@ -947,6 +1151,15 @@ describe('ProjectInviteTests', function () {
   })
 
   describe('sharing link routes', function () {
+    beforeEach(async function () {
+      // In saas, split-test assignments come from the database. In non-saas the
+      // splitTestOverrides in the test settings handle it, and the splittests
+      // collection has no index on `name` (so a seed write hits notablescan).
+      if (Features.hasFeature('saas')) {
+        await enableNewLinkSplitTest()
+      }
+    })
+
     beforeEach(function (done) {
       this.projectName = `sharing-link-test-${Math.random()}`
       createProject(this.sendingUser, this.projectName, (err, projectId) => {
@@ -992,6 +1205,91 @@ describe('ProjectInviteTests', function () {
                 cb()
               }
             )
+          },
+        ],
+        done
+      )
+    })
+
+    it('should reject an unrecognized field when updating a sharing link', function (done) {
+      this.sendingUser.getCsrfToken(err => {
+        if (err) {
+          return done(err)
+        }
+        this.sendingUser.request.post(
+          {
+            uri: `/project/${this.projectId}/sharing-link`,
+            json: {
+              privileges: 'readOnly',
+              notARealField: 'nope',
+            },
+          },
+          (err, response) => {
+            if (err) {
+              return done(err)
+            }
+            expect(response.statusCode).to.equal(400)
+            done()
+          }
+        )
+      })
+    })
+
+    it('should reject a malformed project id when viewing the sharing-link page', function (done) {
+      this.sendingUser.request.get(
+        {
+          uri: '/project/not-a-valid-project-id/share',
+        },
+        (err, response) => {
+          if (err) {
+            return done(err)
+          }
+          expect(response.statusCode).to.equal(404)
+          done()
+        }
+      )
+    })
+
+    it('should reject an unrecognized field when validating a sharing link', function (done) {
+      Async.series(
+        [
+          cb => this.user.login(cb),
+          cb => {
+            updateSharingLink(
+              this.sendingUser,
+              this.projectId,
+              'readOnly',
+              (err, link) => {
+                if (err) {
+                  return cb(err)
+                }
+                this.sharingLink = link
+                cb()
+              }
+            )
+          },
+          cb => {
+            this.user.getCsrfToken(err => {
+              if (err) {
+                return cb(err)
+              }
+              this.user.request.post(
+                {
+                  uri: `/project/${this.projectId}/share/validate`,
+                  json: {
+                    token: this.sharingLink.token,
+                    notARealField: 'nope',
+                  },
+                },
+                (err, response) => {
+                  if (err) {
+                    return cb(err)
+                  }
+                  expect(response.statusCode).to.equal(400)
+                  cb()
+                }
+              )
+            })
           },
         ],
         done
@@ -1144,6 +1442,163 @@ describe('ProjectInviteTests', function () {
         ],
         done
       )
+    })
+
+    describe('anonymous (logged-out) access', function () {
+      beforeEach(function (done) {
+        this.anonymousUser = new User()
+        this.anonymousUser.getCsrfToken(done)
+      })
+
+      it('grants read-only access via a public sharing link, regardless of the link privilege', function (done) {
+        Async.series(
+          [
+            cb => {
+              // An "anyone with the link" editor link should still only grant
+              // anonymous users read-only access.
+              updateSharingLink(
+                this.sendingUser,
+                this.projectId,
+                'readAndWrite',
+                (err, link) => {
+                  if (err) {
+                    return cb(err)
+                  }
+                  this.sharingLink = link
+                  cb()
+                }
+              )
+            },
+            cb => expectNoProjectAccess(this.anonymousUser, this.projectId, cb),
+            cb => {
+              validateSharingLink(
+                this.anonymousUser,
+                this.projectId,
+                this.sharingLink.token,
+                (err, response, body) => {
+                  if (err) {
+                    return cb(err)
+                  }
+                  expect(response.statusCode).to.equal(200)
+                  expect(body.valid).to.equal(true)
+                  expect(body.redirect).to.equal(true)
+                  cb()
+                }
+              )
+            },
+            cb => expectProjectAccess(this.anonymousUser, this.projectId, cb),
+          ],
+          done
+        )
+      })
+
+      it('renders the invite page for a public sharing link', function (done) {
+        Async.series(
+          [
+            cb => {
+              updateSharingLink(
+                this.sendingUser,
+                this.projectId,
+                'readOnly',
+                (err, link) => {
+                  if (err) {
+                    return cb(err)
+                  }
+                  this.sharingLink = link
+                  cb()
+                }
+              )
+            },
+            cb =>
+              expectInvitePage(
+                this.anonymousUser,
+                `${settings.siteUrl}/project/${this.projectId}/share`,
+                cb
+              ),
+          ],
+          done
+        )
+      })
+
+      it('redirects to register when there is no public sharing link', function (done) {
+        tryFollowInviteLink(
+          this.anonymousUser,
+          `${settings.siteUrl}/project/${this.projectId}/share`,
+          (err, response) => {
+            if (err) {
+              return done(err)
+            }
+            expect(response.statusCode).to.equal(302)
+            expect(response.headers.location).to.match(/^\/register/)
+            done()
+          }
+        )
+      })
+
+      it('does not grant access via a group-restricted sharing link', function (done) {
+        if (!Features.hasFeature('saas')) {
+          this.skip()
+        }
+        const subscription = new Subscription({
+          adminId: this.sendingUser._id,
+          memberIds: [this.sendingUser._id],
+          groupPlan: true,
+          planCode: 'group_professional',
+          paymentProvider: { state: 'active' },
+        })
+        Async.series(
+          [
+            cb => subscription.ensureExists(cb),
+            cb => {
+              updateSharingLink(
+                this.sendingUser,
+                this.projectId,
+                'readOnly',
+                { subscriptionId: subscription._id.toString() },
+                (err, link) => {
+                  if (err) {
+                    return cb(err)
+                  }
+                  this.sharingLink = link
+                  cb()
+                }
+              )
+            },
+            cb => {
+              validateSharingLink(
+                this.anonymousUser,
+                this.projectId,
+                this.sharingLink.token,
+                (err, response, body) => {
+                  if (err) {
+                    return cb(err)
+                  }
+                  expect(response.statusCode).to.equal(200)
+                  expect(body.valid).to.equal(false)
+                  cb()
+                }
+              )
+            },
+            cb => expectNoProjectAccess(this.anonymousUser, this.projectId, cb),
+            cb => {
+              // Group-restricted links send logged-out users to register.
+              tryFollowInviteLink(
+                this.anonymousUser,
+                `${settings.siteUrl}/project/${this.projectId}/share`,
+                (err, response) => {
+                  if (err) {
+                    return cb(err)
+                  }
+                  expect(response.statusCode).to.equal(302)
+                  expect(response.headers.location).to.match(/^\/register/)
+                  cb()
+                }
+              )
+            },
+          ],
+          done
+        )
+      })
     })
   })
 })

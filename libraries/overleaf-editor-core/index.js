@@ -2,6 +2,7 @@ const AddCommentOperation = require('./lib/operation/add_comment_operation')
 const Author = require('./lib/author')
 const AuthorList = require('./lib/author_list')
 const Blob = require('./lib/blob')
+const BlobStoreBase = require('./lib/blob_store_base')
 const Change = require('./lib/change')
 const ChangeRequest = require('./lib/change_request')
 const ChangeNote = require('./lib/change_note')
@@ -25,11 +26,38 @@ const Operation = require('./lib/operation')
 const RestoreOrigin = require('./lib/origin/restore_origin')
 const RestoreFileOrigin = require('./lib/origin/restore_file_origin')
 const Origin = require('./lib/origin')
+const { EDITOR_ORIGIN_KIND } = require('./lib/origin')
 const OtClient = require('./lib/ot_client')
+const {
+  HISTORY_FILE_TREE_STAGE,
+  historyIsSourceOfTruth,
+} = require('./lib/ot_migration_stages')
+const {
+  chooseRootDoc,
+  isRootDocCandidate,
+  setMainPathnameOperations,
+} = require('./lib/root_doc')
+const rebaseChanges = require('./lib/rebase')
+const {
+  editorChangeIdentity,
+  editorChangeIdentityOf,
+  isSameEditorChange,
+  isChangeFrom,
+} = require('./lib/change_identity')
 const TextOperation = require('./lib/operation/text_operation')
 const EditOperation = require('./lib/operation/edit_operation')
 const safePathname = require('./lib/safe_pathname')
+const {
+  DOCUMENT_METADATA_KEYS,
+  isDocumentMetadata,
+  hasDocumentMetadataFlag,
+  withDocumentMetadataFlag,
+} = require('./lib/file_metadata')
 const Snapshot = require('./lib/snapshot')
+const {
+  DEFAULT_TEXT_EXTENSIONS,
+  DEFAULT_EDITABLE_FILENAMES,
+} = require('./lib/text_file_defaults')
 const util = require('./lib/util')
 const V2DocVersions = require('./lib/v2_doc_versions')
 const {
@@ -54,12 +82,15 @@ exports.AddCommentOperation = AddCommentOperation
 exports.Author = Author
 exports.AuthorList = AuthorList
 exports.Blob = Blob
+exports.BlobStoreBase = BlobStoreBase
 exports.Change = Change
 exports.ChangeRequest = ChangeRequest
 exports.ChangeNote = ChangeNote
 exports.Chunk = Chunk
 exports.ChunkResponse = ChunkResponse
 exports.Comment = Comment
+exports.DEFAULT_TEXT_EXTENSIONS = DEFAULT_TEXT_EXTENSIONS
+exports.DEFAULT_EDITABLE_FILENAMES = DEFAULT_EDITABLE_FILENAMES
 exports.DeleteCommentOperation = DeleteCommentOperation
 exports.File = File
 exports.FileMap = FileMap
@@ -80,10 +111,25 @@ exports.Operation = Operation
 exports.RestoreOrigin = RestoreOrigin
 exports.RestoreFileOrigin = RestoreFileOrigin
 exports.Origin = Origin
+exports.EDITOR_ORIGIN_KIND = EDITOR_ORIGIN_KIND
 exports.OtClient = OtClient
+exports.HISTORY_FILE_TREE_STAGE = HISTORY_FILE_TREE_STAGE
+exports.historyIsSourceOfTruth = historyIsSourceOfTruth
+exports.chooseRootDoc = chooseRootDoc
+exports.isRootDocCandidate = isRootDocCandidate
+exports.setMainPathnameOperations = setMainPathnameOperations
+exports.rebaseChanges = rebaseChanges
+exports.editorChangeIdentity = editorChangeIdentity
+exports.editorChangeIdentityOf = editorChangeIdentityOf
+exports.isSameEditorChange = isSameEditorChange
+exports.isChangeFrom = isChangeFrom
 exports.TextOperation = TextOperation
 exports.EditOperation = EditOperation
 exports.safePathname = safePathname
+exports.DOCUMENT_METADATA_KEYS = DOCUMENT_METADATA_KEYS
+exports.isDocumentMetadata = isDocumentMetadata
+exports.hasDocumentMetadataFlag = hasDocumentMetadataFlag
+exports.withDocumentMetadataFlag = withDocumentMetadataFlag
 exports.Snapshot = Snapshot
 exports.util = util
 exports.V2DocVersions = V2DocVersions

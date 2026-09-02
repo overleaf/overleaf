@@ -1,4 +1,4 @@
-import { vi, expect } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 
 const SCRIPT_PATH = '../../../../scripts/oauth/notify_expiring_tokens.mjs'

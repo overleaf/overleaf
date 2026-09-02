@@ -20,7 +20,7 @@ const Operation = core.Operation
 const Snapshot = core.Snapshot
 const TextOperation = core.TextOperation
 
-const blobHash = require('../../../../storage').blobHash
+const { blobHashFromString } = require('overleaf-editor-core/lib/blob_utils')
 
 describe('overleaf ot', function () {
   beforeEach(cleanup.everything)
@@ -236,7 +236,7 @@ describe('overleaf ot', function () {
               testFiles.GRAPH_PNG_HASH
             )
             expect(snapshot.getFile('main.tex').getHash()).to.equal(
-              blobHash.fromString('hello')
+              blobHashFromString('hello')
             )
             return projectId
           })
@@ -283,7 +283,7 @@ describe('overleaf ot', function () {
             const snapshot = Snapshot.fromRaw(response.obj)
             expect(snapshot.countFiles()).to.equal(3)
             expect(snapshot.getFile('main.tex').getHash()).to.equal(
-              blobHash.fromString('hi world')
+              blobHashFromString('hi world')
             )
             return projectId
           })
@@ -321,7 +321,7 @@ describe('overleaf ot', function () {
             const snapshot = Snapshot.fromRaw(response.obj)
             expect(snapshot.countFiles()).to.equal(3)
             expect(snapshot.getFile('intro.tex').getHash()).to.equal(
-              blobHash.fromString('hi world')
+              blobHashFromString('hi world')
             )
             return projectId
           })

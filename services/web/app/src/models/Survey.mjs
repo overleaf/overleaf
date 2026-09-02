@@ -74,6 +74,14 @@ export const SurveySchema = new Schema(
         type: Boolean,
         default: false,
       },
+      requireBetaParticipation: {
+        type: Boolean,
+        default: false,
+      },
+      excludeBetaUsers: {
+        type: Boolean,
+        default: false,
+      },
     },
   },
   {

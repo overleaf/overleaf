@@ -48,6 +48,8 @@ import { toolbarPanel } from './toolbar/toolbar-panel'
 import { breadcrumbPanel } from './breadcrumbs-panel'
 import { geometryChangeEvent } from './geometry-change-event'
 import { docName } from './doc-name'
+import { filePreview } from './file-preview'
+import { docFolder } from './doc-folder'
 import { fileTreeItemDrop } from './file-tree-item-drop'
 import { mathPreview } from './math-preview'
 import { ranges } from './ranges'
@@ -66,7 +68,7 @@ const moduleExtensions: Array<(options: Record<string, any>) => Extension> =
 
 export const createExtensions = (options: Record<string, any>): Extension[] => [
   lineNumbers(),
-  highlightSpecialChars(options.visual.visual),
+  highlightSpecialChars(options.showVisual),
   // The built-in extension that manages the history stack,
   // configured to increase the maximum delay between adjacent grouped edits
   history({ newGroupDelay: 250 }),
@@ -85,13 +87,13 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   // A built-in extension that enables soft line wrapping.
   EditorView.lineWrapping,
   sourceOnly(
-    options.visual.visual,
+    options.showVisual,
     EditorView.contentAttributes.of({ 'aria-label': 'Source Editor editing' })
   ),
   // A built-in extension that re-indents input if the language defines an indentOnInput field in its language data.
   indentOnInput(),
-  lineWrappingIndentation(options.visual.visual),
-  indentationMarkers(options.visual.visual),
+  lineWrappingIndentation(options.showVisual),
+  indentationMarkers(options.showVisual),
   bracketMatching(),
   bracketSelection(),
   // A built-in extension that enables rectangular selections, created by dragging a new selection while holding down Alt.
@@ -133,6 +135,8 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   keybindings(),
 
   docName(options.docName),
+  filePreview(options.previewByPath),
+  docFolder(options.currentDocFolder),
 
   // NOTE: `annotations` needs to be before `language`
   annotations(),
@@ -141,7 +145,7 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   theme(options.theme),
   realtime(options.currentDoc, options.handleError),
   cursorPosition(options.currentDoc),
-  scrollPosition(options.currentDoc, options.visual),
+  scrollPosition(options.currentDoc, options.showVisual),
   cursorHighlights(),
   autoPair(options.settings),
   editable(),
@@ -157,20 +161,17 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
     ? historyOT(options.currentDoc.currentDocument)
     : ranges(),
   trackDetachedComments(options.currentDoc),
-  visual(options.docName, options.visual),
+  visual(options.docName, options.showVisual),
   mathPreview(options.settings.mathPreview),
-  reviewTooltip(
-    options.settings.floatingMenu,
-    options.editorContextMenuEnabled
-  ),
-  contextMenu(options.editorContextMenuEnabled),
+  reviewTooltip(options.settings.floatingMenu),
+  contextMenu(),
   toolbarPanel(),
   breadcrumbPanel(),
   verticalOverflow(),
-  highlightActiveLine(options.visual.visual),
+  highlightActiveLine(options.showVisual),
   // The built-in extension that highlights the active line in the gutter.
   highlightActiveLineGutter(),
-  inlineBackground(options.visual.visual),
+  inlineBackground(options.showVisual),
   codemirrorDevTools(),
   // Send exceptions to Sentry
   EditorView.exceptionSink.of(options.handleException),

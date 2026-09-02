@@ -53,18 +53,19 @@
 
   @include light-notification;
 
-  // Until we roll out dark mode notifications, make sure we show buttons in
-  // light mode even when the rest of the page is in dark mode
-  .ide-redesign-main .notification .btn {
-    @include light-buttons;
-  }
-
   @include theme('default') {
     --notification-ai-paywall-background: var(--bg-dark-secondary);
     --notification-ai-paywall-color: var(--content-primary-dark);
     --notification-ai-paywall-border-color: var(--blue-30);
 
-    .project-ds-nav-page {
+    // Until we roll out dark mode notifications, make sure we show buttons in
+    // light mode even when the rest of the page is in dark mode
+    .notification .btn {
+      @include light-buttons;
+    }
+
+    .project-ds-nav-page,
+    .modal-themed {
       .notification {
         @include dark-notification;
         @include dark-bg;

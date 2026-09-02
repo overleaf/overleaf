@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
 import {
+  listProjectAccessRequests,
   listProjectInvites,
   listProjectMembers,
 } from '@/features/share-project-modal/utils/api'
@@ -76,7 +77,11 @@ function useSocketListeners() {
     socket,
     'project:membership:changed',
     useCallback(
-      (data: { members?: boolean; invites?: boolean }) => {
+      (data: {
+        members?: boolean
+        invites?: boolean
+        accessRequests?: boolean
+      }) => {
         if (data.members) {
           listProjectMembers(projectId)
             .then(({ members }) => {
@@ -86,6 +91,21 @@ function useSocketListeners() {
             })
             .catch(err => {
               debugConsole.error('Error fetching members for project', err)
+            })
+        }
+
+        // Access requests are admin-only, so only the owner refetches them;
+        // a requester's own `myAccessRequest` comes from the editor bootstrap.
+        if (data.accessRequests && permissionsLevel === 'owner') {
+          listProjectAccessRequests(projectId)
+            .then(({ editAccessRequests }) => {
+              updateProject({ editAccessRequests })
+            })
+            .catch(err => {
+              debugConsole.error(
+                'Error fetching access requests for project',
+                err
+              )
             })
         }
 

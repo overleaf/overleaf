@@ -14,6 +14,7 @@
  */
 import settings from '@overleaf/settings'
 import { URL } from 'node:url'
+import { getRawReqInput } from './Validation.mjs'
 
 let RedirectManager
 
@@ -54,7 +55,8 @@ export default RedirectManager = {
         }
 
         if (typeof target.url === 'function') {
-          url = target.url(req.params)
+          // redirects run outside validation; raw access is allowlisted
+          url = target.url(getRawReqInput(req).params)
           if (!url) {
             return next()
           }

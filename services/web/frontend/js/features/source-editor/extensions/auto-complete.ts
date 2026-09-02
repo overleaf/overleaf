@@ -74,6 +74,9 @@ const createAutoComplete = ({ enabled, ...rest }: AutoCompleteOptions) => {
           return `ol-cm-completion-${completion.type}`
         },
         interactionDelay: 0,
+        // Sort "unfiltered" (filter: false) results, e.g. from the library
+        // cite-key source, after normally-scored/fuzzy-matched results
+        unfilteredResultsAtEnd: true,
       }),
       /**
        * A keymap which adds Tab for accepting a completion and Ctrl-Space for opening autocomplete.

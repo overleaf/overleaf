@@ -1,21 +1,20 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-import settings from '@overleaf/settings'
+import { z, parseReq } from '../../infrastructure/Validation.mjs'
 
-import logger from '@overleaf/logger'
+const saveTemplateDataInSessionSchema = z.object({
+  query: z.object({
+    templateName: z.string().optional(),
+  }),
+})
 
 export default {
   saveTemplateDataInSession(req, res, next) {
-    if (req.query.templateName) {
-      req.session.templateData = req.query
+    const { query } = parseReq(req, saveTemplateDataInSessionSchema, {
+      logOnly: true,
+    })
+    if (query.templateName) {
+      // only `templateName` is ever read back out of session.templateData
+      // (see UserPagesController.registerPage) — store just that field
+      req.session.templateData = { templateName: query.templateName }
     }
     return next()
   },

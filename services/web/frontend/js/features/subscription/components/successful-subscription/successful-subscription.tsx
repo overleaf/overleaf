@@ -6,7 +6,7 @@ import { useSubscriptionDashboardContext } from '../../context/subscription-dash
 import OLRow from '@/shared/components/ol/ol-row'
 import OLCol from '@/shared/components/ol/ol-col'
 import OLPageContentCard from '@/shared/components/ol/ol-page-content-card'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import {
   AI_ADD_ON_CODE,
   ADD_ON_NAME,
@@ -15,6 +15,7 @@ import {
 import { PaidSubscription } from '../../../../../../types/subscription/dashboard/subscription'
 import { useBroadcastUser } from '@/shared/hooks/user-channel/use-broadcast-user'
 import { getUpgradePlanDisplayName } from '../../util/plan-display-names'
+import { formatPaymentDateTime } from '../../util/payment-dates'
 
 function SuccessfulSubscription() {
   const { t } = useTranslation()
@@ -44,37 +45,40 @@ function SuccessfulSubscription() {
         <OLCol lg={{ span: 8, offset: 2 }}>
           <OLPageContentCard>
             <h2>{t('thanks_for_subscribing')}</h2>
-            <OLNotification
-              type="success"
-              content={
-                <>
-                  {subscription.payment.trialEndsAt && (
-                    <>
-                      <p>
-                        <Trans
-                          i18nKey="next_payment_of_x_collectected_on_y"
-                          values={{
-                            paymentAmmount: subscription.payment.displayPrice,
-                            collectionDate:
-                              subscription.payment.nextPaymentDueAt,
-                          }}
-                          shouldUnescape
-                          tOptions={{ interpolation: { escapeValue: true } }}
-                          components={[<strong />, <strong />]} // eslint-disable-line react/jsx-key
-                        />
-                      </p>
-                      <PriceExceptions subscription={subscription} />
-                    </>
-                  )}
-                  <div className="d-flex justify-content-between align-items-center gap-3">
-                    <span>{t('to_modify_your_subscription_go_to')}</span>
-                    <a href="/user/subscription" rel="noopener noreferrer">
-                      {t('manage_subscription')}
-                    </a>
-                  </div>
-                </>
-              }
-            />
+            <div className="notification-list">
+              <Notification
+                type="success"
+                content={
+                  <>
+                    {subscription.payment.trialEndsAt && (
+                      <>
+                        <p>
+                          <Trans
+                            i18nKey="next_payment_of_x_collectected_on_y"
+                            values={{
+                              paymentAmmount: subscription.payment.displayPrice,
+                              collectionDate: formatPaymentDateTime(
+                                subscription.payment.periodEnd
+                              ),
+                            }}
+                            shouldUnescape
+                            tOptions={{ interpolation: { escapeValue: true } }}
+                            components={[<strong />, <strong />]} // eslint-disable-line react/jsx-key
+                          />
+                        </p>
+                        <PriceExceptions subscription={subscription} />
+                      </>
+                    )}
+                    <div className="d-flex justify-content-between align-items-center gap-3">
+                      <span>{t('to_modify_your_subscription_go_to')}</span>
+                      <a href="/user/subscription" rel="noopener noreferrer">
+                        {t('manage_subscription')}
+                      </a>
+                    </div>
+                  </>
+                }
+              />
+            </div>
             {subscription.groupPlan && (
               <p>
                 <a
@@ -155,23 +159,27 @@ function UpgradeSuccess({
         <OLCol lg={{ span: 8, offset: 2 }}>
           <OLPageContentCard>
             <h2>{t('welcome_to_plan', { planName: planDisplayName })}</h2>
-            <OLNotification
-              type="success"
-              content={
-                <div className="d-flex justify-content-between align-items-center gap-3">
-                  <span>{t('youve_upgraded_your_subscription')}</span>
-                  <a href="/user/subscription" rel="noopener noreferrer">
-                    {t('manage_subscription')}
-                  </a>
-                </div>
-              }
-            />
+            <div className="notification-list">
+              <Notification
+                type="success"
+                content={
+                  <div className="d-flex justify-content-between align-items-center gap-3">
+                    <span>{t('youve_upgraded_your_subscription')}</span>
+                    <a href="/user/subscription" rel="noopener noreferrer">
+                      {t('manage_subscription')}
+                    </a>
+                  </div>
+                }
+              />
+            </div>
             <p>
               <Trans
                 i18nKey="next_payment_of_x_collectected_on_y"
                 values={{
                   paymentAmmount: subscription.payment.displayPrice,
-                  collectionDate: subscription.payment.nextPaymentDueAt,
+                  collectionDate: formatPaymentDateTime(
+                    subscription.payment.periodEnd
+                  ),
                 }}
                 shouldUnescape
                 tOptions={{ interpolation: { escapeValue: true } }}

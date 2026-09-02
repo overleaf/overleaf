@@ -80,4 +80,19 @@ describe('pdf-to-jpeg conversion', function () {
       expect(response.status).to.equal(400)
     })
   })
+
+  describe('with a compileBackendClass query param', function () {
+    it('returns 200', async function () {
+      // v1's CLSI::PdfToJpeg always appends this (Rails.application.config
+      // .conversion_compile_backend_class); clsi-lb already used it to
+      // route to the right backend pool, so this instance's handler
+      // doesn't need to read it again.
+      const response = await Client.convertPdfToJpeg(
+        FIXTURE_PDF,
+        'thumbnail',
+        'free'
+      )
+      expect(response.status).to.equal(200)
+    })
+  })
 })

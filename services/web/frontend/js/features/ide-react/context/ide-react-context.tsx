@@ -16,7 +16,6 @@ import {
 import { JoinProjectPayload } from '@/features/ide-react/connection/join-project-payload'
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
 import { postJSON } from '@/infrastructure/fetch-json'
-import { ReactScopeEventEmitter } from '@/features/ide-react/scope-event-emitter/react-scope-event-emitter'
 import getMeta from '@/utils/meta'
 import { type PermissionsLevel } from '@/features/ide-react/types/permissions'
 import { useProjectContext } from '@/shared/context/project-context'
@@ -35,6 +34,7 @@ type IdeReactContextValue = {
   projectJoined: boolean
   permissionsLevel: PermissionsLevel
   setPermissionsLevel: (permissionsLevel: PermissionsLevel) => void
+  outOfSync: boolean
   setOutOfSync: (value: boolean) => void
 }
 
@@ -48,9 +48,6 @@ export const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const [permissionsLevel, setPermissionsLevel] =
     useState<PermissionsLevel>('readOnly')
   const [outOfSync, setOutOfSync] = useState(false)
-  const [scopeEventEmitter] = useState(
-    () => new ReactScopeEventEmitter(eventEmitter)
-  )
   const [unstableStore] = useState(() => {
     const store = new ReactScopeValueStore()
     // Add dummy editor.ready key for Writefull, that relies on this calling
@@ -106,12 +103,18 @@ export const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
     function handleJoinProjectResponse({
       project: {
         rootDoc_id: rootDocId,
+        mainBibliographyDoc_id: mainBibliographyDocId,
         publicAccesLevel: publicAccessLevel,
         ..._project
       },
       permissionsLevel,
     }: JoinProjectPayload) {
-      const project = { ..._project, rootDocId, publicAccessLevel }
+      const project = {
+        ..._project,
+        rootDocId,
+        mainBibliographyDocId,
+        publicAccessLevel,
+      }
 
       // Cast the project from the payload as ProjectMetadata to ensure it has
       // the correct type for the context. It must be close enough because the
@@ -147,6 +150,7 @@ export const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
       setStartedFreeTrial,
       permissionsLevel: outOfSync ? 'readOnly' : permissionsLevel,
       setPermissionsLevel,
+      outOfSync,
       setOutOfSync,
       projectId,
       reportError,
@@ -165,11 +169,7 @@ export const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
 
   return (
     <IdeReactContext.Provider value={value}>
-      <IdeProvider
-        ide={ide}
-        scopeEventEmitter={scopeEventEmitter}
-        unstableStore={unstableStore}
-      >
+      <IdeProvider ide={ide} unstableStore={unstableStore}>
         {children}
       </IdeProvider>
     </IdeReactContext.Provider>

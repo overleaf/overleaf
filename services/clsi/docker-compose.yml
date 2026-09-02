@@ -10,20 +10,23 @@ services:
       target: base
     volumes:
       - .:/overleaf/services/clsi
-      - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
       - ../../package.json:/overleaf/package.json
       - ../../.yarnrc.yml:/overleaf/.yarnrc.yml
       - ../../yarn.lock:/overleaf/yarn.lock
       - ../../.yarn:/overleaf/.yarn
+      - ../../.pnp.cjs:/overleaf/.pnp.cjs
+      - ../../.pnp.loader.mjs:/overleaf/.pnp.loader.mjs
+      - ../../.pnp.register.mjs:/overleaf/.pnp.register.mjs
       - ../../tsconfig.backend.json:/overleaf/tsconfig.backend.json
     working_dir: /overleaf/services/clsi
     environment:
-      MOCHA_GREP: ${MOCHA_GREP}
+      TEST_NAME_PATTERN: ${TEST_NAME_PATTERN}
       LOG_LEVEL: ${LOG_LEVEL:-}
       MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       NODE_ENV: test
-      NODE_OPTIONS: "--unhandled-rejections=strict"
+      NODE_OPTIONS: "--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --unhandled-rejections=strict"
+      REQ_VALIDATION_MODE: enforce
     command: yarn run --silent test:unit
 
   test_acceptance:
@@ -33,35 +36,42 @@ services:
       target: base
     volumes:
       - .:/overleaf/services/clsi
-      - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
       - ../../package.json:/overleaf/package.json
       - ../../.yarnrc.yml:/overleaf/.yarnrc.yml
       - ../../yarn.lock:/overleaf/yarn.lock
       - ../../.yarn:/overleaf/.yarn
+      - ../../.pnp.cjs:/overleaf/.pnp.cjs
+      - ../../.pnp.loader.mjs:/overleaf/.pnp.loader.mjs
+      - ../../.pnp.register.mjs:/overleaf/.pnp.register.mjs
       - /var/run/docker.sock:/var/run/docker.sock
     working_dir: /overleaf/services/clsi
     environment:
       RETRIES:
       MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       POSTGRES_HOST: postgres
-      MOCHA_GREP: ${MOCHA_GREP}
+      TEST_NAME_PATTERN: ${TEST_NAME_PATTERN}
       LOG_LEVEL: ${LOG_LEVEL:-}
       NODE_ENV: test
-      NODE_OPTIONS: "--unhandled-rejections=strict"
+      NODE_OPTIONS: "--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --unhandled-rejections=strict"
       DOWNLOAD_HOST: http://clsi-nginx:8080
-      ALLOWED_COMPILE_GROUPS: clsi-perf simple-latex-file
+      ALLOWED_COMPILE_GROUPS: alpha priority
       ENABLE_PDF_CACHING: true
       PDF_CACHING_ENABLE_WORKER_POOL: true
-      ALLOWED_IMAGES: quay.io/sharelatex/texlive-full:2017.1 quay.io/sharelatex/texlive-full:2025.1 quay.io/sharelatex/pandoc:3.9 quay.io/sharelatex/pdftocairo:24.02
-      TEXLIVE_IMAGE: quay.io/sharelatex/texlive-full:2025.1
+      ALLOWED_IMAGES: quay.io/sharelatex/texlive-full:2017.1 quay.io/sharelatex/texlive-full:2026.1 quay.io/sharelatex/pandoc:3.9 quay.io/sharelatex/pdftocairo:24.02 quay.io/sharelatex/png2pdf:2026-06-24
+      TEXLIVE_IMAGE: quay.io/sharelatex/texlive-full:2026.1
       TEX_LIVE_IMAGE_NAME_OVERRIDE: us-east1-docker.pkg.dev/overleaf-ops/ol-docker
       TEXLIVE_IMAGE_USER: tex
       SANDBOXED_COMPILES: true
       SANDBOXED_COMPILES_HOST_DIR_COMPILES: $PWD/compiles
       SANDBOXED_COMPILES_HOST_DIR_OUTPUT: $PWD/output
+      SANDBOXED_COMPILES_HOST_DIR_CACHE: $PWD/cache
       ENABLE_PANDOC_CONVERSIONS: true
       ENABLE_PDF_CONVERSIONS: true
+      ENABLE_PNG2PDF_CONVERSIONS: true
+      PNG2PDF_IMAGE: quay.io/sharelatex/png2pdf:2026-06-24
+      REQ_LOCKDOWN_MODE: throw
+      REQ_VALIDATION_MODE: enforce
     depends_on:
       clsi-nginx:
         condition: service_started

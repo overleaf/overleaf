@@ -8,6 +8,7 @@ import {
   OLModalHeader,
   OLModalTitle,
 } from '@/shared/components/ol/ol-modal'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 const ReviewPanelDeleteCommentModal: FC<{
   onHide: () => void
@@ -16,9 +17,10 @@ const ReviewPanelDeleteCommentModal: FC<{
   message: string
 }> = ({ onHide, onDelete, title, message }) => {
   const { t } = useTranslation()
+  const themed = useFeatureFlag('themed-modals')
 
   return (
-    <OLModal show onHide={onHide}>
+    <OLModal show onHide={onHide} themed={themed}>
       <OLModalHeader>
         <OLModalTitle>{title}</OLModalTitle>
       </OLModalHeader>

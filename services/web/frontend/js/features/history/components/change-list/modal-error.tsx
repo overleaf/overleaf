@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 
 // Using this workaround due to inconsistent and improper error responses from the server
 type ModalErrorProps = {
@@ -16,20 +16,24 @@ function ModalError({ error }: ModalErrorProps) {
 
   if (error.response?.status === 400 && error.data?.message) {
     return (
-      <OLNotification
-        type="error"
-        content={error.data.message}
-        className="row-spaced-small"
-      />
+      <div className="notification-list">
+        <Notification
+          type="error"
+          content={error.data.message}
+          className="row-spaced-small"
+        />
+      </div>
     )
   }
 
   return (
-    <OLNotification
-      type="error"
-      content={t('generic_something_went_wrong')}
-      className="row-spaced-small"
-    />
+    <div className="notification-list">
+      <Notification
+        type="error"
+        content={t('generic_something_went_wrong')}
+        className="row-spaced-small"
+      />
+    </div>
   )
 }
 

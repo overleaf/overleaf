@@ -1,5 +1,6 @@
 import mongodb from 'mongodb-legacy'
 import { expect } from 'chai'
+import { expectValidationError } from '@overleaf/validation-tools/testUtils.js'
 import DocstoreApp from './helpers/DocstoreApp.js'
 import DocstoreClient from './helpers/DocstoreClient.js'
 
@@ -16,7 +17,7 @@ describe('Getting a doc', function () {
         {
           id: new ObjectId().toString(),
           op: { i: 'foo', p: 3 },
-          meta: {
+          metadata: {
             user_id: new ObjectId().toString(),
             ts: new Date().toJSON(),
           },
@@ -64,6 +65,47 @@ describe('Getting a doc', function () {
       await expect(DocstoreClient.getDoc(this.project_id, missingDocId))
         .to.eventually.be.rejected.and.have.property('info')
         .to.contain({ status: 404 })
+    })
+  })
+
+  describe('when the doc id is not a valid ObjectId', function () {
+    it('should return a 404', async function () {
+      let err
+      try {
+        await DocstoreClient.getDoc(this.project_id, 'not-an-object-id')
+        expect.fail('should have thrown')
+      } catch (error) {
+        err = error
+      }
+      expectValidationError(err, 404, 'doc_id')
+    })
+  })
+
+  describe('when the project id is not a valid ObjectId', function () {
+    it('should return a 404', async function () {
+      let err
+      try {
+        await DocstoreClient.getDoc('not-an-object-id', this.doc_id)
+        expect.fail('should have thrown')
+      } catch (error) {
+        err = error
+      }
+      expectValidationError(err, 404, 'project_id')
+    })
+  })
+
+  describe('when the include_deleted query value is invalid', function () {
+    it('should return a 400', async function () {
+      let err
+      try {
+        await DocstoreClient.getDoc(this.project_id, this.doc_id, {
+          include_deleted: 'banana',
+        })
+        expect.fail('should have thrown')
+      } catch (error) {
+        err = error
+      }
+      expectValidationError(err, 400, 'include_deleted')
     })
   })
 

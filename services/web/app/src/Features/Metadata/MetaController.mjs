@@ -5,9 +5,17 @@ import logger from '@overleaf/logger'
 import { expressify } from '@overleaf/promise-utils'
 import Analytics from '../Analytics/AnalyticsManager.mjs'
 import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
+import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
+
+const getMetadataSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+  }),
+})
 
 async function getMetadata(req, res) {
-  const { project_id: projectId } = req.params
+  const { params } = parseReq(req, getMetadataSchema, { logOnly: true })
+  const { project_id: projectId } = params
 
   logger.debug({ projectId }, 'getting all labels for project')
 
@@ -55,10 +63,22 @@ function sendAnalyticsEventForPackageUsage(projectId, projectMeta) {
   Analytics.emitPackageUsage(projectId, { documentClasses, packages })
 }
 
+const broadcastMetadataForDocSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+    doc_id: zz.objectId(),
+  }),
+  body: z.strictObject({
+    broadcast: z.boolean().optional(),
+  }),
+})
+
 async function broadcastMetadataForDoc(req, res) {
-  const { project_id: projectId } = req.params
-  const { doc_id: docId } = req.params
-  const { broadcast } = req.body
+  const { params, body } = parseReq(req, broadcastMetadataForDocSchema, {
+    logOnly: true,
+  })
+  const { project_id: projectId, doc_id: docId } = params
+  const { broadcast } = body
 
   logger.debug({ projectId, docId, broadcast }, 'getting labels for doc')
 

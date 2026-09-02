@@ -10,9 +10,11 @@ import {
   OLModalHeader,
   OLModalTitle,
 } from '@/shared/components/ol/ol-modal'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export default function FileTreeModalCreateFile() {
   const { t } = useTranslation()
+  const themed = useFeatureFlag('themed-modals')
 
   const { isCreatingFile, cancel } = useFileTreeActionable()
 
@@ -22,7 +24,7 @@ export default function FileTreeModalCreateFile() {
 
   return (
     <FileTreeCreateFormProvider>
-      <OLModal size="lg" onHide={cancel} show>
+      <OLModal size="lg" onHide={cancel} show themed={themed}>
         <OLModalHeader>
           <OLModalTitle>{t('add_files')}</OLModalTitle>
         </OLModalHeader>

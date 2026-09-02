@@ -102,7 +102,7 @@ export const useToolbarMenuBarEditorCommands = () => {
       {
         id: 'insert-inline-math',
         menuLabel: t('inline_math'),
-        label: t('insert_inline_math'),
+        label: t('inline_math'),
         handler: () => {
           commands.wrapInInlineMath(view)
           view.focus()
@@ -111,7 +111,7 @@ export const useToolbarMenuBarEditorCommands = () => {
       {
         id: 'insert-display-math',
         menuLabel: t('display_math'),
-        label: t('insert_display_math'),
+        label: t('display_math'),
         handler: () => {
           commands.wrapInDisplayMath(view)
           view.focus()
@@ -119,7 +119,7 @@ export const useToolbarMenuBarEditorCommands = () => {
       },
       {
         menuLabel: t('upload_from_computer'),
-        label: t('insert_figure_from_computer'),
+        label: t('figure_from_computer'),
         id: 'insert-figure-from-computer',
         handler: () => {
           openFigureModal(FigureModalSource.FILE_UPLOAD)
@@ -127,7 +127,7 @@ export const useToolbarMenuBarEditorCommands = () => {
       },
       {
         menuLabel: t('from_project_files'),
-        label: t('insert_figure_from_project_files'),
+        label: t('figure_from_project_files'),
         id: 'insert-figure-from-project-files',
         handler: () => {
           openFigureModal(FigureModalSource.FILE_TREE)
@@ -149,7 +149,7 @@ export const useToolbarMenuBarEditorCommands = () => {
     return [
       {
         menuLabel: t('from_another_project'),
-        label: t('insert_figure_from_another_project'),
+        label: t('figure_from_another_project'),
         id: 'insert-figure-from-another-project',
         handler: () => {
           openFigureModal(FigureModalSource.OTHER_PROJECT)
@@ -179,7 +179,7 @@ export const useToolbarMenuBarEditorCommands = () => {
     return [
       {
         menuLabel: t('from_url'),
-        label: t('insert_figure_from_url'),
+        label: t('figure_from_url'),
         id: 'insert-figure-from-url',
         handler: () => {
           openFigureModal(FigureModalSource.FROM_URL)
@@ -206,8 +206,7 @@ export const useToolbarMenuBarEditorCommands = () => {
     return [
       {
         id: 'insert-table',
-        menuLabel: t('table'),
-        label: t('insert_table'),
+        label: t('table'),
         handler: () => {
           commands.insertTable(view, 3, 3)
           view.focus()
@@ -215,8 +214,7 @@ export const useToolbarMenuBarEditorCommands = () => {
       },
       {
         id: 'insert-citation',
-        menuLabel: t('citation'),
-        label: t('insert_citation'),
+        label: t('citation'),
         handler: () => {
           commands.insertCite(view)
           view.focus()
@@ -224,8 +222,7 @@ export const useToolbarMenuBarEditorCommands = () => {
       },
       {
         id: 'insert-link',
-        menuLabel: t('link'),
-        label: t('insert_link'),
+        label: t('link'),
         handler: () => {
           commands.wrapInHref(view)
           view.focus()
@@ -233,8 +230,7 @@ export const useToolbarMenuBarEditorCommands = () => {
       },
       {
         id: 'insert-cross-reference',
-        menuLabel: t('cross_reference'),
-        label: t('insert_cross_reference'),
+        label: t('cross_reference'),
         handler: () => {
           commands.insertRef(view)
           view.focus()

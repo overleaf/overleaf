@@ -1,4 +1,5 @@
 const Stream = require('node:stream')
+const { setTimeout } = require('node:timers/promises')
 const bunyan = require('bunyan')
 const GCPManager = require('./gcp-manager')
 const Serializers = require('./serializers')
@@ -7,8 +8,22 @@ const {
   GCEMetadataLogLevelChecker,
 } = require('./log-level-checker')
 const { setLogger } = require('@overleaf/fetch-utils')
+const {
+  setLogger: setValidationToolsLogger,
+} = require('@overleaf/validation-tools')
+
+// Delay (ms) before exiting to allow final logs to be flushed.
+const EXIT_DELAY = 500
 
 const LoggingManager = {
+  /**
+   * The serializers registered by addSerializer, kept here rather than only on
+   * the logger so that they survive a later initialize() call. A module that
+   * registers one as it is imported would otherwise lose it, since a service
+   * initializes its logger after its imports have run.
+   */
+  customSerializers: {},
+
   /**
    * @param {string} name - The name of the logger
    */
@@ -27,13 +42,33 @@ const LoggingManager = {
         error: Serializers.err,
         req: Serializers.req,
         res: Serializers.res,
+        ...this.customSerializers,
       },
       streams: options.streams ?? [this._getOutputStreamConfig()],
     })
     this._setupRingBuffer()
     this._setupLogLevelChecker()
     setLogger(this)
+    setValidationToolsLogger(this)
     return this
+  },
+
+  /**
+   * Register a serializer, which decides what gets recorded for a named log
+   * field, e.g. `logger.error({ dropboxResponseError: err }, '...')`. Callers
+   * add their own on top of the ones initialize() sets up, and keep them across
+   * a later initialize(), so registering one as a module is imported works.
+   *
+   * A serializer takes whatever was logged under that field, so it receives an
+   * unknown and narrows it itself, and returns the value to record in its
+   * place, which is only ever JSON encoded.
+   *
+   * @param {string} name - the log field the serializer applies to
+   * @param {(value: unknown) => unknown} serializer
+   */
+  addSerializer(name, serializer) {
+    this.customSerializers[name] = serializer
+    this.logger.serializers[name] = serializer
   },
 
   /**
@@ -94,6 +129,16 @@ const LoggingManager = {
    */
   fatal(attributes, message) {
     this.logger.fatal(attributes, message)
+  },
+
+  /**
+   * Exit after a delay to ensure that log messages are flushed
+   * @param {number} code
+   */
+
+  async exit(code) {
+    await setTimeout(EXIT_DELAY)
+    process.exit(code)
   },
 
   _getOutputStreamConfig() {

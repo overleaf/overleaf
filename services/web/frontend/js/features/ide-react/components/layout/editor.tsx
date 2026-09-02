@@ -11,6 +11,7 @@ import SymbolPalettePane from '@/features/ide-react/components/editor/symbol-pal
 import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
+import { useFeatureFlag } from '@/shared/context/split-test-context.tsx'
 
 const [pythonRunnerModule] = importOverleafModules('pythonRunner') as {
   import: { PythonEditorSplit: FC }
@@ -21,6 +22,8 @@ export const Editor = () => {
     useEditorPropertiesContext()
   const { selectedEntityCount, openEntity } = useFileTreeOpenContext()
   const { currentDocumentId, currentDocument } = useEditorOpenDocContext()
+
+  const drawEnabled = useFeatureFlag('symbol-recognition')
 
   if (!currentDocumentId) {
     return null
@@ -64,7 +67,7 @@ export const Editor = () => {
             <Panel
               id="ide-redesign-panel-symbol-palette"
               order={2}
-              defaultSize={25}
+              defaultSize={drawEnabled ? 50 : 25}
               minSize={10}
               maxSize={50}
             >

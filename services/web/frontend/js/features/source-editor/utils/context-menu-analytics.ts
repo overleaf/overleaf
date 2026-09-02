@@ -10,6 +10,7 @@ export type ContextMenuItemSegmentation =
   | 'give-feedback'
   | 'delete'
   | 'jump-to-location-in-pdf'
+  | 'jump-to-definition'
   | 'suggest-edits'
   | 'back-to-editing'
   | 'comment'

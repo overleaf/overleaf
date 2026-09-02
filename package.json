@@ -1,7 +1,7 @@
 {
   "name": "overleaf",
   "private": true,
-  "packageManager": "yarn@4.14.1",
+  "packageManager": "yarn@4.18.0",
   "devDependencies": {
     "@eslint/compat": "^2.1.0",
     "@eslint/js": "^10.0.1",
@@ -16,7 +16,6 @@
     "@vitest/eslint-plugin": "^1.5.0",
     "eslint": "^10.4.0",
     "eslint-config-prettier": "^10.0.1",
-    "eslint-formatter-unix": "^8.40.0",
     "eslint-plugin-chai-expect": "^4.0.0",
     "eslint-plugin-chai-friendly": "^1.1.0",
     "eslint-plugin-cypress": "^4.1.0",
@@ -26,27 +25,30 @@
     "eslint-plugin-promise": "^7.2.1",
     "eslint-plugin-unicorn": "^56.0.0",
     "globals": "^17.6.0",
+    "js-yaml": "^4.1.1",
     "prettier": "3.7.4",
     "prettier-plugin-groovy": "0.2.1",
     "typescript": "^5.9.3"
   },
   "engines": {
-    "node": ">=20.19.0"
+    "node": ">=24.18.1"
   },
   "resolutions": {
     "@xmldom/xmldom": "0.8.13",
     "argparse/underscore": "1.13.8",
     "east/underscore": "1.13.8",
-    "referer-parser/js-yaml": "^4.1.1",
+    "js-yaml": "^4.3.1",
+    "linkify-it": "^5.0.1",
     "sandboxed-module": "patch:sandboxed-module@npm%3A2.0.4#~/.yarn/patches/sandboxed-module-npm-2.0.4-f8b45aacc9.patch",
     "request/tough-cookie": "5.1.2",
-    "request/form-data": "2.5.5",
+    "request/form-data": "2.5.6",
     "request/qs": "6.15.2",
+    "prettier@npm:3.7.4": "patch:prettier@npm%3A3.7.4#~/.yarn/patches/prettier-npm-3.7.4.patch",
     "@cypress/request/qs": "6.15.2",
     "qs": "6.15.2",
     "@opentelemetry/api": "1.9.0",
     "mocha/serialize-javascript": "7.0.5",
-    "protobufjs": "7.6.3",
+    "protobufjs": "7.6.5",
     "@protobufjs/utf8": "1.1.1",
     "mocha-multi-reporters": "patch:mocha-multi-reporters@npm%3A1.5.1#~/.yarn/patches/mocha-multi-reporters-npm-1.5.1-0a1088aed5.patch",
     "pdfjs-dist": "patch:pdfjs-dist@npm%3A5.1.91#~/.yarn/patches/pdfjs-dist-npm-5.1.91.patch",
@@ -68,16 +70,16 @@
     "react-dom": "18.3.1",
     "i18next-scanner/i18next": "23.16.8",
     "downshift": "9.0.9",
-    "body-parser@npm:1.20.4": "patch:body-parser@npm%3A1.20.4#~/.yarn/patches/body-parser-npm-1.20.4.patch",
+    "body-parser": "patch:body-parser@npm%3A1.20.4#~/.yarn/patches/body-parser-npm-1.20.4-805a6a51d0.patch",
     "cypress-multi-reporters": "patch:cypress-multi-reporters@npm%3A2.0.5#~/.yarn/patches/cypress-multi-reporters-npm-2.0.5.patch",
     "forwarded@npm:0.2.0": "patch:forwarded@npm%3A0.2.0#~/.yarn/patches/forwarded-npm-0.2.0.patch",
-    "multer@npm:2.1.1": "patch:multer@npm%3A2.1.1#~/.yarn/patches/multer-npm-2.1.1.patch",
+    "multer@npm:2.2.0": "patch:multer@npm%3A2.2.0#~/.yarn/patches/multer-npm-2.2.0-4ed181c78f.patch",
     "node-fetch": "patch:node-fetch@npm%3A2.7.0#~/.yarn/patches/node-fetch-npm-2.7.0.patch",
+    "passport-local": "patch:passport-local@npm%3A1.0.0#~/.yarn/patches/passport-local-npm-1.0.0-ed89961a0c.patch",
     "passport-oauth2": "patch:passport-oauth2@npm%3A1.6.1#~/.yarn/patches/passport-oauth2-npm-1.6.1.patch",
     "send": "patch:send@npm%3A0.19.0#~/.yarn/patches/send-npm-0.19.0.patch",
     "serve-static": "1.16.2",
     "recurly": "4.12.0",
-    "mongoose": "8.22.1",
     "pg": "8.7.1",
     "pg-query-stream": "4.7.1",
     "@aws-sdk/client-s3": "3.994.0",
@@ -107,8 +109,7 @@
     "http-status": "1.5.0",
     "knex": "2.4.0",
     "utf-8-validate": "5.0.8",
-    "ws@npm:^8": "8.21.0",
-    "samlp": "7.0.2",
+    "samlp": "patch:samlp@npm%3A7.0.2#~/.yarn/patches/samlp-npm-7.0.2-8295b3cf85.patch",
     "compression": "1.7.4",
     "cookie-parser": "1.4.6",
     "react-cookie": "7.2.0",
@@ -120,12 +121,13 @@
     "cssnano": "7.1.4",
     "mini-css-extract-plugin": "2.7.6",
     "nodemon": "3.0.1",
-    "postcss": "8.5.8",
     "postcss-reporter": "7.0.5",
+    "@uppy/core/nanoid": "5.1.16",
+    "@uppy/dashboard/nanoid": "5.1.16",
+    "@uppy/provider-views/nanoid": "5.1.16",
+    "@uppy/xhr-upload/nanoid": "5.1.16",
     "zod": "4.1.11",
     "zod-validation-error": "4.0.1",
-    "simple-oauth2": "5.0.0",
-    "@types/simple-oauth2": "5.0.7",
     "@phosphor-icons/react": "2.1.7",
     "@slack/webhook": "7.0.2",
     "@stripe/react-stripe-js": "3.9.0",
@@ -133,7 +135,6 @@
     "cache-flow": "1.9.0",
     "focus-trap-react": "11.0.4",
     "jose": "4.15.5",
-    "nodemailer": "8.0.5",
     "on-headers": "1.0.2",
     "pug": "3.0.3",
     "rate-limiter-flexible": "2.4.1",
@@ -151,7 +152,6 @@
     "autoprefixer": "10.4.16",
     "babel-plugin-module-resolver": "5.0.2",
     "backbone": "1.6.0",
-    "dompurify": "3.4.0",
     "eventsource-client": "1.1.4",
     "fake-indexeddb": "6.0.0",
     "formik": "2.2.9",
@@ -179,8 +179,8 @@
     "@babel/plugin-transform-modules-systemjs": "7.29.4",
     "fast-xml-builder": "1.1.7",
     "fast-xml-parser": "5.7.3",
-    "ip-address": "10.1.1",
-    "systeminformation": "5.31.6"
+    "ip-address": "10.3.1",
+    "express": "patch:express@npm%3A4.22.1#~/.yarn/patches/express-npm-4.22.1-0ea5210390.patch"
   },
   "scripts": {
     "format": "prettier --cache --cache-location ./.cache/prettier/.prettier-cache --check",
@@ -191,13 +191,14 @@
     "format:pug:fix": "prettier --cache --cache-location ./.cache/prettier/.prettier-cache --write --check '**/*.pug'",
     "format:jenkins": "prettier --cache --cache-location ./.cache/prettier/.prettier-cache --check '**/Jenkinsfile'",
     "format:jenkins:fix": "prettier --cache --cache-location ./.cache/prettier/.prettier-cache --write --check '**/Jenkinsfile'",
-    "format:monorepo-check": "prettier --cache --cache-location ./.cache/prettier/.prettier-cache --check '**/Jenkinsfile' '**/*.md' '**/docker-compose.yml' '**/docker-compose.*.yml' '.agents/**/*.js' '.agents/**/*.md'",
-    "format:monorepo-check:fix": "prettier --cache --cache-location ./.cache/prettier/.prettier-cache --write --check '**/Jenkinsfile' '**/*.md' '**/docker-compose.yml' '**/docker-compose.*.yml' '.agents/**/*.js' '.agents/**/*.md'",
-    "lint": "eslint --cache --cache-location ./.cache/eslint/ --max-warnings 0 --format unix .",
-    "lint:fix": "eslint --cache --cache-location ./.cache/eslint/ --fix ."
+    "format:monorepo-check": "prettier --cache --cache-location ./.cache/prettier/.prettier-cache --check '**/Jenkinsfile' 'google-ops/packer/jenkins/vm_config/init.groovy.d/*.groovy' '**/*.md' '**/docker-compose.yml' '**/docker-compose.*.yml' '.agents/**/*.js' '.agents/**/*.md' '.github/**/*.md' 'tools/monorepo-check/**/*.mjs' .pnp.register.mjs",
+    "format:monorepo-check:fix": "prettier --cache --cache-location ./.cache/prettier/.prettier-cache --write --check '**/Jenkinsfile' 'google-ops/packer/jenkins/vm_config/init.groovy.d/*.groovy' '**/*.md' '**/docker-compose.yml' '**/docker-compose.*.yml' '.agents/**/*.js' '.agents/**/*.md' '.github/**/*.md' 'tools/monorepo-check/**/*.mjs' .pnp.register.mjs",
+    "lint": "eslint --cache --cache-location ./.cache/eslint/ --max-warnings 0",
+    "lint:fix": "eslint --cache --cache-location ./.cache/eslint/ --fix"
   },
   "workspaces": [
     "jobs/mirror-documentation",
+    "jobs/quay-logging",
     "jobs/wiki-algolia",
     "libraries/*",
     "server-ce/test",
@@ -215,6 +216,7 @@
     "services/history-v1",
     "services/idp",
     "services/latexqc",
+    "services/linked-url-proxy",
     "services/notifications",
     "services/project-history",
     "services/real-time",
@@ -222,9 +224,190 @@
     "services/third-party-datastore",
     "services/third-party-references",
     "services/web",
+    "services/web/scripts/plan-prices",
+    "services/web/scripts/ukamf",
     "tools/dependency-management",
     "tools/npm-overrides-helper",
     "tools/saas-e2e",
     "tools/migrations"
-  ]
+  ],
+  "dependenciesMeta": {
+    "@babel/helper-string-parser@7.27.1": {
+      "unplugged": true
+    },
+    "@babel/helper-validator-identifier@7.28.5": {
+      "unplugged": true
+    },
+    "@babel/parser@7.29.2": {
+      "unplugged": true
+    },
+    "@babel/types@7.29.0": {
+      "unplugged": true
+    },
+    "@prettier/plugin-pug@3.4.2": {
+      "unplugged": true
+    },
+    "acorn@7.4.1": {
+      "unplugged": true
+    },
+    "asap@2.0.6": {
+      "unplugged": true
+    },
+    "assert-never@1.4.0": {
+      "unplugged": true
+    },
+    "async-function@1.0.0": {
+      "unplugged": true
+    },
+    "async-generator-function@1.0.0": {
+      "unplugged": true
+    },
+    "babel-walk@3.0.0-canary-5": {
+      "unplugged": true
+    },
+    "call-bind-apply-helpers@1.0.2": {
+      "unplugged": true
+    },
+    "call-bound@1.0.4": {
+      "unplugged": true
+    },
+    "character-parser@2.2.0": {
+      "unplugged": true
+    },
+    "constantinople@4.0.1": {
+      "unplugged": true
+    },
+    "cypress-multi-reporters@2.0.5": {
+      "unplugged": true
+    },
+    "doctypes@1.1.0": {
+      "unplugged": true
+    },
+    "dunder-proto@1.0.1": {
+      "unplugged": true
+    },
+    "es-define-property@1.0.1": {
+      "unplugged": true
+    },
+    "es-errors@1.3.0": {
+      "unplugged": true
+    },
+    "es-object-atoms@1.1.1": {
+      "unplugged": true
+    },
+    "esmock@2.7.3": {
+      "unplugged": true
+    },
+    "function-bind@1.1.2": {
+      "unplugged": true
+    },
+    "generator-function@2.0.1": {
+      "unplugged": true
+    },
+    "get-intrinsic@1.3.1": {
+      "unplugged": true
+    },
+    "get-proto@1.0.1": {
+      "unplugged": true
+    },
+    "gopd@1.2.0": {
+      "unplugged": true
+    },
+    "has-symbols@1.1.0": {
+      "unplugged": true
+    },
+    "has-tostringtag@1.0.2": {
+      "unplugged": true
+    },
+    "hasown@2.0.2": {
+      "unplugged": true
+    },
+    "is-core-module@2.16.1": {
+      "unplugged": true
+    },
+    "is-expression@4.0.0": {
+      "unplugged": true
+    },
+    "is-promise@2.2.2": {
+      "unplugged": true
+    },
+    "is-regex@1.2.1": {
+      "unplugged": true
+    },
+    "js-stringify@1.0.2": {
+      "unplugged": true
+    },
+    "jstransformer@1.0.0": {
+      "unplugged": true
+    },
+    "math-intrinsics@1.1.0": {
+      "unplugged": true
+    },
+    "object-assign@4.1.1": {
+      "unplugged": true
+    },
+    "path-parse@1.0.7": {
+      "unplugged": true
+    },
+    "prettier@3.7.4": {
+      "unplugged": true
+    },
+    "prettier-plugin-groovy@0.2.1": {
+      "unplugged": true
+    },
+    "promise@7.3.1": {
+      "unplugged": true
+    },
+    "pug@3.0.3": {
+      "unplugged": true
+    },
+    "pug-attrs@3.0.0": {
+      "unplugged": true
+    },
+    "pug-code-gen@3.0.4": {
+      "unplugged": true
+    },
+    "pug-error@2.1.0": {
+      "unplugged": true
+    },
+    "pug-filters@4.0.0": {
+      "unplugged": true
+    },
+    "pug-lexer@5.0.1": {
+      "unplugged": true
+    },
+    "pug-linker@4.0.0": {
+      "unplugged": true
+    },
+    "pug-load@3.0.0": {
+      "unplugged": true
+    },
+    "pug-parser@6.0.0": {
+      "unplugged": true
+    },
+    "pug-runtime@3.0.1": {
+      "unplugged": true
+    },
+    "pug-strip-comments@2.0.0": {
+      "unplugged": true
+    },
+    "pug-walk@2.0.0": {
+      "unplugged": true
+    },
+    "resolve@1.22.12": {
+      "unplugged": true
+    },
+    "supports-preserve-symlinks-flag@1.0.0": {
+      "unplugged": true
+    },
+    "token-stream@1.0.0": {
+      "unplugged": true
+    },
+    "void-elements@3.1.0": {
+      "unplugged": true
+    },
+    "with@7.0.2": {
+      "unplugged": true
+    }
+  }
 }

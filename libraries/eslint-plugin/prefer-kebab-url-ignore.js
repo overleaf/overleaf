@@ -71,6 +71,7 @@ const ignoreWords = {
     'resendManagedUserInvite',
     'salesContactForm',
     'showSupport',
+    'uniExternalCollaboration',
   ]),
   other: new Set([
     'Project',

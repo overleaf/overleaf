@@ -62,12 +62,8 @@ describe('<PdfLogsEntries/>', function () {
     )
   }
 
-  // TODO: Remove the ide-redesign-main wrapper when dark-mode buttons are rolled
-  // out globally.
   const LogsPanel = ({ children }: { children: ReactElement }) => (
-    <div className="ide-redesign-main">
-      <div className="error-logs"> {children}</div>
-    </div>
+    <div className="error-logs"> {children}</div>
   )
 
   const logEntries: LogEntry[] = [

@@ -16,8 +16,11 @@ const {
   BlobStore,
   persistChanges,
   redisBuffer,
-  blobHash,
 } = require('../../../../storage')
+const {
+  blobHashFromStream,
+  blobHashFromString,
+} = require('overleaf-editor-core/lib/blob_utils')
 
 const { expectHttpError } = require('./support/expect_response')
 const testServer = require('./support/test_server')
@@ -439,7 +442,7 @@ describe('project controller', function () {
               blobHashes: ['non-existent-hash'],
             },
           }),
-          HTTPStatus.INTERNAL_SERVER_ERROR
+          HTTPStatus.UNPROCESSABLE_ENTITY
         )
       })
 
@@ -453,7 +456,7 @@ describe('project controller', function () {
 
         for (let i = 0; i < nTextBlobs; i++) {
           const content = `text blob ${i}`
-          const hash = blobHash.fromString(content)
+          const hash = blobHashFromString(content)
           blobHashes.push(hash)
           expectedTextBytes += content.length
           const res = await fetch(
@@ -469,7 +472,7 @@ describe('project controller', function () {
 
         for (let i = 0; i < nBinaryBlobs; i++) {
           const content = Buffer.from([0, i, i + 1, i + 2])
-          const hash = await blobHash.fromStream(
+          const hash = await blobHashFromStream(
             content.length,
             Readable.from(content)
           )

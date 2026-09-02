@@ -12,6 +12,7 @@ import { ChangeToGroupModal } from './change-plan/modals/change-to-group-modal'
 import { CancelAiAddOnModal } from '@/features/subscription/components/dashboard/states/active/change-plan/modals/cancel-ai-add-on-modal'
 import OLButton from '@/shared/components/ol/ol-button'
 import isInFreeTrial from '../../../../util/is-in-free-trial'
+import getSubscriptionEventSegmentation from '../../../../util/subscription-event-segmentation'
 import AddOns from '@/features/subscription/components/dashboard/states/active/add-ons'
 import {
   AI_ADD_ON_CODE,
@@ -30,6 +31,10 @@ import { useLocation } from '@/shared/hooks/use-location'
 import { FlashMessage } from '@/features/subscription/components/dashboard/states/active/flash-message'
 import Notification from '@/shared/components/notification'
 import { PendingPlanChange } from './pending-plan-change'
+import {
+  formatPaymentDate,
+  formatPaymentDateTime,
+} from '../../../../util/payment-dates'
 
 export function ActiveSubscription({
   subscription,
@@ -56,7 +61,9 @@ export function ActiveSubscription({
   if (onStandalonePlan) {
     planName = 'Overleaf Free'
     if (institutionMemberships && institutionMemberships.length > 0) {
-      planName = 'Overleaf Commons'
+      planName = institutionMemberships.some(m => m.writefullCommonsAccount)
+        ? `Overleaf ${t('commons_ai')}`
+        : `Overleaf ${t('commons')}`
     }
     if (memberGroupSubscriptions.length > 0) {
       if (memberGroupSubscriptions.some(s => s.planLevelName === 'Pro')) {
@@ -69,7 +76,13 @@ export function ActiveSubscription({
     planName = subscription.plan.name
   }
 
-  const handlePlanChange = () => setModalIdShown('change-plan')
+  const handlePlanChange = () => {
+    sendMB(
+      'subscription-page-upgrade-button-click',
+      getSubscriptionEventSegmentation(subscription)
+    )
+    setModalIdShown('change-plan')
+  }
 
   const handleCancelClick = (addOnCode: string) => {
     if (
@@ -136,7 +149,7 @@ export function ActiveSubscription({
       <p className="mb-1" data-testid="renews-on">
         <Trans
           i18nKey="renews_on"
-          values={{ date: subscription.payment.nextPaymentDueDate }}
+          values={{ date: formatPaymentDate(subscription.payment.periodEnd) }}
           shouldUnescape
           tOptions={{ interpolation: { escapeValue: true } }}
           components={[<strong />]} // eslint-disable-line react/jsx-key
@@ -196,13 +209,12 @@ export function ActiveSubscription({
       <hr />
       <h2 className="h3 fw-bold">{t('plan')}</h2>
       <h3 className="h5 mt-0 mb-1 fw-bold">{planName}</h3>
-      {isInFreeTrial(subscription.payment.trialEndsAt) &&
-        subscription.payment.trialEndsAtFormatted && (
-          <TrialEnding
-            trialEndsAtFormatted={subscription.payment.trialEndsAtFormatted}
-            className="mb-1"
-          />
-        )}
+      {isInFreeTrial(subscription.payment.trialEndsAt) && (
+        <TrialEnding
+          trialEndsAt={subscription.payment.trialEndsAt}
+          className="mb-1"
+        />
+      )}
       {subscription.payment.totalLicenses > 0 && (
         <p className="mb-1" data-testid="plan-licenses">
           {isLegacyPlan &&
@@ -243,7 +255,9 @@ export function ActiveSubscription({
               i18nKey="your_subscription_will_pause_on"
               values={{
                 planName: subscription.plan.name,
-                pauseDate: subscription.payment.nextPaymentDueAt,
+                pauseDate: formatPaymentDateTime(
+                  subscription.payment.periodEnd
+                ),
                 reactivationDate: getFormattedRenewalDate(),
               }}
               shouldUnescape

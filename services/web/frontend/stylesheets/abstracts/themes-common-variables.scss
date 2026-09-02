@@ -1,6 +1,6 @@
 /* ====== Semantic CSS color variables that adjust depending on the current theme ====== */
 
-:root {
+@mixin dark-themed-variables {
   --bg-primary-themed: var(--bg-dark-primary);
   --bg-secondary-themed: var(--bg-dark-secondary);
   --bg-tertiary-themed: var(--bg-dark-tertiary);
@@ -28,7 +28,7 @@
   --premium-gradient-themed: var(--premium-gradient-dark);
 }
 
-@include theme('light') {
+@mixin light-themed-variables {
   --bg-primary-themed: var(--bg-light-primary);
   --bg-secondary-themed: var(--bg-light-secondary);
   --bg-tertiary-themed: var(--bg-light-tertiary);
@@ -47,7 +47,6 @@
   --border-active-themed: var(--border-active);
   --border-danger-themed: var(--border-danger);
   --border-divider-themed: var(--border-divider);
-  --border-dark-divider-themed: var(--border-dark-divider);
   --link-web-themed: var(--link-web);
   --link-web-hover-themed: var(--link-web-hover);
   --link-web-visited-themed: var(--link-web-visited);
@@ -55,4 +54,12 @@
   --link-ui-hover-themed: var(--link-ui-hover);
   --link-ui-visited-themed: var(--link-ui-visited);
   --premium-gradient-themed: var(--premium-gradient);
+}
+
+:root {
+  @include dark-themed-variables;
+}
+
+@include theme('light') {
+  @include light-themed-variables;
 }

@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { EditorState } from '@codemirror/state'
-import useScopeEventEmitter from '../../../shared/hooks/use-scope-event-emitter'
 import useEventListener from '../../../shared/hooks/use-event-listener'
-import useScopeEventListener from '../../../shared/hooks/use-scope-event-listener'
 import { createExtensions } from '../extensions'
 import { setEditorTheme, setOptionsTheme } from '../extensions/theme'
 import {
@@ -33,7 +31,9 @@ import { setKeybindings } from '../extensions/keybindings'
 import { Highlight } from '../../../../../types/highlight'
 import { EditorView } from '@codemirror/view'
 import { useErrorBoundary } from 'react-error-boundary'
-import { setVisual } from '../extensions/visual/visual'
+import { isVisual, setVisual } from '../extensions/visual/visual'
+import { setFilePreview } from '../extensions/file-preview'
+import { setDocFolder } from '../extensions/doc-folder'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import { setDocName } from '@/features/source-editor/extensions/doc-name'
@@ -62,7 +62,6 @@ import { beforeChangeDocEffect } from '@/features/source-editor/extensions/befor
 import { useActiveOverallTheme } from '@/shared/hooks/use-active-overall-theme'
 import { useEditorSelectionContext } from '@/shared/context/editor-selection-context'
 import { useActiveEditorTheme } from '@/shared/hooks/use-active-editor-theme'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { isCmVisualEditorAvailable } from '../utils/visual-editor'
 import { setEditorTabs } from '../extensions/tabs-listener'
 import { setReviewTooltip } from '../extensions/review-tooltip'
@@ -102,7 +101,6 @@ function useCodeMirrorScope(view: EditorView) {
   const { onlineUserCursorHighlights } = useOnlineUsersContext()
 
   const { project, features: projectFeatures } = useProjectContext()
-  const editorContextMenuEnabled = useFeatureFlag('editor-context-menu')
   let spellCheckLanguage = project?.spellCheckLanguage || ''
   // spell check is off when read-only
   if (!permissions.write && !permissions.trackedWrite) {
@@ -152,10 +150,20 @@ function useCodeMirrorScope(view: EditorView) {
         activeOverallTheme,
       })
     )
-
+    // The editor theme is loaded asynchronously, so if we have another update
+    // fire before it finishes loading, there's a race of which one to apply.
+    // For example the print dialog will quickly change the theme to light,
+    // then back to dark which can result in the late-resolving light theme to
+    // be applied regardless of current active overall theme.
+    let stale = false
     setEditorTheme(editorTheme).then(spec => {
-      view.dispatch(spec)
+      if (!stale) {
+        view.dispatch(spec)
+      }
     })
+    return () => {
+      stale = true
+    }
   }, [view, fontFamily, fontSize, lineHeight, activeOverallTheme, editorTheme])
 
   const settingsRef = useRef({
@@ -219,7 +227,6 @@ function useCodeMirrorScope(view: EditorView) {
   }, [view, spellCheckLanguage, hunspellManager])
 
   const projectFeaturesRef = useRef(projectFeatures)
-  const editorContextMenuEnabledRef = useRef(editorContextMenuEnabled)
 
   // listen to doc:after-opened, and focus the editor if it's not a new doc
   useEffect(() => {
@@ -281,15 +288,22 @@ function useCodeMirrorScope(view: EditorView) {
 
   const editableRef = useRef(permissions.write || permissions.trackedWrite)
 
-  const { previewByPath } = useFileTreePathContext()
+  const { previewByPath, dirname } = useFileTreePathContext()
 
   const showVisual =
     visual && !!openDocName && isCmVisualEditorAvailable(openDocName)
 
-  const visualRef = useRef({
-    previewByPath,
-    visual: showVisual,
-  })
+  const showVisualRef = useRef(showVisual)
+
+  const previewByPathRef = useRef(previewByPath)
+
+  const dirnameRef = useRef(dirname)
+
+  // Kept fresh here, above the state-creation effect, so that effect sees the
+  // new file tree on a simultaneous tree-change + doc-switch.
+  useEffect(() => {
+    dirnameRef.current = dirname
+  }, [dirname])
 
   // Persist the search query in this hook when the document changes by keeping
   // a reference to the search query in sync with the editor state
@@ -303,21 +317,24 @@ function useCodeMirrorScope(view: EditorView) {
 
   const { showBoundary } = useErrorBoundary()
 
-  const handleException = useCallback((exception: any) => {
-    captureException(exception, {
-      tags: {
-        handler: 'cm6-exception',
-        // which editor mode is active ('visual' | 'code')
-        ol_editor_mode: visualRef.current.visual ? 'visual' : 'code',
-        // which editor keybindings are active ('default' | 'vim' | 'emacs')
-        ol_editor_keybindings: settingsRef.current.mode,
-        // whether Writefull is present ('extension' | 'integration' | 'none')
-        ol_extensions_writefull: window.writefull ? 'integration' : 'none',
-        // whether Grammarly is present
-        ol_extensions_grammarly: grammarlyExtensionPresent(),
-      },
-    })
-  }, [])
+  const handleException = useCallback(
+    (exception: any) => {
+      captureException(exception, {
+        tags: {
+          handler: 'cm6-exception',
+          // which editor mode is active ('visual' | 'code')
+          ol_editor_mode: isVisual(view) ? 'visual' : 'code',
+          // which editor keybindings are active ('default' | 'vim' | 'emacs')
+          ol_editor_keybindings: settingsRef.current.mode,
+          // whether Writefull is present ('extension' | 'integration' | 'none')
+          ol_extensions_writefull: window.writefull ? 'integration' : 'none',
+          // whether Grammarly is present
+          ol_extensions_grammarly: grammarlyExtensionPresent(),
+        },
+      })
+    },
+    [view]
+  )
 
   // create a new state when currentDocument changes
 
@@ -345,9 +362,10 @@ function useCodeMirrorScope(view: EditorView) {
           settings: settingsRef.current,
           phrases: phrasesRef.current,
           spelling: spellingRef.current,
-          visual: visualRef.current,
+          showVisual: showVisualRef.current,
+          previewByPath: previewByPathRef.current,
+          currentDocFolder: dirnameRef.current(currentDocument.doc_id),
           projectFeatures: projectFeaturesRef.current,
-          editorContextMenuEnabled: editorContextMenuEnabledRef.current,
           initialSearchQuery: searchQueryRef.current,
           showBoundary,
           handleException,
@@ -372,7 +390,7 @@ function useCodeMirrorScope(view: EditorView) {
         view.dispatch(spec)
       })
 
-      if (!visualRef.current.visual) {
+      if (!showVisualRef.current) {
         window.setTimeout(() => {
           view.dispatch(restoreScrollPosition())
           view.focus()
@@ -401,9 +419,9 @@ function useCodeMirrorScope(view: EditorView) {
   }, [view, openDocName])
 
   useEffect(() => {
-    visualRef.current.visual = showVisual
+    showVisualRef.current = showVisual
     window.setTimeout(() => {
-      view.dispatch(setVisual(visualRef.current))
+      view.dispatch(setVisual(showVisual))
       view.dispatch({
         effects: EditorView.scrollIntoView(view.state.selection.main.head),
       })
@@ -413,11 +431,14 @@ function useCodeMirrorScope(view: EditorView) {
   }, [view, showVisual])
 
   useEffect(() => {
-    visualRef.current.previewByPath = previewByPath
+    previewByPathRef.current = previewByPath
     window.setTimeout(() => {
-      view.dispatch(setVisual(visualRef.current))
+      view.dispatch(
+        setFilePreview(previewByPath),
+        setDocFolder(currentDocument ? dirname(currentDocument.doc_id) : null)
+      )
     })
-  }, [view, previewByPath])
+  }, [view, previewByPath, dirname, currentDocument])
 
   useEffect(() => {
     editableRef.current = permissions.write || permissions.trackedWrite
@@ -487,9 +508,7 @@ function useCodeMirrorScope(view: EditorView) {
   useEffect(() => {
     settingsRef.current.floatingMenu = floatingMenu
     window.setTimeout(() => {
-      view.dispatch(
-        setReviewTooltip(floatingMenu, editorContextMenuEnabledRef.current)
-      )
+      view.dispatch(setReviewTooltip(floatingMenu))
     })
   }, [view, floatingMenu])
 
@@ -504,13 +523,16 @@ function useCodeMirrorScope(view: EditorView) {
     settingsRef.current.referencesSearchMode = referencesSearchMode
   }, [referencesSearchMode])
 
-  const emitSyncToPdf = useScopeEventEmitter('cursor:editor:syncToPdf')
+  const emitSyncToPdf = useCallback(() => {
+    window.dispatchEvent(new CustomEvent('cursor:editor:syncToPdf'))
+  }, [])
 
   // select and scroll to position on editor:gotoLine event (from synctex)
-  useScopeEventListener(
+  useEventListener(
     'editor:gotoLine',
     useCallback(
-      (_event: any, options: GotoLineOptions) => {
+      (event: CustomEvent<GotoLineOptions>) => {
+        const options = event.detail
         setCursorLineAndScroll(
           view,
           options.gotoLine,
@@ -526,41 +548,15 @@ function useCodeMirrorScope(view: EditorView) {
   )
 
   // select and scroll to position on editor:gotoOffset event (from review panel)
-  useScopeEventListener(
+  useEventListener(
     'editor:gotoOffset',
     useCallback(
-      (_event: any, options: GotoOffsetOptions) => {
-        setCursorPositionAndScroll(view, options.gotoOffset)
+      (event: CustomEvent<GotoOffsetOptions>) => {
+        setCursorPositionAndScroll(view, event.detail.gotoOffset)
       },
       [view]
     )
   )
-
-  // dispatch 'cursor:editor:update' to Angular scope (for synctex and realtime)
-  const dispatchCursorUpdate = useScopeEventEmitter('cursor:editor:update')
-
-  const handleCursorUpdate = useCallback(
-    (event: CustomEvent) => {
-      dispatchCursorUpdate(event.detail)
-    },
-    [dispatchCursorUpdate]
-  )
-
-  // listen for 'cursor:editor:update' events from CodeMirror, and dispatch them to Angular
-  useEventListener('cursor:editor:update', handleCursorUpdate)
-
-  // dispatch 'cursor:editor:update' to Angular scope (for outline)
-  const dispatchScrollUpdate = useScopeEventEmitter('scroll:editor:update')
-
-  const handleScrollUpdate = useCallback(
-    (event: CustomEvent) => {
-      dispatchScrollUpdate(event.detail)
-    },
-    [dispatchScrollUpdate]
-  )
-
-  // listen for 'cursor:editor:update' events from CodeMirror, and dispatch them to Angular
-  useEventListener('scroll:editor:update', handleScrollUpdate)
 
   // enable the compile log linter a) when "Code Check" is off, b) when the project hasn't changed and isn't compiling.
   // the project "changed at" date is reset at the start of the compile, i.e. "the project hasn't changed",

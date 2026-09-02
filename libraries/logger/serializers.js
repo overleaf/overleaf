@@ -1,4 +1,5 @@
 const OError = require('@overleaf/o-error')
+const { getRawReqInput } = require('@overleaf/validation-tools')
 
 function errSerializer(err) {
   if (!err) {
@@ -36,11 +37,14 @@ function reqSerializer(req) {
       'content-length': headers['content-length'],
     },
   }
-  if (req.params) {
-    const projectId =
-      req.params.projectId || req.params.project_id || req.params.Project_id
-    const userId = req.params.userId || req.params.user_id
-    const docId = req.params.docId || req.params.doc_id
+  // raw access justified: case 2 (final error-handler logging) — this
+  // serializer must not throw while extracting log context, and bunyan
+  // silently drops the whole `req` field (with a stderr warning) if it did
+  const { params } = getRawReqInput(req)
+  if (params) {
+    const projectId = params.projectId || params.project_id || params.Project_id
+    const userId = params.userId || params.user_id
+    const docId = params.docId || params.doc_id
     if (projectId) {
       entry.projectId = projectId
     }

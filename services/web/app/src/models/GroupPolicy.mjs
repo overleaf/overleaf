@@ -30,6 +30,9 @@ export const GroupPolicySchema = new Schema(
 
     // User can't use the Dropbox feature
     userCannotUseDropbox: Boolean,
+
+    // User can't use the shared workspace feature
+    userCannotUseSharedWorkspace: Boolean,
   },
   { minimize: false }
 )

@@ -14,7 +14,8 @@ async function createLinkedFile(
   linkedFileData,
   name,
   parentFolderId,
-  userId
+  userId,
+  _historySource
 ) {
   logger.info(
     { projectId, userId, url: linkedFileData.url },
@@ -50,14 +51,16 @@ async function refreshLinkedFile(
   linkedFileData,
   name,
   parentFolderId,
-  userId
+  userId,
+  historySource
 ) {
   return await createLinkedFile(
     projectId,
     linkedFileData,
     name,
     parentFolderId,
-    userId
+    userId,
+    historySource
   )
 }
 

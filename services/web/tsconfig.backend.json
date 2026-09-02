@@ -10,6 +10,7 @@
     "modules/*/test/acceptance/**/*",
     "modules/*/test/unit/**/*",
     "scripts/**/*",
+    "shared/**/*",
     "test/acceptance/**/*",
     "test/unit/**/*",
     "types/backend/**/*"

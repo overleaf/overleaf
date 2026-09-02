@@ -37,11 +37,10 @@ type PaymentProviderRecord = {
   additionalLicenses: number
   addOns: PaymentProviderAddOn[]
   totalLicenses: number
-  nextPaymentDueAt: string
-  nextPaymentDueDate: string
+  periodEnd: string
   currency: CurrencyCode
+  planPrice: number
   state?: SubscriptionState
-  trialEndsAtFormatted: Nullable<string>
   trialEndsAt: Nullable<string>
   activeCoupons: PaymentProviderCoupon[]
   accountEmail: string
@@ -102,7 +101,11 @@ export type ManagedGroupSubscription = {
   features: {
     groupSSO: boolean | null
     managedUsers: boolean | null
+    aiToggling?: boolean | null
+    sharedWorkspace?: boolean | null
   }
+  managedUsersEnabled: boolean
+  groupPolicy?: GroupPolicy
   teamName?: string
 }
 

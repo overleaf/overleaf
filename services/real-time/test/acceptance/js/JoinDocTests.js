@@ -89,18 +89,8 @@ describe('joinDoc', function () {
         this.ops,
         this.ranges,
         'sharejs-text-ot',
+        { canSkipLeaveDoc: true },
       ])
-    })
-
-    return it('should have joined the doc room', function (done) {
-      return RealTimeClient.getConnectedClient(
-        this.client.socket.sessionid,
-        (error, client) => {
-          if (error) return done(error)
-          expect(Array.from(client.rooms).includes(this.doc_id)).to.equal(true)
-          return done()
-        }
-      )
     })
   })
 
@@ -169,18 +159,8 @@ describe('joinDoc', function () {
         this.ops,
         this.ranges,
         'sharejs-text-ot',
+        { canSkipLeaveDoc: true },
       ])
-    })
-
-    return it('should have joined the doc room', function (done) {
-      return RealTimeClient.getConnectedClient(
-        this.client.socket.sessionid,
-        (error, client) => {
-          if (error) return done(error)
-          expect(Array.from(client.rooms).includes(this.doc_id)).to.equal(true)
-          return done()
-        }
-      )
     })
   })
 
@@ -249,18 +229,8 @@ describe('joinDoc', function () {
         this.ops,
         this.ranges,
         'sharejs-text-ot',
+        { canSkipLeaveDoc: true },
       ])
-    })
-
-    return it('should have joined the doc room', function (done) {
-      return RealTimeClient.getConnectedClient(
-        this.client.socket.sessionid,
-        (error, client) => {
-          if (error) return done(error)
-          expect(Array.from(client.rooms).includes(this.doc_id)).to.equal(true)
-          return done()
-        }
-      )
     })
   })
 
@@ -328,19 +298,6 @@ describe('joinDoc', function () {
 
     it('should return an invalid id error', function () {
       this.error.message.should.equal('invalid Mongo ObjectId')
-    })
-
-    return it('should not have joined the doc room', function (done) {
-      return RealTimeClient.getConnectedClient(
-        this.client.socket.sessionid,
-        (error, client) => {
-          if (error) return done(error)
-          expect(Array.from(client.rooms).includes('invalid-doc-id')).to.equal(
-            false
-          )
-          return done()
-        }
-      )
     })
   })
 
@@ -411,18 +368,8 @@ describe('joinDoc', function () {
         this.ops,
         this.ranges,
         'sharejs-text-ot',
+        { canSkipLeaveDoc: true },
       ])
-    })
-
-    return it('should have joined the doc room', function (done) {
-      return RealTimeClient.getConnectedClient(
-        this.client.socket.sessionid,
-        (error, client) => {
-          if (error) return done(error)
-          expect(Array.from(client.rooms).includes(this.doc_id)).to.equal(true)
-          return done()
-        }
-      )
     })
   })
 
@@ -493,18 +440,8 @@ describe('joinDoc', function () {
         this.ops,
         this.ranges,
         'sharejs-text-ot',
+        { canSkipLeaveDoc: true },
       ])
-    })
-
-    return it('should have joined the doc room', function (done) {
-      return RealTimeClient.getConnectedClient(
-        this.client.socket.sessionid,
-        (error, client) => {
-          if (error) return done(error)
-          expect(Array.from(client.rooms).includes(this.doc_id)).to.equal(true)
-          return done()
-        }
-      )
     })
   })
 
@@ -577,18 +514,8 @@ describe('joinDoc', function () {
         this.ops,
         this.ranges,
         'sharejs-text-ot',
+        { canSkipLeaveDoc: true },
       ])
-    })
-
-    return it('should have joined the doc room', function (done) {
-      return RealTimeClient.getConnectedClient(
-        this.client.socket.sessionid,
-        (error, client) => {
-          if (error) return done(error)
-          expect(Array.from(client.rooms).includes(this.doc_id)).to.equal(true)
-          return done()
-        }
-      )
     })
   })
 
@@ -664,18 +591,8 @@ describe('joinDoc', function () {
           this.ops,
           this.ranges,
           'history-ot',
+          { canSkipLeaveDoc: true },
         ])
-      })
-
-      it('should have joined the doc room', function (done) {
-        RealTimeClient.getConnectedClient(
-          this.client.socket.sessionid,
-          (error, client) => {
-            if (error) return done(error)
-            expect(client.rooms).to.deep.equal([this.project_id, this.doc_id])
-            done()
-          }
-        )
       })
     })
 
@@ -712,17 +629,6 @@ describe('joinDoc', function () {
 
       it('should not return the doc lines, version, ranges and ops', function () {
         this.returnedArgs.should.deep.equal([])
-      })
-
-      it('should leave the doc room again', function (done) {
-        RealTimeClient.getConnectedClient(
-          this.client.socket.sessionid,
-          (error, client) => {
-            if (error) return done(error)
-            expect(client.rooms).to.deep.equal([this.project_id])
-            done()
-          }
-        )
       })
     })
   })

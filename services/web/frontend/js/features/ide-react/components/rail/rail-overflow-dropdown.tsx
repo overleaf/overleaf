@@ -1,4 +1,4 @@
-import { DropdownMenu } from '@/shared/components/dropdown/dropdown-menu'
+import { OLDropdownMenu } from '@/shared/components/ol/ol-dropdown-menu'
 import { RailTabKey } from '@/features/ide-react/context/rail-context'
 import { RailElement } from '@/features/ide-react/util/rail-types'
 import RailTab from './rail-tab'
@@ -14,7 +14,7 @@ export default function RailOverflowDropdown({
   selectedTab: RailTabKey
 }) {
   return (
-    <DropdownMenu className="ide-rail-overflow-dropdown">
+    <OLDropdownMenu className="ide-rail-overflow-dropdown">
       {tabs
         .filter(shouldIncludeElement)
         .map(({ icon, key, indicator, title, disabled }) => (
@@ -28,6 +28,6 @@ export default function RailOverflowDropdown({
             disabled={disabled}
           />
         ))}
-    </DropdownMenu>
+    </OLDropdownMenu>
   )
 }

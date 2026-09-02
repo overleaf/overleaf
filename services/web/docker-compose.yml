@@ -9,7 +9,9 @@ services:
       target: base
     volumes:
       - .:/overleaf/services/web
-      - ../../node_modules:/overleaf/node_modules
+      - ../../.pnp.cjs:/overleaf/.pnp.cjs
+      - ../../.pnp.loader.mjs:/overleaf/.pnp.loader.mjs
+      - ../../.pnp.register.mjs:/overleaf/.pnp.register.mjs
       - ../../libraries:/overleaf/libraries
       - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
       - ../../tools/migrations:/overleaf/tools/migrations
@@ -27,12 +29,13 @@ services:
       MODULE_NAME:
       JUNIT_ROOT_SUITE_NAME:
       COVERAGE_UNIT_TESTS: ${COVERAGE_UNIT_TESTS:-}
-      MOCHA_GREP: ${MOCHA_GREP:-}
+      TEST_NAME_PATTERN: ${TEST_NAME_PATTERN:-}
       LOG_LEVEL: ${LOG_LEVEL:-}
       NODE_ENV: test
-      NODE_OPTIONS: "--unhandled-rejections=strict"
+      NODE_OPTIONS: "--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --unhandled-rejections=strict"
       REDIS_HOST: redis_test
       MONOREPO:
+      REQ_VALIDATION_MODE: enforce
     entrypoint: /overleaf/bin/shared/wait_for_it mongo:27017 --timeout=60 --
     command: yarn run --silent test:unit:app
     user: node
@@ -47,7 +50,9 @@ services:
       target: base
     volumes:
       - .:/overleaf/services/web
-      - ../../node_modules:/overleaf/node_modules
+      - ../../.pnp.cjs:/overleaf/.pnp.cjs
+      - ../../.pnp.loader.mjs:/overleaf/.pnp.loader.mjs
+      - ../../.pnp.register.mjs:/overleaf/.pnp.register.mjs
       - ../../libraries:/overleaf/libraries
       - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
       - ../../tools/migrations:/overleaf/tools/migrations
@@ -65,10 +70,13 @@ services:
       MODULE_NAME:
       JUNIT_ROOT_SUITE_NAME:
       COVERAGE_ACCEPTANCE_TESTS: ${COVERAGE_ACCEPTANCE_TESTS:-}
-      MOCHA_GREP: ${MOCHA_GREP:-}
+      TEST_NAME_PATTERN: ${TEST_NAME_PATTERN:-}
       LOG_LEVEL: ${LOG_LEVEL:-}
+      REQ_LOCKDOWN_MODE: throw
+      REQ_VALIDATION_MODE: enforce
       MONGO_SERVER_SELECTION_TIMEOUT: 600000
       MONGO_SOCKET_TIMEOUT: 300000
+      NODE_OPTIONS: "--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --unhandled-rejections=strict"
       REDIS_HOST: redis_test
       MONOREPO:
       RETRIES:
@@ -91,7 +99,9 @@ services:
       target: base
     volumes:
       - .:/overleaf/services/web
-      - ../../node_modules:/overleaf/node_modules
+      - ../../.pnp.cjs:/overleaf/.pnp.cjs
+      - ../../.pnp.loader.mjs:/overleaf/.pnp.loader.mjs
+      - ../../.pnp.register.mjs:/overleaf/.pnp.register.mjs
       - ../../libraries:/overleaf/libraries
       - ../../package.json:/overleaf/package.json
       - ../../.yarnrc.yml:/overleaf/.yarnrc.yml
@@ -101,8 +111,8 @@ services:
     environment:
       CI:
       JUNIT_ROOT_SUITE_NAME:
-      MOCHA_GREP: ${MOCHA_GREP}
-      NODE_OPTIONS: "--unhandled-rejections=strict"
+      TEST_NAME_PATTERN: ${TEST_NAME_PATTERN:-}
+      NODE_OPTIONS: "--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --unhandled-rejections=strict"
       VERBOSE_LOGGING:
     command: yarn run --silent test:frontend
     user: node
@@ -113,9 +123,15 @@ services:
       args:
         - USER_UID
         - USER_GID
+    platform: linux/amd64
+    # Keep Chrome's shared memory in RAM, so cypress.config.ts can drop --disable-dev-shm-usage and its write-then-delete churn.
+    shm_size: 1gb
     volumes:
       - .:/overleaf/services/web
-      - ../../node_modules:/overleaf/node_modules
+      - ../../bin/shared:/overleaf/bin/shared:ro
+      - ../../.pnp.cjs:/overleaf/.pnp.cjs
+      - ../../.pnp.loader.mjs:/overleaf/.pnp.loader.mjs
+      - ../../.pnp.register.mjs:/overleaf/.pnp.register.mjs
       - ../../libraries:/overleaf/libraries
       - ../../package.json:/overleaf/package.json
       - ../../.yarnrc.yml:/overleaf/.yarnrc.yml
@@ -128,7 +144,13 @@ services:
       JUNIT_ROOT_SUITE_NAME:
       CYPRESS_SPEC_PATTERN: ${CYPRESS_SPEC_PATTERN:-}
       CYPRESS_EXCLUDE_SPEC_PATTERN: ${CYPRESS_EXCLUDE_SPEC_PATTERN:-}
-    entrypoint: npm
+      NODE_OPTIONS: "--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs"
+      # Must clear ws's 30s closing-handshake timeout during teardown, or a green run exits 1 (#36734).
+      CYPRESS_INTERNAL_TEARDOWN_TIMEOUT: ${CYPRESS_INTERNAL_TEARDOWN_TIMEOUT:-45000}
+      # Cypress's CLI filters teardown errors out of stderr; either of these shows them (#36734).
+      DEBUG:
+      ELECTRON_ENABLE_LOGGING:
+    entrypoint: yarn
     command:
       - "run"
       - "cypress:run-ct"
@@ -140,7 +162,9 @@ services:
       target: base
     volumes:
       - .:/overleaf/services/web
-      - ../../node_modules:/overleaf/node_modules
+      - ../../.pnp.cjs:/overleaf/.pnp.cjs
+      - ../../.pnp.loader.mjs:/overleaf/.pnp.loader.mjs
+      - ../../.pnp.register.mjs:/overleaf/.pnp.register.mjs
       - ../../libraries:/overleaf/libraries
       - ../../package.json:/overleaf/package.json
       - ../../.yarnrc.yml:/overleaf/.yarnrc.yml
@@ -150,7 +174,7 @@ services:
     environment:
       CI:
       JUNIT_ROOT_SUITE_NAME:
-      NODE_OPTIONS: "--unhandled-rejections=strict"
+      NODE_OPTIONS: "--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --unhandled-rejections=strict"
       VERBOSE_LOGGING:
     command: yarn run --silent test:writefull
     user: node

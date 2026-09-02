@@ -1,6 +1,11 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import OError from '@overleaf/o-error'
+import {
+  InvalidParamsError,
+  InvalidRequestError,
+  setReqValidationModeForTests,
+} from '@overleaf/validation-tools'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
 const modulePath = '../../../../app/src/Features/User/UserController.mjs'
 
@@ -42,7 +47,12 @@ describe('UserController', function () {
       },
     }
 
-    ctx.UserDeleter = { promises: { deleteUser: sinon.stub().resolves() } }
+    ctx.UserDeleter = {
+      promises: {
+        deleteUser: sinon.stub().resolves(),
+        expireDeletedUser: sinon.stub().resolves(),
+      },
+    }
 
     ctx.UserGetter = {
       promises: { getUser: sinon.stub().resolves(ctx.user) },
@@ -250,6 +260,10 @@ describe('UserController', function () {
     ctx.callback = sinon.stub()
   })
 
+  afterEach(function () {
+    setReqValidationModeForTests(null)
+  })
+
   describe('tryDeleteUser', function () {
     beforeEach(function (ctx) {
       ctx.req.body.password = 'wat'
@@ -435,6 +449,22 @@ describe('UserController', function () {
         })
       })
     })
+
+    describe('request validation', function () {
+      beforeEach(function () {
+        setReqValidationModeForTests('enforce')
+      })
+
+      it('rejects an unrecognized body field', async function (ctx) {
+        ctx.req.body.extraField = 'nope'
+        await ctx.UserController.tryDeleteUser(
+          ctx.req,
+          ctx.res
+        ).should.be.rejectedWith(InvalidRequestError)
+        expect(ctx.AuthenticationManager.promises.authenticate).to.not.have.been
+          .called
+      })
+    })
   })
 
   describe('updateUserSettings', function () {
@@ -589,6 +619,21 @@ describe('UserController', function () {
           ctx.user.ace.zotero.enabled.should.equal(false)
           ctx.user.ace.zotero.groups.should.deep.equal([{ id: '123' }])
           ctx.user.ace.zotero.disablePersonalLibrary.should.equal(true)
+          resolve()
+        }
+        ctx.UserController.updateUserSettings(ctx.req, ctx.res)
+      })
+    })
+
+    it('should drop the _id from zotero groups', function (ctx) {
+      return new Promise(resolve => {
+        ctx.req.body = {
+          zotero: {
+            groups: [{ _id: 'abc123', id: '123' }],
+          },
+        }
+        ctx.res.sendStatus = code => {
+          ctx.user.ace.zotero.groups.should.deep.equal([{ id: '123' }])
           resolve()
         }
         ctx.UserController.updateUserSettings(ctx.req, ctx.res)
@@ -830,6 +875,29 @@ describe('UserController', function () {
         })
       })
     })
+
+    describe('request validation', function () {
+      it('rejects a non-string first_name', async function (ctx) {
+        ctx.req.body = { first_name: 12345 }
+        await ctx.UserController.updateUserSettings(
+          ctx.req,
+          ctx.res
+        ).should.be.rejectedWith(InvalidRequestError)
+        expect(ctx.user.save).to.not.have.been.called
+      })
+
+      it('tolerates an unrecognized body field via the fallback schema', function (ctx) {
+        setReqValidationModeForTests('log')
+        return new Promise(resolve => {
+          ctx.req.body = { someNewSetting: 'x' }
+          ctx.res.sendStatus = code => {
+            code.should.equal(200)
+            resolve()
+          }
+          ctx.UserController.updateUserSettings(ctx.req, ctx.res)
+        })
+      })
+    })
   })
 
   describe('logout', function () {
@@ -916,6 +984,20 @@ describe('UserController', function () {
           resolve()
         }
         ctx.UserController.logout(ctx.req, ctx.res)
+      })
+    })
+
+    describe('request validation', function () {
+      beforeEach(function () {
+        setReqValidationModeForTests('enforce')
+      })
+
+      it('rejects an unrecognized body field', async function (ctx) {
+        ctx.req.body.extraField = 'nope'
+        await ctx.UserController.logout(
+          ctx.req,
+          ctx.res
+        ).should.be.rejectedWith(InvalidRequestError)
       })
     })
   })
@@ -1244,6 +1326,26 @@ describe('UserController', function () {
         })
       })
     })
+
+    describe('request validation', function () {
+      beforeEach(function () {
+        setReqValidationModeForTests('enforce')
+      })
+
+      it('rejects an unrecognized body field', async function (ctx) {
+        ctx.req.body = {
+          newPassword1: 'newpass',
+          newPassword2: 'newpass',
+          extraField: 'nope',
+        }
+        await ctx.UserController.changePassword(
+          ctx.req,
+          ctx.res
+        ).should.be.rejectedWith(InvalidRequestError)
+        expect(ctx.AuthenticationManager.promises.authenticate).to.not.have.been
+          .called
+      })
+    })
   })
 
   describe('ensureAffiliationMiddleware', function () {
@@ -1454,6 +1556,60 @@ describe('UserController', function () {
 
       it('should return the error', function (ctx) {
         expect(ctx.next).to.be.calledWith(sinon.match.instanceOf(Error))
+      })
+    })
+
+    describe('request validation', function () {
+      beforeEach(function (ctx) {
+        ctx.user.emails = []
+        ctx.Features.hasFeature.withArgs('affiliations').returns(true)
+        ctx.req.query = { ensureAffiliation: true, extraField: 'nope' }
+      })
+
+      it('tolerates an unrecognized query field via the fallback schema', async function (ctx) {
+        setReqValidationModeForTests('log')
+        await ctx.UserController.ensureAffiliationMiddleware(
+          ctx.req,
+          ctx.res,
+          ctx.next
+        )
+        expect(ctx.next).to.have.been.calledWith()
+        expect(ctx.UserGetter.promises.getUser).to.have.been.called
+      })
+    })
+  })
+
+  describe('expireDeletedUser', function () {
+    beforeEach(function (ctx) {
+      ctx.req.params = { userId: '507f191e810c19729de860ea' }
+    })
+
+    it('should expire the deleted user and return 204', function (ctx) {
+      return new Promise(resolve => {
+        ctx.res.sendStatus = code => {
+          expect(code).to.equal(204)
+          expect(
+            ctx.UserDeleter.promises.expireDeletedUser
+          ).to.have.been.calledWith('507f191e810c19729de860ea')
+          resolve()
+        }
+        ctx.UserController.expireDeletedUser(ctx.req, ctx.res, ctx.next)
+      })
+    })
+
+    describe('request validation', function () {
+      beforeEach(function () {
+        setReqValidationModeForTests('enforce')
+      })
+
+      it('rejects a malformed userId', async function (ctx) {
+        ctx.req.params = { userId: 'not-an-object-id' }
+        await ctx.UserController.expireDeletedUser(
+          ctx.req,
+          ctx.res
+        ).should.be.rejectedWith(InvalidParamsError)
+        expect(ctx.UserDeleter.promises.expireDeletedUser).to.not.have.been
+          .called
       })
     })
   })

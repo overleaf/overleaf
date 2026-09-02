@@ -23,6 +23,7 @@ import { CloneProjectTag } from '@/features/clone-project-modal/components/clone
 import { addProjectsToTag } from '@/features/project-list/util/api'
 import { captureException } from '@/infrastructure/error-reporter'
 import { Tag } from '../../../../../../app/src/Features/Tags/types'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 type NewProjectData = {
   project_id: string
@@ -53,6 +54,7 @@ function ModalContentNewProjectForm({
   const [redirecting, setRedirecting] = useState(false)
   const { isLoading, isError, error, runAsync } = useAsync<NewProjectData>()
   const location = useLocation()
+  const themed = useFeatureFlag('themed-modals')
 
   const removeTag = useCallback((tag: Tag) => {
     setProjectTags(value => value.filter(item => item._id !== tag._id))
@@ -128,6 +130,7 @@ function ModalContentNewProjectForm({
                     key={tag._id}
                     tag={tag}
                     removeTag={removeTag}
+                    themed={themed}
                   />
                 ))}
               </div>

@@ -50,6 +50,8 @@ class ServiceNotConfiguredError extends BackwardCompatibleError {}
 
 class TooManyRequestsError extends BackwardCompatibleError {}
 
+class TooManyFilesError extends BackwardCompatibleError {}
+
 class ResourceGoneError extends BackwardCompatibleError {}
 
 class DuplicateNameError extends OError {}
@@ -79,6 +81,8 @@ class EmailExistsError extends OErrorV2CompatibleError {
 }
 
 class InvalidError extends BackwardCompatibleError {}
+
+class NotifyGroupAdminError extends OError {}
 
 class NotInV2Error extends BackwardCompatibleError {}
 
@@ -143,12 +147,6 @@ class SAMLAssertionAudienceMismatch extends SAMLAuthenticationError {}
 class SAMLAuthenticationRequiredError extends SAMLAuthenticationError {
   get i18nKey() {
     return 'saml_authentication_required_error'
-  }
-}
-
-class SAMLGroupSSOLoginIdentityMismatchError extends SAMLAuthenticationError {
-  get i18nKey() {
-    return 'saml_login_identity_mismatch_error'
   }
 }
 
@@ -396,6 +394,7 @@ module.exports = {
   ForbiddenError,
   ServiceNotConfiguredError,
   TooManyRequestsError,
+  TooManyFilesError,
   ResourceGoneError,
   DuplicateNameError,
   InvalidNameError,
@@ -409,6 +408,7 @@ module.exports = {
   UnconfirmedEmailError,
   EmailExistsError,
   InvalidError,
+  NotifyGroupAdminError,
   NotInV2Error,
   OutputFileFetchFailedError,
   SAMLAssertionAudienceMismatch,
@@ -427,7 +427,6 @@ module.exports = {
   SAMLSessionDataMissing,
   SAMLSessionProviderDataMissing,
   SAMLAuthenticationError,
-  SAMLGroupSSOLoginIdentityMismatchError,
   SAMLGroupSSOLoginIdentityNotFoundError,
   SAMLGroupSSODisabledError,
   SAMLGroupSSOLoginRequestedEmailNotConfirmed,

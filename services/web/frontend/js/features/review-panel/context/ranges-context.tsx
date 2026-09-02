@@ -13,7 +13,6 @@ import {
   CommentOperation,
   EditOperation,
 } from '../../../../../types/change'
-import RangesTracker from '@overleaf/ranges-tracker'
 import { rejectChanges } from '@/features/source-editor/extensions/changes/reject-changes'
 import { useCodeMirrorViewContext } from '@/features/source-editor/components/codemirror-context'
 import { postJSON } from '@/infrastructure/fetch-json'
@@ -167,30 +166,6 @@ export const RangesProvider: FC<React.PropsWithChildren> = ({ children }) => {
         // currentDocument.off('ranges:clear.cm6')
         currentDocument.off('ranges:redraw.cm6')
         currentDocument.off('ranges:dirty.cm6')
-      }
-    }
-  }, [currentDocument])
-
-  // TODO: move this into DocumentContainer?
-  useEffect(() => {
-    if (currentDocument) {
-      const regenerateTrackChangesId = (doc: DocumentContainer) => {
-        if (doc.ranges) {
-          const inflight = doc.ranges.getIdSeed()
-          const pending = RangesTracker.generateIdSeed()
-          doc.ranges.setIdSeed(pending)
-          doc.setTrackChangesIdSeeds({ pending, inflight })
-        }
-      }
-
-      currentDocument.on('flipped_pending_to_inflight', () =>
-        regenerateTrackChangesId(currentDocument)
-      )
-
-      regenerateTrackChangesId(currentDocument)
-
-      return () => {
-        currentDocument.off('flipped_pending_to_inflight')
       }
     }
   }, [currentDocument])

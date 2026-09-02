@@ -37,6 +37,12 @@ describe('AuthorizationManager', function () {
 
     ctx.CollaboratorsHandler = {}
 
+    ctx.CollaboratorsInviteGetter = {
+      promises: {
+        getUsableAnonymousSharingLinkInvite: sinon.stub().resolves(null),
+      },
+    }
+
     ctx.User = {
       findOne: sinon.stub().returns({ exec: sinon.stub().resolves(null) }),
     }
@@ -89,6 +95,13 @@ describe('AuthorizationManager', function () {
       '../../../../app/src/Features/Collaborators/CollaboratorsHandler',
       () => ({
         default: ctx.CollaboratorsHandler,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Collaborators/CollaboratorsInviteGetter',
+      () => ({
+        default: ctx.CollaboratorsInviteGetter,
       })
     )
 
@@ -392,6 +405,50 @@ describe('AuthorizationManager', function () {
         })
 
         it('should return false', function (ctx) {
+          expect(ctx.result).to.equal(false)
+        })
+      })
+
+      describe('with no user (anonymous) and a public sharing link', function () {
+        beforeEach(async function (ctx) {
+          ctx.CollaboratorsInviteGetter.promises.getUsableAnonymousSharingLinkInvite
+            .withArgs(ctx.project._id, ctx.token)
+            .resolves({ _id: new ObjectId(), privileges: 'readAndWrite' })
+          ctx.result =
+            await ctx.AuthorizationManager.promises.getPrivilegeLevelForProject(
+              null,
+              ctx.project._id,
+              ctx.token
+            )
+        })
+
+        it('should look up the sharing-link invite by token', function (ctx) {
+          ctx.CollaboratorsInviteGetter.promises.getUsableAnonymousSharingLinkInvite.should.have.been.calledWith(
+            ctx.project._id,
+            ctx.token
+          )
+        })
+
+        it('should give read-only access regardless of the link privilege', function (ctx) {
+          expect(ctx.result).to.equal('readOnly')
+        })
+      })
+
+      describe('with no user (anonymous) and ignorePublicAccess', function () {
+        beforeEach(async function (ctx) {
+          ctx.CollaboratorsInviteGetter.promises.getUsableAnonymousSharingLinkInvite
+            .withArgs(ctx.project._id, ctx.token)
+            .resolves({ _id: new ObjectId(), privileges: 'readAndWrite' })
+          ctx.result =
+            await ctx.AuthorizationManager.promises.getPrivilegeLevelForProject(
+              null,
+              ctx.project._id,
+              ctx.token,
+              { ignorePublicAccess: true }
+            )
+        })
+
+        it('should not grant sharing-link access', function (ctx) {
           expect(ctx.result).to.equal(false)
         })
       })

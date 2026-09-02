@@ -43,9 +43,9 @@ function ArchiveProjectModal({
       <p>
         {t('archiving_projects_wont_affect_collaborators')}{' '}
         <a
-          href="https://www.overleaf.com/learn/how-to/How_do_I_archive_and_unarchive_projects%3F"
+          href="https://docs.overleaf.com/managing-projects-and-files/archiving-deleting-and-leaving-projects"
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
         >
           {t('find_out_more_nt')}
         </a>

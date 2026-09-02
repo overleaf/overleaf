@@ -1,0 +1,55 @@
+diff --git a/index.js b/index.js
+index 49f181005f74cf11db3bd5b0ecf512520163ec71..d47ad4270883b90766152342c99495a07cb952e0 100644
+--- a/index.js
++++ b/index.js
+@@ -1,5 +1,29 @@
+ const parseCookie = require('cookie').parse;
+ const decodeCookie = require('cookie-parser').signedCookie;
++// --- Overleaf patch: request-input lockdown compatibility ---
++// This middleware is mounted globally, before any router split, and reads
++// req.query/req.body directly to look for a bearer token -- otherwise
++// indistinguishable from unvalidated application code reading raw request
++// input under Overleaf's request-input lockdown (see
++// libraries/validation-tools and the patched express in
++// .yarn/patches/express-npm-*.patch). The lockdown captures the original
++// parsed values in symbol-keyed fields, registered in the global symbol
++// registry (the same ones @overleaf/validation-tools' lockdown.js reads),
++// and only turns the *public* req.query/req.body properties into throwing
++// accessors -- reading through these raw fields instead sidesteps that, and
++// is identical to plain req.query/req.body when the lockdown isn't
++// installed (i.e. for every consumer of this package outside this
++// monorepo).
++const __overleafLockdownInstalled = Symbol.for('overleaf.lockdown.installed');
++const __overleafLockdownRawQuery = Symbol.for('overleaf.lockdown.rawQuery');
++const __overleafLockdownRawBody = Symbol.for('overleaf.lockdown.rawBody');
++function __overleafRawQuery(req) {
++  return req[__overleafLockdownInstalled] ? req[__overleafLockdownRawQuery] : req.query;
++}
++function __overleafRawBody(req) {
++  return req[__overleafLockdownInstalled] ? req[__overleafLockdownRawBody] : req.body;
++}
++// --- end Overleaf patch ---
+ 
+ const getCookie = (serialized_cookies, key) => parseCookie(serialized_cookies)[key] || false;
+ 
+@@ -32,16 +56,16 @@ module.exports = opts => {
+       let error;
+ 
+       // query
+-      if (req.query && req.query[queryKey]) {
+-        token = req.query[queryKey];
++      if (__overleafRawQuery(req) && __overleafRawQuery(req)[queryKey]) {
++        token = __overleafRawQuery(req)[queryKey];
+       }
+ 
+       // body
+-      if (req.body && req.body[bodyKey]) {
++      if (__overleafRawBody(req) && __overleafRawBody(req)[bodyKey]) {
+         if (token) {
+           error = true;
+         }
+-        token = req.body[bodyKey];
++        token = __overleafRawBody(req)[bodyKey];
+       }
+ 
+       // headers

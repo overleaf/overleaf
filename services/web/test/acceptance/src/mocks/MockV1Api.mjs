@@ -1,6 +1,121 @@
 import AbstractMockApi from './AbstractMockApi.mjs'
 import moment from 'moment'
 import sinon from 'sinon'
+import { parseReq, z, zz, getRawReqInput } from '@overleaf/validation-tools'
+
+const v1UserIdParamsSchema = z.object({
+  params: z.strictObject({ v1_user_id: z.string() }),
+})
+
+const exportByIdSchema = z.object({
+  params: z.strictObject({ id: z.string() }),
+  query: z.object({ token: z.string().optional() }),
+})
+
+// zip_url only reads req.query.token -- unlike exportByIdSchema above, the
+// route's own :id param is never read by the handler, so it is left out.
+const exportZipUrlSchema = z.object({
+  query: z.object({ token: z.string().optional() }),
+})
+
+const userIdParamsSchema = z.object({
+  params: z.strictObject({ userId: zz.objectId() }),
+})
+
+// Institution id sent from web varies by caller: UserEmailsController.mjs
+// forwards a client-supplied number, while the SAML/group-domain-capture
+// call sites always .toString() it first -- see
+// app/src/Features/User/SAMLIdentityManager.mjs and
+// modules/saas-authentication/app/src/SAML/SAMLController.mjs.
+const affiliationUniversitySchema = z
+  .strictObject({
+    id: z.union([z.number(), z.string()]).optional(),
+    name: z.string().optional(),
+    country_code: z.string().optional(),
+  })
+  .optional()
+
+// Mirrors every field InstitutionsAPI.mjs#addAffiliation actually puts on
+// the wire (app/src/Features/Institutions/InstitutionsAPI.mjs) -- the mock
+// handler itself only reads email/entitlement/confirmedAt, but the other
+// fields are genuinely sent by real callers (UserEmailsController,
+// SAMLIdentityManager, SAMLController, GroupDomainCaptureHandler) and must
+// still be accepted by this strict schema.
+const addAffiliationSchema = z.object({
+  params: z.strictObject({ userId: zz.objectId() }),
+  body: z.strictObject({
+    email: z.string(),
+    university: affiliationUniversitySchema,
+    department: z.string().optional(),
+    role: z.string().optional(),
+    entitlement: z.boolean().optional(),
+    confirmedAt: z.coerce.date().optional(),
+    rejectIfBlocklisted: z.boolean().optional(),
+  }),
+})
+
+const brandSlugSchema = z.object({
+  params: z.strictObject({ slug: z.string() }),
+})
+
+const universitiesListSchema = z.object({
+  query: z.object({
+    country_code: z.string().optional(),
+    search: z.string().optional(),
+    max_results: z.string().optional(),
+  }),
+})
+
+const universityByIdSchema = z.object({
+  params: z.strictObject({ id: z.string() }),
+})
+
+const universityDomainsSchema = z.object({
+  query: z.object({ hostname: z.string().optional() }),
+})
+
+const updateEmailSchema = z.object({
+  params: z.strictObject({ id: z.string() }),
+  body: z.strictObject({
+    user: z.strictObject({ email: z.string() }),
+  }),
+})
+
+const loginSchema = z.object({
+  body: z.strictObject({
+    email: z.string(),
+    password: z.string(),
+  }),
+})
+
+const partnerConversionSchema = z.object({
+  params: z.strictObject({
+    partner: z.string(),
+    id: z.string(),
+  }),
+})
+
+const brandVariationSchema = z.object({
+  params: z.strictObject({ id: z.string() }),
+})
+
+const tokenParamsSchema = z.object({
+  params: z.strictObject({
+    user_id: z.string().optional(),
+    token: z.string(),
+  }),
+})
+
+const templateSchema = z.object({
+  params: z.strictObject({ templateId: z.string() }),
+})
+
+const fakeRouteApiHandlerTestsSchema = z.object({
+  query: z.object({
+    expectedStatus: z.string(),
+    expectedBody: z.string(),
+  }),
+})
 
 class MockV1Api extends AbstractMockApi {
   reset() {
@@ -69,6 +184,7 @@ class MockV1Api extends AbstractMockApi {
     if (options && options.hostname) {
       this.addInstitutionDomain(id, options.hostname, {
         confirmed: options.confirmed,
+        captured_by_group: options.captured_by_group,
       })
     }
     return id
@@ -162,7 +278,8 @@ class MockV1Api extends AbstractMockApi {
 
   applyRoutes() {
     this.app.get('/api/v1/overleaf/users/:v1_user_id/plan_code', (req, res) => {
-      const user = this.users[req.params.v1_user_id]
+      const { params } = parseReq(req, v1UserIdParamsSchema)
+      const user = this.users[params.v1_user_id]
       if (user) {
         res.json(user)
       } else {
@@ -173,7 +290,8 @@ class MockV1Api extends AbstractMockApi {
     this.app.get(
       '/api/v1/overleaf/users/:v1_user_id/subscriptions',
       (req, res) => {
-        const user = this.users[req.params.v1_user_id]
+        const { params } = parseReq(req, v1UserIdParamsSchema)
+        const user = this.users[params.v1_user_id]
         if (user && user.subscription) {
           res.json(user.subscription)
         } else {
@@ -185,7 +303,8 @@ class MockV1Api extends AbstractMockApi {
     this.app.get(
       '/api/v1/overleaf/users/:v1_user_id/subscription_status',
       (req, res) => {
-        const user = this.users[req.params.v1_user_id]
+        const { params } = parseReq(req, v1UserIdParamsSchema)
+        const user = this.users[params.v1_user_id]
         if (user && user.subscription_status) {
           res.json(user.subscription_status)
         } else {
@@ -197,7 +316,8 @@ class MockV1Api extends AbstractMockApi {
     this.app.delete(
       '/api/v1/overleaf/users/:v1_user_id/subscription',
       (req, res) => {
-        const user = this.users[req.params.v1_user_id]
+        const { params } = parseReq(req, v1UserIdParamsSchema)
+        const user = this.users[params.v1_user_id]
         if (user) {
           user.canceled = true
           res.sendStatus(200)
@@ -208,29 +328,37 @@ class MockV1Api extends AbstractMockApi {
     )
 
     this.app.post('/api/v1/overleaf/users/:v1_user_id/sync', (req, res) => {
-      this.syncUserFeatures(req.params.v1_user_id)
+      const { params } = parseReq(req, v1UserIdParamsSchema)
+      this.syncUserFeatures(params.v1_user_id)
       res.sendStatus(200)
     })
 
     this.app.post('/api/v1/overleaf/exports', (req, res) => {
-      this.exportParams = Object.assign({}, req.body)
+      // case 3: acceptance tests assert on the exact raw body sent to v1's
+      // export endpoint via getLastExportParams() (see
+      // modules/saas-authentication/test/acceptance/src/ExportsTests.mjs) --
+      // this records the wire payload verbatim for later inspection rather
+      // than reading any field of it itself.
+      this.exportParams = Object.assign({}, getRawReqInput(req).body)
       res.json({ exportId: this.exportId, token: this.exportToken })
     })
 
     this.app.get('/api/v1/overleaf/exports/:id', (req, res) => {
-      const { token } = req.query
+      const { params, query } = parseReq(req, exportByIdSchema)
+      const { token } = query
       if (token && token !== this.exportToken) {
         return res.sendStatus(404)
       }
       res.json({
-        id: parseInt(req.params.id, 10),
+        id: parseInt(params.id, 10),
         status_summary: 'succeeded',
         token: this.exportToken,
       })
     })
 
     this.app.get('/api/v1/overleaf/exports/:id/zip_url', (req, res) => {
-      const { token } = req.query
+      const { query } = parseReq(req, exportZipUrlSchema)
+      const { token } = query
       if (token && token !== this.exportToken) {
         return res.sendStatus(404)
       }
@@ -239,61 +367,62 @@ class MockV1Api extends AbstractMockApi {
     })
 
     this.app.get('/api/v2/users/:userId/affiliations', (req, res) => {
-      if (!this.affiliations[req.params.userId]) return res.json([])
-      const affiliations = this.affiliations[req.params.userId].map(
-        affiliation => {
-          const institutionId = affiliation.institution.id
-          const domain = affiliation.email.split('@').pop()
-          const domainData =
-            this.institutionDomains[institutionId][domain] || {}
-          const institutionData = this.institutions[institutionId] || {}
+      const { params } = parseReq(req, userIdParamsSchema)
+      if (!this.affiliations[params.userId]) return res.json([])
+      const affiliations = this.affiliations[params.userId].map(affiliation => {
+        const institutionId = affiliation.institution.id
+        const domain = affiliation.email.split('@').pop()
+        const domainData = this.institutionDomains[institutionId][domain] || {}
+        const institutionData = this.institutions[institutionId] || {}
 
-          affiliation.institution = {
-            id: institutionId,
-            name: institutionData.name,
-            commonsAccount: institutionData.commonsAccount,
-            isUniversity: !institutionData.institution,
-            ssoBeta: institutionData.sso_beta || false,
-            ssoEnabled: institutionData.sso_enabled || false,
-            maxConfirmationMonths:
-              institutionData.maxConfirmationMonths || null,
-          }
-
-          affiliation.institution.confirmed = !!domainData.confirmed
-
-          affiliation.licence = 'free'
-          if (
-            institutionData.commonsAccount &&
-            (!institutionData.sso_enabled ||
-              (institutionData.sso_enabled &&
-                affiliation.cached_entitlement === true))
-          ) {
-            affiliation.licence = 'pro_plus'
-          }
-
-          if (
-            institutionData.maxConfirmationMonths &&
-            affiliation.cached_reconfirmed_at
-          ) {
-            const lastDayToReconfirm = moment(
-              affiliation.cached_reconfirmed_at
-            ).add(institutionData.maxConfirmationMonths, 'months')
-            affiliation.last_day_to_reconfirm = lastDayToReconfirm.toDate()
-            affiliation.past_reconfirm_date = lastDayToReconfirm.isBefore()
-          }
-
-          return affiliation
+        affiliation.institution = {
+          id: institutionId,
+          name: institutionData.name,
+          commonsAccount: institutionData.commonsAccount,
+          writefullCommonsAccount:
+            institutionData.writefullCommonsAccount || false,
+          isUniversity: !institutionData.institution,
+          ssoBeta: institutionData.sso_beta || false,
+          ssoEnabled: institutionData.sso_enabled || false,
+          maxConfirmationMonths: institutionData.maxConfirmationMonths || null,
         }
-      )
+
+        affiliation.institution.confirmed = !!domainData.confirmed
+
+        affiliation.licence = 'free'
+        if (
+          institutionData.commonsAccount &&
+          (!institutionData.sso_enabled ||
+            (institutionData.sso_enabled &&
+              affiliation.cached_entitlement === true))
+        ) {
+          affiliation.licence = 'pro_plus'
+        }
+
+        if (
+          institutionData.maxConfirmationMonths &&
+          affiliation.cached_reconfirmed_at
+        ) {
+          const lastDayToReconfirm = moment(
+            affiliation.cached_reconfirmed_at
+          ).add(institutionData.maxConfirmationMonths, 'months')
+          affiliation.last_day_to_reconfirm = lastDayToReconfirm.toDate()
+          affiliation.past_reconfirm_date = lastDayToReconfirm.isBefore()
+        }
+
+        affiliation.domainCapturedByGroup = domainData.captured_by_group
+        return affiliation
+      })
       res.json(affiliations)
     })
 
     this.app.post('/api/v2/users/:userId/affiliations', (req, res) => {
+      const { params, body } = parseReq(req, addAffiliationSchema)
       this.addAffiliation(
-        req.params.userId,
-        req.body.email,
-        req.body.entitlement,
-        req.body.confirmedAt
+        params.userId,
+        body.email,
+        body.entitlement,
+        body.confirmedAt
       )
       res.sendStatus(201)
     })
@@ -327,8 +456,9 @@ class MockV1Api extends AbstractMockApi {
     )
 
     this.app.get('/api/v2/brands/:slug', (req, res) => {
+      const { params } = parseReq(req, brandSlugSchema)
       let brand
-      if ((brand = this.brands[req.params.slug])) {
+      if ((brand = this.brands[params.slug])) {
         res.json(brand)
       } else {
         res.sendStatus(404)
@@ -336,6 +466,7 @@ class MockV1Api extends AbstractMockApi {
     })
 
     this.app.get('/universities/list', (req, res) => {
+      const { query } = parseReq(req, universitiesListSchema)
       const response = []
 
       const university1 = {
@@ -352,27 +483,29 @@ class MockV1Api extends AbstractMockApi {
         departments: [],
       }
 
-      if (req.query.country_code === 'en') {
+      if (query.country_code === 'en') {
         response.push(university1)
       }
-      if (req.query.search === 'Institution') {
+      if (query.search === 'Institution') {
         response.push(university1)
-        if (req.query.max_results !== '1') {
+        if (query.max_results !== '1') {
           response.push(university2)
         }
       }
       res.json(response)
     })
 
-    this.app.get('/universities/list/:id', (req, res) =>
+    this.app.get('/universities/list/:id', (req, res) => {
+      const { params } = parseReq(req, universityByIdSchema)
       res.json({
-        id: parseInt(req.params.id),
-        name: `Institution ${req.params.id}`,
+        id: parseInt(params.id),
+        name: `Institution ${params.id}`,
       })
-    )
+    })
 
     this.app.get('/university/domains', (req, res) => {
-      if (req.query.hostname === 'overleaf.com') {
+      const { query } = parseReq(req, universityDomainsSchema)
+      if (query.hostname === 'overleaf.com') {
         res.json([
           {
             id: 42,
@@ -388,7 +521,7 @@ class MockV1Api extends AbstractMockApi {
             },
           },
         ])
-      } else if (req.query.hostname === 'sharelatex.com') {
+      } else if (query.hostname === 'sharelatex.com') {
         res.json([
           {
             id: 44,
@@ -411,22 +544,24 @@ class MockV1Api extends AbstractMockApi {
     })
 
     this.app.put('/api/v1/overleaf/users/:id/email', (req, res) => {
-      const { email } = req.body && req.body.user
+      const { params, body } = parseReq(req, updateEmailSchema)
+      const { email } = body.user
       if (this.existingEmails.includes(email)) {
         res.sendStatus(409)
       } else {
-        this.updateEmail(parseInt(req.params.id), email)
+        this.updateEmail(parseInt(params.id), email)
         res.sendStatus(200)
       }
     })
 
     this.app.post('/api/v1/overleaf/login', (req, res) => {
+      const { body } = parseReq(req, loginSchema)
       for (const id in this.users) {
         const user = this.users[id]
         if (
           user &&
-          user.email === req.body.email &&
-          user.password === req.body.password
+          user.email === body.email &&
+          user.password === body.password
         ) {
           return res.json({
             email: user.email,
@@ -436,15 +571,16 @@ class MockV1Api extends AbstractMockApi {
         }
       }
       res.status(403).json({
-        email: req.body.email,
+        email: body.email,
         valid: false,
       })
     })
 
     this.app.get('/api/v2/partners/:partner/conversions/:id', (req, res) => {
-      const partner = this.validation_clients[req.params.partner]
+      const { params } = parseReq(req, partnerConversionSchema)
+      const partner = this.validation_clients[params.partner]
       const conversion =
-        partner && partner.conversions && partner.conversions[req.params.id]
+        partner && partner.conversions && partner.conversions[params.id]
 
       if (conversion) {
         res.status(200).json({
@@ -457,7 +593,8 @@ class MockV1Api extends AbstractMockApi {
     })
 
     this.app.get('/api/v2/brand_variations/:id', (req, res) => {
-      const variation = this.brand_variations[req.params.id]
+      const { params } = parseReq(req, brandVariationSchema)
+      const variation = this.brand_variations[params.id]
       if (variation) {
         res.status(200).json(variation)
       } else {
@@ -472,7 +609,8 @@ class MockV1Api extends AbstractMockApi {
     this.app.get(
       '/api/v1/overleaf/users/:user_id/docs/:token/info',
       (req, res) => {
-        const info = this.getDocInfo(req.params.token) || {
+        const { params } = parseReq(req, tokenParamsSchema)
+        const info = this.getDocInfo(params.token) || {
           exists: false,
           exported: false,
         }
@@ -481,7 +619,8 @@ class MockV1Api extends AbstractMockApi {
     )
 
     this.app.get('/api/v1/overleaf/docs/:token/info', (req, res) => {
-      const info = this.getDocInfo(req.params.token) || {
+      const { params } = parseReq(req, tokenParamsSchema)
+      const info = this.getDocInfo(params.token) || {
         exists: false,
         exported: false,
       }
@@ -496,7 +635,8 @@ class MockV1Api extends AbstractMockApi {
     )
 
     this.app.get('/api/v2/templates/:templateId', (req, res) => {
-      const template = this.templates[req.params.templateId]
+      const { params } = parseReq(req, templateSchema)
+      const template = this.templates[params.templateId]
       if (!template) {
         return res.sendStatus(404)
       }
@@ -506,8 +646,9 @@ class MockV1Api extends AbstractMockApi {
     this.app.get(
       '/api/v1/overleaf/fake_route_api_handler_tests',
       (req, res) => {
-        const expectedStatus = req.query.expectedStatus
-        const expectedBody = req.query.expectedBody
+        const { query } = parseReq(req, fakeRouteApiHandlerTestsSchema)
+        const expectedStatus = query.expectedStatus
+        const expectedBody = query.expectedBody
         const statusCode = Number(expectedStatus)
         if (
           !Number.isInteger(statusCode) ||

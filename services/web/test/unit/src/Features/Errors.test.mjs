@@ -43,3 +43,13 @@ describe('BackwardCompatibleError', function () {
     expect(error.cause).to.equal(cause)
   })
 })
+
+describe('NotifyGroupAdminError', function () {
+  it('is exported and can be constructed', function () {
+    const error = new Errors.NotifyGroupAdminError('notify admin failed')
+
+    expect(error).to.be.instanceOf(Error)
+    expect(error).to.be.instanceOf(Errors.NotifyGroupAdminError)
+    expect(error.message).to.equal('notify admin failed')
+  })
+})

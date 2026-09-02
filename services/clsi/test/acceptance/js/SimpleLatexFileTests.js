@@ -18,7 +18,7 @@ Hello world
       request: {
         resources: [{ path: 'main.tex', content }],
         options: {
-          compileGroup: 'simple-latex-file',
+          compileGroup: 'alpha',
         },
       },
     },
@@ -27,7 +27,7 @@ Hello world
       request: {
         resources: [{ path: 'main.tex', content }],
         options: {
-          compileGroup: 'simple-latex-file',
+          compileGroup: 'alpha',
           imageName: 'quay.io/sharelatex/texlive-full:2017.1',
         },
       },
@@ -42,7 +42,7 @@ Hello world
           enablePdfCaching: false,
           metricsPath: 'clsi-perf',
           metricsMethod: 'memoir-manual',
-          compileGroup: 'clsi-perf', // only used by tests, not by the service
+          compileGroup: 'priority',
         },
       },
     },
@@ -134,6 +134,8 @@ Hello world
         const expectedRuns = scenario.expectedRuns ?? 1
         // Note: chai's all.keys assertion rejects extra keys
         stats.should.have.all.keys(
+          'include-image-all',
+          'include-image-optimised',
           'isInitialCompile',
           'latexmk-errors',
           'latex-runs',
@@ -148,6 +150,8 @@ Hello world
           'compile',
           'output',
           'compileE2E',
+          'include-image-all',
+          'include-image-optimised',
           ...pdfCachingTimings
         )
       })

@@ -2,6 +2,7 @@
 const { setTimeout } = require('node:timers/promises')
 const Settings = require('@overleaf/settings')
 const Errors = require('./Errors')
+const HistoryConversions = require('./HistoryConversions')
 const OError = require('@overleaf/o-error')
 const Metrics = require('./Metrics')
 const logger = require('@overleaf/logger')
@@ -67,7 +68,11 @@ async function getDocOnce(projectId, docId, options = {}) {
 
     if (body.otMigrationStage > 0) {
       // Use history-ot
-      body.lines = { content: body.lines.join('\n') }
+      body.lines = HistoryConversions.toHistoryOT(
+        body.lines,
+        body.ranges || {},
+        body.resolvedCommentIds || []
+      )
       body.ranges = {}
     }
 

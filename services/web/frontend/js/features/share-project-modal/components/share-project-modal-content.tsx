@@ -10,7 +10,7 @@ import {
   OLModalHeader,
   OLModalTitle,
 } from '@/shared/components/ol/ol-modal'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import OLButton from '@/shared/components/ol/ol-button'
 import OLSpinner from '@/shared/components/ol/ol-spinner'
 import MaterialIcon from '@/shared/components/material-icon'
@@ -31,6 +31,11 @@ const ReadOnlyTokenLink = lazy(() =>
 )
 
 const ShareModalBody = lazy(() => import('./share-modal-body'))
+
+export type ShareModalScreen =
+  | 'project-access'
+  | 'invited-people'
+  | 'access-requests'
 
 type ShareProjectModalContentProps = {
   cancel: () => void
@@ -74,18 +79,23 @@ function ShareProjectModalContentInner({
 >) {
   const { t } = useTranslation()
   const isSharingUpdatesEnabled = useFeatureFlag('sharing-updates')
-  const [isInvitedPeopleScreen, setIsInvitedPeopleScreen] = useState(false)
+  // The copy-sharing-link button only applies to the new reusable links; legacy
+  // token links are copied from their own inputs, so hide it when the new-link
+  // feature is off.
+  const isNewLinkEnabled = useFeatureFlag('sharing-updates-new-link')
   const { successActionMessage, projectAccess } = useShareProjectContext()
+  const [screen, setScreen] = useState<ShareModalScreen>('project-access')
   const { isRestrictedTokenMember, isProjectOwner } = useEditorContext()
+  const isSubScreen = screen !== 'project-access'
 
   return (
     <>
       <OLModalHeader>
         <div className="d-flex flex-grow-1 justify-content-between">
-          {isSharingUpdatesEnabled && isInvitedPeopleScreen ? (
+          {isSharingUpdatesEnabled && isSubScreen ? (
             <OLButton
               variant="ghost"
-              onClick={() => setIsInvitedPeopleScreen(false)}
+              onClick={() => setScreen('project-access')}
               leadingIcon="arrow_back_ios_new"
             >
               {t('back')}
@@ -100,7 +110,6 @@ function ShareProjectModalContentInner({
           {isSharingUpdatesEnabled && isProjectOwner && <GiveFeedbackLink />}
         </div>
       </OLModalHeader>
-
       <OLModalBody
         className={classNames('modal-body-share modal-link-share', {
           'modal-redesign': isSharingUpdatesEnabled,
@@ -116,27 +125,29 @@ function ShareProjectModalContentInner({
               <ReadOnlyTokenLink />
             ) : (
               <ShareModalBody
-                isInvitedPeopleScreen={isInvitedPeopleScreen}
-                setIsInvitedPeopleScreen={setIsInvitedPeopleScreen}
+                screen={screen}
+                setScreen={setScreen}
                 error={error}
               />
             )}
           </Suspense>
           {!isSharingUpdatesEnabled && error && (
-            <OLNotification
-              type="error"
-              content={<ErrorMessage error={error} />}
-              className="mb-0 mt-3"
-            />
+            <div className="notification-list">
+              <Notification
+                type="error"
+                content={<ErrorMessage error={error} />}
+                className="mb-0 mt-3"
+              />
+            </div>
           )}
         </div>
       </OLModalBody>
-
       <OLModalFooter>
         <div className="d-flex flex-grow-1 flex-wrap gap-2">
           {isSharingUpdatesEnabled ? (
             <>
-              {!isInvitedPeopleScreen &&
+              {isNewLinkEnabled &&
+                !isSubScreen &&
                 projectAccess &&
                 (projectAccess === 'onlyInvitedPeople' ||
                   projectAccess.startsWith('anyoneInXyzWithTheLink') ||

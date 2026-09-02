@@ -1,5 +1,6 @@
-import { vi, expect } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
+import { setReqValidationModeForTests } from '@overleaf/validation-tools'
 import MockResponse from '../helpers/MockResponse.mjs'
 import MockRequest from '../helpers/MockRequest.mjs'
 import mongodb from 'mongodb-legacy'
@@ -48,6 +49,10 @@ describe('UserInfoController', function () {
     ctx.req = new MockRequest(vi)
     ctx.res = new MockResponse(vi)
     ctx.next = sinon.stub()
+  })
+
+  afterEach(function () {
+    setReqValidationModeForTests(null)
   })
 
   describe('getPersonalInfo', function () {
@@ -113,11 +118,24 @@ describe('UserInfoController', function () {
         ctx.user_id = 'invalid'
         ctx.req.params = { user_id: ctx.user_id }
         ctx.UserGetter.getUser = sinon.stub().callsArgWith(2, null, null)
-        ctx.UserInfoController.getPersonalInfo(ctx.req, ctx.res, ctx.next)
       })
 
-      it('should return 400 to the client', function (ctx) {
+      it('should throw an InvalidParamsError (404 via handleValidationError)', function (ctx) {
+        setReqValidationModeForTests('enforce')
+        expect(() =>
+          ctx.UserInfoController.getPersonalInfo(ctx.req, ctx.res, ctx.next)
+        ).to.throw()
+        ctx.UserGetter.getUser.called.should.equal(false)
+      })
+
+      it('should return 400 without validation enforcement', function (ctx) {
+        setReqValidationModeForTests('log')
+        expect(() =>
+          ctx.UserInfoController.getPersonalInfo(ctx.req, ctx.res, ctx.next)
+        ).to.not.throw()
         ctx.res.statusCode.should.equal(400)
+        ctx.UserGetter.getUser.called.should.equal(false)
+        ctx.next.called.should.equal(false)
       })
     })
   })

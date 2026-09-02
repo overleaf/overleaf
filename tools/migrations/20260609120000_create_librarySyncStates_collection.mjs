@@ -1,7 +1,6 @@
 import Helpers from './lib/helpers.mjs'
-import { getCollectionInternal } from './lib/mongodb.mjs'
 
-const tags = ['saas']
+const tags = ['saas', 'auxiliary']
 
 const indexes = [
   {
@@ -11,14 +10,14 @@ const indexes = [
   },
 ]
 
-const migrate = async () => {
-  const librarySyncStates = await getCollectionInternal('librarySyncStates')
-  await Helpers.addIndexesToCollection(librarySyncStates, indexes)
+const migrate = async client => {
+  const { db } = client
+  await Helpers.addIndexesToCollection(db.librarySyncStates, indexes)
 }
 
-const rollback = async () => {
-  const librarySyncStates = await getCollectionInternal('librarySyncStates')
-  await Helpers.dropIndexesFromCollection(librarySyncStates, indexes)
+const rollback = async client => {
+  const { db } = client
+  await Helpers.dropIndexesFromCollection(db.librarySyncStates, indexes)
 }
 
 export default {

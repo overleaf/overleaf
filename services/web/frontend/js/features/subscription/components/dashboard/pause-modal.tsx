@@ -10,13 +10,14 @@ import {
 } from '@/shared/components/ol/ol-modal'
 import { Select } from '@/shared/components/select'
 import OLFormGroup from '@/shared/components/ol/ol-form-group'
-import Button from '@/shared/components/button/button'
+import OLButton from '@/shared/components/ol/ol-button'
 import { Stack } from 'react-bootstrap'
 import { debugConsole } from '@/utils/debugging'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
 import PauseDuck from '../../images/pause-duck.svg'
 import GenericErrorAlert from './generic-error-alert'
 import { PaidSubscription } from '../../../../../../types/subscription/dashboard/subscription'
+import getSubscriptionEventSegmentation from '../../util/subscription-event-segmentation'
 
 const pauseMonthDurationOptions = [1, 2, 3]
 
@@ -37,13 +38,10 @@ export default function PauseSubscriptionModal() {
 
   function handleCancelSubscriptionClick() {
     const subscription = personalSubscription as PaidSubscription
-    eventTracking.sendMB('subscription-page-cancel-button-click', {
-      plan_code: subscription?.planCode,
-      is_trial:
-        subscription?.payment.trialEndsAtFormatted &&
-        subscription?.payment.trialEndsAt &&
-        new Date(subscription.payment.trialEndsAt).getTime() > Date.now(),
-    })
+    eventTracking.sendMB(
+      'subscription-page-cancel-button-click',
+      getSubscriptionEventSegmentation(subscription)
+    )
     setShowCancellation(true)
   }
 
@@ -119,19 +117,19 @@ export default function PauseSubscriptionModal() {
           />
         </OLFormGroup>
         <Stack gap={2}>
-          <Button
+          <OLButton
             onClick={handleConfirmPauseSubscriptionClick}
             disabled={inflight}
           >
             {t('pause_subscription')}
-          </Button>
-          <Button
+          </OLButton>
+          <OLButton
             onClick={handleCancelSubscriptionClick}
             disabled={inflight}
             variant="danger-ghost"
           >
             {t('cancel_subscription')}
-          </Button>
+          </OLButton>
         </Stack>
       </OLModalBody>
     </OLModal>

@@ -1,15 +1,102 @@
 // @ts-check
 
+import logger from '@overleaf/logger'
 import UserGetter from '../../Features/User/UserGetter.mjs'
 import FeatureUsageRateLimiter from './FeatureUsageRateLimiter.mjs'
 import Settings from '@overleaf/settings'
-import SplitTestHandler from '../../Features/SplitTests/SplitTestHandler.mjs'
-import SplitTestUserGetter from '../../Features/SplitTests/SplitTestUserGetter.mjs'
 import FeaturesHelper from '../../Features/Subscription/FeaturesHelper.mjs'
+import AnalyticsManager from '../../Features/Analytics/AnalyticsManager.mjs'
+import SubscriptionViewModelBuilder from '../../Features/Subscription/SubscriptionViewModelBuilder.mjs'
+import UserAuditLogHandler from '../../Features/User/UserAuditLogHandler.mjs'
 
 class AiFeatureUsageRateLimiter extends FeatureUsageRateLimiter {
   constructor() {
     super('aiFeatureUsage')
+  }
+
+  /**
+   * When an AI feature is used at or over quota: write an `ai-quota-breach`
+   * audit entry (every at-limit request) and emit `ai-usage-limit-reached`
+   * once per period.
+   *
+   * @param {string} userId
+   * @param {import('express').Response} res
+   * @param {{periodStart?: Date, usage?: number}} featureUsage
+   * @param {number} allowance
+   * @param {{auditLogTool?: string}} options
+   */
+  async _onFeatureUsed(userId, res, featureUsage, allowance, options) {
+    const usage = featureUsage.usage ?? 0
+    if (usage < allowance) {
+      return
+    }
+
+    if (options.auditLogTool) {
+      UserAuditLogHandler.addEntryInBackground(
+        userId,
+        'ai-quota-breach',
+        userId,
+        res.req?.ip,
+        { tool: options.auditLogTool }
+      )
+    }
+
+    // Guard against a missing periodStart: without it the marker would change
+    // every call and re-fire the event on every request.
+    const periodStart = featureUsage.periodStart
+    if (
+      periodStart &&
+      (await this._recordFirstLimitReach(userId, periodStart))
+    ) {
+      this._recordLimitReachedEvent(
+        userId,
+        allowance,
+        options.auditLogTool
+      ).catch(() => {})
+    }
+  }
+
+  /**
+   * Records the `ai-usage-limit-reached` event when the user reaches their AI
+   * usage quota.
+   *
+   * @param {string} userId
+   * @param {number} limit
+   * @param {string} [tool]
+   */
+  async _recordLimitReachedEvent(userId, limit, tool) {
+    let planCode
+    let planType
+    try {
+      const { bestSubscription } =
+        await SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails(
+          {
+            _id: userId,
+          }
+        )
+      const subscription =
+        /** @type {import('../../Features/Subscription/CustomerIoPlanHelpers.mjs').BestSubscription} */ (
+          bestSubscription
+        )
+      planCode = subscription?.plan?.planCode
+      planType = subscription?.type
+    } catch (err) {
+      logger.warn(
+        { err, userId },
+        'failed to resolve plan for ai-usage-limit-reached event'
+      )
+    }
+
+    AnalyticsManager.recordEventForUserInBackground(
+      userId,
+      'ai-usage-limit-reached',
+      {
+        limit,
+        ...(tool ? { feature: tool } : {}),
+        ...(planCode ? { 'plan-code': planCode } : {}),
+        ...(planType ? { 'plan-type': planType } : {}),
+      }
+    )
   }
 
   /**
@@ -20,31 +107,16 @@ class AiFeatureUsageRateLimiter extends FeatureUsageRateLimiter {
     const user = await UserGetter.promises.getUser(userId, {
       features: 1,
       writefull: 1,
-      ...SplitTestUserGetter.getProjection('plans-2026-phase-1'),
     })
-    // todo: quota clean-up: remove aiErrorAssistant checking, and split test
-    const inQuotaSplitTest =
-      await SplitTestHandler.promises.featureFlagEnabledForMongoUser(
-        user,
-        'plans-2026-phase-1'
-      )
 
-    if (inQuotaSplitTest) {
-      const wfQuota = user.writefull?.isPremium
-        ? Settings.writefull.quotaTierGranted
-        : Settings.aiFeatures.freeQuota
-      const mergedFeatures = FeaturesHelper.mergeFeatures(user.features, {
-        aiUsageQuota: wfQuota,
-      })
-      const quotaTier = mergedFeatures.aiUsageQuota
-      return _quotaTierToAllowance(quotaTier)
-    } else {
-      const DEFAULT_ALLOWANCE = 1
-      const ADD_ON_ALLOWANCE = 200
-      const hasAddOn =
-        user?.features?.aiErrorAssistant || user?.writefull?.isPremium
-      return hasAddOn ? ADD_ON_ALLOWANCE : DEFAULT_ALLOWANCE
-    }
+    const wfQuota = user?.writefull?.isPremium
+      ? Settings.writefull.quotaTierGranted
+      : Settings.aiFeatures.freeQuota
+    const mergedFeatures = FeaturesHelper.mergeFeatures(user?.features, {
+      aiUsageQuota: wfQuota,
+    })
+    const quotaTier = mergedFeatures.aiUsageQuota
+    return _quotaTierToAllowance(quotaTier)
   }
 }
 
@@ -57,7 +129,7 @@ class AiFeatureUsageRateLimiter extends FeatureUsageRateLimiter {
  */
 function _quotaTierToAllowance(quotaTier) {
   const quota = Settings.quotaGrants.ai[quotaTier]
-  if (!quota || typeof quota !== 'number') {
+  if (typeof quota !== 'number') {
     throw new Error(`Quota tier "${quotaTier}" is not initialized in settings`)
   }
   return Math.floor(quota)

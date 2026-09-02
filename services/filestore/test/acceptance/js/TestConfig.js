@@ -38,10 +38,22 @@ function s3SSECConfig() {
     automaticallyRotateDEKEncryption: true,
     dataEncryptionKeyBucketName: process.env.AWS_S3_USER_FILES_DEK_BUCKET_NAME,
     pathToProjectFolder(_bucketName, path) {
-      const match = path.match(/^[a-f0-9]{24}\//)
-      if (!match) throw new Error('not a project-folder')
-      const [projectFolder] = match
-      return projectFolder
+      // template_files keys are `templateId/v/version/fileId` (literal
+      // 24-hex prefix). project_blobs keys are
+      // `projectKey.format(historyId)/hash-prefix/hash-rest`, i.e. a
+      // reversed, zero-padded historyId split into 3/3/rest digits (numeric
+      // legacy ids) or 3/3/18 hex chars (reversed ObjectId hex) -- both
+      // stores share this test bucket, so accept either shape. See
+      // @overleaf/object-persistor/src/ProjectKey.js and
+      // history-v1/storage/lib/backupPersistor.mjs's PROJECT_FOLDER_REGEX
+      // for the same distinction in production.
+      const rawId = path.match(/^[a-f0-9]{24}\//)
+      if (rawId) return rawId[0]
+      const reversedId = path.match(
+        /^(?:\d{3}\/\d{3}\/\d{3,}|[a-f0-9]{3}\/[a-f0-9]{3}\/[a-f0-9]{18})\//
+      )
+      if (reversedId) return reversedId[0]
+      throw new Error('not a project-folder')
     },
     async getRootKeyEncryptionKeys() {
       return S3SSECKeys
@@ -60,8 +72,15 @@ function s3ConfigDefaultProviderCredentials() {
 }
 
 function s3Stores() {
+  // project_blobs/global_blobs reuse the template_files bucket in tests --
+  // buckets are just opaque containers keyed by an unrelated namespace, so
+  // this is enough to exercise the routing/key-building/validation for the
+  // history blob routes without provisioning dedicated test buckets.
+  const templateFiles = process.env.AWS_S3_TEMPLATE_FILES_BUCKET_NAME
   return {
-    template_files: process.env.AWS_S3_TEMPLATE_FILES_BUCKET_NAME,
+    template_files: templateFiles,
+    project_blobs: templateFiles,
+    global_blobs: templateFiles,
   }
 }
 
@@ -78,17 +97,26 @@ function gcsConfig() {
 }
 
 function gcsStores() {
+  // see s3Stores() above: reuse the same bucket for the history blob stores.
+  const templateFiles = process.env.GCS_TEMPLATE_FILES_BUCKET_NAME
   return {
-    template_files: process.env.GCS_TEMPLATE_FILES_BUCKET_NAME,
+    template_files: templateFiles,
+    project_blobs: templateFiles,
+    global_blobs: templateFiles,
   }
 }
 
 function fsStores() {
+  // see s3Stores() above: reuse the same directory for the history blob
+  // stores.
+  const templateFiles = Path.resolve(
+    import.meta.dirname,
+    '../../../template_files'
+  )
   return {
-    template_files: Path.resolve(
-      import.meta.dirname,
-      '../../../template_files'
-    ),
+    template_files: templateFiles,
+    project_blobs: templateFiles,
+    global_blobs: templateFiles,
   }
 }
 

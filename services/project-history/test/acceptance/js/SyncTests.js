@@ -18,7 +18,7 @@ import { fetchNothing, RequestFailedError } from '@overleaf/fetch-utils'
 import { _getBlobHashFromString } from '../../../app/js/HashManager.js'
 import { db, ObjectId } from '../../../app/js/mongodb.js'
 
-const EMPTY_FILE_HASH = 'e69de29bb2d1d6434b8b29ae775ad8c2e48c5391'
+const EMPTY_FILE_HASH = File.EMPTY_FILE_HASH
 
 const MockHistoryStore = () => nock('http://127.0.0.1:3100')
 const MockFileStore = () => nock('http://127.0.0.1:3009')
@@ -161,7 +161,12 @@ describe('Syncing with web and doc-updater', function () {
           }
           await ProjectHistoryClient.pushRawUpdate(this.project_id, update)
 
-          await ProjectHistoryClient.flushProject(this.project_id)
+          // The resync stays pending: this test only queues the structure
+          // update, not the resyncDocContent updates it asks for.
+          const res = await ProjectHistoryClient.flushProject(this.project_id, {
+            allowErrors: true,
+          })
+          expect(res.statusCode).to.equal(409)
 
           assert(
             createBlob.isDone(),
@@ -917,7 +922,12 @@ describe('Syncing with web and doc-updater', function () {
           }
           await ProjectHistoryClient.pushRawUpdate(this.project_id, update)
 
-          await ProjectHistoryClient.flushProject(this.project_id)
+          // The resync stays pending: this test only queues the structure
+          // update, not the resyncDocContent updates it asks for.
+          const res = await ProjectHistoryClient.flushProject(this.project_id, {
+            allowErrors: true,
+          })
+          expect(res.statusCode).to.equal(409)
 
           assert(
             deleteFile.isDone(),
@@ -2795,8 +2805,12 @@ describe('Syncing with web and doc-updater', function () {
           )
 
           // Step 3: Flush — processes structure update, adds /main.tex to resyncDocContents
-          // This succeeds (204) but leaves sync in an incomplete state
-          await ProjectHistoryClient.flushProject(this.project_id)
+          // The updates are applied, but the flush reports the incomplete sync
+          const flush = await ProjectHistoryClient.flushProject(
+            this.project_id,
+            { allowErrors: true }
+          )
+          expect(flush.statusCode).to.equal(409)
 
           // Step 4: Verify the sync state is stuck
           const syncState = await ProjectHistoryClient.getSyncState(
@@ -2823,7 +2837,11 @@ describe('Syncing with web and doc-updater', function () {
 
           // Step 6: Flush again — the text update should be silently skipped
           // because the doc is in resyncDocContents (sync "ongoing")
-          await ProjectHistoryClient.flushProject(this.project_id)
+          const flushAgain = await ProjectHistoryClient.flushProject(
+            this.project_id,
+            { allowErrors: true }
+          )
+          expect(flushAgain.statusCode).to.equal(409)
 
           // Step 7: Verify the sync state is STILL stuck (text update was skipped)
           const syncStateAfter = await ProjectHistoryClient.getSyncState(
@@ -2851,11 +2869,24 @@ describe('Syncing with web and doc-updater', function () {
             assert.fail('resync should have failed')
           } catch (error) {
             if (error instanceof RequestFailedError) {
-              expect(error.response.status).to.equal(500)
+              expect(error.response.status).to.equal(409)
             } else {
               throw error
             }
           }
+
+          expect(loggerError).to.have.been.calledWith(
+            sinon.match({
+              err: sinon.match({
+                name: 'SyncOngoingError',
+                message: 'sync ongoing',
+                info: sinon.match({
+                  projectId: this.project_id,
+                  stuckDocPaths: ['/main.tex'],
+                }),
+              }),
+            })
+          )
         })
 
         it('should recover with a hard resync (force=true)', async function () {
@@ -2876,7 +2907,9 @@ describe('Syncing with web and doc-updater', function () {
             this.project_id,
             structureUpdate
           )
-          await ProjectHistoryClient.flushProject(this.project_id)
+          await ProjectHistoryClient.flushProject(this.project_id, {
+            allowErrors: true,
+          })
 
           // Verify stuck
           const syncState = await ProjectHistoryClient.getSyncState(
@@ -2940,6 +2973,56 @@ describe('Syncing with web and doc-updater', function () {
           expect(syncState.stuckClearCount).to.equal(1)
           expect(syncState.resyncProjectStructure).to.equal(true)
           expect(syncState.lastStuckDocPaths).to.deep.equal(['/main.tex'])
+        })
+
+        it('should report a pending resync at the end of a flush', async function () {
+          await ProjectHistoryClient.injectStuckSyncState(this.project_id, [
+            '/main.tex',
+          ])
+
+          const requestResync = MockWeb()
+            .post(`/project/${this.project_id}/history/resync`)
+            .reply(204)
+
+          const res = await ProjectHistoryClient.flushProject(this.project_id, {
+            allowErrors: true,
+          })
+          expect(res.statusCode).to.equal(409)
+
+          // The flush only reports, it does not start a resync of its own
+          assert(!requestResync.isDone(), 'should not have requested a resync')
+          const syncState = await ProjectHistoryClient.getSyncState(
+            this.project_id
+          )
+          expect(syncState.resyncProjectStructure).to.equal(false)
+          expect(syncState.resyncDocContents).to.deep.equal(['/main.tex'])
+        })
+
+        it('should not report a resync that completes during the flush', async function () {
+          await ProjectHistoryClient.resyncHistory(this.project_id)
+
+          await ProjectHistoryClient.pushRawUpdate(this.project_id, {
+            projectHistoryId: historyId,
+            resyncProjectStructure: {
+              docs: [{ path: '/main.tex' }],
+              files: [],
+            },
+            meta: { ts: this.timestamp },
+          })
+          await ProjectHistoryClient.pushRawUpdate(this.project_id, {
+            path: '/main.tex',
+            doc: this.doc_id,
+            resyncDocContent: { content: 'a\nb' },
+            meta: { ts: this.timestamp },
+          })
+
+          await ProjectHistoryClient.flushProject(this.project_id)
+
+          const syncState = await ProjectHistoryClient.getSyncState(
+            this.project_id
+          )
+          expect(syncState.resyncProjectStructure).to.equal(false)
+          expect(syncState.resyncDocContents).to.deep.equal([])
         })
       })
     })

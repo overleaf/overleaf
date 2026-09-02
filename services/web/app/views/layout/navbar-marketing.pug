@@ -9,12 +9,13 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(
 )
 	.container-fluid.navbar-container
 		.navbar-header
+			- var customLogo = settings.nav.custom_logo_light || settings.nav.custom_logo
 			a.navbar-brand(href='/' aria-label=settings.appName)
-				if settings.nav.custom_logo
-					.navbar-logo(style=`background-image:url("${settings.nav.custom_logo}")`)
+				if customLogo
+					.navbar-logo(style=`background-image:url("${customLogo}")`)
 				if nav.title
 					.navbar-title #{nav.title}
-				if !nav.title && !settings.nav.custom_logo
+				if !nav.title && !customLogo
 					.navbar-logo
 
 			- var enableUpgradeButton = projectDashboardReact && usersBestSubscription && (usersBestSubscription.type === 'free' || usersBestSubscription.type === 'standalone-ai-add-on')
@@ -66,7 +67,7 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(
 									+dropdown-menu-link-item(href='/admin') Manage Site
 									+dropdown-menu-link-item(href='/admin/user') Manage Users
 								if canDisplayProjectUrlLookup
-									+dropdown-menu-link-item(href='/admin/project') Project URL Lookup
+									+dropdown-menu-link-item(href='/admin/project') Project/Object Lookup
 								if canDisplayAdminRedirect
 									+dropdown-menu-link-item(href=settings.adminUrl) Switch to Admin
 								if canDisplaySplitTestMenu

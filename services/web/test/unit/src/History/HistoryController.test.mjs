@@ -1,4 +1,4 @@
-import { vi, expect } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import { RequestFailedError } from '@overleaf/fetch-utils'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
@@ -119,7 +119,17 @@ describe('HistoryController', function () {
     vi.doMock(
       '../../../../app/src/Features/History/RestoreManager.mjs',
       () => ({
-        default: (ctx.RestoreManager = {}),
+        default: (ctx.RestoreManager = {
+          promises: {
+            restoreFileFromV2: sinon
+              .stub()
+              .resolves({ _id: 'restored-id', type: 'doc' }),
+            revertFile: sinon
+              .stub()
+              .resolves({ _id: 'reverted-id', type: 'doc' }),
+            revertProject: sinon.stub().resolves([]),
+          },
+        }),
       })
     )
 
@@ -137,7 +147,12 @@ describe('HistoryController', function () {
 
   describe('proxyToHistoryApi', function () {
     beforeEach(async function (ctx) {
-      ctx.req = { url: '/mock/url', method: 'POST', session: sinon.stub() }
+      ctx.req = {
+        url: '/mock/url',
+        method: 'POST',
+        session: sinon.stub(),
+        params: {},
+      }
       ctx.res = {
         set: sinon.stub(),
       }
@@ -186,9 +201,32 @@ describe('HistoryController', function () {
     })
   })
 
+  describe('proxyToHistoryApi (with an invalid request)', function () {
+    beforeEach(async function (ctx) {
+      ctx.req = {
+        url: '/mock/url',
+        method: 'GET',
+        session: sinon.stub(),
+        params: { Project_id: 'not-an-object-id' },
+      }
+      ctx.res = { set: sinon.stub() }
+      await ctx.HistoryController.proxyToHistoryApi(ctx.req, ctx.res, ctx.next)
+    })
+
+    it('rejects the request without calling the history api', function (ctx) {
+      ctx.next.should.have.been.calledOnce
+      ctx.next.firstCall.args[0].should.be.an.instanceof(Error)
+      ctx.fetchStreamWithResponse.should.not.have.been.called
+    })
+  })
+
   describe('proxyToHistoryApiAndInjectUserDetails', function () {
     beforeEach(async function (ctx) {
-      ctx.req = { url: '/mock/url', method: 'POST' }
+      ctx.req = {
+        url: '/mock/url',
+        method: 'POST',
+        params: { Project_id: ctx.project_id },
+      }
       ctx.res = { json: sinon.stub() }
       ctx.data = 'mock-data'
       ctx.dataWithUsers = 'mock-injected-data'
@@ -233,7 +271,11 @@ describe('HistoryController', function () {
   describe('proxyToHistoryApiAndInjectUserDetails (with the history API failing)', function () {
     beforeEach(async function (ctx) {
       ctx.url = '/mock/url'
-      ctx.req = { url: ctx.url, method: 'POST' }
+      ctx.req = {
+        url: ctx.url,
+        method: 'POST',
+        params: { Project_id: ctx.project_id },
+      }
       ctx.res = { json: sinon.stub() }
       ctx.err = new RequestFailedError(ctx.url, {}, { status: 500 })
       ctx.fetchJson.rejects(ctx.err)
@@ -254,6 +296,28 @@ describe('HistoryController', function () {
 
     it('should throw an error', function (ctx) {
       ctx.next.should.have.been.calledWith(ctx.err)
+    })
+  })
+
+  describe('proxyToHistoryApiAndInjectUserDetails (with an invalid request)', function () {
+    beforeEach(async function (ctx) {
+      ctx.req = {
+        url: '/mock/url',
+        method: 'GET',
+        params: { Project_id: 'not-an-object-id' },
+      }
+      ctx.res = { json: sinon.stub() }
+      await ctx.HistoryController.proxyToHistoryApiAndInjectUserDetails(
+        ctx.req,
+        ctx.res,
+        ctx.next
+      )
+    })
+
+    it('rejects the request without calling the history api', function (ctx) {
+      ctx.next.should.have.been.calledOnce
+      ctx.next.firstCall.args[0].should.be.an.instanceof(Error)
+      ctx.fetchJson.should.not.have.been.called
     })
   })
 
@@ -305,6 +369,288 @@ describe('HistoryController', function () {
       it('responds with a 204', function (ctx) {
         ctx.res.sendStatus.should.have.been.calledWith(204)
       })
+    })
+
+    describe('with an invalid historyRangesMigration value', function () {
+      beforeEach(async function (ctx) {
+        ctx.req = {
+          params: { Project_id: ctx.project_id },
+          body: { historyRangesMigration: 'sideways' },
+        }
+        ctx.res = { setTimeout: sinon.stub(), sendStatus: sinon.stub() }
+
+        await ctx.HistoryController.resyncProjectHistory(
+          ctx.req,
+          ctx.res,
+          ctx.next
+        )
+      })
+
+      it('rejects the request without resyncing', function (ctx) {
+        ctx.next.should.have.been.calledOnce
+        ctx.next.firstCall.args[0].should.be.an.instanceof(Error)
+        ctx.ProjectEntityUpdateHandler.promises.resyncProjectHistory.should.not
+          .have.been.called
+      })
+    })
+  })
+
+  describe('restoreFileFromV2', function () {
+    beforeEach(function (ctx) {
+      ctx.res = { json: sinon.stub() }
+      ctx.ProjectAuditLogHandler.addEntryIfManagedInBackground = sinon.stub()
+    })
+
+    it('restores the file for a valid request', async function (ctx) {
+      ctx.req = {
+        params: { project_id: ctx.project_id },
+        body: { version: 42, pathname: 'foo/bar.tex' },
+        session: {},
+        ip: '1.2.3.4',
+      }
+      await ctx.HistoryController.restoreFileFromV2(ctx.req, ctx.res, ctx.next)
+      ctx.RestoreManager.promises.restoreFileFromV2.should.have.been.calledWith(
+        ctx.user_id,
+        ctx.project_id,
+        42,
+        'foo/bar.tex'
+      )
+    })
+
+    it('rejects a non-numeric version without invoking RestoreManager', async function (ctx) {
+      ctx.req = {
+        params: { project_id: ctx.project_id },
+        body: { version: 'not-a-number', pathname: 'foo/bar.tex' },
+        session: {},
+        ip: '1.2.3.4',
+      }
+      await ctx.HistoryController.restoreFileFromV2(ctx.req, ctx.res, ctx.next)
+      ctx.next.should.have.been.calledOnce
+      ctx.next.firstCall.args[0].should.be.an.instanceof(Error)
+      ctx.RestoreManager.promises.restoreFileFromV2.should.not.have.been.called
+    })
+
+    it('rejects a negative version without invoking RestoreManager', async function (ctx) {
+      ctx.req = {
+        params: { project_id: ctx.project_id },
+        body: { version: -1, pathname: 'foo/bar.tex' },
+        session: {},
+        ip: '1.2.3.4',
+      }
+      await ctx.HistoryController.restoreFileFromV2(ctx.req, ctx.res, ctx.next)
+      ctx.next.should.have.been.calledOnce
+      ctx.next.firstCall.args[0].should.be.an.instanceof(Error)
+      ctx.RestoreManager.promises.restoreFileFromV2.should.not.have.been.called
+    })
+
+    it('rejects a pathname containing .. without invoking RestoreManager', async function (ctx) {
+      ctx.req = {
+        params: { project_id: ctx.project_id },
+        body: { version: 42, pathname: '../../etc/passwd' },
+        session: {},
+        ip: '1.2.3.4',
+      }
+      await ctx.HistoryController.restoreFileFromV2(ctx.req, ctx.res, ctx.next)
+      ctx.next.should.have.been.calledOnce
+      ctx.next.firstCall.args[0].should.be.an.instanceof(Error)
+      ctx.RestoreManager.promises.restoreFileFromV2.should.not.have.been.called
+    })
+
+    it('rejects an absolute pathname without invoking RestoreManager', async function (ctx) {
+      ctx.req = {
+        params: { project_id: ctx.project_id },
+        body: { version: 42, pathname: '/etc/passwd' },
+        session: {},
+        ip: '1.2.3.4',
+      }
+      await ctx.HistoryController.restoreFileFromV2(ctx.req, ctx.res, ctx.next)
+      ctx.next.should.have.been.calledOnce
+      ctx.next.firstCall.args[0].should.be.an.instanceof(Error)
+      ctx.RestoreManager.promises.restoreFileFromV2.should.not.have.been.called
+    })
+
+    it('rejects a path-traversal string as version without invoking RestoreManager', async function (ctx) {
+      ctx.req = {
+        params: { project_id: ctx.project_id },
+        body: { version: '0/../../../ObjectId', pathname: 'foo/bar.tex' },
+        session: {},
+        ip: '1.2.3.4',
+      }
+      await ctx.HistoryController.restoreFileFromV2(ctx.req, ctx.res, ctx.next)
+      ctx.next.should.have.been.calledOnce
+      ctx.next.firstCall.args[0].should.be.an.instanceof(Error)
+      ctx.RestoreManager.promises.restoreFileFromV2.should.not.have.been.called
+    })
+  })
+
+  describe('revertFile', function () {
+    beforeEach(function (ctx) {
+      ctx.res = { json: sinon.stub() }
+      ctx.ProjectAuditLogHandler.addEntryIfManagedInBackground = sinon.stub()
+    })
+
+    it('reverts the file for a valid request', async function (ctx) {
+      ctx.req = {
+        params: { project_id: ctx.project_id },
+        body: { version: 42, pathname: 'foo/bar.tex' },
+        session: {},
+        ip: '1.2.3.4',
+      }
+      await ctx.HistoryController.revertFile(ctx.req, ctx.res, ctx.next)
+      ctx.RestoreManager.promises.revertFile.should.have.been.calledWith(
+        ctx.user_id,
+        ctx.project_id,
+        42,
+        'foo/bar.tex'
+      )
+    })
+
+    it('rejects a malformed pathname without invoking RestoreManager', async function (ctx) {
+      ctx.req = {
+        params: { project_id: ctx.project_id },
+        body: { version: 42, pathname: '../secret.tex' },
+        session: {},
+        ip: '1.2.3.4',
+      }
+      await ctx.HistoryController.revertFile(ctx.req, ctx.res, ctx.next)
+      ctx.next.should.have.been.calledOnce
+      ctx.next.firstCall.args[0].should.be.an.instanceof(Error)
+      ctx.RestoreManager.promises.revertFile.should.not.have.been.called
+    })
+  })
+
+  describe('revertProject', function () {
+    beforeEach(function (ctx) {
+      ctx.res = { json: sinon.stub() }
+      ctx.ProjectAuditLogHandler.addEntryIfManagedInBackground = sinon.stub()
+    })
+
+    it('reverts the project for a valid request', async function (ctx) {
+      ctx.req = {
+        params: { project_id: ctx.project_id },
+        body: { version: 42 },
+        session: {},
+        ip: '1.2.3.4',
+      }
+      await ctx.HistoryController.revertProject(ctx.req, ctx.res, ctx.next)
+      ctx.RestoreManager.promises.revertProject.should.have.been.calledWith(
+        ctx.user_id,
+        ctx.project_id,
+        42
+      )
+    })
+
+    it('rejects a non-integer version without invoking RestoreManager', async function (ctx) {
+      ctx.req = {
+        params: { project_id: ctx.project_id },
+        body: { version: 1.5 },
+        session: {},
+        ip: '1.2.3.4',
+      }
+      await ctx.HistoryController.revertProject(ctx.req, ctx.res, ctx.next)
+      ctx.next.should.have.been.calledOnce
+      ctx.next.firstCall.args[0].should.be.an.instanceof(Error)
+      ctx.RestoreManager.promises.revertProject.should.not.have.been.called
+    })
+  })
+
+  describe('getLabels', function () {
+    beforeEach(function (ctx) {
+      ctx.res = { json: sinon.stub() }
+      ctx.labels = [{ id: 'label-1', comment: 'a label' }]
+      ctx.fetchJson.resolves(ctx.labels)
+    })
+
+    it('fetches and returns the labels for a valid request', async function (ctx) {
+      ctx.req = { params: { Project_id: ctx.project_id } }
+      await ctx.HistoryController.getLabels(ctx.req, ctx.res, ctx.next)
+      ctx.fetchJson.should.have.been.calledWith(
+        `${ctx.settings.apis.project_history.url}/project/${ctx.project_id}/labels`
+      )
+      ctx.res.json.should.have.been.calledWith(ctx.labels)
+    })
+
+    it('rejects a malformed Project_id without calling the history api', async function (ctx) {
+      ctx.req = { params: { Project_id: 'not-an-object-id' } }
+      await ctx.HistoryController.getLabels(ctx.req, ctx.res, ctx.next)
+      ctx.next.should.have.been.calledOnce
+      ctx.next.firstCall.args[0].should.be.an.instanceof(Error)
+      ctx.fetchJson.should.not.have.been.called
+    })
+  })
+
+  describe('createLabel', function () {
+    beforeEach(function (ctx) {
+      ctx.res = { json: sinon.stub() }
+    })
+
+    it('creates and returns the label for a valid request', async function (ctx) {
+      ctx.req = {
+        params: { Project_id: ctx.project_id },
+        body: { comment: 'a label', version: 3 },
+        session: {},
+      }
+      ctx.label = { id: 'label-1', comment: 'a label', version: 3 }
+      ctx.fetchJson.resolves(ctx.label)
+      await ctx.HistoryController.createLabel(ctx.req, ctx.res, ctx.next)
+      ctx.fetchJson.should.have.been.calledWith(
+        `${ctx.settings.apis.project_history.url}/project/${ctx.project_id}/labels`,
+        {
+          method: 'POST',
+          json: { comment: 'a label', version: 3, user_id: ctx.user_id },
+        }
+      )
+      ctx.res.json.should.have.been.calledWith(
+        sinon.match({ comment: 'a label', version: 3 })
+      )
+    })
+
+    it('rejects a negative version without calling the history api', async function (ctx) {
+      ctx.req = {
+        params: { Project_id: ctx.project_id },
+        body: { comment: 'a label', version: -1 },
+        session: {},
+      }
+      await ctx.HistoryController.createLabel(ctx.req, ctx.res, ctx.next)
+      ctx.next.should.have.been.calledOnce
+      ctx.next.firstCall.args[0].should.be.an.instanceof(Error)
+      ctx.fetchJson.should.not.have.been.called
+    })
+  })
+
+  describe('deleteLabel', function () {
+    beforeEach(function (ctx) {
+      ctx.res = { sendStatus: sinon.stub() }
+      ctx.labelId = '000000000000000087654321'
+      ctx.ProjectGetter.promises = {
+        getProject: sinon.stub().resolves({
+          owner_ref: { equals: sinon.stub().returns(true) },
+        }),
+      }
+    })
+
+    it('deletes the label for a valid request', async function (ctx) {
+      ctx.req = {
+        params: { Project_id: ctx.project_id, label_id: ctx.labelId },
+        session: {},
+      }
+      await ctx.HistoryController.deleteLabel(ctx.req, ctx.res, ctx.next)
+      ctx.fetchNothing.should.have.been.calledWith(
+        `${ctx.settings.apis.project_history.url}/project/${ctx.project_id}/labels/${ctx.labelId}`,
+        { method: 'DELETE' }
+      )
+      ctx.res.sendStatus.should.have.been.calledWith(204)
+    })
+
+    it('rejects a malformed label_id without calling the history api', async function (ctx) {
+      ctx.req = {
+        params: { Project_id: ctx.project_id, label_id: 'not-an-object-id' },
+        session: {},
+      }
+      await ctx.HistoryController.deleteLabel(ctx.req, ctx.res, ctx.next)
+      ctx.next.should.have.been.calledOnce
+      ctx.next.firstCall.args[0].should.be.an.instanceof(Error)
+      ctx.fetchNothing.should.not.have.been.called
     })
   })
 

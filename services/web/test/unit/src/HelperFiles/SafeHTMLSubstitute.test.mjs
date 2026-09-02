@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 import path from 'node:path'
 const MODULE_PATH = path.join(
   import.meta.dirname,

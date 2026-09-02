@@ -2,6 +2,7 @@
   --ds-nav-active-bg: var(--bg-accent-03);
   --ds-nav-active-color: var(--green-60);
   --theme-toggle-selected-background: var(--green-20);
+  --ds-nav-content-bg-primary: var(--bg-light-primary);
   --ds-nav-content-bg-secondary: var(--bg-light-secondary);
   --table-icon-bg-hover: 27 34 44;
   --themed-dashboard-popover-bg: var(--bg-dark-primary);
@@ -15,6 +16,7 @@
     --ds-nav-active-bg: var(--green-70);
     --ds-nav-active-color: var(--green-10);
     --theme-toggle-selected-background: var(--green-70);
+    --ds-nav-content-bg-primary: var(--bg-dark-primary);
     --ds-nav-content-bg-secondary: var(--bg-dark-secondary);
     --table-icon-bg-hover: 255 255 255;
     --themed-dashboard-popover-bg: var(--bg-light-primary);
@@ -51,7 +53,8 @@ body {
     .navbar-header .navbar-logo {
       @include media-breakpoint-up(md) {
         position: relative;
-        top: var(--spacing-05);
+        top: calc(var(--spacing-05) * 2);
+        left: var(--spacing-05);
       }
     }
 
@@ -103,38 +106,34 @@ body {
     }
   }
 
-  &.library-enabled {
-    .navbar-default .navbar-header .navbar-logo {
+  &.ds-nav-hides-top-navbar {
+    // The sidebar shows the logo and account/help menus from md upwards, so
+    // the top navbar is only needed on mobile.
+    .navbar-default {
       @include media-breakpoint-up(md) {
-        top: calc(var(--spacing-05) * 2);
-        left: var(--spacing-05);
+        display: none;
       }
     }
 
-    .project-list-wrapper .project-list-sidebar-wrapper-react {
-      padding-top: calc(var(--spacing-08) - 1px);
+    .project-list-wrapper
+      .project-ds-nav-content-and-messages
+      .project-ds-nav-content {
+      @include media-breakpoint-up(md) {
+        border-top-left-radius: 0;
+        border-top: none;
+      }
+    }
 
-      .ds-nav-page-switcher-divider {
-        margin: var(--spacing-05) 0;
+    .project-list-header-row {
+      @include media-breakpoint-up(md) {
+        margin-top: var(--spacing-08);
       }
 
-      .project-list-sidebar-scroll {
-        padding-top: 0;
-        padding-right: var(--spacing-05);
-      }
-
-      ul.project-list-filters {
-        > li > button {
-          padding-left: calc(var(--spacing-05) + 24px + var(--spacing-05));
-        }
-
-        .dropdown-header {
-          padding-left: calc(var(--spacing-06) + 24px + var(--spacing-05));
-        }
-
-        > li.tag button.tag-name {
-          padding-left: calc(var(--spacing-06) + 24px + var(--spacing-05));
-        }
+      // On mobile the trash page has no heading or plan widget in this row
+      // (both are desktop-only), so collapse it to avoid an empty gap above
+      // the navigation dropdown.
+      @include media-breakpoint-down(md) {
+        display: none;
       }
     }
   }
@@ -157,7 +156,7 @@ body {
       max-width: 320px;
       min-width: 200px;
       margin-top: var(--spacing-03);
-      padding: var(--spacing-08) 0 0 0;
+      padding: calc(var(--spacing-08) - 1px) 0 0;
 
       .new-project-dropdown {
         padding: 0 var(--spacing-08) var(--spacing-05) var(--spacing-05);
@@ -173,7 +172,6 @@ body {
             100vh - #{$header-height} - var(--spacing-03) - var(--spacing-08) -
               36px - var(--spacing-05)
           );
-          overflow: auto;
         }
       }
 
@@ -188,12 +186,48 @@ body {
         flex: 1 1 auto;
         overflow: auto;
         margin: 0 var(--spacing-02) 0 0;
-        padding: var(--spacing-05) var(--spacing-07) var(--spacing-05)
-          var(--spacing-05);
+        padding: 0 var(--spacing-05) var(--spacing-05);
+      }
+
+      ul.project-list-filters {
+        margin-top: var(--spacing-05);
+
+        .sidebar-filter-button {
+          display: flex;
+          align-items: center;
+          padding-left: calc(var(--spacing-05) + 20px + var(--spacing-05));
+        }
+
+        .sidebar-filter-button-with-icon {
+          // Only the items with an icon are 44px tall: 20px of content between
+          // 12px paddings. The rest of the filters stay at 40px.
+          line-height: var(--line-height-02);
+          padding: var(--spacing-05);
+
+          // Without this the icon is an inline box sitting on the text
+          // baseline, which leaves descender space below it and stops
+          // align-items from centring it against the label.
+          .icon {
+            display: flex;
+            align-items: center;
+          }
+
+          svg {
+            margin-right: var(--spacing-05);
+          }
+        }
+
+        .dropdown-header {
+          padding-left: calc(var(--spacing-06) + 20px + var(--spacing-05));
+        }
+
+        > li.tag button.tag-name {
+          padding-left: calc(var(--spacing-06) + 20px + var(--spacing-05));
+        }
       }
 
       .ds-nav-page-switcher-logo {
-        padding: 0 var(--spacing-08) var(--spacing-07);
+        padding: 0 var(--spacing-08) var(--spacing-04);
 
         img {
           width: 130px;
@@ -201,27 +235,30 @@ body {
         }
       }
 
-      .ds-nav-page-switcher-items {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-02);
-        padding: 0 var(--spacing-05);
-        margin: 0;
-
-        &--no-logo {
-          padding-top: var(--spacing-05);
-        }
-      }
-
       .ds-nav-page-switcher-item {
         display: flex;
         align-items: center;
+        width: 100%;
         gap: var(--spacing-05);
+
+        // 20px of text between 12px paddings makes the item 44px tall.
+        line-height: var(--line-height-02);
         padding: var(--spacing-05);
+        border: none;
         border-radius: var(--border-radius-medium);
+        background: none;
         color: var(--ds-nav-color);
         font-size: var(--font-size-03);
+        text-align: left;
         text-decoration: none;
+
+        .ds-nav-page-switcher-item-label {
+          flex: 1 1 auto;
+          min-width: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
 
         &:hover {
           background-color: var(--ds-nav-hover-bg);
@@ -236,8 +273,16 @@ body {
         }
       }
 
+      .ds-nav-dropdown-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-02);
+        padding: 0;
+        margin: 0;
+      }
+
       .ds-nav-sidebar-lower {
-        padding: var(--spacing-05) var(--spacing-08) 0 var(--spacing-05);
+        padding: var(--spacing-05) var(--spacing-05) 0 var(--spacing-05);
         border-top: solid 1px transparent;
 
         &.show-shadow {
@@ -343,11 +388,69 @@ body {
     }
 
     .project-ds-nav-main {
+      display: flex;
+      flex-direction: column;
       min-height: 100%;
       padding: var(--spacing-08) var(--spacing-06);
 
       @include media-breakpoint-up(md) {
         padding: var(--spacing-08);
+      }
+
+      main {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+      }
+
+      .project-ds-empty-project-list {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        flex: 1;
+        padding: var(--spacing-09);
+        background: var(--ds-nav-content-bg-primary);
+        border-radius: var(--border-radius-base);
+
+        @include media-breakpoint-down(md) {
+          margin-top: var(--spacing-06);
+        }
+
+        .project-ds-empty-project-list-inner {
+          display: flex;
+          flex-direction: column;
+          gap: var(--spacing-06);
+          max-width: 560px;
+
+          .project-ds-empty-project-list-icon {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto;
+            height: 80px;
+            width: 80px;
+            padding: var(--spacing-08);
+            border-radius: 50%;
+            background-color: var(--bg-secondary-themed);
+            color: var(--content-secondary-themed);
+
+            .material-symbols {
+              font-size: var(--font-size-08);
+            }
+          }
+
+          .project-ds-empty-project-list-title {
+            @include heading-sm;
+
+            text-align: center;
+            font-weight: 600;
+          }
+
+          .project-ds-empty-project-list-description {
+            text-align: center;
+          }
+        }
       }
     }
 
@@ -411,14 +514,13 @@ body {
     }
   }
 
-  .ds-nav-icon-dropdown {
+  .ds-nav-dropdown {
     .dropdown-toggle {
-      color: var(--ds-nav-color);
+      width: 100%;
+      border: none;
       background: none;
-      height: 44px;
-      width: 44px;
-      padding: 0;
-      overflow: hidden;
+      font-weight: normal;
+      text-align: left;
 
       &:hover {
         background-color: var(--ds-nav-hover-bg);
@@ -431,17 +533,6 @@ body {
 
       &::after {
         display: none;
-      }
-
-      > div {
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .material-symbols {
-        vertical-align: middle;
       }
     }
   }
@@ -533,6 +624,38 @@ body {
 
     &:hover {
       color: var(--themed-dashboard-popover-link-visited-color);
+    }
+  }
+}
+
+.trash-page-tabs {
+  display: flex;
+  gap: var(--spacing-06);
+  margin-bottom: var(--spacing-06);
+  border-bottom: 1px solid var(--border-divider-themed);
+
+  // On mobile the Projects/References switch lives in the navigation dropdown
+  // submenu instead of these tabs.
+  @include media-breakpoint-down(md) {
+    display: none;
+  }
+
+  .trash-page-tab {
+    padding: var(--spacing-03) var(--spacing-02);
+    margin-bottom: -1px;
+    border-bottom: 2px solid transparent;
+    color: var(--content-secondary-themed);
+    font-size: var(--font-size-03);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--content-primary-themed);
+      text-decoration: none;
+    }
+
+    &.active {
+      border-bottom-color: var(--green-50);
+      color: var(--content-primary-themed);
     }
   }
 }

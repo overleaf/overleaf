@@ -1,4 +1,4 @@
-import { expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import CustomerIoPlanHelpers from '../../../../app/src/Features/Subscription/CustomerIoPlanHelpers.mjs'
 
 describe('CustomerIoPlanHelpers', function () {
@@ -121,6 +121,47 @@ describe('CustomerIoPlanHelpers', function () {
     it('sets enterprise_commons=false when there are no emails', function () {
       const properties = CustomerIoPlanHelpers.getAffiliationProperties([])
       expect(properties.enterprise_commons).to.equal(false)
+    })
+
+    it('sets commons_ai=true when the user has active commons access at a writefullCommonsAccount institution', function () {
+      const properties = CustomerIoPlanHelpers.getAffiliationProperties([
+        {
+          emailHasInstitutionLicence: true,
+          affiliation: {
+            institution: { writefullCommonsAccount: true },
+          },
+        },
+      ])
+      expect(properties.commons_ai).to.equal(true)
+    })
+
+    it('sets commons_ai=false when affiliated with a writefullCommonsAccount institution but without active commons access', function () {
+      const properties = CustomerIoPlanHelpers.getAffiliationProperties([
+        {
+          emailHasInstitutionLicence: false,
+          affiliation: {
+            institution: { writefullCommonsAccount: true },
+          },
+        },
+      ])
+      expect(properties.commons_ai).to.equal(false)
+    })
+
+    it('sets commons_ai=false when active access is not at a writefullCommonsAccount institution', function () {
+      const properties = CustomerIoPlanHelpers.getAffiliationProperties([
+        {
+          emailHasInstitutionLicence: true,
+          affiliation: {
+            institution: { commonsAccount: true },
+          },
+        },
+      ])
+      expect(properties.commons_ai).to.equal(false)
+    })
+
+    it('sets commons_ai=false when there are no emails', function () {
+      const properties = CustomerIoPlanHelpers.getAffiliationProperties([])
+      expect(properties.commons_ai).to.equal(false)
     })
 
     it('sets domain_capture=true when an affiliation has domain capture enabled', function () {

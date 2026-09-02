@@ -8,7 +8,6 @@ import {
   useMemo,
   useState,
 } from 'react'
-import useScopeEventEmitter from '@/shared/hooks/use-scope-event-emitter'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import { isValidTeXFile } from '@/main/is-valid-tex-file'
 import localStorage from '@/infrastructure/local-storage'
@@ -54,8 +53,6 @@ export const OutlineProvider: FC<React.PropsWithChildren> = ({ children }) => {
     useState<boolean>(false)
   const [ignoreNextScroll, setIgnoreNextScroll] = useState<boolean>(false)
   const { sendEvent } = useEditorAnalytics()
-
-  const goToLineEmitter = useScopeEventEmitter('editor:gotoLine', true)
 
   useEventListener(
     'file-view:file-opened',
@@ -106,14 +103,18 @@ export const OutlineProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const jumpToLine = useCallback(
     (lineNumber: number, syncToPdf: boolean) => {
       setIgnoreNextScroll(true)
-      goToLineEmitter({
-        gotoLine: lineNumber,
-        gotoColumn: 0,
-        syncToPdf,
-      })
+      window.dispatchEvent(
+        new CustomEvent('editor:gotoLine', {
+          detail: {
+            gotoLine: lineNumber,
+            gotoColumn: 0,
+            syncToPdf,
+          },
+        })
+      )
       sendEvent('outline-jump-to-line')
     },
-    [goToLineEmitter, sendEvent]
+    [sendEvent]
   )
 
   const highlightedLine = useMemo(

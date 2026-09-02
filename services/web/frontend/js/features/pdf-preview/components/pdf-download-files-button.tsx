@@ -1,8 +1,8 @@
 import {
-  Dropdown,
-  DropdownMenu,
-  DropdownToggle,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import PdfFileList from './pdf-file-list'
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -18,19 +18,19 @@ function PdfDownloadFilesButton() {
   }
 
   return (
-    <Dropdown drop="up">
-      <DropdownToggle
+    <OLDropdown drop="up">
+      <OLDropdownToggle
         id="dropdown-files-logs-pane"
         variant="secondary"
         size="sm"
         disabled={compiling || !fileList}
       >
         {t('other_logs_and_files')}
-      </DropdownToggle>
-      <DropdownMenu id="dropdown-files-logs-pane-list">
+      </OLDropdownToggle>
+      <OLDropdownMenu id="dropdown-files-logs-pane-list">
         <PdfFileList fileList={fileList} />
-      </DropdownMenu>
-    </Dropdown>
+      </OLDropdownMenu>
+    </OLDropdown>
   )
 }
 

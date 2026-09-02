@@ -9,7 +9,7 @@ import {
 import OLFormGroup from '@/shared/components/ol/ol-form-group'
 import OLFormLabel from '@/shared/components/ol/ol-form-label'
 import OLFormControl from '@/shared/components/ol/ol-form-control'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 
 /**
  * A form component that renders a text input with label,
@@ -36,20 +36,34 @@ export default function FileTreeCreateNameInput({
 
   // the value is stored in a context provider, so it's available elsewhere in the form
   const { name, setName, touchedName, validName } = useFileTreeCreateName()
+  const touchedNameRef = useRef(touchedName)
+  touchedNameRef.current = touchedName
 
   // focus the first part of the filename if needed
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    if (inputRef.current && focusName) {
+    const input = inputRef.current
+    if (input && focusName) {
+      const { selectionStart, selectionEnd } = input
+      // Defer the focus so it is not overridden while the modal is opening.
       window.requestAnimationFrame(() => {
-        if (inputRef.current) {
-          inputRef.current.focus()
-          inputRef.current.setSelectionRange(
-            0,
-            inputRef.current.value.lastIndexOf('.')
-          )
+        const input = inputRef.current
+        if (!input) {
+          return // The input has been unmounted before the focus could be applied.
         }
+        if (touchedNameRef.current) {
+          return // The name has been edited already; focusing and selecting the initial name now would clobber that edit.
+        }
+        if (
+          input.selectionStart !== selectionStart ||
+          input.selectionEnd !== selectionEnd
+        ) {
+          return // The selection has been changed already (e.g. a select-all ahead of deleting the name); selecting the initial name now would clobber that change.
+        }
+        input.focus()
+        // Select the name part so that typing keeps the extension.
+        input.setSelectionRange(0, input.value.lastIndexOf('.'))
       })
     }
   }, [focusName])
@@ -57,7 +71,6 @@ export default function FileTreeCreateNameInput({
   return (
     <OLFormGroup controlId="new-doc-name" className={classes.formGroup}>
       <OLFormLabel>{label || t('file_name')}</OLFormLabel>
-
       <OLFormControl
         type="text"
         placeholder={placeholder || t('file_name')}
@@ -67,15 +80,15 @@ export default function FileTreeCreateNameInput({
         ref={inputRef}
         disabled={inFlight}
       />
-
       {touchedName && !validName && (
-        <OLNotification
-          type="error"
-          className="row-spaced-small"
-          content={t('files_cannot_include_invalid_characters')}
-        />
+        <div className="notification-list">
+          <Notification
+            type="error"
+            className="row-spaced-small"
+            content={t('files_cannot_include_invalid_characters')}
+          />
+        </div>
       )}
-
       {error && <ErrorMessage error={error} />}
     </OLFormGroup>
   )
@@ -91,29 +104,35 @@ function ErrorMessage({ error }: { error: string | Record<string, any> }) {
   switch (error.constructor) {
     case DuplicateFilenameError:
       return (
-        <OLNotification
-          type="error"
-          className="row-spaced-small"
-          content={t('file_already_exists')}
-        />
+        <div className="notification-list">
+          <Notification
+            type="error"
+            className="row-spaced-small"
+            content={t('file_already_exists')}
+          />
+        </div>
       )
 
     case InvalidFilenameError:
       return (
-        <OLNotification
-          type="error"
-          className="row-spaced-small"
-          content={t('files_cannot_include_invalid_characters')}
-        />
+        <div className="notification-list">
+          <Notification
+            type="error"
+            className="row-spaced-small"
+            content={t('files_cannot_include_invalid_characters')}
+          />
+        </div>
       )
 
     case BlockedFilenameError:
       return (
-        <OLNotification
-          type="error"
-          className="row-spaced-small"
-          content={t('blocked_filename')}
-        />
+        <div className="notification-list">
+          <Notification
+            type="error"
+            className="row-spaced-small"
+            content={t('blocked_filename')}
+          />
+        </div>
       )
 
     default:

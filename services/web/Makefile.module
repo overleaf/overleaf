@@ -7,7 +7,7 @@ export MODULE_NAME := $(notdir $(shell pwd))
 export MODULE_DIR := modules/$(MODULE_NAME)
 export PROJECT_NAME = web
 export RETRIES ?= $(if $(CI),3,0)
-export MOCHA_GREP ?=
+export TEST_NAME_PATTERN ?=
 
 export OVERLEAF_CONFIG = /overleaf/services/web/$(MODULE_DIR)/test/acceptance/config/settings.test.js
 export BASE_CONFIG ?= /overleaf/services/web/test/acceptance/config/settings.test.saas.js

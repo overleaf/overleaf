@@ -1,8 +1,9 @@
-import { vi, expect } from 'vitest'
+import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { setTimeout } from 'node:timers/promises'
 import sinon from 'sinon'
 import tk from 'timekeeper'
 import { RequestFailedError } from '@overleaf/fetch-utils'
+import Errors from '../../../../app/src/Features/Errors/Errors.js'
 import _ from 'lodash'
 
 const FILESTORE_URL = 'http://filestore.example.com'
@@ -197,6 +198,10 @@ describe('ClsiManager', function () {
       clsiCookie: { key: 'clsiserver' },
       safeCompilers: ['pdflatex', 'latex', 'xelatex', 'lualatex'],
       defaultLatexCompiler: 'pdflatex',
+      allowedImageNames: [
+        { imageName: 'mock-image-name', hasCheckpointing: true },
+        { imageName: 'mock-image-name-no-checkpointing' },
+      ],
     }
     ctx.ClsiCacheHandler = {
       clearCache: sinon.stub().resolves(),
@@ -204,6 +209,15 @@ describe('ClsiManager', function () {
     ctx.HistoryManager = {
       promises: {
         flushProject: sinon.stub().resolves(),
+        getLatestHistoryWithHistoryId: sinon.stub().resolves({
+          chunk: {
+            history: { snapshot: { files: {} }, changes: [] },
+            startVersion: 0,
+          },
+        }),
+        getChangesWithHistoryId: sinon
+          .stub()
+          .resolves({ changes: [], hasMore: false }),
       },
       getFilestoreBlobURL: sinon.stub().callsFake((historyId, hash) => {
         if (hash === GLOBAL_BLOB_HASH) {
@@ -288,6 +302,12 @@ describe('ClsiManager', function () {
 
     vi.doMock('../../../../app/src/Features/History/HistoryManager', () => ({
       default: ctx.HistoryManager,
+    }))
+
+    // Re-export the real Errors module so instanceof checks in ClsiManager use
+    // the same class instances as this test.
+    vi.doMock('../../../../app/src/Features/Errors/Errors.js', () => ({
+      default: Errors,
     }))
 
     vi.doMock(
@@ -517,10 +537,44 @@ describe('ClsiManager', function () {
       })
     })
 
-    describe('with compile from history fallback to incremental', function () {
+    describe('with compile from history', function () {
       const buildId = '18fbe9e7564-30dcb2f71250c690'
 
-      beforeEach(async function (ctx) {
+      function makeLockedError() {
+        return new RequestFailedError(
+          'http://project-history/project/x/flush',
+          { method: 'POST' },
+          { status: 423 },
+          '{"message":"redis lock is taken"}'
+        )
+      }
+
+      function makeResyncPendingError() {
+        return new RequestFailedError(
+          'http://project-history/project/x/flush',
+          { method: 'POST' },
+          { status: 422 }
+        )
+      }
+
+      function sendHistoryRequest(ctx, options = {}) {
+        return ctx.ClsiManager.promises.sendRequest(
+          null,
+          ctx.project._id,
+          ctx.user_id,
+          {
+            compileBackendClass: 'free',
+            compileGroup: 'standard',
+            timeout: 100,
+            compileFromHistory: true,
+            incrementalCompilesEnabled: true,
+            rootResourcePath: 'main.tex',
+            ...options,
+          }
+        )
+      }
+
+      beforeEach(function (ctx) {
         ctx.outputFiles = [
           {
             url: `/project/${ctx.project_id}/user/${ctx.user_id}/build/${buildId}/output/output.pdf`,
@@ -542,8 +596,8 @@ describe('ClsiManager', function () {
           })
         )
         ctx.responseBody.compile.buildId = buildId
-        ctx.timeout = 100
-        ctx.HistoryManager.promises.flushProject.rejects()
+
+        // stubs for the legacy compile fallback path
         const doc = ctx.docs['/main.tex']
         ctx.DocumentUpdaterHandler.promises.getProjectDocsIfMatch.resolves([
           { _id: doc._id, lines: doc.lines, v: 123 },
@@ -551,119 +605,155 @@ describe('ClsiManager', function () {
         ctx.ProjectEntityHandler.getAllDocPathsFromProject.returns({
           'mock-doc-id-1': 'main.tex',
         })
-        ctx.result = await ctx.ClsiManager.promises.sendRequest(
-          null,
-          ctx.project._id,
-          ctx.user_id,
-          {
-            compileBackendClass: 'free',
-            compileGroup: 'standard',
-            timeout: ctx.timeout,
-            compileFromHistory: true,
-            incrementalCompilesEnabled: true,
-          }
-        )
       })
 
-      it('should send the request to the CLSI', function (ctx) {
-        const doc = ctx.docs['/main.tex']
-        ctx.FetchUtils.fetchStringWithResponse.should.have.been.calledWith(
-          sinon.match(
-            url =>
-              url.host === CLSI_HOST &&
-              url.pathname ===
-                `/project/${ctx.project._id}/user/${ctx.user_id}/compile` &&
-              url.searchParams.get('compileBackendClass') === 'free' &&
-              url.searchParams.get('compileGroup') === 'standard'
-          ),
-          {
-            method: 'POST',
-            json: sinon.match({
-              compile: {
-                options: {
-                  compiler: ctx.project.compiler,
-                  imageName: ctx.project.imageName,
-                  timeout: ctx.timeout,
-                  draft: false,
-                  compileGroup: 'standard',
-                  metricsMethod: 'standard',
-                  stopOnFirstError: false,
-                  syncType: 'incremental',
-                  syncState: '01234567890abcdef',
-                },
-                rootResourcePath: 'main.tex',
-                resources: [
-                  { path: 'main.tex', content: doc.lines.join('\n') },
-                ],
-              },
-            }),
-            headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/json',
-              Cookie: `${ctx.clsiCookieKey}=${ctx.clsiServerId}`,
-            },
-            signal: sinon.match.instanceOf(AbortSignal),
-          }
-        )
-      })
+      describe('when the flush fails then succeeds', function () {
+        beforeEach(async function (ctx) {
+          ctx.HistoryManager.promises.flushProject
+            .onFirstCall()
+            .rejects(makeLockedError())
+            .onSecondCall()
+            .resolves()
+          ctx.result = await sendHistoryRequest(ctx, { baseHistoryVersion: -1 })
+        })
 
-      it('should compute the hash with the full project', function (ctx) {
-        ctx.ClsiStateManager.computeHash.should.have.been.calledWithMatch({
-          rootFolder: ctx.project.rootFolder,
+        it('should retry the flush', function (ctx) {
+          expect(ctx.HistoryManager.promises.flushProject.callCount).to.equal(2)
+        })
+
+        it('should compile from history without downgrading', function (ctx) {
+          expect(ctx.HistoryManager.promises.getLatestHistoryWithHistoryId).to
+            .have.been.called
+          expect(ctx.DocumentUpdaterHandler.promises.getProjectDocsIfMatch).to
+            .not.have.been.called
+          expect(ctx.result.status).to.equal('success')
         })
       })
 
-      it('should get the project with the required fields', function (ctx) {
-        ctx.ProjectGetter.promises.getProject.should.have.been.calledWith(
-          ctx.project._id,
-          {
-            compiler: 1,
-            rootDoc_id: 1,
-            imageName: 1,
-            rootFolder: 1,
-            'overleaf.history.id': 1,
-          }
-        )
+      describe('when the flush fails on every attempt', function () {
+        beforeEach(async function (ctx) {
+          // any error is retried, not just a locked (423) response
+          ctx.HistoryManager.promises.flushProject.rejects(new Error('boom'))
+          ctx.result = await sendHistoryRequest(ctx, { baseHistoryVersion: -1 })
+        })
+
+        it('should retry up to the maximum before giving up', function (ctx) {
+          expect(ctx.HistoryManager.promises.flushProject.callCount).to.equal(3)
+        })
+
+        it('should fall back to a legacy compile', function (ctx) {
+          expect(
+            ctx.DocumentUpdaterHandler.promises.getProjectDocsIfMatch
+          ).to.have.been.calledWith(ctx.project._id)
+          expect(ctx.result.status).to.equal('success')
+        })
       })
 
-      it('should get only the live docs from the docupdater with a background flush in docupdater', function (ctx) {
-        ctx.DocumentUpdaterHandler.promises.getProjectDocsIfMatch.should.have.been.calledWith(
-          ctx.project._id
-        )
+      describe('when getting the latest history fails once (full sync)', function () {
+        beforeEach(async function (ctx) {
+          ctx.HistoryManager.promises.getLatestHistoryWithHistoryId
+            .onFirstCall()
+            .rejects(new Error('history-v1 unavailable'))
+          ctx.result = await sendHistoryRequest(ctx, { baseHistoryVersion: -1 })
+        })
+
+        it('should retry the chunk fetch once and succeed', function (ctx) {
+          expect(
+            ctx.HistoryManager.promises.getLatestHistoryWithHistoryId.callCount
+          ).to.equal(2)
+          expect(ctx.result.status).to.equal('success')
+        })
       })
 
-      it('should not get any docs from mongo', function (ctx) {
-        ctx.ProjectEntityHandler.promises.getAllDocs.should.not.have.been.calledWith(
-          ctx.project._id
-        )
+      describe('when getting changes fails once (incremental sync)', function () {
+        beforeEach(async function (ctx) {
+          ctx.HistoryManager.promises.getChangesWithHistoryId
+            .onFirstCall()
+            .rejects(new Error('history-v1 unavailable'))
+          ctx.result = await sendHistoryRequest(ctx, { baseHistoryVersion: 5 })
+        })
+
+        it('should retry the chunk fetch once and succeed', function (ctx) {
+          expect(
+            ctx.HistoryManager.promises.getChangesWithHistoryId.callCount
+          ).to.equal(2)
+          expect(ctx.result.status).to.equal('success')
+        })
       })
 
-      it('should not get any of the files', function (ctx) {
-        ctx.ProjectEntityHandler.promises.getAllFiles.should.not.have.been
-          .called
+      describe('when getting the chunk fails on every attempt', function () {
+        beforeEach(async function (ctx) {
+          ctx.HistoryManager.promises.getLatestHistoryWithHistoryId.rejects(
+            new Error('history-v1 unavailable')
+          )
+          ctx.result = await sendHistoryRequest(ctx, { baseHistoryVersion: -1 })
+        })
+
+        it('should retry up to the maximum before giving up', function (ctx) {
+          expect(
+            ctx.HistoryManager.promises.getLatestHistoryWithHistoryId.callCount
+          ).to.equal(3)
+        })
+
+        it('should fall back to a legacy compile', function (ctx) {
+          expect(
+            ctx.DocumentUpdaterHandler.promises.getProjectDocsIfMatch
+          ).to.have.been.calledWith(ctx.project._id)
+          expect(ctx.result.status).to.equal('success')
+        })
       })
 
-      it('should return the status and output files', function (ctx) {
-        expect(ctx.result.status).to.equal('success')
-        expect(ctx.result.outputFiles.map(f => f.path)).to.have.members(
-          ctx.outputFiles.map(f => f.path)
-        )
+      describe('when the flush reports a pending resync then succeeds', function () {
+        beforeEach(async function (ctx) {
+          ctx.HistoryManager.promises.flushProject
+            .onFirstCall()
+            .rejects(makeResyncPendingError())
+            .onSecondCall()
+            .resolves()
+          ctx.result = await sendHistoryRequest(ctx, { baseHistoryVersion: -1 })
+        })
+
+        it('should compile from history without downgrading', function (ctx) {
+          expect(ctx.HistoryManager.promises.flushProject.callCount).to.equal(2)
+          expect(ctx.HistoryManager.promises.getLatestHistoryWithHistoryId).to
+            .have.been.called
+          expect(ctx.DocumentUpdaterHandler.promises.getProjectDocsIfMatch).to
+            .not.have.been.called
+          expect(ctx.result.status).to.equal('success')
+        })
       })
 
-      it('should return the buildId', function (ctx) {
-        expect(ctx.result.buildId).to.equal(buildId)
-      })
+      describe('when the flush reports a pending resync', function () {
+        beforeEach(async function (ctx) {
+          ctx.HistoryManager.promises.flushProject.rejects(
+            makeResyncPendingError()
+          )
+          ctx.result = await sendHistoryRequest(ctx, { baseHistoryVersion: -1 })
+        })
 
-      it('should persist the cookie from the response', function (ctx) {
-        expect(
-          ctx.ClsiCookieManager.promises.setServerId
-        ).to.have.been.calledWith(
-          ctx.project._id,
-          ctx.user_id,
-          'standard',
-          'free',
-          `${ctx.newClsiServerId}1`
-        )
+        it('should retry the flush, the resync updates may arrive', function (ctx) {
+          expect(ctx.HistoryManager.promises.flushProject.callCount).to.equal(3)
+        })
+
+        it('should fall back to a legacy compile', function (ctx) {
+          expect(
+            ctx.DocumentUpdaterHandler.promises.getProjectDocsIfMatch
+          ).to.have.been.calledWith(ctx.project._id)
+          expect(ctx.result.status).to.equal('success')
+        })
+
+        it('should get the project with the legacy compile fields', function (ctx) {
+          ctx.ProjectGetter.promises.getProject.should.have.been.calledWith(
+            ctx.project._id,
+            {
+              compiler: 1,
+              rootDoc_id: 1,
+              imageName: 1,
+              rootFolder: 1,
+              'overleaf.history.id': 1,
+            }
+          )
+        })
       })
     })
 
@@ -1026,6 +1116,207 @@ describe('ClsiManager', function () {
           sinon.match.any,
           sinon.match({
             json: { compile: { options: { draft: true } } },
+          })
+        )
+      })
+    })
+
+    describe('with the checkpointing option', function () {
+      it('should ask the clsi to enable checkpointing, leaving the image alone', async function (ctx) {
+        await ctx.ClsiManager.promises.sendRequest(
+          null,
+          ctx.project._id,
+          ctx.user_id,
+          {
+            timeout: 100,
+            compileGroup: 'priority',
+            checkpointing: true,
+          }
+        )
+
+        expect(ctx.FetchUtils.fetchStringWithResponse).to.have.been.calledWith(
+          sinon.match.any,
+          sinon.match({
+            json: {
+              compile: {
+                options: {
+                  imageName: ctx.project.imageName,
+                  enableCheckpoint: true,
+                },
+              },
+            },
+          })
+        )
+      })
+
+      it('should not enable checkpointing for a standard compileGroup', async function (ctx) {
+        await ctx.ClsiManager.promises.sendRequest(
+          null,
+          ctx.project._id,
+          ctx.user_id,
+          {
+            timeout: 100,
+            compileGroup: 'standard',
+            checkpointing: true,
+          }
+        )
+
+        expect(ctx.FetchUtils.fetchStringWithResponse).to.have.been.calledWith(
+          sinon.match.any,
+          sinon.match({
+            json: {
+              compile: { options: { enableCheckpoint: false } },
+            },
+          })
+        )
+      })
+
+      it('should not enable checkpointing without the option', async function (ctx) {
+        await ctx.ClsiManager.promises.sendRequest(
+          null,
+          ctx.project._id,
+          ctx.user_id,
+          {
+            timeout: 100,
+            compileGroup: 'priority',
+          }
+        )
+
+        expect(ctx.FetchUtils.fetchStringWithResponse).to.have.been.calledWith(
+          sinon.match.any,
+          sinon.match({
+            json: {
+              compile: {
+                options: {
+                  imageName: ctx.project.imageName,
+                  enableCheckpoint: false,
+                },
+              },
+            },
+          })
+        )
+      })
+
+      it('should not enable checkpointing when the image has no checkpointing build', async function (ctx) {
+        ctx.project.imageName = 'mock-image-name-no-checkpointing'
+        await ctx.ClsiManager.promises.sendRequest(
+          null,
+          ctx.project._id,
+          ctx.user_id,
+          {
+            timeout: 100,
+            compileGroup: 'priority',
+            checkpointing: true,
+          }
+        )
+
+        expect(ctx.FetchUtils.fetchStringWithResponse).to.have.been.calledWith(
+          sinon.match.any,
+          sinon.match({
+            json: {
+              compile: { options: { enableCheckpoint: false } },
+            },
+          })
+        )
+      })
+
+      it('should not enable checkpointing when the project has no image', async function (ctx) {
+        delete ctx.project.imageName
+        await ctx.ClsiManager.promises.sendRequest(
+          null,
+          ctx.project._id,
+          ctx.user_id,
+          {
+            timeout: 100,
+            compileGroup: 'priority',
+            checkpointing: true,
+          }
+        )
+
+        expect(ctx.FetchUtils.fetchStringWithResponse).to.have.been.calledWith(
+          sinon.match.any,
+          sinon.match({
+            json: {
+              compile: { options: { enableCheckpoint: false } },
+            },
+          })
+        )
+      })
+
+      it('should look up the image ignoring the registry host', async function (ctx) {
+        ctx.project.imageName = 'quay.io/sharelatex/mock-image-name'
+        await ctx.ClsiManager.promises.sendRequest(
+          null,
+          ctx.project._id,
+          ctx.user_id,
+          {
+            timeout: 100,
+            compileGroup: 'priority',
+            checkpointing: true,
+          }
+        )
+
+        expect(ctx.FetchUtils.fetchStringWithResponse).to.have.been.calledWith(
+          sinon.match.any,
+          sinon.match({
+            json: {
+              compile: { options: { enableCheckpoint: true } },
+            },
+          })
+        )
+      })
+    })
+
+    describe('with the png2pdf option', function () {
+      beforeEach(async function (ctx) {
+        await ctx.ClsiManager.promises.sendRequest(
+          null,
+          ctx.project._id,
+          ctx.user_id,
+          {
+            timeout: 100,
+            compileGroup: 'priority',
+            png2pdf: true,
+          }
+        )
+      })
+
+      it('should add the png2pdf option into the request', function (ctx) {
+        expect(ctx.FetchUtils.fetchStringWithResponse).to.have.been.calledWith(
+          sinon.match.any,
+          sinon.match({
+            json: { compile: { options: { png2pdf: true } } },
+          })
+        )
+      })
+    })
+
+    describe('with the png2pdf option and standard compileGroup', function () {
+      beforeEach(async function (ctx) {
+        await ctx.ClsiManager.promises.sendRequest(
+          null,
+          ctx.project._id,
+          ctx.user_id,
+          {
+            timeout: 100,
+            compileGroup: 'standard',
+            png2pdf: true,
+          }
+        )
+      })
+
+      it('should force the png2pdf option to false in the request', function (ctx) {
+        expect(ctx.FetchUtils.fetchStringWithResponse).to.have.been.calledWith(
+          sinon.match.any,
+          sinon.match({
+            json: {
+              compile: {
+                options: {
+                  compileGroup: 'standard',
+                  png2pdf: false,
+                },
+              },
+            },
           })
         )
       })
@@ -1506,7 +1797,8 @@ describe('ClsiManager', function () {
           ctx.user_id,
           false,
           { compileBackendClass: 'free', compileGroup: 'standard' },
-          'node-1'
+          'node-1',
+          { rootResourcePath: 'main.tex' }
         )
       })
 
@@ -1520,9 +1812,80 @@ describe('ClsiManager', function () {
         )
       })
 
+      it('should post the project state as a history payload', function (ctx) {
+        expect(ctx.FetchUtils.fetchString).to.have.been.calledWith(
+          sinon.match.any,
+          sinon.match(
+            opts =>
+              opts.method === 'POST' &&
+              opts.json.compile.rawSnapshot != null &&
+              opts.json.compile.options.syncType === 'history-full'
+          )
+        )
+      })
+
       it('should not persist a cookie on response', function (ctx) {
         expect(ctx.ClsiCookieManager.promises.setServerId).not.to.have.been
           .called
+      })
+    })
+
+    describe('when the clsi does not support the POST route', function () {
+      beforeEach(async function (ctx) {
+        ctx.FetchUtils.fetchString
+          .onFirstCall()
+          .rejects(
+            new RequestFailedError(
+              'http://clsi.example.com',
+              { method: 'POST' },
+              { status: 404 }
+            )
+          )
+        await ctx.ClsiManager.promises.wordCount(
+          ctx.project._id,
+          ctx.user_id,
+          false,
+          { compileBackendClass: 'free', compileGroup: 'standard' },
+          'node-1',
+          { rootResourcePath: 'main.tex' }
+        )
+      })
+
+      it('should retry with a GET', function (ctx) {
+        expect(ctx.FetchUtils.fetchString).to.have.been.calledTwice
+        expect(ctx.FetchUtils.fetchString.secondCall.args[1]).to.deep.equal({
+          method: 'GET',
+        })
+      })
+    })
+
+    describe('when a compile holds the compile dir lock', function () {
+      beforeEach(async function (ctx) {
+        ctx.FetchUtils.fetchString
+          .onFirstCall()
+          .rejects(
+            new RequestFailedError(
+              'http://clsi.example.com',
+              { method: 'POST' },
+              { status: 423 }
+            )
+          )
+        ctx.result = await ctx.ClsiManager.promises.wordCount(
+          ctx.project._id,
+          ctx.user_id,
+          false,
+          { compileBackendClass: 'free', compileGroup: 'standard' },
+          'node-1',
+          { rootResourcePath: 'main.tex' }
+        )
+      })
+
+      it('should count what is on disk rather than failing', function (ctx) {
+        expect(ctx.FetchUtils.fetchString).to.have.been.calledTwice
+        expect(ctx.FetchUtils.fetchString.secondCall.args[1]).to.deep.equal({
+          method: 'GET',
+        })
+        expect(ctx.result).to.exist
       })
     })
 
@@ -1533,7 +1896,8 @@ describe('ClsiManager', function () {
           ctx.user_id,
           'other.tex',
           { compileBackendClass: 'free', compileGroup: 'standard' },
-          'node-2'
+          'node-2',
+          { rootResourcePath: 'main.tex' }
         )
       })
 
@@ -1567,7 +1931,8 @@ describe('ClsiManager', function () {
           ctx.user_id,
           false,
           { compileBackendClass: 'premium', compileGroup: 'priority' },
-          'node-1'
+          'node-1',
+          { rootResourcePath: 'main.tex' }
         )
         // wait for the background task to finish
         await setTimeout(0)

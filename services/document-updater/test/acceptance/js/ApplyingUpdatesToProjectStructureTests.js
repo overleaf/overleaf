@@ -1,5 +1,7 @@
 const sinon = require('sinon')
+const { expect } = require('chai')
 const { setTimeout } = require('node:timers/promises')
+const { RequestFailedError } = require('@overleaf/fetch-utils')
 const Settings = require('@overleaf/settings')
 const rclientProjectHistory = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.project_history
@@ -11,8 +13,20 @@ const MockWebApi = require('./helpers/MockWebApi')
 const DocUpdaterClient = require('./helpers/DocUpdaterClient')
 const DocUpdaterApp = require('./helpers/DocUpdaterApp')
 
-async function sendProjectUpdateAndWait(projectId, docId, update, version) {
-  await DocUpdaterClient.sendProjectUpdate(projectId, docId, update, version)
+async function sendProjectUpdateAndWait(
+  projectId,
+  docId,
+  update,
+  version,
+  source
+) {
+  await DocUpdaterClient.sendProjectUpdate(
+    projectId,
+    docId,
+    update,
+    version,
+    source
+  )
 
   // It seems that we need to wait for a little while
   await setTimeout(200)
@@ -20,7 +34,7 @@ async function sendProjectUpdateAndWait(projectId, docId, update, version) {
 
 describe("Applying updates to a project's structure", function () {
   before(async function () {
-    this.user_id = 'user-id-123'
+    this.user_id = DocUpdaterClient.randomId()
     this.version = 1234
 
     await DocUpdaterApp.ensureRunning()
@@ -438,6 +452,184 @@ describe("Applying updates to a project's structure", function () {
         }
       )
     })
+
+    describe('with importedAt metadata', function () {
+      before(async function () {
+        this.project_id = DocUpdaterClient.randomId()
+        this.metadata = { importedAt: new Date().toISOString() }
+        this.fileUpdate = {
+          type: 'add-file',
+          id: DocUpdaterClient.randomId(),
+          pathname: '/file-path',
+          url: 'filestore.example.com',
+          metadata: this.metadata,
+        }
+        this.updates = [this.fileUpdate]
+        await sendProjectUpdateAndWait(
+          this.project_id,
+          this.user_id,
+          this.updates,
+          this.version
+        )
+      })
+
+      it('should push the file addition to the project history api with the metadata', function (done) {
+        rclientProjectHistory.lrange(
+          ProjectHistoryKeys.projectHistoryOps({ project_id: this.project_id }),
+          0,
+          -1,
+          (error, updates) => {
+            if (error) {
+              return done(error)
+            }
+
+            const update = JSON.parse(updates[0])
+            update.file.should.equal(this.fileUpdate.id)
+            expect(update.metadata).to.deep.equal(this.metadata)
+
+            done()
+          }
+        )
+      })
+    })
+
+    describe('with main and importedAt metadata', function () {
+      before(async function () {
+        this.project_id = DocUpdaterClient.randomId()
+        this.metadata = { main: true, importedAt: new Date().toISOString() }
+        this.fileUpdate = {
+          type: 'add-file',
+          id: DocUpdaterClient.randomId(),
+          pathname: '/file-path',
+          url: 'filestore.example.com',
+          metadata: this.metadata,
+        }
+        this.updates = [this.fileUpdate]
+        await sendProjectUpdateAndWait(
+          this.project_id,
+          this.user_id,
+          this.updates,
+          this.version
+        )
+      })
+
+      it('should push the file addition to the project history api with the metadata', function (done) {
+        rclientProjectHistory.lrange(
+          ProjectHistoryKeys.projectHistoryOps({ project_id: this.project_id }),
+          0,
+          -1,
+          (error, updates) => {
+            if (error) {
+              return done(error)
+            }
+
+            const update = JSON.parse(updates[0])
+            update.file.should.equal(this.fileUpdate.id)
+            expect(update.metadata).to.deep.equal(this.metadata)
+
+            done()
+          }
+        )
+      })
+    })
+
+    describe('with linked-file metadata for a personal reference library', function () {
+      before(async function () {
+        this.project_id = DocUpdaterClient.randomId()
+        this.metadata = {
+          provider: 'zotero',
+          format: 'bibtex',
+          // web persists the absent group as null, see the rawLinkedFileData
+          // comment in overleaf-editor-core
+          group_id: null,
+          importer_id: this.user_id,
+          importedAt: new Date().toISOString(),
+        }
+        this.fileUpdate = {
+          type: 'add-file',
+          id: DocUpdaterClient.randomId(),
+          pathname: '/references.bib',
+          url: 'filestore.example.com',
+          metadata: this.metadata,
+        }
+        this.updates = [this.fileUpdate]
+        await sendProjectUpdateAndWait(
+          this.project_id,
+          this.user_id,
+          this.updates,
+          this.version
+        )
+      })
+
+      it('should push the file addition to the project history api with the metadata', function (done) {
+        rclientProjectHistory.lrange(
+          ProjectHistoryKeys.projectHistoryOps({ project_id: this.project_id }),
+          0,
+          -1,
+          (error, updates) => {
+            if (error) {
+              return done(error)
+            }
+
+            const update = JSON.parse(updates[0])
+            update.file.should.equal(this.fileUpdate.id)
+            expect(update.metadata).to.deep.equal(this.metadata)
+
+            done()
+          }
+        )
+      })
+    })
+
+    describe('with invalid metadata', function () {
+      before(async function () {
+        this.project_id = DocUpdaterClient.randomId()
+        this.fileUpdate = {
+          type: 'add-file',
+          id: DocUpdaterClient.randomId(),
+          pathname: '/file-path',
+          url: 'filestore.example.com',
+          metadata: { provider: 'not-a-real-provider' },
+        }
+        this.updates = [this.fileUpdate]
+        try {
+          await sendProjectUpdateAndWait(
+            this.project_id,
+            this.user_id,
+            this.updates,
+            this.version
+          )
+          this.statusCode = 200
+        } catch (err) {
+          if (err instanceof RequestFailedError) {
+            this.statusCode = err.response.status
+          } else {
+            throw err
+          }
+        }
+      })
+
+      it('should return a 400 status code', function () {
+        this.statusCode.should.equal(400)
+      })
+
+      it('should not push anything to the project history api', function (done) {
+        rclientProjectHistory.lrange(
+          ProjectHistoryKeys.projectHistoryOps({ project_id: this.project_id }),
+          0,
+          -1,
+          (error, updates) => {
+            if (error) {
+              return done(error)
+            }
+
+            updates.should.deep.equal([])
+
+            done()
+          }
+        )
+      })
+    })
   })
 
   describe('adding a doc', function () {
@@ -475,6 +667,195 @@ describe("Applying updates to a project's structure", function () {
           update.meta.user_id.should.equal(this.user_id)
           update.meta.ts.should.be.a('string')
           update.version.should.equal(`${this.version}.0`)
+
+          done()
+        }
+      )
+    })
+  })
+
+  describe('adding a doc with a null source (e.g. project creation)', function () {
+    // web sends an explicit `null` source (not an omitted field) when
+    // creating the root/bib doc for a new project, duplicating a project, or
+    // importing a zip upload -- see
+    // web/app/src/Features/Project/ProjectCreationHandler.mjs _createRootDoc.
+    before(async function () {
+      this.project_id = DocUpdaterClient.randomId()
+      this.docUpdate = {
+        type: 'add-doc',
+        id: DocUpdaterClient.randomId(),
+        pathname: '/file-path',
+        docLines: 'a\nb',
+      }
+      this.updates = [this.docUpdate]
+      await sendProjectUpdateAndWait(
+        this.project_id,
+        this.user_id,
+        this.updates,
+        this.version,
+        null
+      )
+    })
+
+    it('should push the doc addition to the project history api without a source', function (done) {
+      rclientProjectHistory.lrange(
+        ProjectHistoryKeys.projectHistoryOps({ project_id: this.project_id }),
+        0,
+        -1,
+        (error, updates) => {
+          if (error) {
+            return done(error)
+          }
+
+          const update = JSON.parse(updates[0])
+          update.doc.should.equal(this.docUpdate.id)
+          update.meta.user_id.should.equal(this.user_id)
+          expect(update.meta.source).to.not.exist
+
+          done()
+        }
+      )
+    })
+  })
+
+  describe('adding a doc with an origin object source (e.g. restoring a project from history)', function () {
+    // web's RestoreManager.mjs sends the richer Origin/RestoreProjectOrigin
+    // raw shape (not a plain string) as the "source" of a project-structure
+    // change when restoring a file or project from history -- see
+    // overleaf-editor-core/lib/origin/restore_project_origin.js. It carries
+    // the version/timestamp of the restored version, needed downstream to
+    // build a valid history Change origin.
+    before(async function () {
+      this.project_id = DocUpdaterClient.randomId()
+      this.docUpdate = {
+        type: 'add-doc',
+        id: DocUpdaterClient.randomId(),
+        pathname: '/file-path',
+        docLines: 'a\nb',
+      }
+      this.updates = [this.docUpdate]
+      this.origin = {
+        kind: 'project-restore',
+        version: 3,
+        timestamp: new Date().toISOString(),
+      }
+      await sendProjectUpdateAndWait(
+        this.project_id,
+        this.user_id,
+        this.updates,
+        this.version,
+        this.origin
+      )
+    })
+
+    it('should push the doc addition to the project history api with the origin', function (done) {
+      rclientProjectHistory.lrange(
+        ProjectHistoryKeys.projectHistoryOps({ project_id: this.project_id }),
+        0,
+        -1,
+        (error, updates) => {
+          if (error) {
+            return done(error)
+          }
+
+          const update = JSON.parse(updates[0])
+          update.doc.should.equal(this.docUpdate.id)
+          update.meta.user_id.should.equal(this.user_id)
+          expect(update.meta.source).to.not.exist
+          expect(update.meta.origin).to.deep.equal(this.origin)
+          expect(update.meta.type).to.equal('external')
+
+          done()
+        }
+      )
+    })
+  })
+
+  describe('adding a doc with a null userId (e.g. a TPDS/GitHub-sync update)', function () {
+    // web sends an explicit `null` userId (not an omitted field) for
+    // system-initiated project-structure changes that aren't attributable to
+    // a specific user -- e.g. TpdsController.mjs's updateProjectContents
+    // calls UpdateMerger.promises.mergeUpdate(null, ...) for GitHub-sync
+    // updates.
+    before(async function () {
+      this.project_id = DocUpdaterClient.randomId()
+      this.docUpdate = {
+        type: 'add-doc',
+        id: DocUpdaterClient.randomId(),
+        pathname: '/file-path',
+        docLines: 'a\nb',
+      }
+      this.updates = [this.docUpdate]
+      await sendProjectUpdateAndWait(
+        this.project_id,
+        null,
+        this.updates,
+        this.version
+      )
+    })
+
+    it('should push the doc addition to the project history api without a user_id', function (done) {
+      rclientProjectHistory.lrange(
+        ProjectHistoryKeys.projectHistoryOps({ project_id: this.project_id }),
+        0,
+        -1,
+        (error, updates) => {
+          if (error) {
+            return done(error)
+          }
+
+          const update = JSON.parse(updates[0])
+          update.doc.should.equal(this.docUpdate.id)
+          expect(update.meta.user_id).to.be.null
+
+          done()
+        }
+      )
+    })
+  })
+
+  describe('adding a doc with an invalid userId', function () {
+    before(async function () {
+      this.project_id = DocUpdaterClient.randomId()
+      this.docUpdate = {
+        type: 'add-doc',
+        id: DocUpdaterClient.randomId(),
+        pathname: '/file-path',
+        docLines: 'a\nb',
+      }
+      this.updates = [this.docUpdate]
+      try {
+        await sendProjectUpdateAndWait(
+          this.project_id,
+          'not-an-object-id',
+          this.updates,
+          this.version
+        )
+        this.statusCode = 200
+      } catch (err) {
+        if (err instanceof RequestFailedError) {
+          this.statusCode = err.response.status
+        } else {
+          throw err
+        }
+      }
+    })
+
+    it('should return a 400 status code', function () {
+      this.statusCode.should.equal(400)
+    })
+
+    it('should not push anything to the project history api', function (done) {
+      rclientProjectHistory.lrange(
+        ProjectHistoryKeys.projectHistoryOps({ project_id: this.project_id }),
+        0,
+        -1,
+        (error, updates) => {
+          if (error) {
+            return done(error)
+          }
+
+          updates.should.deep.equal([])
 
           done()
         }

@@ -2,7 +2,6 @@
 
 import { UserFeatureUsage } from '../../models/UserFeatureUsage.mjs'
 import { TooManyRequestsError } from '../../Features/Errors/Errors.js'
-import UserAuditLogHandler from '../../Features/User/UserAuditLogHandler.mjs'
 
 const PERIOD = 24 // hours
 const PERIOD_IN_MILLISECONDS = PERIOD * 60 * 60 * 1000
@@ -56,7 +55,7 @@ export default class FeatureUsageRateLimiter {
    * @param {string} userId
    * @param {import('express').Response} res
    * @param {number} [cost] - the amount to increment the users usage by, may be 0 for features that are quota locked but dont consume any uses
-   * @param {{ auditLogTool?: string }} [options] - if `auditLogTool` is set, an `ai-quota-breach` audit log entry is written with `{ tool }` in the info payload when this request lands at or past the allowance (covers both the just-exhausted and over-the-limit cases)
+   * @param {{ auditLogTool?: string }} [options] - passed through to the `_onFeatureUsed` hook for subclasses to react to
    */
   async useFeature(userId, res, cost = 1, options = {}) {
     const allowance = await this._getAllowance(userId)
@@ -98,17 +97,50 @@ export default class FeatureUsageRateLimiter {
 
     setRateLimitHeaders(res, featureUsage, allowance)
 
-    if (options.auditLogTool && (featureUsage.usage ?? 0) >= allowance) {
-      UserAuditLogHandler.addEntryInBackground(
-        userId,
-        'ai-quota-breach',
-        userId,
-        res.req?.ip,
-        { tool: options.auditLogTool }
-      )
-    }
+    await this._onFeatureUsed(userId, res, featureUsage, allowance, options)
 
     this._checkRateLimit(featureUsage, allowance)
+  }
+
+  /**
+   * Hook fired after usage is recorded, before the rate-limit check runs.
+   * No-op by default; subclasses override to react to the post-usage state.
+   *
+   * @param {string} _userId
+   * @param {import('express').Response} _res
+   * @param {{periodStart?: Date, usage?: number}} _featureUsage
+   * @param {number} _allowance
+   * @param {{auditLogTool?: string}} _options
+   */
+  async _onFeatureUsed(_userId, _res, _featureUsage, _allowance, _options) {}
+
+  /**
+   * Records that the user reached their limit this period. Returns true only for
+   * the first at-limit request of the period: the `$ne: periodStart` filter
+   * matches once and writes; later requests in the same period no-op and return
+   * false. Best-effort: a failed write returns false and never throws.
+   *
+   * @param {string} userId
+   * @param {Date} periodStart
+   * @returns {Promise<boolean>} whether this was the first reach of the period
+   */
+  async _recordFirstLimitReach(userId, periodStart) {
+    const result = await UserFeatureUsage.updateOne(
+      {
+        _id: userId,
+        [`features.${this.featureName}.limitReachedPeriodStart`]: {
+          $ne: periodStart,
+        },
+      },
+      {
+        $set: {
+          [`features.${this.featureName}.limitReachedPeriodStart`]: periodStart,
+        },
+      }
+    )
+      .exec()
+      .catch(() => null)
+    return result?.modifiedCount === 1
   }
 
   /**
@@ -174,12 +206,17 @@ export default class FeatureUsageRateLimiter {
       ] ?? {}
     const periodStart = featureUsage.periodStart ?? new Date()
     const usage = featureUsage.usage ?? 0
-    const usesLeft = allowance - usage
     const refreshEpoch = periodStart.getTime() + PERIOD_IN_MILLISECONDS
+    const periodExpired = refreshEpoch <= Date.now()
+    const remainingUsage = periodExpired ? allowance : allowance - usage
+    // This date isn't exactly correct when computed before an actual feature usage
+    const resetDate = new Date(
+      periodExpired ? Date.now() + PERIOD_IN_MILLISECONDS : refreshEpoch
+    ).toString()
     return {
       [this.featureName]: {
-        remainingUsage: Date.now() > refreshEpoch ? allowance : usesLeft,
-        resetDate: new Date(refreshEpoch).toString(),
+        remainingUsage: Math.max(remainingUsage, 0),
+        resetDate,
       },
     }
   }

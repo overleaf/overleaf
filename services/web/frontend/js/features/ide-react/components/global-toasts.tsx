@@ -6,8 +6,9 @@ import { debugConsole } from '@/utils/debugging'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import { OLToastContainer } from '@/shared/components/ol/ol-toast-container'
 import clipboardToastGenerators from '@/features/source-editor/components/clipboard-toasts'
-import importDocumentFeedbackToastGenerators from '@/features/project-list/components/new-project-button/import-document-feedback-toast'
 import exportDocumentToastGenerators from '@/features/ide-react/components/toolbar/export-document-toasts'
+import connectionRestoredToastGenerators from '@/features/ide-react/components/connection-restored-toast'
+import deepLinkToastGenerators from '@/features/ide-react/components/deep-link-toasts'
 
 const moduleGeneratorsImport = importOverleafModules('toastGenerators') as {
   import: { default: GlobalToastGeneratorEntry[] }
@@ -29,8 +30,9 @@ type GlobalToastGenerator = (
 const GENERATOR_LIST: GlobalToastGeneratorEntry[] = [
   ...moduleGenerators.flat(),
   ...clipboardToastGenerators,
-  ...importDocumentFeedbackToastGenerators,
   ...exportDocumentToastGenerators,
+  ...connectionRestoredToastGenerators,
+  ...deepLinkToastGenerators,
 ]
 const GENERATOR_MAP: Map<string, GlobalToastGenerator> = new Map(
   GENERATOR_LIST.map(({ key, generator }) => [key, generator])

@@ -1,4 +1,4 @@
-import { DropdownHeader } from '@/shared/components/dropdown/dropdown-menu'
+import { OLDropdownHeader } from '@/shared/components/ol/ol-dropdown-menu'
 import { ToolbarButtonMenu } from './button-menu'
 import { emitToolbarEvent } from '../../extensions/toolbar/utils/analytics'
 import MaterialIcon from '../../../../shared/components/material-icon'
@@ -31,10 +31,11 @@ export const MathDropdown = memo(function MathDropdown() {
     >
       {renderAIButton && (
         <>
-          <DropdownHeader className="ol-cm-toolbar-header mx-2">
+          <OLDropdownHeader className="ol-cm-toolbar-header mx-2">
             {t('toolbar_insert_math_lowercase')}
-          </DropdownHeader>
+          </OLDropdownHeader>
           <OLListGroupItem
+            className={showAiFeaturesDisabled ? 'opacity-50' : ''}
             aria-label={t('toolbar_generate_math')}
             disabled={showAiFeaturesDisabled}
             disabledReason={t('ai_features_unavailable_on_this_project')}
@@ -54,9 +55,7 @@ export const MathDropdown = memo(function MathDropdown() {
               src={sparkleWhite}
               aria-hidden="true"
             />
-            <span className={showAiFeaturesDisabled ? 'opacity-50' : ''}>
-              {t('generate_from_text_or_image')}
-            </span>
+            <span>{t('generate_from_text_or_image')}</span>
           </OLListGroupItem>
         </>
       )}

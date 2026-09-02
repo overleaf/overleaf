@@ -11,7 +11,7 @@ const StringFileData = require('./file_data/string_file_data')
 
 /**
  * @import Blob from "./blob"
- * @import { BlobStore, ReadonlyBlobStore, RawFileData, RawFile } from "./types"
+ * @import { BlobStore, ReadonlyBlobStore, RawFileData, RawFile, FileMetadata } from "./types"
  * @import { StringFileRawData, CommentRawData } from "./types"
  * @import CommentList from "./file_data/comment_list"
  * @import TextOperation from "./operation/text_operation"
@@ -47,6 +47,11 @@ class File {
   /**
    * Blob hash for an empty file.
    *
+   * Spelled out rather than read from `Blob.EMPTY_HASH`, which is the same value: a
+   * static field initialised from another module's class is `undefined` wherever the
+   * load order has that module still mid-load, and then everything comparing a hash
+   * against this fails without saying anything.
+   *
    * @type {String}
    */
   static EMPTY_FILE_HASH = 'e69de29bb2d1d6434b8b29ae775ad8c2e48c5391'
@@ -55,12 +60,13 @@ class File {
 
   /**
    * @param {FileData} data
-   * @param {Object} [metadata]
+   * @param {FileMetadata} [metadata]
    */
   constructor(data, metadata) {
     assert.instance(data, FileData, 'File: bad data')
 
     this.data = data
+    /** @type {FileMetadata} */
     this.metadata = {}
     this.setMetadata(metadata || {})
   }
@@ -77,7 +83,7 @@ class File {
   /**
    * @param  {string} hash
    * @param  {string} [rangesHash]
-   * @param  {Object} [metadata]
+   * @param  {FileMetadata} [metadata]
    * @return {File}
    */
   static fromHash(hash, rangesHash, metadata) {
@@ -86,7 +92,7 @@ class File {
 
   /**
    * @param  {string} string
-   * @param  {Object} [metadata]
+   * @param  {FileMetadata} [metadata]
    * @return {File}
    */
   static fromString(string, metadata) {
@@ -96,7 +102,7 @@ class File {
   /**
    * @param  {number} byteLength
    * @param  {number} [stringLength]
-   * @param  {Object} [metadata]
+   * @param  {FileMetadata} [metadata]
    * @return {File}
    */
   static createHollow(byteLength, stringLength, metadata) {
@@ -106,7 +112,7 @@ class File {
   /**
    * @param {Blob} blob
    * @param {Blob} [rangesBlob]
-   * @param {Object} [metadata]
+   * @param {FileMetadata} [metadata]
    * @return {File}
    */
   static createLazyFromBlobs(blob, rangesBlob, metadata) {
@@ -197,7 +203,7 @@ class File {
   /**
    * Return the metadata object for this file.
    *
-   * @return {Object}
+   * @return {FileMetadata}
    */
   getMetadata() {
     return this.metadata
@@ -206,7 +212,7 @@ class File {
   /**
    * Set the metadata object for this file.
    *
-   * @param {Object} metadata
+   * @param {FileMetadata} metadata
    */
   setMetadata(metadata) {
     assert.object(metadata, 'File: bad metadata')
@@ -265,6 +271,26 @@ class File {
   }
 
   /**
+   * Load the content of an editable file, answering with the data holding it.
+   *
+   * Only an editable file has content: any other kind is bytes addressed by
+   * hash, and hollow data records the size of content it does not have. Both
+   * answer {@link File#getContent} with null, which this rules out for its
+   * caller -- what it answers with is the data that always has the content.
+   *
+   * @param {ReadonlyBlobStore} blobStore
+   * @return {Promise<StringFileData>} the loaded data of this file
+   * @throws {NotEditableError} where the file is not an editable doc
+   */
+  async loadEager(blobStore) {
+    await this.load('eager', blobStore)
+    if (!(this.data instanceof StringFileData)) {
+      throw new File.NotEditableError()
+    }
+    return this.data
+  }
+
+  /**
    * Store the file's content in the blob store and return a raw file with
    * the corresponding hash. As a side effect, make this object consistent with
    * the hash.
@@ -281,7 +307,7 @@ class File {
 }
 
 /**
- * @param {Object} metadata
+ * @param {FileMetadata} metadata
  * @param {RawFile} raw
  */
 function storeRawMetadata(metadata, raw) {

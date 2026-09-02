@@ -102,6 +102,19 @@ export async function createProjectWithOldHistoryId(
   )
 }
 
+export async function createProjectWithHistoryOT(userId, otMigrationStage) {
+  const historyId = parseInt(
+    await HistoryManager.promises.initializeProject(),
+    10
+  )
+  const projectName = `history-ot-${otMigrationStage}`
+  await ProjectCreationHandler.promises.createExampleProject(
+    userId,
+    projectName,
+    { overleaf: { history: { otMigrationStage, id: historyId } } }
+  )
+}
+
 /**
  * @param {string} email
  * @return {Promise<void>}
@@ -117,6 +130,9 @@ async function provisionUser(email) {
 
   if (email === 'user+old-history-id@example.com') {
     await createProjectWithOldHistoryId(userId)
+  }
+  if (email === 'user+history-ot-1@example.com') {
+    await createProjectWithHistoryOT(userId, 1)
   }
 }
 
@@ -185,6 +201,63 @@ export async function provisionSplitTests(merge = false, extraSplitTests = []) {
       },
     ],
   })
+  SPLIT_TESTS.push({
+    name: 'linked-file-from-history',
+    versions: [
+      {
+        versionNumber: 1,
+        createdAt: '2026-08-11T09:00:00.000Z',
+        active: true,
+        analyticsEnabled: false,
+        phase: 'release',
+        variants: [
+          {
+            name: 'enabled',
+            rolloutPercent: 0,
+            rolloutStripes: [],
+          },
+        ],
+      },
+    ],
+  })
+  SPLIT_TESTS.push({
+    name: 'command-palette',
+    versions: [
+      {
+        versionNumber: 1,
+        createdAt: '2026-07-21T00:00:00.000Z',
+        active: true,
+        analyticsEnabled: false,
+        phase: 'release',
+        variants: [
+          {
+            name: 'enabled',
+            rolloutPercent: 0,
+            rolloutStripes: [],
+          },
+        ],
+      },
+    ],
+  })
+  SPLIT_TESTS.push({
+    name: 'png2pdf',
+    versions: [
+      {
+        versionNumber: 1,
+        createdAt: '2026-06-23T00:00:00.000Z',
+        active: true,
+        analyticsEnabled: false,
+        phase: 'release',
+        variants: [
+          {
+            name: 'enabled',
+            rolloutPercent: 0,
+            rolloutStripes: [],
+          },
+        ],
+      },
+    ],
+  })
   console.log(`> Importing ${SPLIT_TESTS.length} split-tests from production.`)
   if (merge) {
     await SplitTestManager.mergeSplitTests(SPLIT_TESTS, false)
@@ -222,7 +295,15 @@ async function main() {
   }
   await checkNoTableScan()
 
-  await Promise.all([purgeNewUsers(), provisionUsers(), provisionSplitTests()])
+  // Replace all split-tests with the production snapshot, or merge the snapshot
+  // into the existing split-tests. Controlled via the REPLACE_SPLIT_TESTS env var
+  // (see bin/e2e_test_setup for details).
+  const mergeSplitTests = process.env.REPLACE_SPLIT_TESTS !== 'true'
+  await Promise.all([
+    purgeNewUsers(),
+    provisionUsers(),
+    provisionSplitTests(mergeSplitTests),
+  ])
 }
 
 if (import.meta.main) {

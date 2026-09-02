@@ -1,9 +1,10 @@
 logger
 --dependencies=None
---env-add=
 --env-pass-through=
 --esmock-loader=False
 --is-library=True
---node-version=24.14.1
+--node-version=24.18.1
 --pipeline-owner=32
 --public-repo=False
+--test-acceptance-runner=mocha
+--test-unit-runner=mocha

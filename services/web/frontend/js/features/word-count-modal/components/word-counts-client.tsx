@@ -2,7 +2,7 @@ import { FC, useMemo } from 'react'
 import { WordCountData } from '@/features/word-count-modal/components/word-count-data'
 import { useTranslation } from 'react-i18next'
 import { Container, Row, Col, Form } from 'react-bootstrap'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import usePersistedState from '@/shared/hooks/use-persisted-state'
 
 const numberFormat = new Intl.NumberFormat()
@@ -77,16 +77,17 @@ export const WordCountsClient: FC<{ data: WordCountData }> = ({ data }) => {
       {data.messages && (
         <Row>
           <Col xs={12}>
-            <OLNotification
-              type="error"
-              content={
-                <p style={{ whiteSpace: 'pre-wrap' }}>{data.messages}</p>
-              }
-            />
+            <div className="notification-list">
+              <Notification
+                type="error"
+                content={
+                  <p style={{ whiteSpace: 'pre-wrap' }}>{data.messages}</p>
+                }
+              />
+            </div>
           </Col>
         </Row>
       )}
-
       <Row className="mb-4">
         <table style={{ width: 'auto' }}>
           <thead>
@@ -138,20 +139,17 @@ export const WordCountsClient: FC<{ data: WordCountData }> = ({ data }) => {
           </tbody>
         </table>
       </Row>
-
-      <Row className="border-top py-2">
+      <Row className="word-count-row py-2">
         <Col xs={12}>
           <b>{t('headers')}:</b> {data.headers}
         </Col>
       </Row>
-
-      <Row className="border-top py-2">
+      <Row className="word-count-row py-2">
         <Col xs={12}>
           <b>{t('inline_math')}:</b> {data.mathInline}
         </Col>
       </Row>
-
-      <Row className="border-top py-2 pb-0">
+      <Row className="word-count-row py-2 pb-0">
         <Col xs={12}>
           <b>{t('display_math')}:</b> {data.mathDisplay}
         </Col>

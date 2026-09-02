@@ -1,107 +1,50 @@
 import logger from '@overleaf/logger'
 import settings from '@overleaf/settings'
-import RedisClientManager from './RedisClientManager.js'
-import SafeJsonParse from './SafeJsonParse.js'
 import EventLogger from './EventLogger.js'
-import HealthCheckManager from './HealthCheckManager.js'
-import RoomManager from './RoomManager.js'
-import ChannelManager from './ChannelManager.js'
 import metrics from '@overleaf/metrics'
 
 let DocumentUpdaterController
 
 export default DocumentUpdaterController = {
-  // DocumentUpdaterController is responsible for updates that come via Redis
-  // Pub/Sub from the document updater.
-  rclientList: RedisClientManager.createClientList(settings.redis.pubsub),
+  // DocumentUpdaterController broadcasts applied ops (and errors) from
+  // document-updater to socket.io clients. The messages arrive on the
+  // per-project editor-events channel and are forwarded here by the
+  // WebsocketLoadBalancer.
 
-  listenForUpdatesFromDocumentUpdater(io) {
-    logger.debug(
-      { rclients: this.rclientList.length },
-      'listening for applied-ops events'
-    )
-    for (const rclient of this.rclientList) {
-      rclient.subscribe('applied-ops')
-      rclient.on('message', function (channel, message) {
-        metrics.inc('rclient', 0.001) // global event rate metric
-        if (settings.debugEvents > 0) {
-          EventLogger.debugEvent(channel, message)
-        }
-        DocumentUpdaterController._processMessageFromDocumentUpdater(
-          io,
-          channel,
+  // Handle an already-parsed message from document-updater (an applied op
+  // or an error) and broadcast it to the project room (roomId = project_id).
+  handleAppliedOpMessage(io, message, roomId) {
+    if (message.op) {
+      if (message._id && settings.checkEventOrder) {
+        const status = EventLogger.checkEventOrder(
+          'applied-ops',
+          message._id,
           message
         )
-      })
-    }
-    // create metrics for each redis instance only when we have multiple redis clients
-    if (this.rclientList.length > 1) {
-      this.rclientList.forEach((rclient, i) => {
-        // per client event rate metric
-        const metricName = `rclient-${i}`
-        rclient.on('message', () => metrics.inc(metricName, 0.001))
-      })
-    }
-    this.handleRoomUpdates(this.rclientList)
-  },
-
-  handleRoomUpdates(rclientSubList) {
-    const roomEvents = RoomManager.eventSource()
-    roomEvents.on('doc-active', function (docId) {
-      const subscribePromises = rclientSubList.map(rclient =>
-        ChannelManager.subscribe(rclient, 'applied-ops', docId)
-      )
-      RoomManager.emitOnCompletion(subscribePromises, `doc-subscribed-${docId}`)
-    })
-    roomEvents.on('doc-empty', docId =>
-      rclientSubList.map(rclient =>
-        ChannelManager.unsubscribe(rclient, 'applied-ops', docId)
-      )
-    )
-  },
-
-  _processMessageFromDocumentUpdater(io, channel, message) {
-    SafeJsonParse.parse(message, function (error, message) {
-      if (error) {
-        logger.error({ err: error, channel }, 'error parsing JSON')
-        return
-      }
-      if (message.op) {
-        if (message._id && settings.checkEventOrder) {
-          const status = EventLogger.checkEventOrder(
-            'applied-ops',
-            message._id,
-            message
-          )
-          if (status === 'duplicate') {
-            return // skip duplicate events
-          }
+        if (status === 'duplicate') {
+          return // skip duplicate events
         }
-        DocumentUpdaterController._applyUpdateFromDocumentUpdater(
-          io,
-          message.doc_id,
-          message.op
-        )
-      } else if (message.error) {
-        DocumentUpdaterController._processErrorFromDocumentUpdater(
-          io,
-          message.doc_id,
-          message.error,
-          message
-        )
-      } else if (message.health_check) {
-        logger.debug(
-          { message },
-          'got health check message in applied ops channel'
-        )
-        HealthCheckManager.check(channel, message.key)
       }
-    })
+      DocumentUpdaterController._applyUpdateFromDocumentUpdater(
+        io,
+        roomId,
+        message.doc_id,
+        message.op
+      )
+    } else if (message.error) {
+      DocumentUpdaterController._processErrorFromDocumentUpdater(
+        io,
+        roomId,
+        message.doc_id,
+        message.error,
+        message
+      )
+    }
   },
 
-  _applyUpdateFromDocumentUpdater(io, docId, update) {
+  _applyUpdateFromDocumentUpdater(io, roomId, docId, update) {
     let client
-    const clientList = io.sockets.clients(docId)
+    const clientList = io.sockets.clients(roomId)
     // avoid unnecessary work if no clients are connected
     if (clientList.length === 0) {
       return
@@ -172,8 +115,14 @@ export default DocumentUpdaterController = {
     }
   },
 
-  _processErrorFromDocumentUpdater(io, docId, error, message) {
-    for (const client of io.sockets.clients(docId)) {
+  _processErrorFromDocumentUpdater(io, roomId, docId, error, message) {
+    for (const client of io.sockets.clients(roomId)) {
+      // When broadcasting via the project room, only clients that have
+      // joined the doc are affected by the error. (Always true for clients
+      // in the doc room.)
+      if (client.ol_context?.[`doc:${docId}`] !== 'allowed') {
+        continue
+      }
       logger.warn(
         { err: error, docId, clientId: client.id },
         'error from document updater, disconnecting client'

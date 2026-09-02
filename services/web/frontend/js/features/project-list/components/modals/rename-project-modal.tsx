@@ -28,6 +28,7 @@ import OLForm from '@/shared/components/ol/ol-form'
 import OLFormGroup from '@/shared/components/ol/ol-form-group'
 import OLFormLabel from '@/shared/components/ol/ol-form-label'
 import OLFormControl from '@/shared/components/ol/ol-form-control'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 type RenameProjectModalProps = {
   handleCloseModal: () => void
@@ -45,6 +46,7 @@ function RenameProjectModal({
   const { error, isError, isLoading, runAsync } = useAsync()
   const { toggleSelectedProject, updateProjectViewData } =
     useProjectListContext()
+  const themed = useFeatureFlag('themed-modals')
 
   useEffect(() => {
     if (showModal) {
@@ -104,6 +106,8 @@ function RenameProjectModal({
       onHide={handleCloseModal}
       id="rename-project-modal"
       backdrop="static"
+      themed={themed}
+      className="project-list-modal"
     >
       <OLModalHeader>
         <OLModalTitle>{t('rename_project')}</OLModalTitle>

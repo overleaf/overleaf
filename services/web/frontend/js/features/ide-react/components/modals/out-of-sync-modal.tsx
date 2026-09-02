@@ -1,7 +1,8 @@
 import { Trans, useTranslation } from 'react-i18next'
-import { memo, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import { useLocation } from '@/shared/hooks/use-location'
 import OLButton from '@/shared/components/ol/ol-button'
+import { sendMB } from '@/infrastructure/event-tracking'
 import {
   OLModal,
   OLModalBody,
@@ -9,6 +10,7 @@ import {
   OLModalHeader,
   OLModalTitle,
 } from '@/shared/components/ol/ol-modal'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export type OutOfSyncModalProps = {
   editorContent: string
@@ -20,7 +22,14 @@ function OutOfSyncModal({ editorContent, show, onHide }: OutOfSyncModalProps) {
   const { t } = useTranslation()
   const location = useLocation()
   const [editorContentShown, setEditorContentShown] = useState(false)
+  const themed = useFeatureFlag('themed-modals')
   const editorContentRows = (editorContent.match(/\n/g)?.length || 0) + 1
+
+  useEffect(() => {
+    if (show) {
+      sendMB('out-of-sync-modal-shown')
+    }
+  }, [show])
 
   // Reload the page to avoid staying in an inconsistent state.
   // https://github.com/overleaf/issues/issues/3694
@@ -36,6 +45,7 @@ function OutOfSyncModal({ editorContent, show, onHide }: OutOfSyncModalProps) {
       className="out-of-sync-modal"
       backdrop={false}
       keyboard={false}
+      themed={themed}
     >
       <OLModalHeader>
         <OLModalTitle>{t('out_of_sync')}</OLModalTitle>
@@ -50,7 +60,7 @@ function OutOfSyncModal({ editorContent, show, onHide }: OutOfSyncModalProps) {
             <a
               target="_blank"
               rel="noopener noreferrer"
-              href="/learn/Kb/Editor_out_of_sync_problems"
+              href="https://docs.overleaf.com/troubleshooting-and-support/resolving-pdf-rendering-and-project-loading-problems"
             />,
           ]}
         />

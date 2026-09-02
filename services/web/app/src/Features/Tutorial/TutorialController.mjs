@@ -1,6 +1,7 @@
 import SessionManager from '../Authentication/SessionManager.mjs'
 import TutorialHandler from './TutorialHandler.mjs'
 import { expressify } from '@overleaf/promise-utils'
+import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
 
 const VALID_KEYS = [
   'react-history-buttons-tutorial',
@@ -32,11 +33,52 @@ const VALID_KEYS = [
   'themed-dashboard-intro',
   'dimensions-consent',
   'dimensions-rail-popover',
+  'library-new-badge',
 ]
+
+// tutorialKey is validated against the same known-key enum the handlers
+// also check by hand below. Both the schema and the manual
+// VALID_KEYS.includes() guard enforce the same allow-list during this
+// rollout's logOnly phase, so an unrecognized key still 404s even while the
+// schema failure alone would not throw.
+const tutorialKeyParamsSchema = z.strictObject({
+  tutorialKey: z.enum(VALID_KEYS),
+})
+
+const completeTutorialSchema = z.object({
+  params: tutorialKeyParamsSchema,
+})
+
+const postponeTutorialSchema = z.object({
+  params: tutorialKeyParamsSchema,
+  body: z.strictObject({
+    postponedUntil: zz.datetime().optional(),
+  }),
+})
+
+// Rollout-temporary fallback (loosened primary schema; no zod validation
+// existed for this route on main); delete when this route's
+// REQ_VALIDATION_MODE instrumentation is removed.
+const postponeTutorialFallbackSchema = z.object({
+  params: z.object({
+    tutorialKey: z.enum(VALID_KEYS),
+  }),
+  body: z.object({
+    postponedUntil: z
+      .union([z.date(), z.string()])
+      .optional()
+      .transform(dt =>
+        dt === undefined ? undefined : dt instanceof Date ? dt : new Date(dt)
+      ),
+  }),
+})
 
 async function completeTutorial(req, res, next) {
   const userId = SessionManager.getLoggedInUserId(req.session)
-  const tutorialKey = req.params.tutorialKey
+  const { params } = parseReq(req, completeTutorialSchema, {
+    logOnly: true,
+  })
+  const { tutorialKey } = params
 
   if (!VALID_KEYS.includes(tutorialKey)) {
     return res.sendStatus(404)
@@ -48,14 +90,19 @@ async function completeTutorial(req, res, next) {
 
 async function postponeTutorial(req, res, next) {
   const userId = SessionManager.getLoggedInUserId(req.session)
-  const tutorialKey = req.params.tutorialKey
-  let postponedUntil
-  if (req.body.postponedUntil) {
-    postponedUntil = new Date(req.body.postponedUntil)
-  }
+  const { params, body } = parseReq(req, postponeTutorialSchema, {
+    logOnly: true,
+    fallbackSchema: postponeTutorialFallbackSchema,
+  })
+  const { tutorialKey } = params
 
   if (!VALID_KEYS.includes(tutorialKey)) {
     return res.sendStatus(404)
+  }
+
+  let postponedUntil
+  if (body.postponedUntil) {
+    postponedUntil = new Date(body.postponedUntil)
   }
 
   await TutorialHandler.setTutorialState(

@@ -2,12 +2,11 @@
 # Instead run bin/update_build_scripts from
 # https://github.com/overleaf/internal/
 
-FROM node:24.14.1 AS base
+FROM node:24.18.1 AS base
 
 # Corepack setup, shared between all the images.
-ENV PATH="/overleaf/node_modules/.bin:$PATH"
 ENV COREPACK_HOME=/opt/corepack
-RUN corepack enable && corepack install -g yarn@4.14.1
+RUN corepack enable && corepack install -g yarn@4.18.0
 ENV COREPACK_ENABLE_NETWORK=0
 
 WORKDIR /overleaf/services/document-updater
@@ -18,7 +17,7 @@ RUN mkdir /home/node/.config && chown node:node /home/node/.config
 
 FROM base AS app
 
-COPY package.json yarn.lock .yarnrc.yml /overleaf/
+COPY package.json yarn.lock .yarnrc.yml .pnp.register.mjs /overleaf/
 COPY libraries/eslint-plugin/package.json /overleaf/libraries/eslint-plugin/package.json
 COPY libraries/fetch-utils/package.json /overleaf/libraries/fetch-utils/package.json
 COPY libraries/logger/package.json /overleaf/libraries/logger/package.json
@@ -30,6 +29,7 @@ COPY libraries/promise-utils/package.json /overleaf/libraries/promise-utils/pack
 COPY libraries/ranges-tracker/package.json /overleaf/libraries/ranges-tracker/package.json
 COPY libraries/redis-wrapper/package.json /overleaf/libraries/redis-wrapper/package.json
 COPY libraries/settings/package.json /overleaf/libraries/settings/package.json
+COPY libraries/validation-tools/package.json /overleaf/libraries/validation-tools/package.json
 COPY services/document-updater/package.json /overleaf/services/document-updater/package.json
 COPY tools/migrations/package.json /overleaf/tools/migrations/package.json
 COPY .yarn/patches/ /overleaf/.yarn/patches/
@@ -47,10 +47,13 @@ COPY libraries/promise-utils/ /overleaf/libraries/promise-utils/
 COPY libraries/ranges-tracker/ /overleaf/libraries/ranges-tracker/
 COPY libraries/redis-wrapper/ /overleaf/libraries/redis-wrapper/
 COPY libraries/settings/ /overleaf/libraries/settings/
+COPY libraries/validation-tools/ /overleaf/libraries/validation-tools/
 COPY services/document-updater/ /overleaf/services/document-updater/
 COPY tools/migrations/ /overleaf/tools/migrations/
+
+ENV NODE_OPTIONS="--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs"
 
 FROM app
 USER node
 
-CMD ["node", "--expose-gc", "app.js"]
+CMD ["node", "--expose-gc", "--trace-warnings", "app.js"]

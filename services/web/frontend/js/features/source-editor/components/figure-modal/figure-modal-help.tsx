@@ -1,17 +1,17 @@
 import { FC } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 
-const LearnWikiLink: FC<React.PropsWithChildren<{ article: string }>> = ({
-  article,
+const LearnWikiLink: FC<React.PropsWithChildren<{ href: string }>> = ({
+  href,
   children,
 }) => {
-  return <a href={`/learn/latex/${article}`}>{children}</a>
+  return <a href={href}>{children}</a>
 }
 
 export const FigureModalHelp = () => {
   const { t } = useTranslation()
   return (
-    <>
+    <div className="figure-modal-help">
       <p>{t('this_tool_helps_you_insert_figures')}</p>
       <b>{t('editing_captions')}</b>
       <p>{t('when_you_tick_the_include_caption_box')}</p>
@@ -24,7 +24,7 @@ export const FigureModalHelp = () => {
             // eslint-disable-next-line react/jsx-key
             <code />,
             // eslint-disable-next-line react/jsx-key
-            <LearnWikiLink article="Inserting_Images#Labels_and_cross-references" />,
+            <LearnWikiLink href="https://docs.overleaf.com/writing-and-editing/inserting-images/captioning-and-referencing-figures#captioning-labeling-and-referencing" />,
           ]}
         />
       </p>
@@ -35,7 +35,7 @@ export const FigureModalHelp = () => {
           i18nKey="there_are_lots_of_options_to_edit_and_customize_your_figures"
           components={[
             // eslint-disable-next-line react/jsx-key
-            <LearnWikiLink article="Inserting_Images" />,
+            <LearnWikiLink href="https://docs.overleaf.com/writing-and-editing/inserting-images" />,
           ]}
         />
       </p>
@@ -46,7 +46,7 @@ export const FigureModalHelp = () => {
           i18nKey="latex_places_figures_according_to_a_special_algorithm"
           components={[
             // eslint-disable-next-line react/jsx-key
-            <LearnWikiLink article="Positioning_images_and_tables" />,
+            <LearnWikiLink href="https://docs.overleaf.com/writing-and-editing/inserting-images/positioning-figures" />,
           ]}
         />
       </p>
@@ -59,10 +59,10 @@ export const FigureModalHelp = () => {
             // eslint-disable-next-line react/jsx-key
             <code />,
             // eslint-disable-next-line react/jsx-key
-            <LearnWikiLink article="Inserting_Images" />,
+            <LearnWikiLink href="https://docs.overleaf.com/writing-and-editing/inserting-images/latex-code-for-including-images-in-your-document" />,
           ]}
         />
       </p>
-    </>
+    </div>
   )
 }

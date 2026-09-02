@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-  Dropdown,
-  DropdownDivider,
-  DropdownHeader,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
-} from '@/shared/components/dropdown/dropdown-menu'
-import FormControl from '@/shared/components/form/form-control'
+  OLDropdown,
+  OLDropdownDivider,
+  OLDropdownHeader,
+  OLDropdownItem,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
+import OLFormControl from '@/shared/components/ol/ol-form-control'
 import { isMac } from '@/shared/utils/os'
 import { Shortcut } from '@/shared/components/shortcut'
 
@@ -56,7 +56,7 @@ function PdfZoomDropdown({
   const showPresentOption = document.fullscreenEnabled
 
   return (
-    <Dropdown
+    <OLDropdown
       onSelect={eventKey => {
         if (eventKey === 'custom-zoom') {
           return
@@ -71,23 +71,23 @@ function PdfZoomDropdown({
       }}
       align="end"
     >
-      <DropdownToggle
+      <OLDropdownToggle
         id="pdf-zoom-dropdown"
         variant="link"
         className="pdf-toolbar-btn pdfjs-zoom-dropdown-button small"
         aria-label={t('pdf_zoom_level')}
       >
         {rawScaleToPercentage(rawScale)}
-      </DropdownToggle>
-      <DropdownMenu className="pdfjs-zoom-dropdown-menu">
+      </OLDropdownToggle>
+      <OLDropdownMenu className="pdfjs-zoom-dropdown-menu">
         <li role="none">
-          <DropdownItem
+          <OLDropdownItem
             disabled
             as="div"
             className="pdfjs-custom-zoom-menu-item"
             eventKey="custom-zoom"
           >
-            <FormControl
+            <OLFormControl
               onFocus={event => event.target.select()}
               value={customZoomValue}
               type="text"
@@ -111,64 +111,64 @@ function PdfZoomDropdown({
                 setCustomZoomValue(parsedValue)
               }}
             />
-          </DropdownItem>
+          </OLDropdownItem>
         </li>
-        <DropdownDivider />
+        <OLDropdownDivider />
         <li role="none">
-          <DropdownItem
+          <OLDropdownItem
             as="button"
             eventKey="zoom-in"
             trailingIcon={<Shortcut keys={shortcuts['zoom-in']} />}
           >
             {t('zoom_in')}
-          </DropdownItem>
+          </OLDropdownItem>
         </li>
         <li role="none">
-          <DropdownItem
+          <OLDropdownItem
             as="button"
             eventKey="zoom-out"
             trailingIcon={<Shortcut keys={shortcuts['zoom-out']} />}
           >
             {t('zoom_out')}
-          </DropdownItem>
+          </OLDropdownItem>
         </li>
         <li role="none">
-          <DropdownItem
+          <OLDropdownItem
             as="button"
             eventKey="page-width"
             trailingIcon={<Shortcut keys={shortcuts['fit-to-width']} />}
           >
             {t('fit_to_width')}
-          </DropdownItem>
+          </OLDropdownItem>
         </li>
         <li role="none">
-          <DropdownItem
+          <OLDropdownItem
             as="button"
             eventKey="page-height"
             trailingIcon={<Shortcut keys={shortcuts['fit-to-height']} />}
           >
             {t('fit_to_height')}
-          </DropdownItem>
+          </OLDropdownItem>
         </li>
-        {showPresentOption && <DropdownDivider />}
+        {showPresentOption && <OLDropdownDivider />}
         {showPresentOption && (
           <li role="none">
-            <DropdownItem as="button" eventKey="present">
+            <OLDropdownItem as="button" eventKey="present">
               {t('presentation_mode')}
-            </DropdownItem>
+            </OLDropdownItem>
           </li>
         )}
-        <DropdownDivider />
-        <DropdownHeader aria-hidden="true">{t('zoom_to')}</DropdownHeader>
+        <OLDropdownDivider />
+        <OLDropdownHeader aria-hidden="true">{t('zoom_to')}</OLDropdownHeader>
         {zoomValues.map(value => (
           <li role="none" key={value}>
-            <DropdownItem as="button" eventKey={value}>
+            <OLDropdownItem as="button" eventKey={value}>
               {rawScaleToPercentage(Number(value))}
-            </DropdownItem>
+            </OLDropdownItem>
           </li>
         ))}
-      </DropdownMenu>
-    </Dropdown>
+      </OLDropdownMenu>
+    </OLDropdown>
   )
 }
 

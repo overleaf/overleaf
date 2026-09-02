@@ -150,6 +150,18 @@ describe('CompileManager', () => {
       downloadOutputDotSynctexFromCompileCache: sinon.stub().resolves(),
     }
 
+    ctx.HistoryResourceWriter = {
+      syncResourcesToDisk: sinon.stub().resolves({
+        resourceList: ctx.resources,
+        baseHistoryVersion: undefined,
+      }),
+      saveSlowPngList: sinon.stub().resolves(),
+    }
+
+    ctx.Png2Pdf = {
+      isEnabled: sinon.stub().returns(true),
+    }
+
     ctx.LatexMetrics = { enableLatexMkMetrics: sinon.stub() }
 
     ctx.StatsManager = { sampleRequest: sinon.stub().returns(false) }
@@ -172,6 +184,16 @@ describe('CompileManager', () => {
 
     vi.doMock('@overleaf/settings', () => ({
       default: ctx.Settings,
+    }))
+
+    ctx.logger = {
+      debug: sinon.stub(),
+      info: sinon.stub(),
+      warn: sinon.stub(),
+      error: sinon.stub(),
+    }
+    vi.doMock('@overleaf/logger', () => ({
+      default: ctx.logger,
     }))
 
     vi.doMock('@overleaf/metrics', () => ({
@@ -213,6 +235,15 @@ describe('CompileManager', () => {
 
     vi.doMock('../../../app/js/CLSICacheHandler', () => ({
       default: ctx.CLSICacheHandler,
+    }))
+
+    vi.doMock(
+      '../../../app/js/HistoryResourceWriter',
+      () => ctx.HistoryResourceWriter
+    )
+
+    vi.doMock('../../../app/js/Png2Pdf', () => ({
+      default: ctx.Png2Pdf,
     }))
 
     vi.doMock('../../../app/js/LatexMetrics', () => ({
@@ -369,6 +400,77 @@ describe('CompileManager', () => {
       })
     })
 
+    describe('with the enableCheckpoint option', () => {
+      beforeEach(ctx => {
+        ctx.baseImage = 'example.com/texlive-full:2025.1'
+        ctx.checkpointingImage = `${ctx.baseImage}.checkpointing`
+        ctx.request.imageName = ctx.baseImage
+        ctx.request.enableCheckpoint = true
+        ctx.Settings.clsi.docker.allowedImages = [
+          ctx.baseImage,
+          ctx.checkpointingImage,
+        ]
+      })
+
+      it('should compile on the checkpointing variant of the image', async ctx => {
+        await ctx.CompileManager.promises.doCompileWithLock(ctx.request, {}, {})
+        const { image, environment } =
+          ctx.LatexRunner.promises.runLatex.args[0][1]
+        expect(image).to.equal(ctx.checkpointingImage)
+        expect(environment).to.have.property('ENABLE_CHECKPOINT', '1')
+      })
+
+      it('should log an error and compile on the base image when there is no checkpointing variant', async ctx => {
+        ctx.Settings.clsi.docker.allowedImages = [ctx.baseImage]
+        await ctx.CompileManager.promises.doCompileWithLock(ctx.request, {}, {})
+        const { image, environment } =
+          ctx.LatexRunner.promises.runLatex.args[0][1]
+        expect(image).to.equal(ctx.baseImage)
+        expect(environment).to.not.have.property('ENABLE_CHECKPOINT')
+        expect(ctx.logger.error).to.have.been.calledWith(
+          sinon.match({ imageName: ctx.baseImage })
+        )
+      })
+
+      it('should log an error and compile on the base image when there is no allow list', async ctx => {
+        delete ctx.Settings.clsi.docker.allowedImages
+        await ctx.CompileManager.promises.doCompileWithLock(ctx.request, {}, {})
+        const { image, environment } =
+          ctx.LatexRunner.promises.runLatex.args[0][1]
+        expect(image).to.equal(ctx.baseImage)
+        expect(environment).to.not.have.property('ENABLE_CHECKPOINT')
+        expect(ctx.logger.error).to.have.been.called
+      })
+
+      it('should log an error and compile without an image when none is requested', async ctx => {
+        delete ctx.request.imageName
+        await ctx.CompileManager.promises.doCompileWithLock(ctx.request, {}, {})
+        const { image, environment } =
+          ctx.LatexRunner.promises.runLatex.args[0][1]
+        expect(image).to.be.undefined
+        expect(environment).to.not.have.property('ENABLE_CHECKPOINT')
+        expect(ctx.logger.error).to.have.been.called
+      })
+    })
+
+    describe('without the enableCheckpoint option', () => {
+      beforeEach(async ctx => {
+        ctx.request.imageName = 'example.com/texlive-full:2025.1'
+        ctx.Settings.clsi.docker.allowedImages = [
+          'example.com/texlive-full:2025.1',
+          'example.com/texlive-full:2025.1.checkpointing',
+        ]
+        await ctx.CompileManager.promises.doCompileWithLock(ctx.request, {}, {})
+      })
+
+      it('should not enable checkpointing or change the image', ctx => {
+        const { image, environment } =
+          ctx.LatexRunner.promises.runLatex.args[0][1]
+        expect(image).to.equal('example.com/texlive-full:2025.1')
+        expect(environment).to.not.have.property('ENABLE_CHECKPOINT')
+      })
+    })
+
     describe('with a check option', () => {
       beforeEach(async ctx => {
         ctx.request.check = 'error'
@@ -470,6 +572,48 @@ describe('CompileManager', () => {
           ctx.compileDir + '/main.tex'
         )
         expect(ctx.fsPromises.rmdir).to.have.been.calledWith(ctx.compileDir)
+      })
+    })
+
+    describe('with slow pngs from latexmk metrics', () => {
+      beforeEach(ctx => {
+        ctx.request.isCompileFromHistory = true
+        ctx.request.png2pdf = true
+      })
+
+      it('should save the slow png list for the next compile', async ctx => {
+        const stats = {
+          latexmk: {
+            'latexmk-png-slow': ['images/alpha.png', 'images/palette.png'],
+          },
+        }
+
+        await ctx.CompileManager.promises.doCompileWithLock(
+          ctx.request,
+          stats,
+          {}
+        )
+
+        expect(
+          ctx.HistoryResourceWriter.saveSlowPngList
+        ).to.have.been.calledWith(`${ctx.projectId}-${ctx.userId}`, [
+          'images/alpha.png',
+          'images/palette.png',
+        ])
+      })
+
+      it('should not fail compile when saving the slow png list fails', async ctx => {
+        ctx.HistoryResourceWriter.saveSlowPngList.rejects(
+          new Error('save failed')
+        )
+
+        await expect(
+          ctx.CompileManager.promises.doCompileWithLock(
+            ctx.request,
+            { latexmk: { 'latexmk-png-slow': ['images/alpha.png'] } },
+            {}
+          )
+        ).to.be.fulfilled
       })
     })
   })
@@ -767,6 +911,140 @@ describe('CompileManager', () => {
         mathDisplay: 0,
         errors: 0,
         messages: '',
+      })
+    })
+
+    it('should not sync resources without a request', async ctx => {
+      expect(ctx.ResourceWriter.promises.syncResourcesToDisk).not.to.have.been
+        .called
+      expect(ctx.LockManager.acquire).not.to.have.been.called
+    })
+  })
+
+  describe('wordcount with a request', () => {
+    beforeEach(ctx => {
+      ctx.filename = 'main.tex'
+      ctx.image = 'example.com/image'
+      ctx.filePath = Path.join(ctx.compileDir, ctx.filename)
+      ctx.request = { project_id: ctx.projectId, resources: ctx.resources }
+    })
+
+    describe('normally', () => {
+      beforeEach(async ctx => {
+        await ctx.CompileManager.promises.wordcount(
+          ctx.projectId,
+          ctx.userId,
+          ctx.filename,
+          ctx.image,
+          ctx.request
+        )
+      })
+
+      it('should sync the resources to the compile dir', ctx => {
+        expect(
+          ctx.ResourceWriter.promises.syncResourcesToDisk
+        ).to.have.been.calledWith(ctx.request, ctx.compileDir)
+      })
+
+      it('should hold the compile dir lock while syncing', ctx => {
+        expect(ctx.LockManager.acquire).to.have.been.calledWith(ctx.compileDir)
+        expect(ctx.lock.release).to.have.been.called
+      })
+
+      it('should run the texcount command afterwards', ctx => {
+        expect(ctx.CommandRunner.promises.run).to.have.been.called
+      })
+
+      it('should not restore the clsi cache for an existing compile dir', ctx => {
+        expect(ctx.CLSICacheHandler.downloadLatestCompileCache).not.to.have.been
+          .called
+      })
+    })
+
+    describe('when this request creates the compile dir', () => {
+      beforeEach(async ctx => {
+        // fsPromises.mkdir resolves the path only when it created the directory
+        ctx.fsPromises.mkdir.withArgs(ctx.compileDir).resolves(ctx.compileDir)
+        ctx.request.compileFromClsiCache = true
+
+        await ctx.CompileManager.promises.wordcount(
+          ctx.projectId,
+          ctx.userId,
+          ctx.filename,
+          ctx.image,
+          ctx.request
+        )
+      })
+
+      it('should restore the cached outputs before syncing', ctx => {
+        expect(
+          ctx.CLSICacheHandler.downloadLatestCompileCache
+        ).to.have.been.calledWith(ctx.projectId, ctx.userId, ctx.compileDir)
+        expect(
+          ctx.CLSICacheHandler.downloadLatestCompileCache
+        ).to.have.been.calledBefore(
+          ctx.ResourceWriter.promises.syncResourcesToDisk
+        )
+      })
+
+      it('should still count when the cache restore fails', async ctx => {
+        ctx.CLSICacheHandler.downloadLatestCompileCache.rejects(
+          new Error('clsi-cache is down')
+        )
+        await ctx.CompileManager.promises.wordcount(
+          ctx.projectId,
+          ctx.userId,
+          ctx.filename,
+          ctx.image,
+          ctx.request
+        )
+        expect(ctx.CommandRunner.promises.run).to.have.been.called
+      })
+    })
+
+    describe('when the request is a compile from history', () => {
+      beforeEach(async ctx => {
+        ctx.request.isCompileFromHistory = true
+
+        await ctx.CompileManager.promises.wordcount(
+          ctx.projectId,
+          ctx.userId,
+          ctx.filename,
+          ctx.image,
+          ctx.request
+        )
+      })
+
+      it('should sync via the history resource writer', ctx => {
+        expect(
+          ctx.HistoryResourceWriter.syncResourcesToDisk
+        ).to.have.been.calledWith(
+          ctx.projectId,
+          ctx.userId,
+          ctx.request,
+          ctx.compileDir
+        )
+        expect(ctx.ResourceWriter.promises.syncResourcesToDisk).not.to.have.been
+          .called
+      })
+    })
+
+    describe('when a compile is in progress', () => {
+      beforeEach(ctx => {
+        ctx.LockManager.acquire.throws(new Error('compile in progress'))
+      })
+
+      it('should not run the texcount command', async ctx => {
+        await expect(
+          ctx.CompileManager.promises.wordcount(
+            ctx.projectId,
+            ctx.userId,
+            ctx.filename,
+            ctx.image,
+            ctx.request
+          )
+        ).to.be.rejectedWith('compile in progress')
+        expect(ctx.CommandRunner.promises.run).not.to.have.been.called
       })
     })
   })

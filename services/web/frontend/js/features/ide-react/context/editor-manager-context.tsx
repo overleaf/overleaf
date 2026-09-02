@@ -24,8 +24,10 @@ import {
   findDocEntityById,
   findFileRefEntityById,
 } from '@/features/ide-react/util/find-doc-entity-by-id'
-import useScopeEventEmitter from '@/shared/hooks/use-scope-event-emitter'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
+import { IdeEvents } from '@/features/ide-react/create-ide-event-emitter'
+import { OfflineDocBackup } from '@/features/ide-react/editor/offline-doc-backup'
+import { ConnectionOutageTracker } from '@/features/ide-react/editor/connection-outage-tracker'
 import { useTranslation } from 'react-i18next'
 import customLocalStorage from '@/infrastructure/local-storage'
 import useEventListener from '@/shared/hooks/use-event-listener'
@@ -36,6 +38,8 @@ import { useDebugDiffTracker } from '../hooks/use-debug-diff-tracker'
 import { convertFileRefToBinaryFile } from '@/features/ide-react/util/file-view'
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
+import { showConnectionRestoredToast } from '@/features/ide-react/components/connection-restored-toast'
+import { useDeepLinkContext } from '@/features/ide-react/context/deep-link-context'
 
 export interface GotoOffsetOptions {
   gotoOffset: number
@@ -84,10 +88,15 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
   const { t } = useTranslation()
   const { reportError, eventEmitter, projectId, setOutOfSync } =
     useIdeReactContext()
-  const { socket, closeConnection, connectionState } = useConnectionContext()
+  const { socket, closeConnection, connectionState, isConnected } =
+    useConnectionContext()
   const { view, setView, setOpenFile } = useLayoutContext()
-  const { showGenericMessageModal, genericModalVisible, showOutOfSyncModal } =
-    useModalsContext()
+  const {
+    showGenericMessageModal,
+    genericModalVisible,
+    showOutOfSyncModal,
+    showUnableToSyncModal,
+  } = useModalsContext()
   const { id: userId } = useUserContext()
   const {
     showVisual,
@@ -111,9 +120,17 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
     wantTrackChangesRef.current = wantTrackChanges
   }, [wantTrackChanges])
 
-  const goToLineEmitter = useScopeEventEmitter('editor:gotoLine')
+  const {
+    deepLinkedDocId,
+    deepLinkedThreadId,
+    reportDeepLinkedThreadNotFound,
+  } = useDeepLinkContext()
 
   const { fileTreeData } = useFileTreeData()
+  const fileTreeDataRef = useRef(fileTreeData)
+  useEffect(() => {
+    fileTreeDataRef.current = fileTreeData
+  }, [fileTreeData])
 
   const [ignoringExternalUpdates, setIgnoringExternalUpdates] = useState(false)
 
@@ -197,12 +214,11 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
     [currentDocumentId]
   )
 
-  const jumpToLine = useCallback(
-    (options: GotoLineOptions) => {
-      goToLineEmitter(options)
-    },
-    [goToLineEmitter]
-  )
+  const jumpToLine = useCallback((options: GotoLineOptions) => {
+    window.dispatchEvent(
+      new CustomEvent('editor:gotoLine', { detail: options })
+    )
+  }, [])
 
   const attachErrorHandlerToDocument = useCallback(
     (doc: Doc, document: DocumentContainer) => {
@@ -417,7 +433,9 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
           }
         } else if (hasGotoOffset(options)) {
           const jump = () => {
-            eventEmitter.emit('editor:gotoOffset', options)
+            window.dispatchEvent(
+              new CustomEvent('editor:gotoOffset', { detail: options })
+            )
           }
 
           if (isNewDoc) {
@@ -516,13 +534,34 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
 
   const openInitialDoc = useCallback(
     async (fallbackDocId?: string) => {
+      if (deepLinkedDocId) {
+        const deepLinkedDoc = findDocEntityById(fileTreeData, deepLinkedDocId)
+        if (deepLinkedDoc) {
+          return await openDoc(deepLinkedDoc)
+        }
+
+        // the deep link points at a doc that is no longer in the project, so
+        // any comment it referenced is unreachable
+        if (deepLinkedThreadId) {
+          reportDeepLinkedThreadNotFound()
+        }
+      }
+
       const docId =
         customLocalStorage.getItem(currentDocumentIdStorageKey) || fallbackDocId
       if (docId) {
         return await openDocWithId(docId)
       }
     },
-    [currentDocumentIdStorageKey, openDocWithId]
+    [
+      currentDocumentIdStorageKey,
+      deepLinkedDocId,
+      deepLinkedThreadId,
+      fileTreeData,
+      openDoc,
+      openDocWithId,
+      reportDeepLinkedThreadNotFound,
+    ]
   )
 
   useEffect(() => {
@@ -574,8 +613,33 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
         setErrorState(true)
         // Ensure that the editor is locked
         setOutOfSync(true)
-        // Display the "out of sync" modal
-        showOutOfSyncModal(editorContent || '')
+        // A failure while there are recoverable offline edits is a failed sync,
+        // so report it through the same event as the recovery path and let the
+        // listener show the modal. Otherwise fall back to the out of sync modal.
+        const backupRecord = OfflineDocBackup.readRecoverable(
+          projectId,
+          document.doc_id
+        )
+        ConnectionOutageTracker.recordTeardown(projectId)
+        if (backupRecord) {
+          if (!isConnected) {
+            // Still offline, so nothing has been rejected yet: this is the
+            // fatal op timeout running out while the outage is ongoing. Keep
+            // the backup and let recovery on the next load report the outcome,
+            // rather than declaring a failed sync mid-outage.
+            return
+          }
+          eventEmitter.emit('ide:unableToSyncOfflineChanges', {
+            docId: document.doc_id,
+            editorContent: editorContent || '',
+            baseContent: backupRecord.snapshot,
+            docName: document.docName,
+            reloadAfterClose: true,
+          })
+          OfflineDocBackup.remove(projectId, document.doc_id)
+        } else {
+          showOutOfSyncModal(editorContent || '')
+        }
 
         // Do not forceReopen the document.
         return
@@ -603,7 +667,48 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
     showOutOfSyncModal,
     setOutOfSync,
     t,
+    projectId,
+    isConnected,
   ])
+
+  useEffect(() => {
+    const handleUnableToSync = ({
+      detail: [
+        { docId, editorContent, baseContent, docName, reloadAfterClose },
+      ],
+    }: CustomEvent<IdeEvents['ide:unableToSyncOfflineChanges']>) => {
+      const resolvedDocName =
+        docName ||
+        (fileTreeDataRef.current &&
+          findDocEntityById(fileTreeDataRef.current, docId)?.name) ||
+        null
+      showUnableToSyncModal({
+        baseContent,
+        targetContent: editorContent,
+        docName: resolvedDocName,
+        rootFolderId: fileTreeDataRef.current?._id,
+        reloadAfterClose,
+      })
+    }
+
+    eventEmitter.on('ide:unableToSyncOfflineChanges', handleUnableToSync)
+
+    return () => {
+      eventEmitter.off('ide:unableToSyncOfflineChanges', handleUnableToSync)
+    }
+  }, [eventEmitter, showUnableToSyncModal])
+
+  useEffect(() => {
+    const handleOfflineChangesSynced = () => {
+      showConnectionRestoredToast()
+    }
+
+    eventEmitter.on('ide:offlineChangesSynced', handleOfflineChangesSynced)
+
+    return () => {
+      eventEmitter.off('ide:offlineChangesSynced', handleOfflineChangesSynced)
+    }
+  }, [eventEmitter])
 
   useEventListener(
     'editor:insert-symbol',

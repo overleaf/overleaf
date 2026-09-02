@@ -24,16 +24,21 @@ export const cursorPosition = ({
   return [
     // store cursor position
     ViewPlugin.define(view => {
-      const unloadListener = () => {
-        storeCursorPosition(view, docId)
+      const handleVisibilityChange = () => {
+        if (document.visibilityState === 'hidden') {
+          storeCursorPosition(view, docId)
+        }
       }
 
-      window.addEventListener('unload', unloadListener)
+      document.addEventListener('visibilitychange', handleVisibilityChange)
 
       return {
         destroy: () => {
-          window.removeEventListener('unload', unloadListener)
-          unloadListener()
+          document.removeEventListener(
+            'visibilitychange',
+            handleVisibilityChange
+          )
+          storeCursorPosition(view, docId)
         },
       }
     }),

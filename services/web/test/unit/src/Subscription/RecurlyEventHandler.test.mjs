@@ -1,4 +1,4 @@
-import { vi } from 'vitest'
+import { beforeEach, describe, it, vi } from 'vitest'
 import mongodb from 'mongodb-legacy'
 import sinon from 'sinon'
 
@@ -209,6 +209,10 @@ describe('RecurlyEventHandler', function () {
   it('with updated_subscription_notification', async function (ctx) {
     ctx.planCode = 'new-plan-code'
     ctx.eventData.subscription.plan.plan_code = ctx.planCode
+    ctx.SubscriptionLocator.promises.getUsersSubscription.resolves({
+      _id: 'sub123',
+      planCode: 'collaborator',
+    })
     await ctx.RecurlyEventHandler.sendRecurlyAnalyticsEvent(
       'updated_subscription_notification',
       ctx.eventData
@@ -219,6 +223,7 @@ describe('RecurlyEventHandler', function () {
       'subscription-updated',
       {
         plan_code: ctx.planCode,
+        previous_plan_code: 'collaborator',
         quantity: 1,
         is_trial: true,
         has_ai_add_on: false,
@@ -243,6 +248,19 @@ describe('RecurlyEventHandler', function () {
       ctx.userId,
       'subscription-is-trial',
       true
+    )
+  })
+
+  it('with updated_subscription_notification and no subscription in mongo', async function (ctx) {
+    await ctx.RecurlyEventHandler.sendRecurlyAnalyticsEvent(
+      'updated_subscription_notification',
+      ctx.eventData
+    )
+    sinon.assert.calledWith(
+      ctx.AnalyticsManager.recordEventForUserInBackground,
+      ctx.userId,
+      'subscription-updated',
+      sinon.match({ previous_plan_code: undefined })
     )
   })
 

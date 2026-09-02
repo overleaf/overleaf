@@ -16,7 +16,6 @@ import getMeta from '../../utils/meta'
 import { DetachRole } from './detach-context'
 import { debugConsole } from '@/utils/debugging'
 import { BinaryFile } from '@/features/file-view/types/binary-file'
-import useScopeEventEmitter from '@/shared/hooks/use-scope-event-emitter'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import { isMac } from '@/shared/utils/os'
 import { sendSearchEvent } from '@/features/event-tracking/search-events'
@@ -90,7 +89,6 @@ export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
   // what to show in the "flat" view (editor or pdf)
   const [view, _setView] = useState<IdeView | null>('editor')
   const [openFile, setOpenFile] = useState<BinaryFile | null>(null)
-  const historyToggleEmitter = useScopeEventEmitter('history:toggle', true)
   const { isOpen: railIsOpen, setIsOpen: setRailIsOpen } = useRailContext()
   const [prevRailIsOpen, setPrevRailIsOpen] = useState(railIsOpen)
   // Whether we came from a file or a document when we left the ide
@@ -102,7 +100,7 @@ export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
       _setView(oldValue => {
         // ensure that the "history:toggle" event is broadcast when switching in or out of history view
         if (value === 'history' || oldValue === 'history') {
-          historyToggleEmitter()
+          window.dispatchEvent(new CustomEvent('history:toggle'))
         }
 
         if (value === 'history') {
@@ -121,14 +119,7 @@ export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
         return value
       })
     },
-    [
-      _setView,
-      setRailIsOpen,
-      historyToggleEmitter,
-      prevRailIsOpen,
-      setPrevRailIsOpen,
-      railIsOpen,
-    ]
+    [_setView, setRailIsOpen, prevRailIsOpen, setPrevRailIsOpen, railIsOpen]
   )
 
   const restoreView = useCallback(() => {
@@ -354,7 +345,7 @@ export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
           !event.shiftKey &&
           !event.altKey
         ) {
-          switch (event.code) {
+          switch (event.key) {
             case 'ArrowLeft': // Editor only
               event.preventDefault()
               handleChangeLayout('flat', 'editor')

@@ -28,7 +28,7 @@ CFG_SAAS=/overleaf/services/web/test/acceptance/config/settings.test.saas.js
 CFG_SERVER_CE=/overleaf/services/web/test/acceptance/config/settings.test.server-ce.js
 CFG_SERVER_PRO=/overleaf/services/web/test/acceptance/config/settings.test.server-pro.js
 
-export MOCHA_GREP ?=
+export TEST_NAME_PATTERN ?=
 DOCKER_COMPOSE := docker compose ${DOCKER_COMPOSE_FLAGS}
 
 # Common flags for docker compose run.
@@ -77,6 +77,7 @@ SHARD_PROJECT_NAMES = \
 	acceptance_test_modules_merged_saas_3_$(BUILD_DIR_NAME) \
 	acceptance_test_modules_merged_saas_4_$(BUILD_DIR_NAME) \
 	acceptance_test_modules_merged_saas_5_$(BUILD_DIR_NAME) \
+	acceptance_test_modules_merged_saas_6_$(BUILD_DIR_NAME) \
 	acceptance_test_modules_merged_server_ce_$(BUILD_DIR_NAME) \
 	acceptance_test_modules_merged_server_pro_$(BUILD_DIR_NAME) \
 	frontend_test_$(BUILD_DIR_NAME) \
@@ -129,6 +130,15 @@ test_unit_app: export COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME)
 test_unit_app: mongo_migrations_for_tests
 	$(DOCKER_COMPOSE) run --name unit_test_$(BUILD_DIR_NAME) --rm test_unit
 
+# Run a single unit test file instead of globbing the whole suite.
+# FILE is relative to services/web; TEST_NAME_PATTERN focuses describe/it blocks
+# e.g. make test_unit_file FILE=test/unit/src/Subscription/FeaturesUpdater.test.mjs
+#      make test_unit_file FILE=test/unit/src/Subscription/FeaturesUpdater.test.mjs TEST_NAME_PATTERN=refreshFeatures
+test_unit_file: export COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME)
+test_unit_file: mongo_migrations_for_tests
+	@test -n "$(FILE)" || { echo "FILE is required, e.g. make test_unit_file FILE=test/unit/src/Subscription/FeaturesUpdater.test.mjs"; exit 1; }
+	$(DOCKER_COMPOSE) run $(DC_RUN_FLAGS) test_unit yarn run test:unit:run_dir $(FILE) --hideSkippedTests
+
 test_unit_parallel: export JUNIT_ROOT_SUITE_NAME = ESM unit tests - parallel
 test_unit_parallel: export COMPOSE_PROJECT_NAME=unit_test_parallel_$(BUILD_DIR_NAME)
 test_unit_parallel: mongo_migrations_for_tests
@@ -151,7 +161,7 @@ MOCHA_CMD_LINE = \
 	mocha \
 		--exit \
 		--file test/unit/bootstrap.js \
-		--grep="${MOCHA_GREP}" \
+		--grep="${TEST_NAME_PATTERN}" \
 		--reporter spec \
 		--timeout 25000 \
 
@@ -226,13 +236,13 @@ build_test_frontend_ct:
 	$(DOCKER_COMPOSE) build test_frontend_ct
 	docker run --rm --volume /dev/shm:/dev/shm --user root $(IMAGE_CI) bash -ec 'for path in /overleaf/services/web/cypress/results /overleaf/services/web/cypress/support /overleaf/services/web/.cache; do mkdir -p $$path; chown -R node:node $$path; done && tar -cC / overleaf | tar -xC /dev/shm'
 
-test_frontend_ct_core_other: export CYPRESS_DOWNLOADS=./cypress/downloads/core
-test_frontend_ct_core_other: export CYPRESS_RESULTS=./cypress/results/core
+test_frontend_ct_core_other: export CYPRESS_DOWNLOADS=./cypress/downloads/core_other
+test_frontend_ct_core_other: export CYPRESS_RESULTS=./cypress/results/core_other
 test_frontend_ct_core_other: export CYPRESS_SPEC_PATTERN=./test/frontend/**/*.spec.{js,jsx,ts,tsx}
 test_frontend_ct_core_other: export CYPRESS_EXCLUDE_SPEC_PATTERN=./test/frontend/features/**/*.spec.{js,jsx,ts,tsx}
 
-test_frontend_ct_core_features: export CYPRESS_DOWNLOADS=./cypress/downloads/core
-test_frontend_ct_core_features: export CYPRESS_RESULTS=./cypress/results/core
+test_frontend_ct_core_features: export CYPRESS_DOWNLOADS=./cypress/downloads/core_features
+test_frontend_ct_core_features: export CYPRESS_RESULTS=./cypress/results/core_features
 test_frontend_ct_core_features: export CYPRESS_SPEC_PATTERN=./test/frontend/features/**/*.spec.{js,jsx,ts,tsx}
 test_frontend_ct_core_features: export CYPRESS_EXCLUDE_SPEC_PATTERN=./test/frontend/features/source-editor/**/*.spec.{js,jsx,ts,tsx}
 
@@ -252,6 +262,12 @@ test_frontend_ct_editor_visual: export CYPRESS_SPEC_PATTERN=./test/frontend/feat
 $(TEST_FRONTEND_CT_VARIANTS):
 	COMPOSE_PROJECT_NAME=$@_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run $(DC_RUN_FLAGS) test_frontend_ct
 	COMPOSE_PROJECT_NAME=$@_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
+
+# The component tests run out of a copy of the tree in /dev/shm, so the screenshots of
+# their failures are nowhere Jenkins can archive them from. Bring them into the workspace.
+collect_frontend_ct_screenshots:
+	rm -rf cypress/results
+	-cp -r /dev/shm/overleaf/services/web/cypress/results cypress/results
 
 #
 # Acceptance tests
@@ -391,28 +407,30 @@ test_acceptance_modules_merged_inner:
 # inner loop for running saas tests in parallel
 no_more_targets:
 
-# If we ever have more than 50 modules, we need to add _6 targets to all the places and have it START at 51.
-test_acceptance_modules_merged_inner_1: export START=1
-test_acceptance_modules_merged_inner_2: export START=11
-test_acceptance_modules_merged_inner_3: export START=21
-test_acceptance_modules_merged_inner_4: export START=31
-test_acceptance_modules_merged_inner_5: export START=41
+test_acceptance_modules_merged_inner_1: export SHARD_INDEX=1
+test_acceptance_modules_merged_inner_2: export SHARD_INDEX=2
+test_acceptance_modules_merged_inner_3: export SHARD_INDEX=3
+test_acceptance_modules_merged_inner_4: export SHARD_INDEX=4
+test_acceptance_modules_merged_inner_5: export SHARD_INDEX=5
+test_acceptance_modules_merged_inner_6: export SHARD_INDEX=6
 TEST_ACCEPTANCE_MODULES_MERGED_INNER_SPLIT = \
 	test_acceptance_modules_merged_inner_1 \
 	test_acceptance_modules_merged_inner_2 \
 	test_acceptance_modules_merged_inner_3 \
 	test_acceptance_modules_merged_inner_4 \
 	test_acceptance_modules_merged_inner_5 \
+	test_acceptance_modules_merged_inner_6 \
 
-# The node script prints one module per line.
-# Using tail and head we skip over the first n=START entries and print the last 10.
-# Finally we check with grep for any targets in a batch and print a fallback if none were found.
+SHARD_TOTAL = 6
+
+# The node script uses recorded runtimes (test/acceptance/module-timings.json) to
+# greedily bin-pack modules into SHARD_TOTAL shards (LPT: longest first into the
+# currently lightest shard). It prints the make targets for SHARD_INDEX, or
+# "no_more_targets" if that shard has no modules assigned.
 $(TEST_ACCEPTANCE_MODULES_MERGED_INNER_SPLIT):
 	$(MAKE) $(shell \
 		OVERLEAF_CONFIG=$(BASE_CONFIG) \
-		yarn node test/acceptance/getModuleTargets test_acceptance_merged_inner \
-		| tail -n+$(START) | head -n 10 \
-		| grep -e . || echo no_more_targets \
+		yarn node test/acceptance/getModuleTargets test_acceptance_merged_inner $(SHARD_INDEX) $(SHARD_TOTAL) \
 	)
 
 # See docs for test_acceptance_server_ce how this works.
@@ -449,6 +467,7 @@ TEST_ACCEPTANCE_MODULES_MERGED_SPLIT_SAAS = \
 	test_acceptance_modules_merged_saas_3 \
 	test_acceptance_modules_merged_saas_4 \
 	test_acceptance_modules_merged_saas_5 \
+	test_acceptance_modules_merged_saas_6 \
 
 test_acceptance_modules_merged_saas_1: export COMPOSE_PROJECT_NAME = \
 	acceptance_test_modules_merged_saas_1_$(BUILD_DIR_NAME)
@@ -460,6 +479,8 @@ test_acceptance_modules_merged_saas_4: export COMPOSE_PROJECT_NAME = \
 	acceptance_test_modules_merged_saas_4_$(BUILD_DIR_NAME)
 test_acceptance_modules_merged_saas_5: export COMPOSE_PROJECT_NAME = \
 	acceptance_test_modules_merged_saas_5_$(BUILD_DIR_NAME)
+test_acceptance_modules_merged_saas_6: export COMPOSE_PROJECT_NAME = \
+	acceptance_test_modules_merged_saas_6_$(BUILD_DIR_NAME)
 $(TEST_ACCEPTANCE_MODULES_MERGED_SPLIT_SAAS): export BASE_CONFIG = $(CFG_SAAS)
 $(TEST_ACCEPTANCE_MODULES_MERGED_SPLIT_SAAS): export JUNIT_ROOT_SUITE_NAME = SaaS modules acceptance tests
 
@@ -496,9 +517,9 @@ RUN_LINTING_MONOREPO = ../../bin/run monorepo yarn run --silent
 
 ORG_PATH = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 RUN_LINT_FORMAT ?= \
-	docker run --rm --env BRANCH_NAME --env CI --env COMMIT_SHA --env MONOREPO --env PATH=/overleaf/node_modules/.bin:$(ORG_PATH) --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc.cjs:/overleaf/.prettierrc.cjs --volume ${PWD}/data/reports:/overleaf/services/web/data/reports --volume $(MONOREPO)/.cache/:/overleaf/.cache/ ${IMAGE_CI}
+	docker run --rm --env BRANCH_NAME --env CI --env COMMIT_SHA --env MONOREPO --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc.cjs:/overleaf/.prettierrc.cjs --volume ${PWD}/data/reports:/overleaf/services/web/data/reports --volume $(MONOREPO)/.cache/:/overleaf/.cache/ ${IMAGE_CI}
 
-NODE_MODULES_PATH := ${PATH}:${PWD}/node_modules/.bin:/overleaf/services/web/node_modules/.bin
+NODE_MODULES_PATH := ${PATH}
 WITH_NODE_MODULES_PATH = \
 	format_backend \
 	format_frontend \
@@ -568,6 +589,10 @@ lint: lint_pug
 lint_pug:
 	bin/lint_pug_templates
 
+lint: lint_pug_docs_link_rel
+lint_pug_docs_link_rel:
+	node scripts/check_pug_docs_link_rel.mjs
+
 lint: lint_locales
 lint_locales:
 	bin/lint_locales
@@ -585,7 +610,11 @@ lint_flag_res_send_usage:
 
 lint: lint_overleafModuleImports
 lint_overleafModuleImports:
-	node scripts/check_overleafModuleImports.mjs
+ifeq ($(CI),true)
+	yarn node scripts/check_overleafModuleImports.mjs
+else
+	../../bin/run -w /overleaf/services/$(PROJECT_NAME) monorepo yarn node scripts/check_overleafModuleImports.mjs
+endif
 
 lint: typecheck_frontend
 typecheck_frontend:
@@ -670,6 +699,7 @@ IMAGE_CACHE ?= $(IMAGE_REPO):cache-$(shell cat \
 	$(MONOREPO)/package.json \
 	$(MONOREPO)/yarn.lock \
 	$(MONOREPO)/libraries/access-token-encryptor/package.json \
+	$(MONOREPO)/libraries/eslint-config/package.json \
   $(MONOREPO)/libraries/eslint-plugin/package.json \
   $(MONOREPO)/libraries/fetch-utils/package.json \
   $(MONOREPO)/libraries/logger/package.json \
@@ -795,6 +825,7 @@ $(MODULE_TARGETS):
 	$(MODULE_TARGETS) \
 	compile_modules compile_modules_full clean_ci \
 	test test_module mongo_migrations_for_tests test_unit test_unit_app \
+	test_unit_file \
 	test_unit_modules test_unit_module test_frontend_jsdom \
 	test_acceptance test_acceptance_app test_acceptance_modules \
 	test_acceptance_module ci format format_fix lint \

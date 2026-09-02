@@ -8,6 +8,8 @@ const httpAuthUsers = {}
 httpAuthUsers[httpAuthUser] = httpAuthPass
 
 module.exports = {
+  adminRolesEnabled: false,
+
   catchErrors: false,
   clsiCookie: undefined,
 
@@ -69,6 +71,9 @@ module.exports = {
       url: 'http://127.0.0.1:23013',
       downloadHost: 'http://127.0.0.1:23080',
     },
+    clsiCache: {
+      instances: [{ url: 'http://127.0.0.1:23081', shard: 'cache' }],
+    },
     realTime: {
       url: 'http://127.0.0.1:23026',
     },
@@ -114,7 +119,7 @@ module.exports = {
       trackChanges: false,
       symbolPalette: false,
       aiUsageQuota: 'basic',
-      aiErrorAssistant: false,
+      offlineMode: false,
     },
     personal: {
       collaborators: 1,
@@ -132,7 +137,7 @@ module.exports = {
       trackChanges: false,
       symbolPalette: false,
       aiUsageQuota: 'basic',
-      aiErrorAssistant: false,
+      offlineMode: false,
     },
     collaborator: {
       collaborators: 10,
@@ -150,7 +155,7 @@ module.exports = {
       trackChanges: true,
       symbolPalette: true,
       aiUsageQuota: 'basic',
-      aiErrorAssistant: false,
+      offlineMode: true,
     },
     professional: {
       collaborators: -1,
@@ -168,7 +173,7 @@ module.exports = {
       trackChanges: true,
       symbolPalette: true,
       aiUsageQuota: 'basic',
-      aiErrorAssistant: false,
+      offlineMode: true,
     },
   }),
 
@@ -193,6 +198,26 @@ module.exports = {
       planCode: 'collaborator',
       name: 'Standard monthly',
       price_in_cents: 1500,
+      features: features.collaborator,
+    },
+    // The real student plans live in settings.overrides.saas.js, but
+    // @overleaf/settings' merge replaces arrays wholesale rather than
+    // merging them, so this list (not that one) is what acceptance tests
+    // see. Without these, PlansLocator.findLocalPlanInSettings cannot
+    // resolve 'student' and any test of the student-verification gate is
+    // blocked before the gate is reached. Feature set is deliberately
+    // borrowed from collaborator: the gate only needs the plan to resolve.
+    {
+      planCode: 'student',
+      name: 'Student monthly',
+      price_in_cents: 1000,
+      features: features.collaborator,
+    },
+    {
+      planCode: 'student-annual',
+      name: 'Student annual',
+      price_in_cents: 10000,
+      annual: true,
       features: features.collaborator,
     },
     {

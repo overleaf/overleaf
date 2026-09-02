@@ -36,6 +36,8 @@ export class HasNoAdditionalLicenseWhenManuallyCollectedError extends OError {}
 
 export class InvalidTaxIdError extends OError {}
 
+export class AddressPendingReactivationError extends OError {}
+
 export class StripeClientIdempotencyKeyInUseError extends OError {
   constructor() {
     super('Stripe idempotency key was already in use')
@@ -85,5 +87,6 @@ export default {
   HasPastDueInvoiceError,
   HasNoAdditionalLicenseWhenManuallyCollectedError,
   InvalidTaxIdError,
+  AddressPendingReactivationError,
   StripeClientIdempotencyKeyInUseError,
 }

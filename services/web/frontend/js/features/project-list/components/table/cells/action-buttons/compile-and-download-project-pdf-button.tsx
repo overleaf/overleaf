@@ -18,6 +18,7 @@ import {
 import OLIconButton from '@/shared/components/ol/ol-icon-button'
 import getMeta from '@/utils/meta'
 import { v4 as uuid } from 'uuid'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export const FAKE_EDITOR_ID = uuid()
 
@@ -150,9 +151,10 @@ function CompileErrorModal({
   handleClose,
 }: { project: Project } & { handleClose: () => void }) {
   const { t } = useTranslation()
+  const themed = useFeatureFlag('themed-modals')
   return (
     <>
-      <OLModal show onHide={handleClose}>
+      <OLModal show onHide={handleClose} themed={themed}>
         <OLModalHeader>
           <OLModalTitle>
             {project.name}: {t('pdf_unavailable_for_download')}

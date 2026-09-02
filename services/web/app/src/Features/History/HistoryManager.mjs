@@ -14,7 +14,7 @@ import ProjectGetter from '../Project/ProjectGetter.mjs'
 import HistoryBackupDeletionHandler from './HistoryBackupDeletionHandler.mjs'
 import { db, waitForDb } from '../../infrastructure/mongodb.mjs'
 import Metrics from '@overleaf/metrics'
-import { NotFoundError } from '../Errors/Errors.js'
+import { NotFoundError, FileTooLargeError } from '../Errors/Errors.js'
 
 const HISTORY_V1_URL = settings.apis.v1_history.url
 const HISTORY_V1_BASIC_AUTH = {
@@ -75,7 +75,7 @@ async function flushProject(projectId) {
   try {
     await fetchNothing(
       `${settings.apis.project_history.url}/project/${projectId}/flush`,
-      { method: 'POST' }
+      { method: 'POST', signal: AbortSignal.timeout(60_000) }
     )
   } catch (err) {
     throw OError.tag(err, 'failed to flush project to project history', {
@@ -138,7 +138,7 @@ async function _deleteProjectInProjectHistory(projectId) {
   try {
     await fetchNothing(
       `${settings.apis.project_history.url}/project/${projectId}`,
-      { method: 'DELETE' }
+      { method: 'DELETE', signal: AbortSignal.timeout(5 * 60_000) }
     )
   } catch (err) {
     throw OError.tag(
@@ -154,6 +154,7 @@ async function _deleteProjectInFullProjectHistory(historyId) {
     await fetchNothing(`${HISTORY_V1_URL}/projects/${historyId}`, {
       method: 'DELETE',
       basicAuth: HISTORY_V1_BASIC_AUTH,
+      signal: AbortSignal.timeout(5 * 60_000),
     })
   } catch (err) {
     throw OError.tag(err, 'failed to clear project history', { historyId })
@@ -173,15 +174,27 @@ async function uploadBlobFromDisk(historyId, hash, byteLength, fsPath) {
   })
 }
 
-async function copyBlob(sourceHistoryId, targetHistoryId, hash) {
-  const url = `${HISTORY_V1_URL}/projects/${targetHistoryId}/blobs/${hash}`
-  await fetchNothing(
-    `${url}?${new URLSearchParams({ copyFrom: sourceHistoryId })}`,
-    {
+async function copyBlob(sourceHistoryId, targetHistoryId, hash, sizeLimit) {
+  const url = new URL(
+    `${HISTORY_V1_URL}/projects/${targetHistoryId}/blobs/${hash}`
+  )
+  url.searchParams.set('copyFrom', sourceHistoryId)
+  if (sizeLimit) url.searchParams.set('sizeLimit', sizeLimit)
+  try {
+    await fetchNothing(url, {
       method: 'POST',
       basicAuth: HISTORY_V1_BASIC_AUTH,
+    })
+  } catch (err) {
+    if (err instanceof RequestFailedError && err.response.status === 413) {
+      let size
+      try {
+        ;({ size } = JSON.parse(err.body))
+      } catch {}
+      throw new FileTooLargeError('file too large', { size })
     }
-  )
+    throw err
+  }
 }
 
 async function requestBlobWithProjectId(
@@ -317,13 +330,6 @@ async function getLatestZipWithHistoryId(historyId) {
     }
   )
   return { stream, historyVersion: response.headers.get('X-History-Version') }
-}
-
-async function ensureNoResyncPending(projectId) {
-  const { resyncPending } = await fetchJson(
-    `${settings.apis.project_history.url}/project/${projectId}/resync-pending`
-  )
-  if (resyncPending) throw new OError('broken history with pending resync')
 }
 
 async function getDebugInfo(projectId) {
@@ -517,7 +523,6 @@ export default {
     getProjectBlobStats,
     getBlobStats,
     getLatestHistoryWithHistoryId,
-    ensureNoResyncPending,
     getDebugInfo,
     getHistoryFailures,
   },

@@ -381,15 +381,6 @@
   align-items: center;
   white-space: nowrap;
 
-  &::before {
-    content: '';
-    display: block;
-    width: 1px;
-    height: 16px;
-    background-color: var(--toolbar-dropdown-divider-color);
-    margin-right: var(--spacing-02);
-  }
-
   .toggle-switch-label span {
     background: none;
     transition: background 0.12s ease-out;
@@ -402,6 +393,10 @@
   .toggle-switch-label:last-of-type span {
     padding-right: var(--spacing-04);
     border-right: none;
+  }
+
+  .toggle-switch {
+    margin-right: 0;
   }
 }
 

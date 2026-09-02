@@ -32,6 +32,12 @@ router.post(
 )
 
 router.post(
+  '/projects/:project_id/set_content',
+  handleBasicAuth,
+  projectImportController.setContent
+)
+
+router.post(
   '/projects/:project_id/flush',
   handleBasicAuth,
   projectImportController.flushChanges

@@ -172,13 +172,37 @@ async function userIsMemberOfGroupSubscription(user) {
 /**
  * @param {any} subscription
  */
-function teamHasReachedMemberLimit(subscription) {
-  const currentTotal =
+function currentGroupTotal(subscription) {
+  return (
     (subscription.member_ids || []).length +
     (subscription.teamInvites || []).length +
     (subscription.invited_emails || []).length
+  )
+}
+
+/**
+ * @param {any} subscription
+ */
+function teamHasReachedMemberLimit(subscription) {
+  const currentTotal = currentGroupTotal(subscription)
 
   return currentTotal >= subscription.membersLimit
+}
+/**
+ * Calculate the number of remaining seats for a group subscription.
+ *
+ * @param {any} subscriptionId - The subscription ID
+ * @returns {Promise<number>} - Remaining seats (membersLimit - current members/invites)
+ */
+async function remainingSeatsForGroup(subscriptionId) {
+  const subscription =
+    await SubscriptionLocator.promises.getSubscription(subscriptionId)
+  if (!subscription) {
+    logger.warn({ subscriptionId }, 'no subscription found')
+    throw new Error('no subscription found')
+  }
+  const currentTotal = currentGroupTotal(subscription)
+  return subscription.membersLimit - currentTotal
 }
 
 /**
@@ -241,6 +265,7 @@ const LimitationsManager = {
     userHasSubscription,
     userIsMemberOfGroupSubscription,
     hasGroupMembersLimitReached,
+    remainingSeatsForGroup,
   },
 }
 

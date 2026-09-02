@@ -1,0 +1,251 @@
+diff --git a/lib/logout.js b/lib/logout.js
+index 77c417213851ffbe4a29f1b501027b8727931d8f..03d1bd8452ce80964f187f541ff47986931d3b73 100644
+--- a/lib/logout.js
++++ b/lib/logout.js
+@@ -10,6 +10,20 @@ var zlib                  = require('zlib');
+ var qs                    = require('querystring');
+ var xtend                 = require('xtend');
+ var constants             = require('./constants');
++// --- Overleaf patch: request-input lockdown compatibility ---
++// See lib/samlp.js for the full rationale; the IdP-initiated and
++// SP-initiated logout flows read SAMLRequest/SAMLResponse/RelayState off
++// req.query/req.body directly, same as the login flow there.
++var __overleafLockdownInstalled = Symbol.for('overleaf.lockdown.installed');
++var __overleafLockdownRawQuery = Symbol.for('overleaf.lockdown.rawQuery');
++var __overleafLockdownRawBody = Symbol.for('overleaf.lockdown.rawBody');
++function __overleafRawQuery(req) {
++  return req[__overleafLockdownInstalled] ? req[__overleafLockdownRawQuery] : req.query;
++}
++function __overleafRawBody(req) {
++  return req[__overleafLockdownInstalled] ? req[__overleafLockdownRawBody] : req.body;
++}
++// --- end Overleaf patch ---
+ 
+ var BINDINGS  = constants.BINDINGS;
+ var STATUS = constants.STATUS;
+@@ -87,7 +101,7 @@ module.exports.logout = function (options) {
+   }
+ 
+   function validateSamlResponse(req, sessionParticipant, cb) {
+-    var SAMLResponse = req.query.SAMLResponse || req.body.SAMLResponse;
++    var SAMLResponse = __overleafRawQuery(req).SAMLResponse || __overleafRawBody(req).SAMLResponse;
+ 
+     function parseAndValidate(err, buffer) {
+       if (err) { return cb(err); }
+@@ -141,7 +155,7 @@ module.exports.logout = function (options) {
+       cb(null, parsedResponse);
+     }
+ 
+-    if (req.body.SAMLResponse || !options.deflate) {
++    if (__overleafRawBody(req).SAMLResponse || !options.deflate) {
+       // HTTP-POST or HTTP-Redirect without deflate encoding
+       return parseAndValidate(null, new Buffer(SAMLResponse, 'base64'));
+     }
+@@ -153,7 +167,7 @@ module.exports.logout = function (options) {
+   return function (req, res, next) {
+     try {
+       // SP Initated flow.
+-      if (req.query.SAMLRequest || req.body.SAMLRequest) {
++      if (__overleafRawQuery(req).SAMLRequest || __overleafRawBody(req).SAMLRequest) {
+         const opts = {
+           getCredentials: function getCredentials(issuer, sessionIndices, nameId, cb) {
+             options.sessionParticipants.get(issuer, sessionIndices, nameId, function (err, session) {
+@@ -168,7 +182,7 @@ module.exports.logout = function (options) {
+             });
+           }
+         };
+-        parseIncomingLogoutRequest(req, req.query.SAMLRequest || req.body.SAMLRequest, opts, function (err, requestData) {
++        parseIncomingLogoutRequest(req, __overleafRawQuery(req).SAMLRequest || __overleafRawBody(req).SAMLRequest, opts, function (err, requestData) {
+           if (err) { return next(err); }
+ 
+           if (!requestData.issuer) {
+@@ -185,7 +199,7 @@ module.exports.logout = function (options) {
+                 id: requestData.id,
+                 serviceProviderLogoutURL: (session|| {}).serviceProviderLogoutURL || options.destination
+               },
+-              relayState: req.query.RelayState || (req.body && req.body.RelayState)
++              relayState: __overleafRawQuery(req).RelayState || (__overleafRawBody(req) && __overleafRawBody(req).RelayState)
+             };
+ 
+             options.store.save(req, spData, function (err, transactionId) {
+@@ -206,7 +220,7 @@ module.exports.logout = function (options) {
+         });
+ 
+       // Logout flow in progress, incoming SAMLResponse from SP. (Could be SP initiated or IdP initiated)
+-      } else if (req.query.SAMLResponse || req.body.SAMLResponse) {
++      } else if (__overleafRawQuery(req).SAMLResponse || __overleafRawBody(req).SAMLResponse) {
+         function process(state, transactionId) {
+           // LogoutResponse was OK, we remove the session participant from the IdP
+           options.sessionParticipants.remove(state.issuer, state.sessionIndex, state.nameId, function (err) {
+@@ -218,7 +232,7 @@ module.exports.logout = function (options) {
+         }
+ 
+         // Verify that the state sent to the SP matches the one returned
+-        var h = req.query.RelayState || (req.body && req.body.RelayState);
++        var h = __overleafRawQuery(req).RelayState || (__overleafRawBody(req) && __overleafRawBody(req).RelayState);
+         options.store.load(req, h, {destroy: true}, function (err, state) {
+           if (err) { return next(err); }
+           if (!state) { return next(new Error('Invalid RelayState')); }
+@@ -379,7 +393,7 @@ module.exports.sendLogoutError = function(options){
+ 
+     // Signature location
+     options.reference = constants.ELEMENTS.LOGOUT_RESPONSE.SIGNATURE_LOCATION_PATH;
+-    options.relayState = options.relayState || req.query.RelayState || (req.body || {}).RelayState;
++    options.relayState = options.relayState || __overleafRawQuery(req).RelayState || (__overleafRawBody(req) || {}).RelayState;
+ 
+     return prepareAndSendToken(req, res, 'LOGOUT_RESPONSE', logoutResponse, options, next);
+   };
+diff --git a/lib/samlp.js b/lib/samlp.js
+index 19a13328d60124417e9aa844c6d54745f7121166..08bef8456e1dcbadceb0460588bb78fff1e3f122 100644
+--- a/lib/samlp.js
++++ b/lib/samlp.js
+@@ -7,6 +7,30 @@ var templates = require('./templates');
+ var encoders = require('./encoders');
+ var PassportProfileMapper = require('./claims/PassportProfileMapper');
+ var constants = require('./constants');
++// --- Overleaf patch: request-input lockdown compatibility ---
++// This library reads req.query/req.body directly to parse the SAML protocol
++// fields (Signature, SigAlg, RelayState, SAMLRequest/SAMLResponse) it is
++// built around, which is otherwise indistinguishable from unvalidated
++// application code reading raw request input under Overleaf's
++// request-input lockdown (see libraries/validation-tools and the patched
++// express in .yarn/patches/express-npm-*.patch). The lockdown captures the
++// original parsed values in symbol-keyed fields, registered in the global
++// symbol registry (the same ones @overleaf/validation-tools' lockdown.js
++// reads), and only turns the *public* req.query/req.body properties into
++// throwing accessors -- reading through these raw fields instead sidesteps
++// that, and is identical to plain req.query/req.body when the lockdown
++// isn't installed (i.e. for every consumer of this package outside this
++// monorepo).
++var __overleafLockdownInstalled = Symbol.for('overleaf.lockdown.installed');
++var __overleafLockdownRawQuery = Symbol.for('overleaf.lockdown.rawQuery');
++var __overleafLockdownRawBody = Symbol.for('overleaf.lockdown.rawBody');
++function __overleafRawQuery(req) {
++  return req[__overleafLockdownInstalled] ? req[__overleafLockdownRawQuery] : req.query;
++}
++function __overleafRawBody(req) {
++  return req[__overleafLockdownInstalled] ? req[__overleafLockdownRawBody] : req.body;
++}
++// --- end Overleaf patch ---
+ 
+ function buildSamlResponse(options) {
+   var SAMLResponse = templates.samlresponse({
+@@ -153,10 +177,10 @@ module.exports.auth = function (options) {
+   return function (req, res, next) {
+     var opts = xtend({}, options || {}); // clone options
+ 
+-    if (req.method === 'GET' && req.query.Signature) {
+-      opts.signature = req.query.Signature;
+-      opts.sigAlg = req.query.SigAlg;
+-      opts.relayState = opts.RelayState || req.query.RelayState;
++    if (req.method === 'GET' && __overleafRawQuery(req).Signature) {
++      opts.signature = __overleafRawQuery(req).Signature;
++      opts.sigAlg = __overleafRawQuery(req).SigAlg;
++      opts.relayState = opts.RelayState || __overleafRawQuery(req).RelayState;
+     }
+ 
+     function execute(postUrl, audience, req, res, next) {
+@@ -178,14 +202,14 @@ module.exports.auth = function (options) {
+           res.send(templates.form({
+             type: 'SAMLResponse',
+             callback: postUrl,
+-            RelayState: opts.RelayState || (req.query || {}).RelayState || (req.body || {}).RelayState || '',
++            RelayState: opts.RelayState || (__overleafRawQuery(req) || {}).RelayState || (__overleafRawBody(req) || {}).RelayState || '',
+             token: response.toString('base64')
+           }));
+         }
+       });
+     }
+ 
+-    utils.parseSamlRequest(req, (req.query || {}).SAMLRequest || (req.body || {}).SAMLRequest, "AUTHN_REQUEST", opts, function (err, samlRequestDom) {
++    utils.parseSamlRequest(req, (__overleafRawQuery(req) || {}).SAMLRequest || (__overleafRawBody(req) || {}).SAMLRequest, "AUTHN_REQUEST", opts, function (err, samlRequestDom) {
+       if (err) return next(err);
+ 
+       var audience = opts.audience;
+@@ -216,7 +240,7 @@ module.exports.parseRequest = function (req, options, callback) {
+     options = {};
+   }
+ 
+-  var samlRequest = (req.query || {}).SAMLRequest || (req.body || {}).SAMLRequest;
++  var samlRequest = (__overleafRawQuery(req) || {}).SAMLRequest || (__overleafRawBody(req) || {}).SAMLRequest;
+   if (!samlRequest)
+     return callback();
+ 
+diff --git a/lib/utils.js b/lib/utils.js
+index c091ac335be08b2bf55907b269e8e1ef79b686bb..23940db43725664367329341a713f2a1077ad071 100644
+--- a/lib/utils.js
++++ b/lib/utils.js
+@@ -6,6 +6,21 @@ const url                   = require('url');
+ const xtend                 = require('xtend');
+ const signers               = require('./signers');
+ const constants             = require('./constants');
++// --- Overleaf patch: request-input lockdown compatibility ---
++// See lib/samlp.js for the full rationale; this module validates SAML
++// signatures carried on req.query/req.body (Signature, SigAlg, RelayState,
++// SAMLRequest/SAMLResponse) for both the login (samlp.js) and logout
++// (logout.js) flows.
++const __overleafLockdownInstalled = Symbol.for('overleaf.lockdown.installed');
++const __overleafLockdownRawQuery = Symbol.for('overleaf.lockdown.rawQuery');
++const __overleafLockdownRawBody = Symbol.for('overleaf.lockdown.rawBody');
++function __overleafRawQuery(req) {
++  return req[__overleafLockdownInstalled] ? req[__overleafLockdownRawQuery] : req.query;
++}
++function __overleafRawBody(req) {
++  return req[__overleafLockdownInstalled] ? req[__overleafLockdownRawBody] : req.body;
++}
++// --- end Overleaf patch ---
+ const IdGenerator           = require('auth0-id-generator');
+ 
+ const generator = new IdGenerator({len: 20, alphabet:"abcdef0123456789"});
+@@ -20,7 +35,7 @@ module.exports.parseSamlRequest = function(req, samlRequest, type, options, call
+     const opts = {
+       signingCert: options.signingCert,
+       thumbprints: options.thumbprints,
+-      deflate: !!req.query.Signature,
++      deflate: !!__overleafRawQuery(req).Signature,
+       relayState: options.relayState
+     };
+ 
+@@ -186,10 +201,10 @@ function validateSignature(req, element_type, xml, options) {
+   const type = constants.ELEMENTS[element_type].PROP;
+ 
+   const isRequestSigned = !options.deflate ?
+-    xpath.select(options.signaturePath || constants.ELEMENTS[element_type].SIGNATURE_VALIDATION_PATH, xml).length > 0 : !!req.query.Signature;
++    xpath.select(options.signaturePath || constants.ELEMENTS[element_type].SIGNATURE_VALIDATION_PATH, xml).length > 0 : !!__overleafRawQuery(req).Signature;
+ 
+   if (isRequestSigned) {
+-    if ((req.body && req.body[type]) || !options.deflate) {
++    if ((__overleafRawBody(req) && __overleafRawBody(req)[type]) || !options.deflate) {
+       // HTTP-POST or HTTP-Redirect without deflate encoding
+       const validationErrors = signers.validateXmlEmbeddedSignature(xml, options);
+       if (validationErrors && validationErrors.length > 0) {
+@@ -199,9 +214,9 @@ function validateSignature(req, element_type, xml, options) {
+     else {
+       // HTTP-Redirect with deflate encoding
+       let signedContent = {};
+-      signedContent[type] = req.query[type];
+-      signedContent.RelayState = req.query.RelayState || options.relayState;
+-      signedContent.SigAlg = req.query.SigAlg;
++      signedContent[type] = __overleafRawQuery(req)[type];
++      signedContent.RelayState = __overleafRawQuery(req).RelayState || options.relayState;
++      signedContent.SigAlg = __overleafRawQuery(req).SigAlg;
+ 
+       if (!signedContent.RelayState && !options.relayState) {
+         delete signedContent.RelayState;
+@@ -215,13 +230,13 @@ function validateSignature(req, element_type, xml, options) {
+         throw new Error('Invalid signature algorithm. Supported algorithms are http://www.w3.org/2001/04/xmldsig-more#rsa-sha1 and http://www.w3.org/2001/04/xmldsig-more#rsa-sha256');
+       }
+ 
+-      const valid = signers.isValidContentAndSignature(qs.stringify(signedContent), req.query.Signature, {
++      const valid = signers.isValidContentAndSignature(qs.stringify(signedContent), __overleafRawQuery(req).Signature, {
+         signingCert: options.signingCert,
+-        signatureAlgorithm: req.query.SigAlg
++        signatureAlgorithm: __overleafRawQuery(req).SigAlg
+       });
+ 
+       if (!valid) {
+-        throw new Error('Signature check errors: The signature provided (' + req.query.Signature + ') does not match the one calculated');
++        throw new Error('Signature check errors: The signature provided (' + __overleafRawQuery(req).Signature + ') does not match the one calculated');
+       }
+     }
+   } else if (options.signingCert) {

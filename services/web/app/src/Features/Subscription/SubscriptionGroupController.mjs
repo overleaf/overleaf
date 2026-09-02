@@ -10,7 +10,7 @@ import { expressify } from '@overleaf/promise-utils'
 import Modules from '../../infrastructure/Modules.mjs'
 import UserGetter from '../User/UserGetter.mjs'
 import { Subscription } from '../../models/Subscription.mjs'
-import { z, parseReq } from '../../infrastructure/Validation.mjs'
+import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
 import { isProfessionalGroupPlan } from './PlansHelper.mjs'
 import {
   MissingBillingInfoError,
@@ -30,14 +30,28 @@ const MAX_NUMBER_OF_PO_NUMBER_CHARACTERS = 50
  * @import { Subscription } from "../../../../types/subscription/dashboard/subscription.js"
  */
 
+const removeUserFromGroupSchema = z.object({
+  // mounted at /manage/groups/:id/user/:user_id -- `id` is consumed
+  // upstream by UserMembershipMiddleware.requireGroupMemberManagement()
+  // (which sets req.entity), but it's still present on req.params, so the
+  // strict schema below has to name it too.
+  params: z.strictObject({
+    id: zz.objectId(),
+    user_id: zz.objectId(),
+  }),
+})
+
 /**
  * @param {import("express").Request} req
  * @param {import("express").Response} res
  * @returns {Promise<void>}
  */
 async function removeUserFromGroup(req, res) {
+  const { params } = parseReq(req, removeUserFromGroupSchema, {
+    logOnly: true,
+  })
   const subscription = req.entity
-  const userToRemoveId = req.params.user_id
+  const userToRemoveId = params.user_id
   const loggedInUserId = SessionManager.getLoggedInUserId(req.session)
   const subscriptionId = subscription._id
   logger.debug(
@@ -52,15 +66,24 @@ async function removeUserFromGroup(req, res) {
   })
 }
 
+const removeSelfFromGroupSchema = z.object({
+  query: z.object({
+    subscriptionId: zz.objectId(),
+  }),
+})
+
 /**
  * @param {import("express").Request} req
  * @param {import("express").Response} res
  * @returns {Promise<void>}
  */
 async function removeSelfFromGroup(req, res) {
+  const { query } = parseReq(req, removeSelfFromGroupSchema, {
+    logOnly: true,
+  })
   const userToRemoveId = SessionManager.getLoggedInUserId(req.session)
   const subscription = await SubscriptionLocator.promises.getSubscription(
-    req.query.subscriptionId
+    query.subscriptionId
   )
 
   await _removeUserFromGroup(req, res, {
@@ -86,10 +109,13 @@ async function _removeUserFromGroup(
 ) {
   const subscriptionId = subscription._id
 
-  const groupSSOActive = (
-    await Modules.promises.hooks.fire('hasGroupSSOEnabled', subscription)
-  )?.[0]
-  if (groupSSOActive) {
+  const userToRemove = await UserGetter.promises.getUser(userToRemoveId, {
+    enrollment: 1,
+  })
+  const isLinkedToGroupSSO = userToRemove?.enrollment?.sso?.some(
+    ssoLink => String(ssoLink.groupId) === String(subscriptionId)
+  )
+  if (isLinkedToGroupSSO) {
     await Modules.promises.hooks.fire(
       'unlinkUserFromGroupSSO',
       userToRemoveId,
@@ -134,12 +160,23 @@ async function _removeUserFromGroup(
   res.sendStatus(200)
 }
 
+const addSeatsToGroupSubscriptionSchema = z.object({
+  query: z.object({
+    // rendered verbatim into the add-seats page; not consumed as a real
+    // error-code enum by this handler.
+    errorCode: z.string().optional(),
+  }),
+})
+
 /**
  * @param {import("express").Request} req
  * @param {import("express").Response} res
  * @returns {Promise<void>}
  */
 async function addSeatsToGroupSubscription(req, res) {
+  const { query } = parseReq(req, addSeatsToGroupSubscriptionSchema, {
+    logOnly: true,
+  })
   try {
     const userId = SessionManager.getLoggedInUserId(req.session)
     const { subscription, paymentProviderSubscription, plan } =
@@ -168,7 +205,7 @@ async function addSeatsToGroupSubscription(req, res) {
       isProfessional: isProfessionalGroupPlan(subscription),
       isCollectionMethodManual:
         paymentProviderSubscription.isCollectionMethodManual,
-      redirectedPaymentErrorCode: req.query.errorCode,
+      redirectedPaymentErrorCode: query.errorCode,
     })
   } catch (error) {
     if (error instanceof MissingBillingInfoError) {
@@ -199,7 +236,17 @@ async function addSeatsToGroupSubscription(req, res) {
   }
 }
 
+const addSeatsBodySchema = z.strictObject({
+  adding: z.number().int().min(1).max(MAX_NUMBER_OF_USERS),
+  poNumber: z.string().max(MAX_NUMBER_OF_PO_NUMBER_CHARACTERS).optional(),
+})
+
 const previewAddSeatsSubscriptionChangeSchema = z.object({
+  body: addSeatsBodySchema,
+})
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const previewAddSeatsSubscriptionChangeFallbackSchema = z.object({
   body: z.object({
     adding: z.number().int().min(1).max(MAX_NUMBER_OF_USERS),
     poNumber: z.string().max(MAX_NUMBER_OF_PO_NUMBER_CHARACTERS).optional(),
@@ -212,7 +259,9 @@ const previewAddSeatsSubscriptionChangeSchema = z.object({
  * @returns {Promise<void>}
  */
 async function previewAddSeatsSubscriptionChange(req, res) {
-  const { body } = parseReq(req, previewAddSeatsSubscriptionChangeSchema)
+  const { body } = parseReq(req, previewAddSeatsSubscriptionChangeSchema, {
+    fallbackSchema: previewAddSeatsSubscriptionChangeFallbackSchema,
+  })
   try {
     const userId = SessionManager.getLoggedInUserId(req.session)
     const preview =
@@ -248,19 +297,26 @@ async function previewAddSeatsSubscriptionChange(req, res) {
   }
 }
 
+const createAddSeatsSubscriptionChangeSchema = z.object({
+  body: addSeatsBodySchema,
+})
+
 /**
  * @param {import("express").Request} req
  * @param {import("express").Response} res
  * @returns {Promise<void>}
  */
 async function createAddSeatsSubscriptionChange(req, res) {
+  const { body } = parseReq(req, createAddSeatsSubscriptionChangeSchema, {
+    logOnly: true,
+  })
   try {
     const userId = SessionManager.getLoggedInUserId(req.session)
     const create =
       await SubscriptionGroupHandler.promises.createAddSeatsSubscriptionChange(
         userId,
-        req.body.adding,
-        req.body.poNumber
+        body.adding,
+        body.poNumber
       )
 
     res.json(create)
@@ -278,7 +334,7 @@ async function createAddSeatsSubscriptionChange(req, res) {
     if (error instanceof SubtotalLimitExceededError) {
       return res.status(422).json({
         code: 'subtotal_limit_exceeded',
-        adding: req.body.adding,
+        adding: body.adding,
       })
     }
 
@@ -300,6 +356,14 @@ async function createAddSeatsSubscriptionChange(req, res) {
 }
 
 const submitFormSchema = z.object({
+  body: z.strictObject({
+    adding: z.coerce.number().int().min(MAX_NUMBER_OF_USERS),
+    poNumber: z.string().optional(),
+  }),
+})
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const submitFormFallbackSchema = z.object({
   body: z.object({
     adding: z.coerce.number().int().min(MAX_NUMBER_OF_USERS),
     poNumber: z.string().optional(),
@@ -307,7 +371,9 @@ const submitFormSchema = z.object({
 })
 
 async function submitForm(req, res) {
-  const { body } = parseReq(req, submitFormSchema)
+  const { body } = parseReq(req, submitFormSchema, {
+    fallbackSchema: submitFormFallbackSchema,
+  })
   const { adding, poNumber } = body
 
   const userId = SessionManager.getLoggedInUserId(req.session)
@@ -358,7 +424,18 @@ async function submitForm(req, res) {
   res.sendStatus(204)
 }
 
+const subscriptionUpgradePageSchema = z.object({
+  query: z.object({
+    // rendered verbatim into the upgrade page; not consumed as a real
+    // error-code enum by this handler.
+    errorCode: z.string().optional(),
+  }),
+})
+
 async function subscriptionUpgradePage(req, res) {
+  const { query } = parseReq(req, subscriptionUpgradePageSchema, {
+    logOnly: true,
+  })
   try {
     const userId = SessionManager.getLoggedInUserId(req.session)
     const changePreview =
@@ -370,7 +447,7 @@ async function subscriptionUpgradePage(req, res) {
       changePreview,
       totalLicenses: olSubscription.membersLimit,
       groupName: olSubscription.teamName,
-      redirectedPaymentErrorCode: req.query.errorCode,
+      redirectedPaymentErrorCode: query.errorCode,
     })
   } catch (error) {
     if (error instanceof MissingBillingInfoError) {
@@ -442,7 +519,17 @@ async function missingBillingInformation(req, res) {
   }
 }
 
+const manuallyCollectedSubscriptionSchema = z.object({
+  query: z.object({
+    // rendered verbatim into the manually-collected-subscription page.
+    error_type: z.string().optional(),
+  }),
+})
+
 async function manuallyCollectedSubscription(req, res) {
+  const { query } = parseReq(req, manuallyCollectedSubscriptionSchema, {
+    logOnly: true,
+  })
   try {
     const userId = SessionManager.getLoggedInUserId(req.session)
     const subscription =
@@ -450,7 +537,7 @@ async function manuallyCollectedSubscription(req, res) {
 
     res.render('subscriptions/manually-collected-subscription', {
       groupName: subscription.teamName,
-      errorType: req.query.error_type,
+      errorType: query.error_type,
     })
   } catch (error) {
     logger.err(
@@ -476,13 +563,24 @@ async function subtotalLimitExceeded(req, res) {
   }
 }
 
+const getGroupPlanPerUserPricesSchema = z.object({
+  query: z.object({
+    // forwarded to the Stripe client as a currency filter; Stripe itself
+    // rejects an unrecognised code, so no enum is duplicated here.
+    currency: z.string().optional(),
+  }),
+})
+
 async function getGroupPlanPerUserPrices(req, res) {
+  const { query } = parseReq(req, getGroupPlanPerUserPricesSchema, {
+    logOnly: true,
+  })
   try {
     const userId = SessionManager.getLoggedInUserId(req.session)
     const prices = await Modules.promises.hooks.fire(
       'getGroupPlanPerUserPrices',
       userId,
-      req.query.currency
+      query.currency
     )
     return res.json(prices[0])
   } catch (error) {

@@ -21,6 +21,7 @@ services:
       HISTORY_REDIS_HOST: redis_test
       ANALYTICS_QUEUES_REDIS_HOST: redis_test
       ANALYTICS_QUEUES_BQ_SINK_REDIS_HOST: redis_test
+      REQ_VALIDATION_MODE: enforce
     depends_on:
       redis_test:
         condition: service_healthy
@@ -37,9 +38,11 @@ services:
       ANALYTICS_QUEUES_BQ_SINK_REDIS_HOST: redis_test
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
-      MOCHA_GREP: ${MOCHA_GREP}
+      TEST_NAME_PATTERN: ${TEST_NAME_PATTERN}
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
+      REQ_LOCKDOWN_MODE: throw
+      REQ_VALIDATION_MODE: enforce
     volumes:
       - ./reports:/overleaf/services/real-time/reports
     depends_on:
@@ -58,6 +61,9 @@ services:
 
   redis_test:
     image: redis:7.4.8
+    # Throw-away test data in tmpfs: the image declares a VOLUME here, which would otherwise leave an anonymous volume behind after every run.
+    tmpfs:
+      - /data
     healthcheck:
       test: ping="$$(redis-cli ping)" && [ "$$ping" = 'PONG' ]
       interval: 1s

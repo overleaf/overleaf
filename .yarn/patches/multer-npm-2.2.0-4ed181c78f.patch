@@ -1,0 +1,34 @@
+diff --git a/lib/make-middleware.js b/lib/make-middleware.js
+index 2c15f248d4f4d221bd9e2b2e1092b8d5c46d2bdd..859f55f56729f0a3874cfdac53722497cfc3c461 100644
+--- a/lib/make-middleware.js
++++ b/lib/make-middleware.js
+@@ -26,7 +26,10 @@ function makeMiddleware (setup) {
+     var preservePath = options.preservePath
+     var defParamCharset = options.defParamCharset
+ 
+-    req.body = Object.create(null)
++    // keep a local reference: with the Overleaf request-input lockdown
++    // installed, writing req.body is allowed but reading it warns/throws
++    var body = Object.create(null)
++    req.body = body
+ 
+     var busboy
+     var appender = null
+@@ -157,7 +160,7 @@ function makeMiddleware (setup) {
+         if (fieldname.split('[').length - 1 > limits.fieldNestingDepth) return abortWithCode('LIMIT_FIELD_NESTING', fieldname)
+       }
+ 
+-      appendField(req.body, fieldname, value)
++      appendField(body, fieldname, value)
+     })
+ 
+     // handle files
+@@ -174,7 +177,7 @@ function makeMiddleware (setup) {
+       if (fieldname == null) return abortWithCode('MISSING_FIELD_NAME')
+ 
+       // don't attach to the files object, if there is no file
+-      if (!filename) return fileStream.resume()
++      if (!filename) filename = 'undefined'
+ 
+       // Work around bug in Busboy (https://github.com/mscdex/busboy/issues/6)
+       if (limits && Object.prototype.hasOwnProperty.call(limits, 'fieldNameSize')) {

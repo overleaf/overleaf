@@ -1,5 +1,5 @@
 diff --git a/lib/index.js b/lib/index.js
-index 567ff5d..8eb45f7 100644
+index 567ff5d..a7a38dd 100644
 --- a/lib/index.js
 +++ b/lib/index.js
 @@ -545,8 +545,8 @@ function clone(instance) {
@@ -74,3 +74,24 @@ index 567ff5d..8eb45f7 100644
  				response = new Response(body, response_options);
  				resolve(response);
  				return;
+@@ -1738,13 +1738,13 @@ function fixResponseChunkedTransferBadEnding(request, errorCallback) {
+ 
+ 		if (headers['transfer-encoding'] === 'chunked' && !headers['content-length']) {
+ 			response.once('close', function (hadError) {
+-				// tests for socket presence, as in some situations the
+-				// the 'socket' event is not triggered for the request
+-				// (happens in deno), avoids `TypeError`
+-				// if a data listener is still present we didn't end cleanly
+-				const hasDataListener = socket && socket.listenerCount('data') > 0;
+-
+-				if (hasDataListener && !hadError) {
++				// A kept-alive socket (Node >= 24.16) still has its 'data'
++				// listener attached when the response 'close' event fires, so
++				// the old socket.listenerCount('data') check reported a false
++				// "Premature close". response.complete is true only once the
++				// terminating zero-length chunk has been received, so it tells
++				// a clean end apart from a genuine truncation.
++				if (!response.complete && !hadError) {
+ 					const err = new Error('Premature close');
+ 					err.code = 'ERR_STREAM_PREMATURE_CLOSE';
+ 					errorCallback(err);

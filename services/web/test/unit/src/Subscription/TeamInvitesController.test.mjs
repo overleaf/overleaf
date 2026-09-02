@@ -1,5 +1,10 @@
-import { expect, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
+import {
+  InvalidParamsError,
+  InvalidRequestError,
+  setReqValidationModeForTests,
+} from '@overleaf/validation-tools'
 import MockResponse from '../helpers/MockResponse.mjs'
 
 const modulePath =
@@ -146,6 +151,10 @@ describe('TeamInvitesController', function () {
     ctx.Controller = (await import(modulePath)).default
   })
 
+  afterEach(function () {
+    setReqValidationModeForTests(null)
+  })
+
   describe('acceptInvite', function () {
     it('should add an audit log entry', async function (ctx) {
       await new Promise(resolve => {
@@ -242,7 +251,7 @@ describe('TeamInvitesController', function () {
             },
           }
           ctx.Controller.viewInvite(
-            { params: { token: 'token123' }, session: {} },
+            { params: { token: 'token123' }, query: {}, session: {} },
             res
           )
         })
@@ -258,7 +267,7 @@ describe('TeamInvitesController', function () {
             },
           }
           ctx.Controller.viewInvite(
-            { params: { token: 'token123' }, session: {} },
+            { params: { token: 'token123' }, query: {}, session: {} },
             res
           )
         })
@@ -360,6 +369,59 @@ describe('TeamInvitesController', function () {
           }
 
           ctx.Controller.resendInvite(ctx.req, res, ctx.next)
+        })
+      })
+    })
+  })
+
+  describe('request validation', function () {
+    beforeEach(function () {
+      setReqValidationModeForTests('enforce')
+    })
+
+    it('createInvite rejects a request missing the email', async function (ctx) {
+      ctx.req.body = {}
+      await new Promise(resolve => {
+        ctx.Controller.createInvite(ctx.req, new MockResponse(vi), err => {
+          expect(err).to.be.instanceof(InvalidRequestError)
+          resolve()
+        })
+      })
+    })
+
+    it('viewInvite rejects a request missing the token param', async function (ctx) {
+      ctx.req.params = {}
+      await new Promise(resolve => {
+        ctx.Controller.viewInvite(ctx.req, new MockResponse(vi), err => {
+          expect(err).to.be.instanceof(InvalidParamsError)
+          resolve()
+        })
+      })
+    })
+
+    it('acceptInvite rejects a request missing the token param', async function (ctx) {
+      ctx.req.params = {}
+      await new Promise(resolve => {
+        ctx.Controller.acceptInvite(ctx.req, new MockResponse(vi), err => {
+          expect(err).to.be.instanceof(InvalidParamsError)
+          resolve()
+        })
+      })
+    })
+
+    it('revokeInvite rejects a malformed group id param', function (ctx) {
+      ctx.req.params = { id: 'not-an-object-id', email: 'user@example.com' }
+      expect(() =>
+        ctx.Controller.revokeInvite(ctx.req, new MockResponse(vi), sinon.stub())
+      ).to.throw(InvalidParamsError)
+    })
+
+    it('resendInvite rejects a non-string email in the body', async function (ctx) {
+      ctx.req.body = { email: 12345 }
+      await new Promise(resolve => {
+        ctx.Controller.resendInvite(ctx.req, new MockResponse(vi), err => {
+          expect(err).to.be.instanceof(InvalidRequestError)
+          resolve()
         })
       })
     })

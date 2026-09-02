@@ -396,8 +396,8 @@ const contextMenuKeymap = (): Extension =>
     ])
   )
 
-export const contextMenu = (enabled: boolean): Extension =>
-  enabled && !isMobile
+export const contextMenu = (): Extension =>
+  !isMobile
     ? [
         contextMenuContainerTheme,
         contextMenuStateField,

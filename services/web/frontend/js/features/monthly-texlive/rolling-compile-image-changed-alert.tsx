@@ -1,6 +1,6 @@
 import useTutorial from '@/shared/hooks/promotions/use-tutorial'
 import { useProjectContext } from '@/shared/context/project-context'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import { useTranslation, Trans } from 'react-i18next'
 import { useCallback } from 'react'
 import { onRollingBuild } from '@/shared/utils/rolling-build'
@@ -31,21 +31,23 @@ const RollingCompileImageChangedAlert = () => {
           href="https://docs.overleaf.com/troubleshooting-and-support/tex-live#How_do_I_change_a_project%E2%80%99s_TeX_Live_version"
           target="_blank"
           key="getting-started-link"
-          rel="noopener"
+          rel="noopener noreferrer"
         />,
       ]}
     />
   )
 
   return (
-    <OLNotification
-      className="mt-5"
-      isDismissible
-      onDismiss={onClose}
-      content={content}
-      type="info"
-      title={t('a_new_version_of_the_rolling_texlive_build_released')}
-    />
+    <div className="notification-list">
+      <Notification
+        className="mt-5"
+        isDismissible
+        onDismiss={onClose}
+        content={content}
+        type="info"
+        title={t('a_new_version_of_the_rolling_texlive_build_released')}
+      />
+    </div>
   )
 }
 

@@ -2,6 +2,7 @@ import {
   Prec,
   Transaction,
   Annotation,
+  ChangeSet,
   ChangeSpec,
   Text,
   StateEffect,
@@ -22,9 +23,17 @@ import {
   InsertOp,
   RemoveOp,
   RetainOp,
+  AddCommentOperation,
+  DeleteCommentOperation,
+  SetCommentStateOperation,
+  StringFileData,
+  TrackedChangeList,
 } from 'overleaf-editor-core'
 import { rangesUpdatedEffect, setTrackChangesUserId } from './history-ot'
-import { trackedDeletesFromState } from '@/features/source-editor/utils/tracked-deletes'
+import {
+  TrackedDeletes,
+  trackedDeletesFromState,
+} from '@/features/source-editor/utils/tracked-deletes'
 
 /*
  * Integrate CodeMirror 6 with the real-time system, via ShareJS.
@@ -332,6 +341,11 @@ class HistoryOTAdapter {
 
   handleUpdateFromCM(transactions: readonly Transaction[]) {
     for (const transaction of transactions) {
+      // TODO: unlike the sharejs adapter above, this only checks visible
+      // length. When history-ot is enabled, add the retained tracked-deletes
+      // length here too (as #20052 did for sharejs) — otherwise total stored
+      // content (visible + tracked deletes) can exceed the backend cap
+      // (TextOperation.MAX_STRING_LENGTH) and fail with a 422.
       if (
         this.maxDocLength &&
         transaction.changes.newLength >= this.maxDocLength
@@ -350,65 +364,113 @@ class HistoryOTAdapter {
     }
   }
 
-  onRemoteOp(operations: EditOperation[]) {
-    const trackedDeletes = trackedDeletesFromState(this.editor.view.state)
-    const changes: ChangeSpec[] = []
-    let trackedChangesUpdated = false
-    for (const operation of operations) {
+  // One dispatch per batch: a per-op dispatch would rebuild rangesState from
+  // shareDoc.snapshot (already final) against an intermediate doc.
+  onRemoteOp(operations: EditOperation[], oldSnapshot?: StringFileData) {
+    const view = this.editor.view
+    let composed = ChangeSet.empty(view.state.doc.length)
+    let trackedDeletes = trackedDeletesFromState(view.state)
+    let trackedChanges: TrackedChangeList | null = null
+    let snapshotLength = 0
+    let trackedChangesOrCommentsUpdated = false
+
+    for (const [index, operation] of operations.entries()) {
       if (operation instanceof TextOperation) {
+        const specs: ChangeSpec[] = []
         let cursor = 0
         for (const op of operation.ops) {
           if (op instanceof InsertOp) {
             if (op.tracking?.type !== 'delete') {
-              changes.push({
+              specs.push({
                 from: trackedDeletes.toCodeMirror(cursor),
                 insert: op.insertion,
               })
             }
-            trackedChangesUpdated = true
+            trackedChangesOrCommentsUpdated = true
           } else if (op instanceof RemoveOp) {
-            changes.push({
+            specs.push({
               from: trackedDeletes.toCodeMirror(cursor),
               to: trackedDeletes.toCodeMirror(cursor + op.length),
             })
             cursor += op.length
-            trackedChangesUpdated = true
+            trackedChangesOrCommentsUpdated = true
           } else if (op instanceof RetainOp) {
             if (op.tracking != null) {
               if (op.tracking.type === 'delete') {
-                changes.push({
+                specs.push({
                   from: trackedDeletes.toCodeMirror(cursor),
                   to: trackedDeletes.toCodeMirror(cursor + op.length),
                 })
               }
-              trackedChangesUpdated = true
+              trackedChangesOrCommentsUpdated = true
             }
             cursor += op.length
           }
         }
+        composed = composed.compose(ChangeSet.of(specs, composed.newLength))
+      } else if (
+        operation instanceof AddCommentOperation ||
+        operation instanceof DeleteCommentOperation ||
+        operation instanceof SetCommentStateOperation
+      ) {
+        // no text change, but comment state changed — rebuild decorations
+        trackedChangesOrCommentsUpdated = true
       }
 
-      const view = this.editor.view
-      const effects: StateEffect<any>[] = []
-      const scrollEffect = view
-        .scrollSnapshot()
-        .map(view.state.changes(changes))
-      if (scrollEffect != null) {
-        effects.push(scrollEffect)
+      // shareDoc.snapshot is already the post-batch state, so advance our own
+      // copy of oldSnapshot's tracked changes per op, keeping trackedDeletes
+      // correct for the next op. Only the tracked-change list feeds
+      // trackedDeletes, so there's no need to clone/edit the whole snapshot.
+      if (index < operations.length - 1 && oldSnapshot) {
+        try {
+          if (trackedChanges === null) {
+            // clone once so we never mutate oldSnapshot (owned by the sharejs event)
+            trackedChanges = TrackedChangeList.fromRaw(
+              oldSnapshot.getTrackedChanges().toRaw()
+            )
+            snapshotLength = oldSnapshot.getStringLength()
+          }
+          if (operation instanceof TextOperation) {
+            if (operation.baseLength !== snapshotLength) {
+              // op doesn't fit our snapshot — we're out of sync
+              throw new Error('remote operation does not fit the snapshot')
+            }
+            // comment ops don't move tracked ranges
+            trackedChanges.applyTextOperation(operation)
+            snapshotLength = operation.targetLength
+          }
+          trackedDeletes = new TrackedDeletes(trackedChanges)
+        } catch (error) {
+          // out of sync — don't map remaining ops against the wrong state
+          this.shareDoc.emit('error', error)
+          debugConsole.error(
+            'Could not advance snapshot for remote operations',
+            error
+          )
+          return
+        }
       }
-      if (trackedChangesUpdated) {
-        effects.push(rangesUpdatedEffect.of(null))
-      }
-
-      view.dispatch({
-        changes,
-        effects,
-        annotations: [
-          Transaction.remote.of(true),
-          Transaction.addToHistory.of(false),
-        ],
-      })
     }
+
+    const effects: StateEffect<any>[] = []
+    const scrollEffect = view.scrollSnapshot().map(composed)
+    if (scrollEffect != null) {
+      effects.push(scrollEffect)
+    }
+    if (trackedChangesOrCommentsUpdated) {
+      effects.push(rangesUpdatedEffect.of(null))
+    }
+
+    view.dispatch({
+      changes: composed,
+      effects,
+      annotations: [
+        Transaction.remote.of(true),
+        Transaction.addToHistory.of(false),
+      ],
+    })
+
+    this.checkContent()
   }
 
   onCodeMirrorChange(

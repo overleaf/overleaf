@@ -34,12 +34,7 @@ export const UserFeaturesProvider: FC<React.PropsWithChildren> = ({
 
   useEffect(() => {
     const listener = async ({ isPremium }: { isPremium: boolean }) => {
-      // todo: quota clean-up: remove once we are transitioned off aiErrorAssistant naming
-      const hasPremiumQuota = hasUnlimitedAi
-      const alreadyPremium =
-        features?.aiErrorAssistant === isPremium ||
-        hasPremiumQuota === isPremium
-      if (alreadyPremium) {
+      if (hasUnlimitedAi === isPremium) {
         // the user is premium on writefull and has the AI assist, no need to refresh the features
         return
       }
@@ -55,7 +50,7 @@ export const UserFeaturesProvider: FC<React.PropsWithChildren> = ({
         listener
       )
     }
-  }, [features?.aiErrorAssistant, writefullInstance])
+  }, [writefullInstance])
 
   return (
     <UserFeaturesContext.Provider value={features}>

@@ -36,10 +36,11 @@ function FileTreeItemInner({
 
   const hasMenu =
     !fileTreeReadOnly && isSelected && selectedEntityIds.size === 1
-  const showBibBadge =
-    useFeatureFlag('bibtex-visual-editor') &&
+  const showMarkdownBadge =
+    useFeatureFlag('markdown-visual') &&
     type !== 'folder' &&
-    name.toLowerCase().endsWith('.bib')
+    (name.toLowerCase().endsWith('.md') ||
+      name.toLowerCase().endsWith('.markdown'))
 
   const { dragRef, setIsDraggable } = useDraggable(id)
 
@@ -93,7 +94,7 @@ function FileTreeItemInner({
     >
       <div
         className={classNames('entity-name', 'entity-name-react', {
-          'file-tree-has-bib-badge': showBibBadge,
+          'file-tree-has-beta-badge': showMarkdownBadge,
         })}
         role="presentation"
         ref={itemRef}
@@ -105,10 +106,10 @@ function FileTreeItemInner({
           onClick={onClick}
           setIsDraggable={setIsDraggable}
         />
-        {showBibBadge && (
-          <div className="file-tree-bib-badge text-white">
+        {showMarkdownBadge && (
+          <div className="file-tree-beta-badge text-white">
             <SplitTestBadge
-              splitTestName="bibtex-visual-editor"
+              splitTestName="markdown-visual"
               displayOnVariants={['enabled']}
             />
           </div>

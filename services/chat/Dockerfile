@@ -2,12 +2,11 @@
 # Instead run bin/update_build_scripts from
 # https://github.com/overleaf/internal/
 
-FROM node:24.14.1 AS base
+FROM node:24.18.1 AS base
 
 # Corepack setup, shared between all the images.
-ENV PATH="/overleaf/node_modules/.bin:$PATH"
 ENV COREPACK_HOME=/opt/corepack
-RUN corepack enable && corepack install -g yarn@4.14.1
+RUN corepack enable && corepack install -g yarn@4.18.0
 ENV COREPACK_ENABLE_NETWORK=0
 
 WORKDIR /overleaf/services/chat
@@ -18,7 +17,7 @@ RUN mkdir /home/node/.config && chown node:node /home/node/.config
 
 FROM base AS app
 
-COPY package.json yarn.lock .yarnrc.yml /overleaf/
+COPY package.json yarn.lock .yarnrc.yml .pnp.register.mjs /overleaf/
 COPY libraries/eslint-plugin/package.json /overleaf/libraries/eslint-plugin/package.json
 COPY libraries/fetch-utils/package.json /overleaf/libraries/fetch-utils/package.json
 COPY libraries/logger/package.json /overleaf/libraries/logger/package.json
@@ -27,6 +26,7 @@ COPY libraries/mongo-utils/package.json /overleaf/libraries/mongo-utils/package.
 COPY libraries/o-error/package.json /overleaf/libraries/o-error/package.json
 COPY libraries/promise-utils/package.json /overleaf/libraries/promise-utils/package.json
 COPY libraries/settings/package.json /overleaf/libraries/settings/package.json
+COPY libraries/validation-tools/package.json /overleaf/libraries/validation-tools/package.json
 COPY services/chat/package.json /overleaf/services/chat/package.json
 COPY tools/migrations/package.json /overleaf/tools/migrations/package.json
 COPY .yarn/patches/ /overleaf/.yarn/patches/
@@ -41,10 +41,13 @@ COPY libraries/mongo-utils/ /overleaf/libraries/mongo-utils/
 COPY libraries/o-error/ /overleaf/libraries/o-error/
 COPY libraries/promise-utils/ /overleaf/libraries/promise-utils/
 COPY libraries/settings/ /overleaf/libraries/settings/
+COPY libraries/validation-tools/ /overleaf/libraries/validation-tools/
 COPY services/chat/ /overleaf/services/chat/
 COPY tools/migrations/ /overleaf/tools/migrations/
+
+ENV NODE_OPTIONS="--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs"
 
 FROM app
 USER node
 
-CMD ["node", "--expose-gc", "app.js"]
+CMD ["node", "--expose-gc", "--trace-warnings", "app.js"]

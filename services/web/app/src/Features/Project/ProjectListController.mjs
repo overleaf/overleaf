@@ -33,6 +33,36 @@ import PermissionsManager from '../Authorization/PermissionsManager.mjs'
 import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
 import { OnboardingDataCollection } from '../../models/OnboardingDataCollection.mjs'
 import UserSettingsHelper from './UserSettingsHelper.mjs'
+import { parseReq, z, zz } from '../../infrastructure/Validation.mjs'
+
+const getProjectsJsonSchema = z.object({
+  body: z.strictObject({
+    filters: z
+      .strictObject({
+        ownedByUser: z.boolean().optional(),
+        sharedWithUser: z.boolean().optional(),
+        archived: z.boolean().optional(),
+        trashed: z.boolean().optional(),
+        // null is a distinct, meaningful value (see _hasActiveFilter) --
+        // not the same as the field being absent
+        tag: z.string().nullish(),
+        search: z.string().optional(),
+      })
+      .optional(),
+    sort: z
+      .strictObject({
+        by: z.enum(['lastUpdated', 'title', 'owner']).optional(),
+        order: z.enum(['asc', 'desc']).optional(),
+      })
+      .optional(),
+    page: z
+      .strictObject({
+        size: z.number().int().positive().optional(),
+        lastId: zz.objectId().optional(),
+      })
+      .optional(),
+  }),
+})
 
 /**
  * @import { GetProjectsRequest, GetProjectsResponse, AllUsersProjects, MongoProject, FormattedProject, MongoTag, SubscriptionRecord } from "./types"
@@ -101,7 +131,7 @@ const _buildPortalTemplatesList = affiliations => {
 }
 
 /**
- * @param {any} req
+ * @param {import("express").Request} req
  */
 function cleanupSession(req) {
   // cleanup redirects at the end of the redirect chain
@@ -181,7 +211,7 @@ async function projectListPage(req, res, next) {
     userId,
     `email isAdmin emails features alphaProgram betaProgram lastPrimaryEmailCheck lastActive signUpDate ace refProviders${
       isSaas
-        ? ' enrollment writefull completedTutorials aiFeatures aiErrorAssistant labsProgram'
+        ? ' enrollment writefull completedTutorials aiFeatures labsProgram'
         : ''
     }`
   )
@@ -538,14 +568,15 @@ async function projectListPage(req, res, next) {
 
   const aiBlocked =
     Features.hasFeature('saas') && !(await _canUseAIAssist(user))
-  const hasAiAssist =
-    Features.hasFeature('saas') && (await _userHasAIAssist(req, res, user))
+  const hasUnlimitedAi =
+    Features.hasFeature('saas') && (await _userHasUnlimitedAiTier(user))
 
   const splitTests = [
     // Split tests that will be made available to the frontend
     'import-docx',
-    'overleaf-library',
     'import-markdown',
+    'themed-modals',
+    'shared-workspace',
   ].filter(Boolean)
 
   await Promise.all(
@@ -578,6 +609,21 @@ async function projectListPage(req, res, next) {
     }
   }
 
+  let splitTestUserProperties
+  if (isSaas) {
+    try {
+      ;[splitTestUserProperties] = await Modules.promises.hooks.fire(
+        'getSplitTestUserProperties',
+        userId
+      )
+    } catch (err) {
+      logger.error(
+        { err, userId },
+        'Failed to build split test user properties for customer.io'
+      )
+    }
+  }
+
   Modules.promises.hooks
     .fire('setUserProperties', userId, {
       overleaf_id: userId,
@@ -591,7 +637,7 @@ async function projectListPage(req, res, next) {
         best_subscription_type: usersBestSubscription.type,
       }),
       ai_blocked: aiBlocked,
-      has_ai_assist: hasAiAssist,
+      has_ai_assist: hasUnlimitedAi,
       ...(subjectArea && { subject_area: subjectArea }),
       ...(role && { role }),
       ...(primaryOccupation && { primary_occupation: primaryOccupation }),
@@ -602,6 +648,7 @@ async function projectListPage(req, res, next) {
       ...(groupRole && { group_role: groupRole }),
       is_managed_user: Boolean(user.enrollment?.managedBy),
       ...(user.email && { email: user.email }),
+      ...splitTestUserProperties,
     })
     .catch(err => {
       logger.error({ err }, 'Failed to set user properties for customer.io')
@@ -616,6 +663,7 @@ async function projectListPage(req, res, next) {
     userAffiliations,
     userEmails,
     userSettings,
+    initialTheme: UserSettingsHelper.getInitialTheme(userSettings.overallTheme),
     reconfirmedViaSAML,
     allInReconfirmNotificationPeriods,
     survey,
@@ -653,7 +701,8 @@ async function projectListPage(req, res, next) {
  * @returns {Promise<void>}
  */
 async function getProjectsJson(req, res) {
-  const { filters, page, sort } = req.body
+  const { body } = parseReq(req, getProjectsJsonSchema, { logOnly: true })
+  const { filters, page, sort } = body
   const userId = SessionManager.getLoggedInUserId(req.session)
   const projectsPage = await _getProjects(userId, filters, sort, page)
   res.json(projectsPage)
@@ -678,8 +727,8 @@ async function _checkForOldDebugProjects(userId) {
 /**
  * @param {string} userId
  * @param {Filters} filters
- * @param {Sort} sort
- * @param {Page} page
+ * @param {Partial<Sort>} sort
+ * @param {Partial<Page>} page
  * @returns {Promise<{totalSize: number, projects: Project[]}>}
  * @private
  */
@@ -791,8 +840,8 @@ function _applyFilters(projects, tags, filters, userId) {
 
 /**
  * @param {FormattedProject[]} projects
- * @param {Sort} sort
- * @param {Page} page
+ * @param {Partial<Sort>} sort
+ * @param {Partial<Page>} page
  * @returns {FormattedProject[]}
  * @private
  */
@@ -949,33 +998,21 @@ function _hasActiveFilter(filters) {
 }
 
 /**
- * @param {any} req
- * @param {any} res
  * @param {any} user
  */
-// todo: quota clean-up: rename function and vars
-async function _userHasAIAssist(req, res, user) {
-  let hasPremiumAiFeatures
-  const inQuotaSplitTest = await SplitTestHandler.promises.featureFlagEnabled(
-    req,
-    res,
-    'plans-2026-phase-1'
-  )
-  if (inQuotaSplitTest) {
-    hasPremiumAiFeatures =
-      user.features?.aiUsageQuota === Settings.aiFeatures.unlimitedQuota
-  } else {
-    hasPremiumAiFeatures = user.features?.aiErrorAssistant === true
-  }
-  // Check if the user has a non free trial version of our AI features
+async function _userHasUnlimitedAiTier(user) {
+  const hasPremiumAiFeatures =
+    user.features?.aiUsageQuota === Settings.aiFeatures.unlimitedQuota
+
+  // Check if the user has highest tier version of our AI features
   if (hasPremiumAiFeatures) {
     return true
   }
 
-  // Check if the user has AI Assist enabled via Writefull
-  const { isPremium: hasAiAssistViaWritefull } =
+  // Check if the user has Unlimited AI quota via Writefull
+  const { isPremium: hasUnlimitedAiViaWritefull } =
     await UserGetter.promises.getWritefullData(user._id)
-  if (hasAiAssistViaWritefull) {
+  if (hasUnlimitedAiViaWritefull) {
     return true
   }
   return false

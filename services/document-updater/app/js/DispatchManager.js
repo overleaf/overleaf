@@ -15,7 +15,6 @@
 let DispatchManager
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
-const Keys = require('./UpdateKeys')
 const redis = require('@overleaf/redis-wrapper')
 const Errors = require('./Errors')
 const _ = require('lodash')
@@ -50,15 +49,11 @@ module.exports = DispatchManager = {
           if (result == null) {
             return callback()
           }
-          const [listName, docKey] = Array.from(result)
-          const [projectId, docId] = Array.from(
-            Keys.splitProjectIdAndDocId(docKey)
-          )
+          const [listName, projectId] = Array.from(result)
           // Dispatch this in the background
           const backgroundTask = cb =>
             UpdateManager.processOutstandingUpdatesWithLock(
               projectId,
-              docId,
               function (error) {
                 // log everything except OpRangeNotAvailable errors, these are normal
                 if (error != null) {
@@ -68,12 +63,12 @@ module.exports = DispatchManager = {
                     error instanceof Errors.DeleteMismatchError
                   if (logAsDebug) {
                     logger.debug(
-                      { err: error, projectId, docId },
+                      { err: error, projectId },
                       'error processing update'
                     )
                   } else {
                     logger.error(
-                      { err: error, projectId, docId },
+                      { err: error, projectId },
                       'error processing update'
                     )
                   }

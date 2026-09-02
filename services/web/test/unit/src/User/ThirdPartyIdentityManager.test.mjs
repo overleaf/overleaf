@@ -1,4 +1,4 @@
-import { vi, expect } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import OError from '@overleaf/o-error'
 import { ThirdPartyUserNotFoundError } from '../../../../app/src/Features/Errors/Errors.js'
@@ -149,6 +149,28 @@ describe('ThirdPartyIdentityManager', function () {
         expect(ctx.User.findOneAndUpdate).to.not.have.been.called
       })
 
+      it('should reject providerId values inherited from Object.prototype', async function (ctx) {
+        await expect(
+          ctx.ThirdPartyIdentityManager.promises.link(
+            ctx.userId,
+            '__proto__',
+            ctx.externalUserId,
+            ctx.externalData,
+            ctx.auditLog
+          )
+        ).to.be.rejectedWith('Not a valid provider')
+        await expect(
+          ctx.ThirdPartyIdentityManager.promises.link(
+            ctx.userId,
+            'constructor',
+            ctx.externalUserId,
+            ctx.externalData,
+            ctx.auditLog
+          )
+        ).to.be.rejectedWith('Not a valid provider')
+        expect(ctx.User.findOneAndUpdate).to.not.have.been.called
+      })
+
       describe('EmailHandler', function () {
         beforeEach(function (ctx) {
           ctx.EmailHandler.promises.sendEmail.rejects(anError)
@@ -221,6 +243,24 @@ describe('ThirdPartyIdentityManager', function () {
           )
         ).to.be.rejectedWith(anError)
 
+        expect(ctx.User.findOneAndUpdate).to.not.have.been.called
+      })
+
+      it('should reject providerId values inherited from Object.prototype', async function (ctx) {
+        await expect(
+          ctx.ThirdPartyIdentityManager.promises.unlink(
+            ctx.userId,
+            '__proto__',
+            ctx.auditLog
+          )
+        ).to.be.rejectedWith('Not a valid provider')
+        await expect(
+          ctx.ThirdPartyIdentityManager.promises.unlink(
+            ctx.userId,
+            'constructor',
+            ctx.auditLog
+          )
+        ).to.be.rejectedWith('Not a valid provider')
         expect(ctx.User.findOneAndUpdate).to.not.have.been.called
       })
 

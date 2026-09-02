@@ -1,0 +1,30 @@
+{
+  "name": "@overleaf/cypress-pnp-reporter",
+  "description": "cypress-multi-reporters, loadable from Cypress's Electron process, which has no Yarn PnP",
+  "main": "index.cjs",
+  "files": [
+    "index.cjs"
+  ],
+  "author": "Overleaf (https://www.overleaf.com)",
+  "private": true,
+  "scripts": {
+    "lint": "eslint --cache --cache-location ../../.cache/eslint/ --ext .cjs,.js,.jsx,.mjs,.ts --max-warnings 0 .",
+    "lint:fix": "eslint --cache --cache-location ../../.cache/eslint/ --fix --ext .cjs,.js,.jsx,.mjs,.ts .",
+    "test": "yarn run lint && yarn run types:check && yarn run test:unit",
+    "test:ci": "yarn run test:unit",
+    "test:unit": "mocha --exit test/**/*.{js,cjs}",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "cypress-multi-reporters": "^2.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "chai": "^4.3.6",
+    "eslint": "^10.4.0",
+    "mocha": "^11.1.0",
+    "mocha-junit-reporter": "^2.2.1",
+    "mocha-multi-reporters": "^1.5.1",
+    "typescript": "^5.0.4"
+  }
+}

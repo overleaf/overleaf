@@ -7,6 +7,7 @@ require('@babel/register')({
       {
         alias: {
           '^@/(.+)': './frontend/js/\\1',
+          '^@shared/(.+)': './shared/\\1',
           '^@modules/(.+)': './modules/\\1',
         },
       },
@@ -20,6 +21,14 @@ require('jsdom-global')(undefined, {
   pretendToBeVisual: true,
   url: 'https://www.test-overleaf.com/',
 })
+
+// JSDOM doesn't define devicePixelRatio, which @juggle/resize-observer's
+// polyfill (used by virtualized lists) reads as a bare global on every
+// observation tick
+if (typeof global.devicePixelRatio === 'undefined') {
+  global.devicePixelRatio = 1
+  window.devicePixelRatio = 1
+}
 
 const path = require('path')
 process.env.OVERLEAF_CONFIG = path.resolve(
@@ -69,6 +78,23 @@ globalThis.ResizeObserver =
   window.ResizeObserver =
     require('@juggle/resize-observer').ResizeObserver
 
+// add stub for matchMedia (used by react-bootstrap's Offcanvas, among others)
+globalThis.matchMedia =
+  global.matchMedia =
+  window.matchMedia =
+    query => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener() {},
+      removeListener() {},
+      addEventListener() {},
+      removeEventListener() {},
+      dispatchEvent() {
+        return false
+      },
+    })
+
 // add stub for BroadcastChannel (unused in these tests)
 globalThis.BroadcastChannel =
   global.BroadcastChannel =
@@ -101,7 +127,7 @@ globalThis.fetch =
 // ignore style/image files
 const { addHook } = require('pirates')
 addHook(() => '', {
-  exts: ['.css', '.scss', '.svg', '.png', '.gif', '.mp4'],
+  exts: ['.css', '.scss', '.svg', '.png', '.gif', '.mp4', '.ort'],
   ignoreNodeModules: false,
 })
 
@@ -122,3 +148,13 @@ Object.defineProperty(navigator, 'onLine', {
   configurable: true,
   get: () => true,
 })
+
+// Reset the URL after each test. Some features (e.g. the project dashboard)
+// push navigation state into the URL via history.pushState; because the jsdom
+// window is shared across the whole run, a dirty path would otherwise leak into
+// the next test's initial state and into the `page` field of analytics events.
+exports.mochaHooks = {
+  afterEach() {
+    window.history.replaceState(null, '', '/')
+  },
+}

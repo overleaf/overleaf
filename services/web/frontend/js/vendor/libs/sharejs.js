@@ -1,3 +1,16 @@
+/**
+ * ShareJS client v0.5.0
+ * https://github.com/josephg/ShareJS
+ *
+ * Copyright (c) 2011-2014 Joseph Gentle
+ * Licensed under the MIT License
+ * SPDX-License-Identifier: MIT
+ *
+ * This file was transpiled from CoffeeScript and adapted for the
+ * Overleaf frontend. See https://github.com/overleaf/internal/issues/25227
+ * for provenance details.
+ */
+
 import { generateSHA1Hash } from '../../shared/utils/sha1'
 import { debugging, debugConsole } from '@/utils/debugging'
 import getMeta from '@/utils/meta'
@@ -1048,6 +1061,24 @@ export const { Doc } = (() => {
             this.version = msg.v;
           }
 
+          // Overleaf: an inflight op that cancelled out against a remote op is
+          // empty; there is nothing to resend. Drop it (resolving its callbacks and
+          // clearing the dedup ids) so we do not resend an empty op. If there is no
+          // pending op either, the doc is fully in sync, so emit 'saved'; otherwise
+          // flush() below sends the pending op normally.
+          if (this.inflightOp && this.inflightOp.length === 0) {
+            this.inflightOp = null;
+            var inflightCallbacks = this.inflightCallbacks;
+            this.inflightCallbacks = [];
+            this.inflightSubmittedIds.length = 0;
+            inflightCallbacks.forEach(function (callback) {
+              callback(null);
+            });
+            if (this.pendingOp === null) {
+              this.emit('saved');
+            }
+          }
+
           // Resend any previously queued operation.
           if (this.inflightOp) {
             var response = {
@@ -1145,6 +1176,21 @@ export const { Doc } = (() => {
 
                 this.pendingOp = _Array$from8[0];
                 undo = _Array$from8[1];
+
+                // Overleaf: a pending op fully reverted by the undo is a no-op.
+                // Drop it (rather than leaving an empty op list) so it is not
+                // flushed and sent as an empty op. Resolve its submit callbacks; the
+                // inflight op was already cleared above, so the doc is fully in
+                // sync: emit 'saved'.
+                if (this.pendingOp.length === 0) {
+                  this.pendingOp = null;
+                  var pendingCallbacks = this.pendingCallbacks;
+                  this.pendingCallbacks = [];
+                  pendingCallbacks.forEach(function (callback) {
+                    callback(null);
+                  });
+                  this.emit('saved');
+                }
               }
 
               // ... and apply it locally, reverting the changes.
@@ -1261,6 +1307,23 @@ export const { Doc } = (() => {
 
             this.pendingOp = _Array$from12[0];
             docOp = _Array$from12[1];
+
+            // Overleaf: a pending op that fully cancels against the server op is a
+            // no-op. Drop it (rather than leaving an empty op list) so it is not
+            // flushed and sent to the server as an empty op. Resolve its submit
+            // callbacks (it completed as a no-op), and if nothing is inflight either
+            // the doc is fully in sync, so emit 'saved'.
+            if (this.pendingOp.length === 0) {
+              this.pendingOp = null;
+              var pendingCallbacks = this.pendingCallbacks;
+              this.pendingCallbacks = [];
+              pendingCallbacks.forEach(function (callback) {
+                callback(null);
+              });
+              if (this.inflightOp === null) {
+                this.emit('saved');
+              }
+            }
           }
 
           this.version++;

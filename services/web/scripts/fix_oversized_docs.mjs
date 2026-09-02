@@ -15,7 +15,7 @@ const redis = RedisWrapper.createClient(Settings.redis.web)
 
 function parseArgs() {
   const args = minimist(process.argv.slice(2), {
-    boolean: ['commit', 'ignore-ranges'],
+    boolean: ['commit', 'ignore-ranges', 'ignore-pending-updates'],
   })
 
   const projectIds = args._
@@ -23,20 +23,22 @@ function parseArgs() {
     console.log(`Usage: ${process.argv[1]} [OPTS] PROJECT_ID
 
 Options:
-    --commit          Actually convert oversized docs to binary files
-    --max-doc-size    Size over which docs are converted to binary files
-    --ignore-ranges   Convert docs even if they contain ranges
+    --commit                  Actually convert oversized docs to binary files
+    --max-doc-size            Size over which docs are converted to binary files
+    --ignore-ranges           Convert docs even if they contain ranges
+    --ignore-pending-updates  Process projects even if they have pending updates
 `)
     process.exit(0)
   }
 
   const commit = args.commit
   const ignoreRanges = args['ignore-ranges']
+  const ignorePendingUpdates = args['ignore-pending-updates']
   const maxDocSize = args['max-doc-size']
     ? parseInt(args['max-doc-size'], 10)
     : 2 * 1024 * 1024
 
-  return { projectIds, commit, ignoreRanges, maxDocSize }
+  return { projectIds, commit, ignoreRanges, ignorePendingUpdates, maxDocSize }
 }
 
 async function main() {
@@ -49,9 +51,33 @@ async function main() {
 }
 
 async function processProject(projectId) {
+  await checkPendingUpdates(projectId)
   const docIds = await getDocIds(projectId)
   for (const docId of docIds) {
     await processDoc(projectId, docId)
+  }
+}
+
+// A doc's pending updates live in the shared
+// `PendingProjectUpdates:{projectId}` list (on the document-updater redis).
+// They would be lost when converting the doc to a binary file, so refuse to
+// process a project that has pending updates - flush/drain the project first,
+// or override with --ignore-pending-updates.
+async function checkPendingUpdates(projectId) {
+  const pendingUpdates = await redis.llen(
+    `PendingProjectUpdates:{${projectId}}`
+  )
+  if (pendingUpdates === 0) {
+    return
+  }
+  if (opts.ignorePendingUpdates) {
+    console.log(
+      `Ignoring ${pendingUpdates} pending update(s) in project ${projectId}`
+    )
+  } else {
+    throw new Error(
+      `project ${projectId} has ${pendingUpdates} pending update(s) in redis - flush/drain the project first, or re-run with --ignore-pending-updates`
+    )
   }
 }
 
@@ -148,11 +174,13 @@ async function deleteDocFromRedis(projectId, docId) {
     `UnflushedTime:{${docId}}`,
     `Pathname:{${docId}}`,
     `ProjectHistoryId:{${docId}}`,
-    `PendingUpdates:{${docId}}`,
     `lastUpdatedAt:{${docId}}`,
     `lastUpdatedBy:{${docId}}`
   )
-  await redis.srem(`DocsIn:{${projectId}}`, projectId)
+  // NOTE: the shared `PendingProjectUpdates:{projectId}` list is per-project
+  // and cannot be cleared here without dropping other docs' updates - see
+  // checkPendingUpdates above.
+  await redis.srem(`DocsIn:{${projectId}}`, docId)
 }
 
 try {

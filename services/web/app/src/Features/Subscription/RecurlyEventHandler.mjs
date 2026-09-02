@@ -29,7 +29,11 @@ async function sendRecurlyAnalyticsEvent(event, eventData) {
       await _sendSubscriptionStartedEvent(userId, eventData)
       break
     case 'updated_subscription_notification':
-      await _sendSubscriptionUpdatedEvent(userId, eventData)
+      await _sendSubscriptionUpdatedEvent(
+        userId,
+        eventData,
+        subscription?.planCode
+      )
       break
     case 'canceled_subscription_notification':
       await _sendSubscriptionCancelledEvent(userId, eventData)
@@ -146,7 +150,11 @@ async function _sendSubscriptionStartedEvent(userId, eventData) {
   }
 }
 
-async function _sendSubscriptionUpdatedEvent(userId, eventData) {
+async function _sendSubscriptionUpdatedEvent(
+  userId,
+  eventData,
+  planCodeBeforeSync
+) {
   const { planCode, quantity, state, isTrial, hasAiAddOn, subscriptionId } =
     _getSubscriptionData(eventData)
   AnalyticsManager.recordEventForUserInBackground(
@@ -154,6 +162,10 @@ async function _sendSubscriptionUpdatedEvent(userId, eventData) {
     'subscription-updated',
     {
       plan_code: planCode,
+      // Mongo sync might already have happened,
+      // we only want to record when it haven't yet.
+      previous_plan_code:
+        planCodeBeforeSync !== planCode ? planCodeBeforeSync : undefined,
       quantity,
       is_trial: isTrial,
       has_ai_add_on: hasAiAddOn,

@@ -1,11 +1,11 @@
-import OLTagIcon from '@/shared/components/ol/ol-tag-icon'
-import Tag from '@/shared/components/tag'
+import TagIcon from '@/shared/components/tag-icon'
+import OLTag from '@/shared/components/ol/ol-tag'
 import type { Meta, StoryObj } from '@storybook/react-webpack5'
 import { figmaDesignUrl } from '../../../.storybook/utils/figma-design-url'
 
-const meta: Meta<typeof Tag> = {
+const meta: Meta<typeof OLTag> = {
   title: 'Shared / Components / Tag',
-  component: Tag,
+  component: OLTag,
   args: {
     children: 'Tag',
   },
@@ -29,11 +29,11 @@ const meta: Meta<typeof Tag> = {
 }
 export default meta
 
-type Story = StoryObj<typeof Tag>
+type Story = StoryObj<typeof OLTag>
 
 export const Default: Story = {
   render: args => {
-    return <Tag {...args} />
+    return <OLTag {...args} />
   },
 }
 Default.parameters = figmaDesignUrl(
@@ -42,7 +42,7 @@ Default.parameters = figmaDesignUrl(
 
 export const Prepend: Story = {
   render: args => {
-    return <Tag prepend={<OLTagIcon />} {...args} />
+    return <OLTag prepend={<TagIcon />} {...args} />
   },
 }
 Prepend.parameters = figmaDesignUrl(
@@ -52,8 +52,8 @@ Prepend.parameters = figmaDesignUrl(
 export const Removable: Story = {
   render: args => {
     return (
-      <Tag
-        prepend={<OLTagIcon />}
+      <OLTag
+        prepend={<TagIcon />}
         closeBtnProps={{
           onClick: () => alert('Close triggered!'),
         }}
@@ -69,8 +69,8 @@ Removable.parameters = figmaDesignUrl(
 export const InteractiveRemovable: Story = {
   render: args => {
     return (
-      <Tag
-        prepend={<OLTagIcon />}
+      <OLTag
+        prepend={<TagIcon />}
         contentProps={{
           onClick: () => alert('Content button clicked!'),
         }}

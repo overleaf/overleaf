@@ -122,10 +122,13 @@ export class RateLimiter {
  * Shared rate limiters
  */
 
-export const openProjectRateLimiter = new RateLimiter('open-project', {
-  points: 15,
-  duration: 60,
-})
+export const openProjectRateLimiter = new RateLimiter(
+  'open-project',
+  Settings.rateLimit?.openProject || {
+    points: 15,
+    duration: 60,
+  }
+)
 
 // Keep in sync with the can-skip-captcha options.
 export const overleafLoginRateLimiter = new RateLimiter(

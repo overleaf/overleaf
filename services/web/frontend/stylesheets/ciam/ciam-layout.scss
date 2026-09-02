@@ -213,11 +213,21 @@
   gap: var(--ds-spacing-200);
 
   li {
-    background-image: url('../../../public/img/ciam-check-green.svg');
-    background-repeat: no-repeat;
-    background-position: left center;
-    background-size: 16px 16px;
+    position: relative;
     padding-left: calc(16px + var(--ds-spacing-200));
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      background-color: var(--ds-color-green-500);
+      mask: url('../../../public/img/ciam-check.svg') no-repeat center / 16px
+        16px;
+    }
   }
 }
 

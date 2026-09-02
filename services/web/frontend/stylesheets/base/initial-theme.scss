@@ -1,0 +1,13 @@
+// Match body's background so the first paint isn't white in dark mode.
+// Background only: color-scheme is set per container (e.g. .project-ds-nav-page)
+[data-initial-theme='dark'] {
+  background-color: var(--bg-dark-primary);
+}
+
+[data-initial-theme='system'] {
+  // The 'system' theme is resolved client-side (useThemedPage), which also
+  // removes this attribute; until then, follow the OS preference.
+  @media (prefers-color-scheme: dark) {
+    background-color: var(--bg-dark-primary);
+  }
+}

@@ -1,6 +1,35 @@
 import AbstractMockApi from './AbstractMockApi.mjs'
 import SubscriptionController from '../../../../app/src/Features/Subscription/SubscriptionController.mjs'
 import { xmlResponse } from '../../../../app/src/infrastructure/Response.mjs'
+import { parseReq, z, zz } from '@overleaf/validation-tools'
+
+// Recurly's own ids: subscription uuids and coupon codes are opaque
+// Recurly-assigned strings, not Mongo ObjectIds -- only the account "id" is
+// ours (it's always set to the Overleaf user's Mongo id, see
+// RecurlyWrapper.mjs's `accounts/${userId}` calls).
+const subscriptionParamsSchema = z.object({
+  params: z.strictObject({ id: z.string() }),
+})
+
+const accountParamsSchema = z.object({
+  params: z.strictObject({ id: zz.objectId() }),
+})
+
+// Mirrors RecurlyWrapper.updateAccountEmailAddress, the sole production
+// caller of this route: it PUTs `<account><email>...</email></account>`,
+// which recurlyNotificationParser parses into { account: { email } }.
+const updateAccountSchema = z.object({
+  params: z.strictObject({ id: zz.objectId() }),
+  body: z.strictObject({
+    account: z.strictObject({
+      email: z.string(),
+    }),
+  }),
+})
+
+const couponParamsSchema = z.object({
+  params: z.strictObject({ code: z.string() }),
+})
 
 class MockRecurlyApi extends AbstractMockApi {
   reset() {
@@ -44,7 +73,8 @@ class MockRecurlyApi extends AbstractMockApi {
       next()
     })
     this.app.get('/subscriptions/:id', (req, res) => {
-      const subscription = this.getMockSubscriptionById(req.params.id)
+      const { params } = parseReq(req, subscriptionParamsSchema)
+      const subscription = this.getMockSubscriptionById(params.id)
       if (!subscription) {
         res.sendStatus(404)
       } else {
@@ -68,7 +98,8 @@ class MockRecurlyApi extends AbstractMockApi {
     })
 
     this.app.get('/accounts/:id', (req, res) => {
-      const subscription = this.getMockSubscriptionByAccountId(req.params.id)
+      const { params } = parseReq(req, accountParamsSchema)
+      const subscription = this.getMockSubscriptionByAccountId(params.id)
       if (!subscription) {
         res.sendStatus(404)
       } else {
@@ -76,7 +107,7 @@ class MockRecurlyApi extends AbstractMockApi {
           res,
           `\
 <account>
-	<account_code>${req.params.id}</account_code>
+	<account_code>${params.id}</account_code>
 	<hosted_login_token>${subscription.account.hosted_login_token}</hosted_login_token>
 	<email>${subscription.account.email}</email>
 </account>\
@@ -89,16 +120,17 @@ class MockRecurlyApi extends AbstractMockApi {
       '/accounts/:id',
       SubscriptionController.recurlyNotificationParser, // required to parse XML requests
       (req, res) => {
-        const subscription = this.getMockSubscriptionByAccountId(req.params.id)
+        const { params, body } = parseReq(req, updateAccountSchema)
+        const subscription = this.getMockSubscriptionByAccountId(params.id)
         if (!subscription) {
           res.sendStatus(404)
         } else {
-          Object.assign(subscription.account, req.body.account)
+          Object.assign(subscription.account, body.account)
           xmlResponse(
             res,
             `\
 <account>
-	<account_code>${req.params.id}</account_code>
+	<account_code>${params.id}</account_code>
 	<email>${subscription.account.email}</email>
 </account>\
 `
@@ -108,7 +140,8 @@ class MockRecurlyApi extends AbstractMockApi {
     )
 
     this.app.get('/coupons/:code', (req, res) => {
-      const coupon = this.coupons[req.params.code]
+      const { params } = parseReq(req, couponParamsSchema)
+      const coupon = this.coupons[params.code]
       if (!coupon) {
         res.sendStatus(404)
       } else {
@@ -116,7 +149,7 @@ class MockRecurlyApi extends AbstractMockApi {
           res,
           `\
 <coupon>
-	<coupon_code>${req.params.code}</coupon_code>
+	<coupon_code>${params.code}</coupon_code>
 	<name>${coupon.name || ''}</name>
 	<description>${coupon.description || ''}</description>
 </coupon>\
@@ -126,7 +159,8 @@ class MockRecurlyApi extends AbstractMockApi {
     })
 
     this.app.get('/accounts/:id/redemptions', (req, res) => {
-      const redemptions = this.redemptions[req.params.id] || []
+      const { params } = parseReq(req, accountParamsSchema)
+      const redemptions = this.redemptions[params.id] || []
       let redemptionsListXml = ''
       for (const redemption of Array.from(redemptions)) {
         redemptionsListXml += `\

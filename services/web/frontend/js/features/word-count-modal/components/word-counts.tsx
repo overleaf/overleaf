@@ -2,7 +2,7 @@ import { FC } from 'react'
 import { ServerWordCountData } from '@/features/word-count-modal/components/word-count-data'
 import { useTranslation } from 'react-i18next'
 import { Container, Row, Col } from 'react-bootstrap'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 
 export const WordCounts: FC<{
   data: ServerWordCountData
@@ -14,16 +14,17 @@ export const WordCounts: FC<{
       {data.messages && (
         <Row>
           <Col xs={12}>
-            <OLNotification
-              type="error"
-              content={
-                <p style={{ whiteSpace: 'pre-wrap' }}>{data.messages}</p>
-              }
-            />
+            <div className="notification-list">
+              <Notification
+                type="error"
+                content={
+                  <p style={{ whiteSpace: 'pre-wrap' }}>{data.messages}</p>
+                }
+              />
+            </div>
           </Col>
         </Row>
       )}
-
       <Row>
         <Col xs={4}>
           <div className="float-end">{t('total_words')}:</div>
@@ -36,14 +37,12 @@ export const WordCounts: FC<{
         </Col>
         <Col xs={6}>{data.headers}</Col>
       </Row>
-
       <Row>
         <Col xs={4}>
           <div className="float-end">{t('math_inline')}:</div>
         </Col>
         <Col xs={6}>{data.mathInline}</Col>
       </Row>
-
       <Row>
         <Col xs={4}>
           <div className="float-end">{t('math_display')}:</div>

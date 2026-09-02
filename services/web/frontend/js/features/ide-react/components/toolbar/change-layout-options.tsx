@@ -1,8 +1,8 @@
 import {
-  DropdownItem,
-  DropdownHeader,
-  DropdownDivider,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdownItem,
+  OLDropdownHeader,
+  OLDropdownDivider,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import {
   IdeLayout,
   IdeView,
@@ -17,7 +17,6 @@ import { Shortcut } from '@/shared/components/shortcut'
 import classNames from 'classnames'
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
-import SplitTestBadge from '@/shared/components/split-test-badge'
 
 type LayoutOption =
   | 'sideBySide'
@@ -81,7 +80,7 @@ const LayoutDropdownItem = ({
   }
 
   return (
-    <DropdownItem
+    <OLDropdownItem
       active={active}
       aria-current={active}
       disabled={disabled}
@@ -91,7 +90,7 @@ const LayoutDropdownItem = ({
       className={classNames({ 'dropdown-item-wide': isMac })}
     >
       {children}
-    </DropdownItem>
+    </OLDropdownItem>
   )
 }
 
@@ -108,7 +107,7 @@ const shortcuts: Record<LayoutOption, string[] | null> = isMac
       pdfOnly: null,
       sideBySide: null,
       detachedPdf: null,
-      focusMode: ['⌃', '⇧', 'M'],
+      focusMode: ['Ctrl', 'Shift', 'M'],
     }
 
 export default function ChangeLayoutOptions() {
@@ -139,7 +138,7 @@ export default function ChangeLayoutOptions() {
 
   return (
     <>
-      <DropdownHeader>{t('layout_options')}</DropdownHeader>
+      <OLDropdownHeader>{t('layout_options')}</OLDropdownHeader>
       <LayoutDropdownItem
         onClick={() => handleChangeLayout('sideBySide')}
         active={activeLayoutOption === 'sideBySide'}
@@ -184,7 +183,7 @@ export default function ChangeLayoutOptions() {
       </LayoutDropdownItem>
       {focusModeEnabled && (
         <>
-          <DropdownDivider />
+          <OLDropdownDivider />
           <LayoutDropdownItem
             onClick={() => {
               setFocusMode(!focusMode)
@@ -193,13 +192,7 @@ export default function ChangeLayoutOptions() {
             active={focusMode}
             leadingIcon="crop_free"
             trailingIcon={
-              <span className="d-flex align-items-center gap-2">
-                <SplitTestBadge
-                  splitTestName="focus-mode"
-                  displayOnVariants={['enabled']}
-                />
-                {shortcuts.focusMode && <Shortcut keys={shortcuts.focusMode} />}
-              </span>
+              shortcuts.focusMode && <Shortcut keys={shortcuts.focusMode} />
             }
           >
             {t('focus_mode')}

@@ -22,6 +22,16 @@ export type IdeEvents = {
   'comment:start_adding': []
   'history:toggle': []
   'entity:deleted': [entity: FileTreeFindResult]
+  'ide:unableToSyncOfflineChanges': [
+    {
+      docId: string
+      editorContent: string
+      baseContent: string
+      docName: string
+      reloadAfterClose?: boolean
+    },
+  ]
+  'ide:offlineChangesSynced': [{ docId: string }]
 }
 
 export class IdeEventEmitter extends EventTarget {

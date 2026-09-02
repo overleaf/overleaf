@@ -14,7 +14,10 @@ import getMeta from '@/utils/meta'
 import { useUnstableStoreSync } from '@/shared/hooks/use-unstable-store-sync'
 import { sendMB } from '@/infrastructure/event-tracking'
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
-import { getVisualEditorStorageKey } from '@/features/source-editor/utils/visual-editor'
+import {
+  getVisualEditorDefault,
+  getVisualEditorStorageKey,
+} from '@/features/source-editor/utils/visual-editor'
 
 // Context value type
 export type EditorPropertiesContextValue = {
@@ -60,7 +63,7 @@ export function showVisualForFile(filename: string): boolean {
   if (key === 'editor.lastUsedMode') {
     return migrateTexVisualMode()
   }
-  return false
+  return getVisualEditorDefault(filename)
 }
 
 export const EditorPropertiesProvider: FC<PropsWithChildren> = ({

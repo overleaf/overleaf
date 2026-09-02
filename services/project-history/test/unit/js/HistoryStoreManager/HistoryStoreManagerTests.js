@@ -2,6 +2,7 @@ import sinon from 'sinon'
 import { expect } from 'chai'
 import { strict as esmock } from 'esmock'
 import EventEmitter from 'node:events'
+import OError from '@overleaf/o-error'
 import { RequestFailedError } from '@overleaf/fetch-utils'
 import * as Errors from '../../../../app/js/Errors.js'
 
@@ -396,6 +397,107 @@ describe('HistoryStoreManager', function () {
     })
   })
 
+  describe('_requestHistoryService error handling', function () {
+    function itCallsBackWithTheHistoryServiceError(statusCode) {
+      it('should call the callback with an error naming the status code', function () {
+        const err = this.callback.firstCall.args[0]
+        expect(err.message).to.equal(
+          `history store a non-success status code: ${statusCode}`
+        )
+      })
+    }
+
+    describe('with a 409 response carrying a body', function () {
+      beforeEach(function (done) {
+        this.FetchUtils.fetchString.rejects(
+          new RequestFailedError(
+            `${this.settings.overleaf.history.host}/projects/${this.historyId}/latest/history`,
+            { method: 'GET' },
+            { status: 409 },
+            'conflict-detail'
+          )
+        )
+        this.HistoryStoreManager.getMostRecentVersion(
+          this.projectId,
+          this.historyId,
+          (...args) => {
+            this.callback(...args)
+            done()
+          }
+        )
+      })
+
+      itCallsBackWithTheHistoryServiceError(409)
+
+      it('should include the response body and status code in the error info', function () {
+        const err = this.callback.firstCall.args[0]
+        const info = OError.getFullInfo(err)
+        expect(info.body).to.equal('conflict-detail')
+        expect(info.statusCode).to.equal(409)
+      })
+    })
+
+    describe('with a 422 response carrying a body', function () {
+      beforeEach(function (done) {
+        this.FetchUtils.fetchString.rejects(
+          new RequestFailedError(
+            `${this.settings.overleaf.history.host}/projects/${this.historyId}/latest/history`,
+            { method: 'GET' },
+            { status: 422 },
+            'schema-validation-detail'
+          )
+        )
+        this.HistoryStoreManager.getMostRecentVersion(
+          this.projectId,
+          this.historyId,
+          (...args) => {
+            this.callback(...args)
+            done()
+          }
+        )
+      })
+
+      itCallsBackWithTheHistoryServiceError(422)
+
+      it('should include the response body and status code in the error info', function () {
+        const err = this.callback.firstCall.args[0]
+        const info = OError.getFullInfo(err)
+        expect(info.body).to.equal('schema-validation-detail')
+        expect(info.statusCode).to.equal(422)
+      })
+    })
+
+    describe('with a 500 response and no informative body', function () {
+      beforeEach(function (done) {
+        this.FetchUtils.fetchString.rejects(
+          new RequestFailedError(
+            `${this.settings.overleaf.history.host}/projects/${this.historyId}/latest/history`,
+            { method: 'GET' },
+            { status: 500 },
+            null
+          )
+        )
+        this.HistoryStoreManager.getMostRecentVersion(
+          this.projectId,
+          this.historyId,
+          (...args) => {
+            this.callback(...args)
+            done()
+          }
+        )
+      })
+
+      itCallsBackWithTheHistoryServiceError(500)
+
+      it('should not include a response body in the error info', function () {
+        const err = this.callback.firstCall.args[0]
+        const info = OError.getFullInfo(err)
+        expect(info.body).to.equal(null)
+        expect(info.statusCode).to.equal(500)
+      })
+    })
+  })
+
   describe('createBlobForUpdate', function () {
     beforeEach(function () {
       this.fileStream = {}
@@ -733,6 +835,79 @@ describe('HistoryStoreManager', function () {
         `${this.settings.overleaf.history.host}/projects/${this.historyId}`,
         { method: 'DELETE' }
       )
+    })
+  })
+
+  describe('sendChanges', function () {
+    beforeEach(function () {
+      this.changes = [{ op: 'mock-change' }]
+      this.endVersion = 42
+    })
+
+    describe('successfully', function () {
+      beforeEach(function (done) {
+        this.FetchUtils.fetchString.resolves(
+          JSON.stringify({ resyncNeeded: true })
+        )
+        this.HistoryStoreManager.sendChanges(
+          this.projectId,
+          this.historyId,
+          this.changes,
+          this.endVersion,
+          (...args) => {
+            this.callback(...args)
+            done()
+          }
+        )
+      })
+
+      it('should send the changes to the history store', function () {
+        expect(this.FetchUtils.fetchString).to.have.been.calledWithMatch(
+          `${this.settings.overleaf.history.host}/projects/${this.historyId}/legacy_changes?end_version=${this.endVersion}`,
+          {
+            method: 'POST',
+            json: this.changes,
+          }
+        )
+      })
+
+      it('should call the callback with the resync flag from the response', function () {
+        expect(this.callback).to.have.been.calledWith(null, {
+          resyncNeeded: true,
+        })
+      })
+    })
+
+    describe('when the history store returns a non-success status code', function () {
+      beforeEach(function (done) {
+        this.FetchUtils.fetchString.rejects(
+          new RequestFailedError(
+            `${this.settings.overleaf.history.host}/projects/${this.historyId}/legacy_changes`,
+            { method: 'POST' },
+            { status: 409 },
+            'conflict-detail'
+          )
+        )
+        this.HistoryStoreManager.sendChanges(
+          this.projectId,
+          this.historyId,
+          this.changes,
+          this.endVersion,
+          (...args) => {
+            this.callback(...args)
+            done()
+          }
+        )
+      })
+
+      it('should call the callback with an error', function () {
+        expect(this.callback.firstCall.args[0]).to.be.an.instanceOf(Error)
+      })
+
+      it('should keep the response body from the history store in the error info', function () {
+        const err = this.callback.firstCall.args[0]
+        expect(OError.getFullInfo(err).body).to.equal('conflict-detail')
+      })
     })
   })
 })

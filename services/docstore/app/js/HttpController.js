@@ -5,21 +5,114 @@ import HealthChecker from './HealthChecker.js'
 import Errors from './Errors.js'
 import Settings from '@overleaf/settings'
 import { expressify } from '@overleaf/promise-utils'
-import { parseReq, z } from '@overleaf/validation-tools'
+import { parseReq, z, zz } from '@overleaf/validation-tools'
+import rangesSchemas from '@overleaf/ranges-tracker/schemas.js'
+
+const projectParamsSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+  }),
+})
+
+const docParamsSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+    doc_id: zz.objectId(),
+  }),
+})
+
+const getDocSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+    doc_id: zz.objectId(),
+  }),
+  query: z.strictObject({
+    include_deleted: z.stringbool().default(false),
+  }),
+})
+
+// Rollout-temporary fallback (loosened primary schema; no zod validation
+// existed for this route on main); delete when this route's
+// REQ_VALIDATION_MODE instrumentation is removed.
+const getDocFallbackSchema = z.object({
+  params: z.object({
+    project_id: z.string(),
+    doc_id: z.string(),
+  }),
+  query: z.object({
+    include_deleted: z.stringbool().default(false),
+  }),
+})
+
+const projectHasRangesSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+  }),
+  query: z.strictObject({
+    useSecondary: z.stringbool().default(false),
+  }),
+})
+
+// Rollout-temporary fallback (loosened primary schema; no zod validation
+// existed for this route on main); delete when this route's
+// REQ_VALIDATION_MODE instrumentation is removed.
+const projectHasRangesFallbackSchema = z.object({
+  params: z.object({
+    project_id: z.string(),
+  }),
+  query: z.object({
+    useSecondary: z.stringbool().default(false),
+  }),
+})
+
+const updateDocSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+    doc_id: zz.objectId(),
+  }),
+  body: z.strictObject({
+    lines: z.array(z.string()),
+    version: z.number(),
+    ranges: rangesSchemas.ranges,
+  }),
+})
 
 const patchDocSchema = z.object({
-  body: z
-    .object({
-      deleted: z.literal(true),
-      deletedAt: z.coerce.date(),
-      name: z.string(),
-    })
-    .strict(),
+  params: z.strictObject({
+    project_id: zz.objectId(),
+    doc_id: zz.objectId(),
+  }),
+  body: z.strictObject({
+    deleted: z.literal(true),
+    deletedAt: z.coerce.date(),
+    name: z.string(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed. Only
+// `body` was validated by parseReq() on main -- `params` were read directly
+// off `req.params` unvalidated, so this keeps them as bare strings rather
+// than reconstructing a param check that never existed.
+const patchDocFallbackSchema = z.object({
+  params: z.object({
+    project_id: z.string(),
+    doc_id: z.string(),
+  }),
+  body: z.strictObject({
+    deleted: z.literal(true),
+    deletedAt: z.coerce.date(),
+    name: z.string(),
+  }),
 })
 
 async function getDoc(req, res) {
-  const { doc_id: docId, project_id: projectId } = req.params
-  const includeDeleted = req.query.include_deleted === 'true'
+  const { params, query } = parseReq(req, getDocSchema, {
+    logOnly: true,
+    fallbackSchema: getDocFallbackSchema,
+  })
+  const { doc_id: docId, project_id: projectId } = params
+  const includeDeleted = query.include_deleted
   logger.debug({ projectId, docId }, 'getting doc')
   const doc = await DocManager.getFullDoc(projectId, docId)
   logger.debug({ docId, projectId }, 'got doc')
@@ -31,7 +124,8 @@ async function getDoc(req, res) {
 }
 
 async function peekDoc(req, res) {
-  const { doc_id: docId, project_id: projectId } = req.params
+  const { params } = parseReq(req, docParamsSchema, { logOnly: true })
+  const { doc_id: docId, project_id: projectId } = params
   logger.debug({ projectId, docId }, 'peeking doc')
   const doc = await DocManager.peekDoc(projectId, docId, {
     deleted: true,
@@ -46,13 +140,15 @@ async function peekDoc(req, res) {
 }
 
 async function isDocDeleted(req, res) {
-  const { doc_id: docId, project_id: projectId } = req.params
+  const { params } = parseReq(req, docParamsSchema, { logOnly: true })
+  const { doc_id: docId, project_id: projectId } = params
   const deleted = await DocManager.isDocDeleted(projectId, docId)
   res.json({ deleted })
 }
 
 async function getRawDoc(req, res) {
-  const { doc_id: docId, project_id: projectId } = req.params
+  const { params } = parseReq(req, docParamsSchema, { logOnly: true })
+  const { doc_id: docId, project_id: projectId } = params
   logger.debug({ projectId, docId }, 'getting raw doc')
   const content = await DocManager.getDocLines(projectId, docId)
   res.setHeader('content-type', 'text/plain')
@@ -60,7 +156,8 @@ async function getRawDoc(req, res) {
 }
 
 async function getAllDocs(req, res) {
-  const { project_id: projectId } = req.params
+  const { params } = parseReq(req, projectParamsSchema, { logOnly: true })
+  const { project_id: projectId } = params
   logger.debug({ projectId }, 'getting all docs')
   const docs = await DocManager.getAllNonDeletedDocs(projectId, {
     lines: true,
@@ -77,7 +174,8 @@ async function getAllDocs(req, res) {
 }
 
 async function getAllDocsWithRanges(req, res) {
-  const { project_id: projectId } = req.params
+  const { params } = parseReq(req, projectParamsSchema, { logOnly: true })
+  const { project_id: projectId } = params
   logger.debug({ projectId }, 'getting all docs with ranges')
   const docs = await DocManager.getAllNonDeletedDocs(projectId, {
     lines: true,
@@ -95,13 +193,15 @@ async function getAllDocsWithRanges(req, res) {
 }
 
 async function getAllDocVersions(req, res) {
-  const { project_id: projectId } = req.params
+  const { params } = parseReq(req, projectParamsSchema, { logOnly: true })
+  const { project_id: projectId } = params
   const docs = await DocManager.getAllDocVersions(projectId)
   res.json(docs)
 }
 
 async function getAllDeletedDocs(req, res) {
-  const { project_id: projectId } = req.params
+  const { params } = parseReq(req, projectParamsSchema, { logOnly: true })
+  const { project_id: projectId } = params
   logger.debug({ projectId }, 'getting all deleted docs')
   const docs = await DocManager.getAllDeletedDocs(projectId, {
     name: true,
@@ -117,7 +217,8 @@ async function getAllDeletedDocs(req, res) {
 }
 
 async function getAllRanges(req, res) {
-  const { project_id: projectId } = req.params
+  const { params } = parseReq(req, projectParamsSchema, { logOnly: true })
+  const { project_id: projectId } = params
   logger.debug({ projectId }, 'getting all ranges')
   const docs = await DocManager.getAllNonDeletedDocs(projectId, {
     ranges: true,
@@ -126,20 +227,26 @@ async function getAllRanges(req, res) {
 }
 
 async function getCommentThreadIds(req, res) {
-  const { project_id: projectId } = req.params
+  const { params } = parseReq(req, projectParamsSchema, { logOnly: true })
+  const { project_id: projectId } = params
   const threadIds = await DocManager.getCommentThreadIds(projectId)
   res.json(threadIds)
 }
 
 async function getTrackedChangesUserIds(req, res) {
-  const { project_id: projectId } = req.params
+  const { params } = parseReq(req, projectParamsSchema, { logOnly: true })
+  const { project_id: projectId } = params
   const userIds = await DocManager.getTrackedChangesUserIds(projectId)
   res.json(userIds)
 }
 
 async function projectHasRanges(req, res) {
-  const { project_id: projectId } = req.params
-  const useSecondary = req.query.useSecondary === 'true'
+  const { params, query } = parseReq(req, projectHasRangesSchema, {
+    logOnly: true,
+    fallbackSchema: projectHasRangesFallbackSchema,
+  })
+  const { project_id: projectId } = params
+  const { useSecondary } = query
   const projectHasRanges = await DocManager.projectHasRanges(
     projectId,
     useSecondary
@@ -148,11 +255,12 @@ async function projectHasRanges(req, res) {
 }
 
 async function updateDoc(req, res) {
-  const { doc_id: docId, project_id: projectId } = req.params
-  const lines = req.body?.lines
-  const version = req.body?.version
-  const ranges = req.body?.ranges
+  const { params, body } = parseReq(req, updateDocSchema, { logOnly: true })
+  const { doc_id: docId, project_id: projectId } = params
+  const { lines, version, ranges } = body
 
+  // Rollout-temporary fallback (validation on the fallback schema); delete
+  // when this route's REQ_VALIDATION_MODE instrumentation is removed.
   if (lines == null || !(lines instanceof Array)) {
     logger.error({ projectId, docId }, 'no doc lines provided')
     res.sendStatus(400) // Bad Request
@@ -193,8 +301,10 @@ async function updateDoc(req, res) {
 }
 
 async function patchDoc(req, res) {
-  const { body: meta } = parseReq(req, patchDocSchema)
-  const { doc_id: docId, project_id: projectId } = req.params
+  const { params, body: meta } = parseReq(req, patchDocSchema, {
+    fallbackSchema: patchDocFallbackSchema,
+  })
+  const { doc_id: docId, project_id: projectId } = params
   logger.debug({ projectId, docId }, 'patching doc')
   await DocManager.patchDoc(projectId, docId, meta)
   res.sendStatus(204)
@@ -227,21 +337,24 @@ function _buildDocsArrayView(projectId, docs) {
 }
 
 async function archiveAllDocs(req, res) {
-  const { project_id: projectId } = req.params
+  const { params } = parseReq(req, projectParamsSchema, { logOnly: true })
+  const { project_id: projectId } = params
   logger.debug({ projectId }, 'archiving all docs')
   await DocArchive.archiveAllDocs(projectId)
   res.sendStatus(204)
 }
 
 async function archiveDoc(req, res) {
-  const { doc_id: docId, project_id: projectId } = req.params
+  const { params } = parseReq(req, docParamsSchema, { logOnly: true })
+  const { doc_id: docId, project_id: projectId } = params
   logger.debug({ projectId, docId }, 'archiving a doc')
   await DocArchive.archiveDoc(projectId, docId)
   res.sendStatus(204)
 }
 
 async function unArchiveAllDocs(req, res) {
-  const { project_id: projectId } = req.params
+  const { params } = parseReq(req, projectParamsSchema, { logOnly: true })
+  const { project_id: projectId } = params
   logger.debug({ projectId }, 'unarchiving all docs')
   try {
     await DocArchive.unArchiveAllDocs(projectId)
@@ -256,7 +369,8 @@ async function unArchiveAllDocs(req, res) {
 }
 
 async function destroyProject(req, res) {
-  const { project_id: projectId } = req.params
+  const { params } = parseReq(req, projectParamsSchema, { logOnly: true })
+  const { project_id: projectId } = params
   logger.debug({ projectId }, 'destroying all docs')
   await DocArchive.destroyProject(projectId)
   res.sendStatus(204)

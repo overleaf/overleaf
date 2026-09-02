@@ -1,7 +1,16 @@
-import Badge from '@/shared/components/badge/badge'
+import { Badge as BSBadge, BadgeProps as BSBadgeProps } from 'react-bootstrap'
+import { MergeAndOverride } from '../../../../../types/utils'
 
-function OLBadge(props: React.ComponentProps<typeof Badge>) {
-  let { bg, text, ...rest } = props
+export type OLBadgeProps = MergeAndOverride<
+  BSBadgeProps,
+  {
+    prepend?: React.ReactNode
+    badgeContentRef?: React.RefObject<HTMLElement>
+  }
+>
+
+function OLBadge(props: OLBadgeProps) {
+  let { bg, text, prepend, children, badgeContentRef, ...rest } = props
 
   // For warning badges, use a light background by default. We still want the
   // Bootstrap warning colour to be dark for text though, so make an
@@ -11,7 +20,14 @@ function OLBadge(props: React.ComponentProps<typeof Badge>) {
     text = 'warning'
   }
 
-  return <Badge bg={bg} text={text} {...rest} />
+  return (
+    <BSBadge bg={bg} text={text} {...rest}>
+      {prepend && <span className="badge-prepend">{prepend}</span>}
+      <span className="badge-content" ref={badgeContentRef}>
+        {children}
+      </span>
+    </BSBadge>
+  )
 }
 
 export default OLBadge

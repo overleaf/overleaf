@@ -22,6 +22,7 @@ import OLButton from '@/shared/components/ol/ol-button'
 import OLFormControl from '@/shared/components/ol/ol-form-control'
 import OLForm from '@/shared/components/ol/ol-form'
 import Notification from '@/shared/components/notification'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 type CreateTagModalProps = {
   id: string
@@ -43,6 +44,7 @@ export default function CreateTagModal({
   const { t } = useTranslation()
   const { isLoading, isError, runAsync, status } = useAsync<Tag>()
   const { autoFocusedRef } = useRefWithAutoFocus<HTMLInputElement>()
+  const themed = useFeatureFlag('themed-modals')
 
   const [tagName, setTagName] = useState<string>()
   const [validationError, setValidationError] = useState<string>()
@@ -80,7 +82,15 @@ export default function CreateTagModal({
   }
 
   return (
-    <OLModal show animation onHide={onClose} id={id} backdrop="static">
+    <OLModal
+      show
+      animation
+      onHide={onClose}
+      id={id}
+      backdrop="static"
+      themed={themed}
+      className="project-list-modal"
+    >
       <OLModalHeader>
         <OLModalTitle>{t('create_new_tag')}</OLModalTitle>
       </OLModalHeader>

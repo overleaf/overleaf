@@ -6,6 +6,10 @@ import Mongoose from './Mongoose.mjs'
 import { addConnectionDrainer } from './GracefulShutdown.mjs'
 import Metrics from '@overleaf/metrics'
 
+/**
+ * @import { Collection, Document } from 'mongodb-legacy'
+ */
+
 // Ensure Mongoose is using the same mongodb instance as the mongodb module,
 // otherwise we will get multiple versions of the ObjectId class. Mongoose
 // patches ObjectId, so loading multiple versions of the mongodb module can
@@ -35,6 +39,37 @@ addConnectionDrainer('mongodb', async () => {
 })
 
 const internalDb = mongoClient.db()
+
+const auxMongoClient = Settings.mongo.auxUrl
+  ? new mongodb.MongoClient(Settings.mongo.auxUrl, Settings.mongo.options)
+  : null
+
+let auxInternalDb = null
+let auxConnectionPromise = Promise.resolve()
+
+if (auxMongoClient) {
+  Metrics.mongodb.monitor(auxMongoClient, 'native-aux')
+
+  addConnectionDrainer('mongodb-aux', async () => {
+    await auxMongoClient.close()
+  })
+
+  auxInternalDb = auxMongoClient.db()
+  auxConnectionPromise = auxMongoClient.connect()
+}
+
+/**
+ * Returns the collection to use for the library collections, which live on
+ * the auxiliary Mongo cluster. Falls back to the main cluster when no
+ * auxiliary client is configured.
+ *
+ * @param {string} name
+ * @returns {Collection<Document>}
+ */
+function libraryCollection(name) {
+  return (auxInternalDb || internalDb).collection(name)
+}
+
 export const db = {
   contacts: internalDb.collection('contacts'),
   deletedProjects: internalDb.collection('deletedProjects'),
@@ -53,8 +88,9 @@ export const db = {
   grouppolicies: internalDb.collection('grouppolicies'),
   groupAuditLogEntries: internalDb.collection('groupAuditLogEntries'),
   institutions: internalDb.collection('institutions'),
-  libraryReferences: internalDb.collection('libraryReferences'),
-  librarySyncStates: internalDb.collection('librarySyncStates'),
+  libraryReferences: libraryCollection('libraryReferences'),
+  librarySizes: libraryCollection('librarySizes'),
+  librarySyncStates: libraryCollection('librarySyncStates'),
   messages: internalDb.collection('messages'),
   migrations: internalDb.collection('migrations'),
   notifications: internalDb.collection('notifications'),
@@ -87,6 +123,7 @@ export const db = {
   tokens: internalDb.collection('tokens'),
   userAuditLogEntries: internalDb.collection('userAuditLogEntries'),
   users: internalDb.collection('users'),
+  workspaces: internalDb.collection('workspaces'),
   onboardingDataCollection: internalDb.collection('onboardingDataCollection'),
   scriptLogs: internalDb.collection('scriptLogs'),
 }
@@ -118,6 +155,37 @@ export async function getCollectionInternal(name) {
 
 export async function waitForDb() {
   await connectionPromise
+  await auxConnectionPromise
+}
+
+/**
+ * Starts a client session for use with multi-document transactions
+ * (session.withTransaction(...)). Requires Mongo to be running as a replica
+ * set, which is enforced at startup for every deployment.
+ *
+ * The session must be started on the same MongoClient as the collections it
+ * operates on, otherwise Mongo throws "ClientSession must be from the same
+ * MongoClient".
+ *
+ * @param {{ aux?: boolean }} [options]
+ * @returns {Promise<import('mongodb').ClientSession>}
+ */
+export async function startSession({ aux = false } = {}) {
+  let client
+  if (aux && auxMongoClient) {
+    await auxConnectionPromise
+    client = auxMongoClient
+  } else {
+    client = await connectionPromise
+  }
+
+  // The session is a real mongodb ClientSession at runtime, but mongodb-legacy
+  // types its subclass via Omit, which drops ClientSession's private members and
+  // makes it structurally incompatible — hence the single cast here rather than
+  // at every call site.
+  return /** @type {import('mongodb').ClientSession} */ (
+    /** @type {unknown} */ (client.startSession())
+  )
 }
 
 export default {
@@ -129,6 +197,7 @@ export default {
   getCollectionInternal,
   cleanupTestDatabase,
   dropTestDatabase,
+  startSession,
   READ_PREFERENCE_PRIMARY,
   READ_PREFERENCE_SECONDARY,
 }

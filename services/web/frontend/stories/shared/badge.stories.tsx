@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-webpack5'
 import classnames from 'classnames'
 import { figmaDesignUrl } from '../../../.storybook/utils/figma-design-url'
-import Badge from '@/shared/components/badge/badge'
+import OLBadge from '@/shared/components/ol/ol-badge'
 import MaterialIcon from '@/shared/components/material-icon'
 
-const meta: Meta<typeof Badge> = {
+const meta: Meta<typeof OLBadge> = {
   title: 'Shared / Components / Badge',
-  component: Badge,
+  component: OLBadge,
   args: {
     children: 'Badge',
   },
@@ -29,7 +29,7 @@ const meta: Meta<typeof Badge> = {
 }
 export default meta
 
-type Story = StoryObj<typeof Badge>
+type Story = StoryObj<typeof OLBadge>
 
 export const BadgeDefault: Story = {
   args: {
@@ -39,7 +39,7 @@ export const BadgeDefault: Story = {
     'https://www.figma.com/design/V7Ogph1Ocs4ux2A4WMNAh7/Overleaf---Components?node-id=3458-9502&m=dev'
   ),
   render: args => (
-    <Badge
+    <OLBadge
       className={classnames({ 'text-dark': args.bg === 'light' })}
       {...args}
     />
@@ -55,7 +55,7 @@ export const BadgePrepend: Story = {
   ),
   render: args => {
     return (
-      <Badge
+      <OLBadge
         className={classnames({ 'text-dark': args.bg === 'light' })}
         prepend={<MaterialIcon type="star" />}
         {...args}

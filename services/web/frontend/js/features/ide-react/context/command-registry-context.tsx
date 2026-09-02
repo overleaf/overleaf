@@ -84,6 +84,7 @@ export const CommandRegistryProvider: React.FC<React.PropsWithChildren> = ({
       'insert-comment': [{ key: 'Mod-Shift-C' }],
       'format-bold': [{ key: 'Mod-b' }],
       'format-italics': [{ key: 'Mod-i' }],
+      'command-palette': [{ key: 'Mod-p' }],
     }),
     []
   )

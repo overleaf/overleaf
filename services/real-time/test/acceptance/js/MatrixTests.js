@@ -57,11 +57,16 @@ import redis from '@overleaf/redis-wrapper'
 const Keys = settings.redis.documentupdater.key_schema
 const rclient = redis.createClient(settings.redis.pubsub)
 
-function getPendingUpdates(docId, cb) {
-  rclient.lrange(Keys.pendingUpdates({ doc_id: docId }), 0, 10, cb)
+function getPendingUpdates(projectId, cb) {
+  rclient.lrange(
+    Keys.pendingProjectUpdates({ project_id: projectId }),
+    0,
+    10,
+    cb
+  )
 }
-function cleanupPreviousUpdates(docId, cb) {
-  rclient.del(Keys.pendingUpdates({ doc_id: docId }), cb)
+function cleanupPreviousUpdates(projectId, cb) {
+  rclient.del(Keys.pendingProjectUpdates({ project_id: projectId }), cb)
 }
 
 describe('MatrixTests', function () {
@@ -344,25 +349,15 @@ describe('MatrixTests', function () {
                     }
                   )
                 })
-
-                it('should not add the user into the privateDoc room', function (done) {
-                  RealTimeClient.getConnectedClient(
-                    client.socket.sessionid,
-                    (error, client) => {
-                      if (error?.message === 'not found') return done() // disconnected
-                      if (error) return done(error)
-                      expect(client.rooms).to.not.include(privateDocId)
-                      done()
-                    }
-                  )
-                })
               })
 
-              describe('receive updates', function () {
+              describe('receive updates via editor-events', function () {
                 const receivedMessages = []
                 beforeEach(function publishAnUpdateInRedis(done) {
                   const update = {
+                    project_id: privateProjectId,
                     doc_id: privateDocId,
+                    message: 'otUpdateApplied',
                     op: {
                       meta: { source: privateClient.publicId },
                       v: 42,
@@ -376,7 +371,7 @@ describe('MatrixTests', function () {
                   privateClient.once('otUpdateApplied', () => {
                     setTimeout(done, 10)
                   })
-                  rclient.publish('applied-ops', JSON.stringify(update))
+                  rclient.publish('editor-events', JSON.stringify(update))
                 })
 
                 it('should send nothing to client', function () {
@@ -408,10 +403,15 @@ describe('MatrixTests', function () {
               })
 
               describe('send updates', function () {
+                // Fake blob hashes, distinguishable from each other, standing in for
+                // whichever client sent the update.
+                const USER_HASH = '1111111111111111111111111111111111111111'
+                const PRIVATE_HASH = '2222222222222222222222222222222222222222'
+
                 let receivedArgs, submittedUpdates, update
 
                 beforeEach(function cleanup(done) {
-                  cleanupPreviousUpdates(privateDocId, done)
+                  cleanupPreviousUpdates(privateProjectId, done)
                 })
 
                 beforeEach(function setupUpdateFields() {
@@ -431,8 +431,8 @@ describe('MatrixTests', function () {
                     // disconnected clients cannot emit messages
                     return this.skip()
                   }
-                  const userUpdate = Object.assign({}, update, {
-                    hash: 'user',
+                  const userUpdate = Object.assign({}, update.op, {
+                    hash: USER_HASH,
                   })
 
                   client.emit(
@@ -447,8 +447,8 @@ describe('MatrixTests', function () {
                 })
 
                 beforeEach(function sendAsPrivateUserForReferenceOp(done) {
-                  const privateUpdate = Object.assign({}, update, {
-                    hash: 'private',
+                  const privateUpdate = Object.assign({}, update.op, {
+                    hash: PRIVATE_HASH,
                   })
 
                   privateClient.emit(
@@ -460,7 +460,7 @@ describe('MatrixTests', function () {
                 })
 
                 beforeEach(function fetchPendingOps(done) {
-                  getPendingUpdates(privateDocId, (err, updates) => {
+                  getPendingUpdates(privateProjectId, (err, updates) => {
                     submittedUpdates = updates
                     done(err)
                   })
@@ -482,7 +482,7 @@ describe('MatrixTests', function () {
                 it('should submit the private users message only', function () {
                   expect(submittedUpdates).to.have.length(1)
                   const update = JSON.parse(submittedUpdates[0])
-                  expect(update.hash).to.equal('private')
+                  expect(update.hash).to.equal(PRIVATE_HASH)
                 })
               })
             })

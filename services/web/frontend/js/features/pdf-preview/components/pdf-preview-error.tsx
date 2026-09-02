@@ -46,8 +46,9 @@ function PdfPreviewError({
                   components={[
                     // eslint-disable-next-line jsx-a11y/anchor-has-content
                     <a
-                      href="/learn/how-to/Resolving_access%2C_loading%2C_and_display_problems"
+                      href="https://docs.overleaf.com/troubleshooting-and-support/resolving-pdf-rendering-and-project-loading-problems"
                       target="_blank"
+                      rel="noopener noreferrer"
                       key="troubleshooting-link"
                     />,
                   ]}
@@ -70,8 +71,9 @@ function PdfPreviewError({
               components={[
                 // eslint-disable-next-line jsx-a11y/anchor-has-content
                 <a
-                  href="/learn/how-to/Resolving_access%2C_loading%2C_and_display_problems"
+                  href="https://docs.overleaf.com/troubleshooting-and-support/resolving-pdf-rendering-and-project-loading-problems"
                   target="_blank"
+                  rel="noopener noreferrer"
                   key="troubleshooting-link"
                 />,
               ]}
@@ -93,8 +95,9 @@ function PdfPreviewError({
                     <code key="domain" />,
                     /* eslint-disable-next-line jsx-a11y/anchor-has-content */
                     <a
-                      href="/learn/how-to/Resolving_access%2C_loading%2C_and_display_problems"
+                      href="https://docs.overleaf.com/troubleshooting-and-support/resolving-pdf-rendering-and-project-loading-problems"
                       target="_blank"
+                      rel="noopener noreferrer"
                       key="troubleshooting-link"
                     />,
                   ]}
@@ -224,8 +227,9 @@ function PdfPreviewError({
                 <strong key="strong-" />,
                 // eslint-disable-next-line jsx-a11y/anchor-has-content
                 <a
-                  href="/learn/how-to/Resolving_access%2C_loading%2C_and_display_problems"
+                  href="https://docs.overleaf.com/troubleshooting-and-support/resolving-pdf-rendering-and-project-loading-problems"
                   target="_blank"
+                  rel="noopener noreferrer"
                   key="troubleshooting-link"
                 />,
                 // eslint-disable-next-line jsx-a11y/anchor-has-content
@@ -299,7 +303,7 @@ function TimedOutLogEntry() {
             components={[
               // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
               <a
-                href="https://www.overleaf.com/learn/how-to/Optimising_very_large_image_files"
+                href="https://docs.overleaf.com/troubleshooting-and-support/fixing-and-preventing-compile-timeouts/optimising-very-large-image-files"
                 onClick={() => {
                   sendMB('paywall-info-click', {
                     'paywall-type': 'compile-timeout',
@@ -317,7 +321,7 @@ function TimedOutLogEntry() {
             components={[
               // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
               <a
-                href="https://www.overleaf.com/learn/how-to/Why_do_I_keep_getting_the_compile_timeout_error_message%3F#Fatal_compile_errors_blocking_the_compilation"
+                href="https://docs.overleaf.com/troubleshooting-and-support/fixing-and-preventing-compile-timeouts"
                 onClick={() => {
                   sendMB('paywall-info-click', {
                     'paywall-type': 'compile-timeout',
@@ -352,7 +356,7 @@ function TimedOutLogEntry() {
           components={[
             // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
             <a
-              href="https://www.overleaf.com/learn/how-to/Why_do_I_keep_getting_the_compile_timeout_error_message%3F"
+              href="https://docs.overleaf.com/troubleshooting-and-support/fixing-and-preventing-compile-timeouts"
               onClick={() => {
                 sendMB('paywall-info-click', {
                   'paywall-type': 'compile-timeout',

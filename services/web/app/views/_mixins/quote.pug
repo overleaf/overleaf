@@ -3,7 +3,7 @@ mixin quoteLargeTextCentered(quote, person, position, affiliation, link, picture
 		.quote !{quote}
 		if pictureUrl
 			.quote-img
-				- var pictureAlt = `Photo of ${person}`
+				- var pictureAlt = translate('photo_of_person', {name: person})
 				img(src=pictureUrl alt=pictureAlt)
 		footer
 			.quote-person

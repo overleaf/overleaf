@@ -16,6 +16,9 @@ import {
   useCommandRegistry,
 } from '@/features/ide-react/context/command-registry-context'
 import { closeContextMenuEffect } from '../extensions/context-menu'
+import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
+import { useContextMenuCommandDefinition } from './use-command-definitions'
 import * as commands from '../extensions/toolbar/commands'
 import {
   cutSelection,
@@ -47,6 +50,7 @@ export const useContextMenuItems = () => {
     changeLayout,
     pdfLayout,
     view: ideView,
+    focusMode,
   } = useLayoutContext()
   const visualPreviewEnabled = useFeatureFlag('visual-preview')
   const { t } = useTranslation()
@@ -58,6 +62,9 @@ export const useContextMenuItems = () => {
   const isReview = trackingChangesMode === 'review'
   const { changesInSelection, acceptChangesHandler, rejectChangesHandler } =
     useTrackedChangesActions()
+  const { openDocWithId } = useEditorManagerContext()
+  const { findEntityByPath } = useFileTreePathContext()
+  const { commandName, commandDefinition } = useContextMenuCommandDefinition()
 
   const closeMenu = useCallback(() => {
     view.dispatch({ effects: closeContextMenuEffect.of(null) })
@@ -186,6 +193,20 @@ export const useContextMenuItems = () => {
     return true
   })
 
+  const handleJumpToDefinition = wrapForContextMenu(
+    'jump-to-definition',
+    () => {
+      if (!commandDefinition) {
+        return true
+      }
+      const result = findEntityByPath(commandDefinition.path)
+      if (result?.type === 'doc') {
+        openDocWithId(result.entity._id, { gotoOffset: commandDefinition.pos })
+      }
+      return true
+    }
+  )
+
   // Sync-to-PDF is special: it needs to wait for async completion before closing
   const handleSyncToPdf = useCallback(() => {
     // Switch to split view only when in editor-only mode with non-detached PDF
@@ -201,10 +222,14 @@ export const useContextMenuItems = () => {
       method: 'editor-context-menu',
       direction: 'code-location-in-pdf',
     })
-    requestedPdfSyncRef.current = true
-    syncToPdf()
-    view.focus()
-  }, [syncToPdf, view, changeLayout, isEditorOnly])
+
+    if (syncToPdf()) {
+      requestedPdfSyncRef.current = true
+      view.focus()
+    } else {
+      closeMenu()
+    }
+  }, [syncToPdf, view, changeLayout, isEditorOnly, closeMenu])
 
   return {
     closeMenu,
@@ -263,6 +288,14 @@ export const useContextMenuItems = () => {
         shortcut: undefined,
       },
       {
+        label: t('jump_to_command_definition'),
+        handler: handleJumpToDefinition,
+        disabled: !commandDefinition,
+        separatorAbove: !jumpToLocationInPdfEnabled,
+        show: Boolean(commandName),
+        shortcut: undefined,
+      },
+      {
         label: wantTrackChanges ? t('back_to_editing') : t('suggest_edits'),
         handler: handleToggleTrackChanges,
         disabled: false,
@@ -274,7 +307,7 @@ export const useContextMenuItems = () => {
         label: t('comment'),
         handler: handleComment,
         disabled: isCursorOnEmptyLine(state),
-        show: permissions.comment,
+        show: permissions.comment && !focusMode,
         shortcut: getShortcut('insert-comment'),
       },
       {

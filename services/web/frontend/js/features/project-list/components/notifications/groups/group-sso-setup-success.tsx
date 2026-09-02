@@ -1,5 +1,5 @@
 import { useTranslation, Trans } from 'react-i18next'
-import Notification from '../../../../../shared/components/notification'
+import Notification from '@/shared/components/notification'
 import getMeta from '../../../../../utils/meta'
 
 function GroupSsoSetupSuccess() {

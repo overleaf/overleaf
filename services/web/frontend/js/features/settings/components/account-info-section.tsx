@@ -8,7 +8,7 @@ import getMeta from '../../../utils/meta'
 import useAsync from '../../../shared/hooks/use-async'
 import { useUserContext } from '../../../shared/context/user-context'
 import OLButton from '@/shared/components/ol/ol-button'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import OLFormGroup from '@/shared/components/ol/ol-form-group'
 import OLFormLabel from '@/shared/components/ol/ol-form-label'
 import OLFormControl from '@/shared/components/ol/ol-form-control'
@@ -105,18 +105,22 @@ function AccountInfoSection() {
         />
         {isSuccess ? (
           <OLFormGroup>
-            <OLNotification
-              type="success"
-              content={t('thanks_settings_updated')}
-            />
+            <div className="notification-list">
+              <Notification
+                type="success"
+                content={t('thanks_settings_updated')}
+              />
+            </div>
           </OLFormGroup>
         ) : null}
         {isError ? (
           <OLFormGroup>
-            <OLNotification
-              type="error"
-              content={getUserFacingMessage(error) ?? ''}
-            />
+            <div className="notification-list">
+              <Notification
+                type="error"
+                content={getUserFacingMessage(error) ?? ''}
+              />
+            </div>
           </OLFormGroup>
         ) : null}
         {canUpdateEmail || canUpdateNames ? (

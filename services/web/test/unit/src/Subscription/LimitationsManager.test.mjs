@@ -1,4 +1,4 @@
-import { vi, expect } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 const modulePath =
   '../../../../app/src/Features/Subscription/LimitationsManager'
@@ -634,6 +634,85 @@ describe('LimitationsManager', function () {
           ctx.subscriptionId
         )
       expect(limitReached).to.be.true
+    })
+  })
+
+  describe('remainingSeatsForGroup', function () {
+    beforeEach(function (ctx) {
+      ctx.subscriptionId = '12312'
+      ctx.subscription = {
+        membersLimit: 10,
+        member_ids: ['u1', 'u2', 'u3'],
+        teamInvites: [
+          { email: 'bob@example.com', sentAt: new Date(), token: 'hey' },
+        ],
+        invited_emails: ['pending@example.com'],
+      }
+    })
+
+    it('should return the number of remaining seats', async function (ctx) {
+      ctx.SubscriptionLocator.promises.getSubscription.resolves(
+        ctx.subscription
+      )
+      // 10 - (3 members + 1 teamInvite + 1 invited_email) = 5
+      const result =
+        await ctx.LimitationsManager.promises.remainingSeatsForGroup(
+          ctx.subscriptionId
+        )
+      expect(result).to.equal(5)
+    })
+
+    it('should return 0 when the limit is exactly reached', async function (ctx) {
+      ctx.subscription.membersLimit = 5
+      ctx.SubscriptionLocator.promises.getSubscription.resolves(
+        ctx.subscription
+      )
+      // 5 - (3 members + 1 teamInvite + 1 invited_email) = 0
+      const result =
+        await ctx.LimitationsManager.promises.remainingSeatsForGroup(
+          ctx.subscriptionId
+        )
+      expect(result).to.equal(0)
+    })
+
+    it('should return a negative number when the limit has been exceeded', async function (ctx) {
+      ctx.subscription.membersLimit = 4
+      ctx.SubscriptionLocator.promises.getSubscription.resolves(
+        ctx.subscription
+      )
+      // 4 - (3 members + 1 teamInvite + 1 invited_email) = -1
+      const result =
+        await ctx.LimitationsManager.promises.remainingSeatsForGroup(
+          ctx.subscriptionId
+        )
+      expect(result).to.equal(-1)
+    })
+
+    it('should treat missing member_ids, teamInvites, and invited_emails as empty', async function (ctx) {
+      ctx.subscription.member_ids = undefined
+      ctx.subscription.teamInvites = undefined
+      ctx.subscription.invited_emails = undefined
+      ctx.SubscriptionLocator.promises.getSubscription.resolves(
+        ctx.subscription
+      )
+      const result =
+        await ctx.LimitationsManager.promises.remainingSeatsForGroup(
+          ctx.subscriptionId
+        )
+      expect(result).to.equal(10)
+    })
+
+    it('should throw when no subscription is found', async function (ctx) {
+      ctx.SubscriptionLocator.promises.getSubscription.resolves(null)
+      let error
+      try {
+        await ctx.LimitationsManager.promises.remainingSeatsForGroup(
+          ctx.subscriptionId
+        )
+      } catch (e) {
+        error = e
+      }
+      expect(error?.message).to.equal('no subscription found')
     })
   })
 })

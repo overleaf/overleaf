@@ -141,20 +141,30 @@ const ProjectGetter = {
    * Return all projects with the given name that belong to the given user.
    *
    * Projects include the user's own projects as well as collaborations with
-   * read/write access.
+   * read/write access. Read-only, review and token-access collaborations are
+   * not considered.
    */
   async findUsersProjectsByName(userId, projectName) {
-    const allProjects = await ProjectGetter.findAllUsersProjects(
-      userId,
-      'name archived trashed'
-    )
+    const fields = 'name archived trashed overleaf'
+    const [ownedProjects, readAndWriteProjects] = await Promise.all([
+      Project.find({ owner_ref: userId }, fields).exec(),
+      Project.find({ collaberator_refs: userId }, fields).exec(),
+    ])
 
-    const { owned, readAndWrite } = allProjects
-    const projects = owned.concat(readAndWrite)
     const lowerCasedProjectName = projectName.toLowerCase()
-    return projects.filter(
-      project => project.name.toLowerCase() === lowerCasedProjectName
-    )
+    const seenProjectIds = new Set()
+    const matches = []
+    for (const project of ownedProjects.concat(readAndWriteProjects)) {
+      const projectId = project._id.toString()
+      if (seenProjectIds.has(projectId)) {
+        continue
+      }
+      seenProjectIds.add(projectId)
+      if (project.name.toLowerCase() === lowerCasedProjectName) {
+        matches.push(project)
+      }
+    }
+    return matches
   },
 
   async getUsersDeletedProjects(userId) {

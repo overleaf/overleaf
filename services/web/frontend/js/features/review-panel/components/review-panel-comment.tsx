@@ -15,6 +15,7 @@ import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import { useTranslation } from 'react-i18next'
 import { debugConsole } from '@/utils/debugging'
+import { useDeepLinkContext } from '@/features/ide-react/context/deep-link-context'
 
 export const ReviewPanelComment = memo<{
   comment: Change<CommentOperation>
@@ -38,13 +39,14 @@ export const ReviewPanelComment = memo<{
     const { showGenericMessageModal } = useModalsContext()
     const { t } = useTranslation()
     const permissions = usePermissionsContext()
+    const { deepLinkedThreadId, clearDeepLinkedThread } = useDeepLinkContext()
 
     const [processing, setProcessing] = useState(false)
 
     const handleResolveComment = useCallback(async () => {
       setProcessing(true)
       try {
-        await resolveThread(comment.op.t)
+        await resolveThread(comment.op.t, docId)
       } catch (err) {
         debugConsole.error(err)
         showGenericMessageModal(
@@ -54,7 +56,7 @@ export const ReviewPanelComment = memo<{
       } finally {
         setProcessing(false)
       }
-    }, [comment.op.t, resolveThread, showGenericMessageModal, t])
+    }, [comment.op.t, docId, resolveThread, showGenericMessageModal, t])
 
     const handleEditMessage = useCallback(
       async (commentId: CommentId, content: string) => {
@@ -110,7 +112,7 @@ export const ReviewPanelComment = memo<{
       async (commentId: ThreadId) => {
         setProcessing(true)
         try {
-          await deleteThread(commentId)
+          await deleteThread(commentId, docId)
         } catch (err) {
           debugConsole.error(err)
           showGenericMessageModal(
@@ -121,7 +123,7 @@ export const ReviewPanelComment = memo<{
           setProcessing(false)
         }
       },
-      [deleteThread, showGenericMessageModal, t]
+      [docId, deleteThread, showGenericMessageModal, t]
     )
 
     const handleSubmitReply = useCallback(
@@ -170,6 +172,8 @@ export const ReviewPanelComment = memo<{
         handleEnter={handleMouseEnter}
         handleLeave={handleMouseLeave}
         entryIndicator="comment"
+        autoSelect={deepLinkedThreadId === comment.op.t}
+        onAutoSelected={clearDeepLinkedThread}
       >
         <ReviewPanelCommentContent
           comment={comment}

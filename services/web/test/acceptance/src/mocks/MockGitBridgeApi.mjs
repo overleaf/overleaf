@@ -1,4 +1,13 @@
 import AbstractMockApi from './AbstractMockApi.mjs'
+import { parseReq, z, getRawReqInput } from '@overleaf/validation-tools'
+
+const deleteProjectSchema = z.object({
+  params: z.strictObject({ projectId: z.string() }),
+})
+
+const postbackParamsSchema = z.object({
+  params: z.strictObject({ id: z.string() }),
+})
 
 class MockGitBridgeApi extends AbstractMockApi {
   reset() {
@@ -16,7 +25,8 @@ class MockGitBridgeApi extends AbstractMockApi {
   }
 
   deleteProject(req, res) {
-    const projectId = req.params.projectId
+    const { params } = parseReq(req, deleteProjectSchema)
+    const projectId = params.projectId
     delete this.projects[projectId]
     res.sendStatus(204)
   }
@@ -31,8 +41,10 @@ class MockGitBridgeApi extends AbstractMockApi {
   }
 
   postback(req, res) {
-    const { id } = req.params
-    const postbackData = req.body
+    const { params } = parseReq(req, postbackParamsSchema)
+    const { id } = params
+    // case 3: recorded verbatim for later assertion by acceptance tests
+    const postbackData = getRawReqInput(req).body
     if (this.postbacks[id]) {
       this.postbacks[id].resolve(postbackData)
     }

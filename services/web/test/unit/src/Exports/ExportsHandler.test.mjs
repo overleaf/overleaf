@@ -1,4 +1,4 @@
-import { expect, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import { RequestFailedError } from '@overleaf/fetch-utils'
 import OError from '@overleaf/o-error'
@@ -513,6 +513,7 @@ describe('ExportsHandler', function () {
       beforeEach(async function (ctx) {
         ctx.error_code = 422
         ctx.error_json = { status: ctx.error_code, message: 'nope' }
+        // fetch-utils exposes the response body as a string, not a parsed object
         ctx.fetchUtils.fetchJson = sinon
           .stub()
           .rejects(
@@ -520,7 +521,7 @@ describe('ExportsHandler', function () {
               new URL('/api/v1/overleaf/exports', ctx.settings.apis.v1.url),
               {},
               { status: ctx.error_code },
-              ctx.error_json
+              JSON.stringify(ctx.error_json)
             )
           )
 
@@ -531,12 +532,11 @@ describe('ExportsHandler', function () {
         }
       })
 
-      it('should throw with an error containing the response to forward', function (ctx) {
+      it('should throw with an error containing the parsed response to forward', function (ctx) {
         expect(response).to.be.undefined
-        expect(OError.getFullInfo(error)).to.have.property(
-          'forwardResponse',
-          ctx.error_json
-        )
+        expect(OError.getFullInfo(error))
+          .to.have.property('forwardResponse')
+          .that.deep.equals(ctx.error_json)
       })
     })
   })

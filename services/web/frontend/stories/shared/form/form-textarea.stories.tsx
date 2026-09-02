@@ -1,13 +1,13 @@
 import { Form } from 'react-bootstrap'
 import type { Meta, StoryObj } from '@storybook/react-webpack5'
-import FormGroup from '@/shared/components/form/form-group'
-import FormText from '@/shared/components/form/form-text'
-import FormControl from '@/shared/components/form/form-control'
+import OLFormGroup from '@/shared/components/ol/ol-form-group'
+import OLFormText from '@/shared/components/ol/ol-form-text'
+import OLFormControl from '@/shared/components/ol/ol-form-control'
 import { figmaDesignUrl } from '../../../../.storybook/utils/figma-design-url'
 
-const meta: Meta<React.ComponentProps<typeof FormControl>> = {
+const meta: Meta<React.ComponentProps<typeof OLFormControl>> = {
   title: 'Shared / Components / Form / Textarea',
-  component: FormControl,
+  component: OLFormControl,
   parameters: {
     controls: {
       include: ['disabled'],
@@ -16,39 +16,39 @@ const meta: Meta<React.ComponentProps<typeof FormControl>> = {
 }
 export default meta
 
-type Story = StoryObj<React.ComponentProps<typeof FormControl>>
+type Story = StoryObj<React.ComponentProps<typeof OLFormControl>>
 
 export const Default: Story = {
   render: args => {
     return (
       <>
-        <FormGroup controlId="id-1">
+        <OLFormGroup controlId="id-1">
           <Form.Label>Label</Form.Label>
-          <FormControl
+          <OLFormControl
             as="textarea"
             defaultValue="Large input"
             size="lg"
             {...args}
           />
-          <FormText>Helper</FormText>
-        </FormGroup>
+          <OLFormText>Helper</OLFormText>
+        </OLFormGroup>
         <hr />
-        <FormGroup controlId="id-2">
+        <OLFormGroup controlId="id-2">
           <Form.Label>Label</Form.Label>
-          <FormControl as="textarea" defaultValue="Regular input" {...args} />
-          <FormText>Helper</FormText>
-        </FormGroup>
+          <OLFormControl as="textarea" defaultValue="Regular input" {...args} />
+          <OLFormText>Helper</OLFormText>
+        </OLFormGroup>
         <hr />
-        <FormGroup controlId="id-3">
+        <OLFormGroup controlId="id-3">
           <Form.Label>Label</Form.Label>
-          <FormControl
+          <OLFormControl
             as="textarea"
             defaultValue="Small input"
             size="sm"
             {...args}
           />
-          <FormText>Helper</FormText>
-        </FormGroup>
+          <OLFormText>Helper</OLFormText>
+        </OLFormGroup>
       </>
     )
   },
@@ -64,40 +64,40 @@ export const Info: Story = {
   render: args => {
     return (
       <>
-        <FormGroup controlId="id-1">
+        <OLFormGroup controlId="id-1">
           <Form.Label>Label</Form.Label>
-          <FormControl
+          <OLFormControl
             as="textarea"
             placeholder="Placeholder"
             defaultValue="Large input"
             size="lg"
             {...args}
           />
-          <FormText type="info">Info</FormText>
-        </FormGroup>
+          <OLFormText type="info">Info</OLFormText>
+        </OLFormGroup>
         <hr />
-        <FormGroup controlId="id-2">
+        <OLFormGroup controlId="id-2">
           <Form.Label>Label</Form.Label>
-          <FormControl
+          <OLFormControl
             as="textarea"
             placeholder="Placeholder"
             defaultValue="Regular input"
             {...args}
           />
-          <FormText type="info">Info</FormText>
-        </FormGroup>
+          <OLFormText type="info">Info</OLFormText>
+        </OLFormGroup>
         <hr />
-        <FormGroup controlId="id-3">
+        <OLFormGroup controlId="id-3">
           <Form.Label>Label</Form.Label>
-          <FormControl
+          <OLFormControl
             as="textarea"
             placeholder="Placeholder"
             defaultValue="Small input"
             size="sm"
             {...args}
           />
-          <FormText type="info">Info</FormText>
-        </FormGroup>
+          <OLFormText type="info">Info</OLFormText>
+        </OLFormGroup>
       </>
     )
   },
@@ -110,9 +110,9 @@ export const Error: Story = {
   render: args => {
     return (
       <>
-        <FormGroup controlId="id-1">
+        <OLFormGroup controlId="id-1">
           <Form.Label>Label</Form.Label>
-          <FormControl
+          <OLFormControl
             as="textarea"
             placeholder="Placeholder"
             defaultValue="Large input"
@@ -120,24 +120,24 @@ export const Error: Story = {
             isInvalid
             {...args}
           />
-          <FormText type="error">Error</FormText>
-        </FormGroup>
+          <OLFormText type="error">Error</OLFormText>
+        </OLFormGroup>
         <hr />
-        <FormGroup controlId="id-2">
+        <OLFormGroup controlId="id-2">
           <Form.Label>Label</Form.Label>
-          <FormControl
+          <OLFormControl
             as="textarea"
             placeholder="Placeholder"
             defaultValue="Regular input"
             isInvalid
             {...args}
           />
-          <FormText type="error">Error</FormText>
-        </FormGroup>
+          <OLFormText type="error">Error</OLFormText>
+        </OLFormGroup>
         <hr />
-        <FormGroup controlId="id-3">
+        <OLFormGroup controlId="id-3">
           <Form.Label>Label</Form.Label>
-          <FormControl
+          <OLFormControl
             as="textarea"
             placeholder="Placeholder"
             defaultValue="Small input"
@@ -145,8 +145,8 @@ export const Error: Story = {
             isInvalid
             {...args}
           />
-          <FormText type="error">Error</FormText>
-        </FormGroup>
+          <OLFormText type="error">Error</OLFormText>
+        </OLFormGroup>
       </>
     )
   },
@@ -162,40 +162,40 @@ export const Warning: Story = {
   render: args => {
     return (
       <>
-        <FormGroup controlId="id-1">
+        <OLFormGroup controlId="id-1">
           <Form.Label>Label</Form.Label>
-          <FormControl
+          <OLFormControl
             as="textarea"
             placeholder="Placeholder"
             defaultValue="Large input"
             size="lg"
             {...args}
           />
-          <FormText type="warning">Warning</FormText>
-        </FormGroup>
+          <OLFormText type="warning">Warning</OLFormText>
+        </OLFormGroup>
         <hr />
-        <FormGroup controlId="id-2">
+        <OLFormGroup controlId="id-2">
           <Form.Label>Label</Form.Label>
-          <FormControl
+          <OLFormControl
             as="textarea"
             placeholder="Placeholder"
             defaultValue="Regular input"
             {...args}
           />
-          <FormText type="warning">Warning</FormText>
-        </FormGroup>
+          <OLFormText type="warning">Warning</OLFormText>
+        </OLFormGroup>
         <hr />
-        <FormGroup controlId="id-3">
+        <OLFormGroup controlId="id-3">
           <Form.Label>Label</Form.Label>
-          <FormControl
+          <OLFormControl
             as="textarea"
             placeholder="Placeholder"
             defaultValue="Small input"
             size="sm"
             {...args}
           />
-          <FormText type="warning">Warning</FormText>
-        </FormGroup>
+          <OLFormText type="warning">Warning</OLFormText>
+        </OLFormGroup>
       </>
     )
   },
@@ -211,40 +211,40 @@ export const Success: Story = {
   render: args => {
     return (
       <>
-        <FormGroup controlId="id-1">
+        <OLFormGroup controlId="id-1">
           <Form.Label>Label</Form.Label>
-          <FormControl
+          <OLFormControl
             as="textarea"
             placeholder="Placeholder"
             defaultValue="Large input"
             size="lg"
             {...args}
           />
-          <FormText type="success">Success</FormText>
-        </FormGroup>
+          <OLFormText type="success">Success</OLFormText>
+        </OLFormGroup>
         <hr />
-        <FormGroup controlId="id-2">
+        <OLFormGroup controlId="id-2">
           <Form.Label>Label</Form.Label>
-          <FormControl
+          <OLFormControl
             as="textarea"
             placeholder="Placeholder"
             defaultValue="Regular input"
             {...args}
           />
-          <FormText type="success">Success</FormText>
-        </FormGroup>
+          <OLFormText type="success">Success</OLFormText>
+        </OLFormGroup>
         <hr />
-        <FormGroup controlId="id-3">
+        <OLFormGroup controlId="id-3">
           <Form.Label>Label</Form.Label>
-          <FormControl
+          <OLFormControl
             as="textarea"
             placeholder="Placeholder"
             defaultValue="Small input"
             size="sm"
             {...args}
           />
-          <FormText type="success">Success</FormText>
-        </FormGroup>
+          <OLFormText type="success">Success</OLFormText>
+        </OLFormGroup>
       </>
     )
   },

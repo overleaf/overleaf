@@ -7,6 +7,7 @@ import {
 } from '@/shared/components/ol/ol-modal'
 import OLButton from '@/shared/components/ol/ol-button'
 import { useTranslation } from 'react-i18next'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export function RestoreProjectErrorModal({
   resetErrorBoundary,
@@ -14,9 +15,10 @@ export function RestoreProjectErrorModal({
   resetErrorBoundary: VoidFunction
 }) {
   const { t } = useTranslation()
+  const themed = useFeatureFlag('themed-modals')
 
   return (
-    <OLModal show onHide={resetErrorBoundary}>
+    <OLModal show onHide={resetErrorBoundary} themed={themed}>
       <OLModalHeader>
         <OLModalTitle>
           {t('an_error_occured_while_restoring_project')}

@@ -2,10 +2,18 @@
 
 set -e
 
+cd "$(dirname "$0")/.."
+
 # Ensure all locales used in the frontend are tracked
 OUTPUT=data/dumpFolder/i18next-scanner
 trap 'rm -rf "$OUTPUT"' EXIT
-npx i18next-scanner --output "$OUTPUT"
+if [ "$CI" = "true" ]; then
+  # In CI this already runs inside the monorepo container.
+  yarn exec i18next-scanner --output "$OUTPUT"
+else
+  # Locally, enter the monorepo container to get the right toolchain.
+  ../../bin/run -w /overleaf/services/web monorepo yarn exec i18next-scanner --output "$OUTPUT"
+fi
 ACTUAL=frontend/extracted-translations.json
 EXPECTED="$OUTPUT/frontend/extracted-translations.json"
 if ! diff "$ACTUAL" "$EXPECTED"; then
@@ -16,7 +24,7 @@ services/web/frontend/extracted-translations.json is not up-to-date.
 ---
 Try running:
 
-  internal$ bin/run web npm run extract-translations
+  internal$ bin/yarn workspace @overleaf/web run extract-translations
 
 ---
 MSG

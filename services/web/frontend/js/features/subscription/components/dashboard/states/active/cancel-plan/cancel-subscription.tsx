@@ -14,6 +14,13 @@ import ExtendTrialButton from './extend-trial-button'
 import { useLocation } from '../../../../../../../shared/hooks/use-location'
 import { debugConsole } from '@/utils/debugging'
 import OLButton from '@/shared/components/ol/ol-button'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
+import isInFreeTrial from '../../../../../util/is-in-free-trial'
+import { formatPaymentDate } from '../../../../../util/payment-dates'
+import {
+  CancelSubscriptionLossMessaging,
+  getLossMessagingPlanType,
+} from './cancel-subscription-loss-messaging'
 
 const planCodeToDowngradeTo = 'paid-personal'
 
@@ -134,8 +141,13 @@ function NotCancelOption({
 export function CancelSubscription() {
   const { t } = useTranslation()
   const location = useLocation()
-  const { personalSubscription, plans, userCanExtendTrial } =
-    useSubscriptionDashboardContext()
+  const {
+    personalSubscription,
+    plans,
+    queryingIndividualPlansData,
+    userCanExtendTrial,
+  } = useSubscriptionDashboardContext()
+  const lossMessagingEnabled = useFeatureFlag('cancel-loss-messaging')
   const {
     isLoading: isLoadingCancel,
     isError: isErrorCancel,
@@ -156,14 +168,15 @@ export function CancelSubscription() {
 
   if (!personalSubscription || !('payment' in personalSubscription)) return null
 
-  const showDowngrade =
-    personalSubscription.payment.isEligibleForDowngradeUpsell
+  const { isEligibleForDowngradeUpsell } = personalSubscription.payment
+  if (isEligibleForDowngradeUpsell && queryingIndividualPlansData) {
+    return <LoadingSpinner />
+  }
   const planToDowngradeTo = plans.find(
     plan => plan.planCode === planCodeToDowngradeTo
   )
-  if (showDowngrade && !planToDowngradeTo) {
-    return <LoadingSpinner />
-  }
+  const showDowngrade =
+    isEligibleForDowngradeUpsell && Boolean(planToDowngradeTo)
 
   async function handleCancelSubscription() {
     try {
@@ -175,6 +188,36 @@ export function CancelSubscription() {
   }
 
   const showExtendFreeTrial = userCanExtendTrial
+
+  // `cancel-loss-messaging` split test: show plan-specific losses instead of
+  // the bare confirmation, for non-trial individual subscribers with no other
+  // retention offer (trial extension or downgrade)
+  const lossMessagingPlanType = getLossMessagingPlanType(
+    personalSubscription.planCode
+  )
+  const showLossMessaging =
+    lossMessagingEnabled &&
+    !showExtendFreeTrial &&
+    !showDowngrade &&
+    lossMessagingPlanType !== null &&
+    !isInFreeTrial(personalSubscription.payment.trialEndsAt)
+
+  if (showLossMessaging) {
+    return (
+      <>
+        {isErrorCancel && <GenericErrorAlert />}
+        <CancelSubscriptionLossMessaging
+          planType={lossMessagingPlanType}
+          terminationDate={
+            formatPaymentDate(personalSubscription.payment.periodEnd)!
+          }
+          onCancelSubscription={handleCancelSubscription}
+          isButtonDisabled={isButtonDisabled}
+          isCancelLoading={isSuccessCancel || isLoadingCancel}
+        />
+      </>
+    )
+  }
 
   return (
     <>

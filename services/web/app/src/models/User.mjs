@@ -12,6 +12,7 @@ const refProviderSettingsSchema = {
   groups: {
     type: [
       {
+        _id: false,
         id: { type: String },
       },
     ],
@@ -104,7 +105,7 @@ export const UserSchema = new Schema(
       fontFamily: { type: String },
       lineHeight: { type: String },
       mathPreview: { type: Boolean, default: true },
-      breadcrumbs: { type: Boolean, default: true },
+      breadcrumbs: { type: Boolean, default: false },
       editorTabs: { type: Boolean, default: true },
       nonBlinkingCursor: { type: Boolean, default: false },
       referencesSearchMode: { type: String, default: 'advanced' }, // 'advanced' or 'simple'
@@ -153,11 +154,11 @@ export const UserSchema = new Schema(
         type: Boolean,
         default: Settings.defaultFeatures.symbolPalette,
       },
-      aiErrorAssistant: {
-        type: Boolean,
-        default: false,
-      },
       aiUsageQuota: { type: String, default: 'basic' },
+      offlineMode: {
+        type: Boolean,
+        default: Settings.defaultFeatures.offlineMode,
+      },
     },
     featuresOverrides: [
       {
@@ -170,8 +171,6 @@ export const UserSchema = new Schema(
         expiresAt: { type: Date },
         note: { type: String },
         features: {
-          // todo: quota clean-up: remove aiErrorAssistant
-          aiErrorAssistant: { type: Boolean },
           aiUsageQuota: { type: String },
           collaborators: { type: Number },
           versioning: { type: Boolean },
@@ -187,6 +186,7 @@ export const UserSchema = new Schema(
           zotero: { type: Boolean },
           referencesSearch: { type: Boolean },
           symbolPalette: { type: Boolean },
+          offlineMode: { type: Boolean },
         },
       },
     ],

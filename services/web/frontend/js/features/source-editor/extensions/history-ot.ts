@@ -6,12 +6,17 @@ import {
 } from '@codemirror/view'
 import {
   EditorState,
+  Range as CmRange,
+  RangeSet,
   StateEffect,
   StateField,
   Transaction,
 } from '@codemirror/state'
 import {
+  AddCommentOperation,
   CommentList,
+  EditOperation,
+  Range as OtRange,
   TextOperation,
   TrackingProps,
   TrackedChangeList,
@@ -22,6 +27,10 @@ import {
   TrackedDeletes,
   trackedDeletesFromState,
 } from '@/features/source-editor/utils/tracked-deletes'
+import {
+  CommentRangeValue,
+  restoreDetachedCommentsEffect,
+} from './changes/comments'
 
 export const historyOT = (currentDoc: DocumentContainer) => {
   const trackedChanges =
@@ -32,6 +41,7 @@ export const historyOT = (currentDoc: DocumentContainer) => {
   return [
     updateSender,
     trackChangesUserIdState,
+    cutCommentsState,
     shareDocState.init(() => currentDoc?.doc?._doc ?? null),
     rangesState.init(() => ({
       trackedChanges,
@@ -145,17 +155,19 @@ const buildRangesDecorations = ({
   for (const comment of comments) {
     if (!comment.resolved) {
       for (const range of comment.ranges) {
-        decorations.push(
-          Decoration.mark({
-            class: 'ol-cm-change ol-cm-change-c',
-            id: comment.id,
-            rangeType: 'comment',
-            comment,
-          }).range(
-            trackedDeletes.toCodeMirror(range.pos),
-            trackedDeletes.toCodeMirror(range.end)
+        const from = trackedDeletes.toCodeMirror(range.pos)
+        const to = trackedDeletes.toCodeMirror(range.end)
+        // a range hidden inside a tracked delete has no visible text to mark
+        if (from < to) {
+          decorations.push(
+            Decoration.mark({
+              class: 'ol-cm-change ol-cm-change-c',
+              id: comment.id,
+              rangeType: 'comment',
+              comment,
+            }).range(from, to)
           )
-        )
+        }
       }
     }
   }
@@ -243,6 +255,165 @@ const trackChangesUserIdState = StateField.define<string | null>({
   },
 })
 
+type CutComment = { offset: number; text: string; id: string }
+type CutSpan = { text: string; comments: CutComment[] }
+
+const cutCommentsEffect = StateEffect.define<CutSpan[]>()
+
+// Comments captured by the latest cut, to restore onto matching pasted text.
+const cutCommentsState = StateField.define<CutSpan[]>({
+  create() {
+    return []
+  },
+  update(value, tr) {
+    for (const effect of tr.effects) {
+      if (effect.is(cutCommentsEffect)) {
+        return effect.value
+      }
+    }
+    if (tr.isUserEvent('input.paste')) {
+      return []
+    }
+    return value
+  },
+})
+
+const findCutComments = (tr: Transaction): CutSpan[] => {
+  // Read the comments as they were before the cut. Snapshots are copied on
+  // each edit, so startState's rangesState still holds the pre-cut ranges.
+  const { comments, trackedChanges } = tr.startState.field(rangesState)
+  const trackedDeletes = new TrackedDeletes(trackedChanges)
+  const spans: CutSpan[] = []
+
+  tr.changes.iterChanges((fromA, toA) => {
+    const captured: CutComment[] = []
+    for (const comment of comments) {
+      for (const range of comment.ranges) {
+        const from = trackedDeletes.toCodeMirror(range.pos)
+        const to = trackedDeletes.toCodeMirror(range.end)
+        // Capture only a comment wholly inside the cut span; from < to skips
+        // already-detached comments, and a straddling comment stays detached.
+        if (from < to && fromA <= from && to <= toA) {
+          captured.push({
+            offset: from - fromA,
+            text: tr.startState.sliceDoc(from, to),
+            id: comment.id,
+          })
+        }
+      }
+    }
+    if (captured.length) {
+      spans.push({
+        text: tr.startState.sliceDoc(fromA, toA),
+        comments: captured,
+      })
+    }
+  })
+
+  return spans
+}
+
+export const findDetachedHistoryOTCommentsInChanges = (tr: Transaction) => {
+  const { comments, trackedChanges } = tr.startState.field(rangesState)
+  const trackedDeletes = new TrackedDeletes(trackedChanges)
+  const items: CmRange<CommentRangeValue>[] = []
+
+  tr.changes.iterChanges((fromA, toA) => {
+    for (const comment of comments) {
+      for (const range of comment.ranges) {
+        const from = trackedDeletes.toCodeMirror(range.pos)
+        const to = trackedDeletes.toCodeMirror(range.end)
+        // Same wholly-inside-the-change capture rule as findCutComments.
+        if (from < to && fromA <= from && to <= toA) {
+          const content = tr.startState.sliceDoc(from, to)
+          items.push(
+            new CommentRangeValue(content, { id: comment.id }).range(from, to)
+          )
+        }
+      }
+    }
+  })
+
+  return RangeSet.of(items, true)
+}
+
+// Re-attach comments to text this transaction restores: cut comments onto
+// matching pasted text, and comments recorded on deletion onto undone text.
+// Ranges are expressed in the target document of the transaction's text op,
+// so the AddCommentOperations must follow it in the same update.
+const buildCommentRestoreOps = (
+  tr: Transaction,
+  shareDoc: HistoryOTShareDoc,
+  insertions: { fromB: number; text: string; targetPos: number }[]
+) => {
+  const rangesByCommentId = new Map<string, OtRange[]>()
+
+  if (tr.isUserEvent('input.paste')) {
+    const cutSpans = tr.startState.field(cutCommentsState)
+    for (const insertion of insertions) {
+      const matched = cutSpans.find(span => span.text === insertion.text)
+      if (!matched) {
+        continue
+      }
+      // Re-adding by the same id moves the (now detached) comment here.
+      for (const { offset, text, id } of matched.comments) {
+        const ranges = rangesByCommentId.get(id) ?? []
+        ranges.push(new OtRange(insertion.targetPos + offset, text.length))
+        rangesByCommentId.set(id, ranges)
+      }
+    }
+  }
+
+  const snapshotComments = shareDoc.snapshot.getComments()
+  for (const effect of tr.effects) {
+    if (!effect.is(restoreDetachedCommentsEffect)) {
+      continue
+    }
+    const cursor = effect.value.iter()
+    while (cursor.value) {
+      const { content, comment } = cursor.value
+      const existing = snapshotComments.getComment(comment.id)
+      // Only restore while the comment is still detached and the undo brought
+      // the same text back.
+      if (
+        existing?.isEmpty() &&
+        tr.newDoc.sliceString(cursor.from, cursor.from + content.length) ===
+          content
+      ) {
+        const insertion = insertions.find(
+          item =>
+            item.fromB <= cursor.from &&
+            cursor.from + content.length <= item.fromB + item.text.length
+        )
+        if (insertion) {
+          const ranges = rangesByCommentId.get(comment.id) ?? []
+          ranges.push(
+            new OtRange(
+              insertion.targetPos + (cursor.from - insertion.fromB),
+              content.length
+            )
+          )
+          rangesByCommentId.set(comment.id, ranges)
+        }
+      }
+      cursor.next()
+    }
+  }
+
+  // One op per id: AddCommentOperation replaces the comment entry, so a second
+  // op for the same id would drop the first op's ranges, and the replacement
+  // must carry the current resolved state.
+  return Array.from(
+    rangesByCommentId,
+    ([id, ranges]) =>
+      new AddCommentOperation(
+        id,
+        ranges,
+        snapshotComments.getComment(id)?.resolved
+      )
+  )
+}
+
 const updateSender = EditorState.transactionExtender.of(tr => {
   if (!tr.docChanged || tr.annotation(Transaction.remote)) {
     return {}
@@ -251,9 +422,31 @@ const updateSender = EditorState.transactionExtender.of(tr => {
   const trackingUserId = tr.startState.field(trackChangesUserIdState)
   const trackedDeletes = trackedDeletesFromState(tr.startState)
   const startDoc = tr.startState.doc
+  // Seed the builder with the full snapshot length (visible length plus all
+  // tracked deletes). Mapping the CM length through toSnapshot under-counts
+  // when a tracked delete sits at the end of the document.
   const opBuilder = new OperationBuilder(
-    trackedDeletes.toSnapshot(startDoc.length)
+    startDoc.length + trackedDeletes.totalLength
   )
+
+  // An insert strictly inside a comment extends it, matching ShareLaTeX
+  // (inserts at either edge are excluded). `pos` is in snapshot coordinates.
+  // Keep the rule in step with getHistoryOpForInsert in document-updater's
+  // RangesManager.
+  const comments = tr.startState.field(rangesState).comments
+  const commentIdsAt = (pos: number) => {
+    const ids = []
+    for (const comment of comments) {
+      if (comment.ranges.some(range => range.pos < pos && pos < range.end)) {
+        ids.push(comment.id)
+      }
+    }
+    return ids.length > 0 ? ids : undefined
+  }
+
+  // Where each insertion lands in the built op's target document, for placing
+  // restored comments in the same update.
+  const insertions: { fromB: number; text: string; targetPos: number }[] = []
 
   if (trackingUserId == null) {
     // Not tracking changes
@@ -261,7 +454,9 @@ const updateSender = EditorState.transactionExtender.of(tr => {
       // insert
       if (inserted.length > 0) {
         const pos = trackedDeletes.toSnapshot(fromA)
-        opBuilder.insert(pos, inserted.toString())
+        const text = inserted.toString()
+        const targetPos = opBuilder.insert(pos, text, commentIdsAt(pos))
+        insertions.push({ fromB, text, targetPos })
       }
 
       // deletion
@@ -278,12 +473,15 @@ const updateSender = EditorState.transactionExtender.of(tr => {
       // insertion
       if (inserted.length > 0) {
         const pos = trackedDeletes.toSnapshot(fromA)
-        opBuilder.trackedInsert(
+        const text = inserted.toString()
+        const targetPos = opBuilder.trackedInsert(
           pos,
-          inserted.toString(),
+          text,
           trackingUserId,
-          timestamp
+          timestamp,
+          commentIdsAt(pos)
         )
+        insertions.push({ fromB, text, targetPos })
       }
 
       // deletion
@@ -295,10 +493,17 @@ const updateSender = EditorState.transactionExtender.of(tr => {
     })
   }
 
-  const op = opBuilder.finish()
   const shareDoc = tr.startState.field(shareDocState)
   if (shareDoc != null) {
-    shareDoc.submitOp([op])
+    const ops: EditOperation[] = [opBuilder.finish()]
+    for (const op of buildCommentRestoreOps(tr, shareDoc, insertions)) {
+      ops.push(op)
+    }
+    shareDoc.submitOp(ops)
+  }
+
+  if (tr.isUserEvent('delete.cut')) {
+    return { effects: cutCommentsEffect.of(findCutComments(tr)) }
   }
 
   return {}
@@ -323,6 +528,12 @@ class OperationBuilder {
   private pos: number
 
   /**
+   * Length difference between the target and source documents for the
+   * operations built so far
+   */
+  private delta: number
+
+  /**
    * Operation built
    */
   private op: TextOperation
@@ -331,24 +542,45 @@ class OperationBuilder {
     this.docLength = docLength
     this.op = new TextOperation()
     this.pos = 0
+    this.delta = 0
   }
 
-  insert(pos: number, text: string) {
+  /**
+   * Returns the position of the inserted text in the target document.
+   */
+  insert(pos: number, text: string, commentIds?: string[]) {
     this.retainUntil(pos)
-    this.op.insert(text)
+    this.op.insert(text, { commentIds })
+    const targetPos = pos + this.delta
+    this.delta += text.length
+    return targetPos
   }
 
   delete(pos: number, length: number) {
     this.retainUntil(pos)
     this.op.remove(length)
     this.pos += length
+    this.delta -= length
   }
 
-  trackedInsert(pos: number, text: string, userId: string, timestamp: Date) {
+  /**
+   * Returns the position of the inserted text in the target document.
+   */
+  trackedInsert(
+    pos: number,
+    text: string,
+    userId: string,
+    timestamp: Date,
+    commentIds?: string[]
+  ) {
     this.retainUntil(pos)
     this.op.insert(text, {
       tracking: new TrackingProps('insert', userId, timestamp),
+      commentIds,
     })
+    const targetPos = pos + this.delta
+    this.delta += text.length
+    return targetPos
   }
 
   trackedDelete(pos: number, length: number, userId: string, timestamp: Date) {

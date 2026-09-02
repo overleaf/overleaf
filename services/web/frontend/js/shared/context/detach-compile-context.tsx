@@ -28,6 +28,7 @@ export const DetachCompileProvider: FC<React.PropsWithChildren> = ({
     compiling: _compiling,
     deliveryLatencies: _deliveryLatencies,
     draft: _draft,
+    png2pdf: _png2pdf,
     editedSinceCompileStarted: _editedSinceCompileStarted,
     error: _error,
     fileList: _fileList,
@@ -74,6 +75,7 @@ export const DetachCompileProvider: FC<React.PropsWithChildren> = ({
     darkModePdf: _darkModePdf,
     setDarkModePdf: _setDarkModePdf,
     activeOverallTheme: _activeOverallTheme,
+    isNetworkStalled: _isNetworkStalled,
   } = localCompileContext
 
   const [animateCompileDropdownArrow] = useDetachStateWatcher(
@@ -119,6 +121,12 @@ export const DetachCompileProvider: FC<React.PropsWithChildren> = ({
     'detached'
   )
   const [draft] = useDetachStateWatcher('draft', _draft, 'detacher', 'detached')
+  const [png2pdf] = useDetachStateWatcher(
+    'png2pdf',
+    _png2pdf,
+    'detacher',
+    'detached'
+  )
   const [error] = useDetachStateWatcher('error', _error, 'detacher', 'detached')
   const [fileList] = useDetachStateWatcher(
     'fileList',
@@ -396,7 +404,14 @@ export const DetachCompileProvider: FC<React.PropsWithChildren> = ({
     'detached'
   )
 
-  useCompileTriggers(startCompile, setChangedAt)
+  const [isNetworkStalled] = useDetachStateWatcher(
+    'isNetworkStalled',
+    _isNetworkStalled,
+    'detacher',
+    'detached'
+  )
+
+  useCompileTriggers(startCompile, setChangedAt, isNetworkStalled)
   useLogEvents(setShowLogs)
 
   const value = useMemo(
@@ -410,6 +425,7 @@ export const DetachCompileProvider: FC<React.PropsWithChildren> = ({
       compiling,
       deliveryLatencies,
       draft,
+      png2pdf,
       editedSinceCompileStarted,
       error,
       fileList,
@@ -457,6 +473,7 @@ export const DetachCompileProvider: FC<React.PropsWithChildren> = ({
       darkModePdf,
       setDarkModePdf,
       activeOverallTheme,
+      isNetworkStalled,
     }),
     [
       animateCompileDropdownArrow,
@@ -468,6 +485,7 @@ export const DetachCompileProvider: FC<React.PropsWithChildren> = ({
       compiling,
       deliveryLatencies,
       draft,
+      png2pdf,
       editedSinceCompileStarted,
       error,
       fileList,
@@ -513,6 +531,7 @@ export const DetachCompileProvider: FC<React.PropsWithChildren> = ({
       darkModePdf,
       setDarkModePdf,
       activeOverallTheme,
+      isNetworkStalled,
     ]
   )
 

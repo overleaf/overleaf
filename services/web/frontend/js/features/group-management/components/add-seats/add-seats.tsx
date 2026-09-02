@@ -5,7 +5,7 @@ import withErrorBoundary from '@/infrastructure/error-boundary'
 import useAbortController from '@/shared/hooks/use-abort-controller'
 import LoadingSpinner from '@/shared/components/loading-spinner'
 import Notification from '@/shared/components/notification'
-import IconButton from '@/shared/components/button/icon-button'
+import OLIconButton from '@/shared/components/ol/ol-icon-button'
 import {
   Card,
   Row,
@@ -14,8 +14,8 @@ import {
   FormLabel,
   FormControl,
 } from 'react-bootstrap'
-import FormText from '@/shared/components/form/form-text'
-import Button from '@/shared/components/button/button'
+import OLFormText from '@/shared/components/ol/ol-form-text'
+import OLButton from '@/shared/components/ol/ol-button'
 import PoNumber from '@/features/group-management/components/add-seats/po-number'
 import CostSummary from '@/features/group-management/components/add-seats/cost-summary'
 import RequestStatus from '@/features/group-management/components/request-status'
@@ -336,7 +336,7 @@ function AddSeats() {
       <Row>
         <Col xxl={5} xl={6} lg={7} md={9} className="mx-auto">
           <div className="group-heading" data-testid="group-heading">
-            <IconButton
+            <OLIconButton
               variant="ghost"
               href="/user/subscription"
               size="lg"
@@ -394,7 +394,7 @@ function AddSeats() {
                       isInvalid={Boolean(addSeatsInputError)}
                     />
                     {Boolean(addSeatsInputError) && (
-                      <FormText type="error">{addSeatsInputError}</FormText>
+                      <OLFormText type="error">{addSeatsInputError}</OLFormText>
                     )}
                   </FormGroup>
                   {isCollectionMethodManual && (
@@ -425,7 +425,7 @@ function AddSeats() {
                       {t('upgrade_my_plan')}
                     </a>
                   )}
-                  <Button
+                  <OLButton
                     variant="secondary"
                     href="/user/subscription"
                     onClick={() =>
@@ -435,8 +435,8 @@ function AddSeats() {
                     }
                   >
                     {t('cancel')}
-                  </Button>
-                  <Button
+                  </OLButton>
+                  <OLButton
                     variant="primary"
                     type="submit"
                     disabled={
@@ -445,9 +445,10 @@ function AddSeats() {
                       isSendingMailToSales
                     }
                     isLoading={isAddingSeats || isSendingMailToSales}
+                    loadingLabel={t('loading')}
                   >
                     {shouldContactSales ? t('send_request') : t('buy_licenses')}
-                  </Button>
+                  </OLButton>
                 </div>
               </form>
             </Card.Body>

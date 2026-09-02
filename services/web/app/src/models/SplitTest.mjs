@@ -180,6 +180,10 @@ export const SplitTestSchema = new Schema(
       type: String,
       required: false,
     },
+    customerIoEnabled: {
+      type: Boolean,
+      required: false,
+    },
     archived: {
       type: Boolean,
       required: false,
@@ -207,6 +211,14 @@ export const SplitTestSchema = new Schema(
     },
     labsSuccessNotification: {
       type: LabsSuccessNotificationSchema,
+      required: false,
+    },
+    // When set, only users with a premium compile group can see this
+    // experiment on the Labs page or opt into it. Left unset rather than
+    // defaulted to false, so split tests that never use it don't carry a
+    // labs-only field.
+    labsRequirePremiumCompiles: {
+      type: Boolean,
       required: false,
     },
   },

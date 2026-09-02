@@ -32,6 +32,13 @@ export const ProjectSchema = new Schema(
     readOnly_refs: [{ type: ObjectId, ref: 'User' }],
     pendingEditor_refs: [{ type: ObjectId, ref: 'User' }],
     pendingReviewer_refs: [{ type: ObjectId, ref: 'User' }],
+    editAccessRequests: [
+      {
+        userId: { type: ObjectId, ref: 'User' },
+        privilegeLevel: { type: String },
+        requestedAt: { type: Date, default: () => new Date() },
+      },
+    ],
     rootDoc_id: { type: ObjectId },
     rootFolder: [FolderSchema],
     mainBibliographyDoc_id: { type: ObjectId },
@@ -45,6 +52,7 @@ export const ProjectSchema = new Schema(
     trashed: [{ type: ObjectId, ref: 'User' }],
     deletedDocs: [DeletedDocSchema],
     imageName: { type: String },
+    png2pdf: { type: Boolean },
     brandVariationId: { type: String },
     track_changes: { type: Object },
     tokens: {
@@ -107,6 +115,7 @@ export const ProjectSchema = new Schema(
       },
     ],
     deferredTpdsFlushCounter: { type: Number },
+    referenceFormat: { type: String },
   },
   { minimize: false }
 )

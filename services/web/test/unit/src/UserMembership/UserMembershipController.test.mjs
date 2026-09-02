@@ -1,4 +1,9 @@
-import { expect, vi, describe, it, beforeEach } from 'vitest'
+import { expect, vi, describe, it, beforeEach, afterEach } from 'vitest'
+import {
+  InvalidParamsError,
+  InvalidRequestError,
+  setReqValidationModeForTests,
+} from '@overleaf/validation-tools'
 import MockRequest from '../helpers/MockRequest.mjs'
 import MockResponse from '../helpers/MockResponse.mjs'
 import EntityConfigs from '../../../../app/src/Features/UserMembership/UserMembershipEntityConfigs.mjs'
@@ -20,16 +25,21 @@ vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
   vi.importActual('../../../../app/src/Features/Errors/Errors.js')
 )
 
+const entityId = 'mock-entity-id'
+
 describe('UserMembershipController', () => {
   let recurlySubscriptionId
 
   beforeEach(async ctx => {
     recurlySubscriptionId = 'mock-recurly-subscription-id'
     ctx.req = new MockRequest(vi)
-    ctx.req.params.id = 'mock-entity-id'
+    ctx.req.params = { id: entityId }
     ctx.req.ip = '1.2.3.4'
-    ctx.user = { _id: 'mock-user-id' }
-    ctx.newUser = { _id: 'mock-new-user-id', email: 'new-user-email@foo.bar' }
+    ctx.user = { _id: '507f191e810c19729de860ea' }
+    ctx.newUser = {
+      _id: '507f191e810c19729de860eb',
+      email: 'new-user-email@foo.bar',
+    }
     ctx.subscription = {
       _id: 'mock-subscription-id',
       admin_id: 'mock-admin-id',
@@ -241,6 +251,10 @@ describe('UserMembershipController', () => {
     ctx.UserMembershipController = (await import(modulePath)).default
   })
 
+  afterEach(() => {
+    setReqValidationModeForTests(null)
+  })
+
   describe('index', () => {
     beforeEach(ctx => {
       ctx.req.user = ctx.user
@@ -285,7 +299,7 @@ describe('UserMembershipController', () => {
       subscription,
       users,
     }) => {
-      expect.assertions(4)
+      expect.assertions(5)
       subscription.managedUsersEnabled = false
       await UserMembershipController.manageGroupMembers(req, {
         render: (viewPath, viewParams) => {
@@ -293,6 +307,7 @@ describe('UserMembershipController', () => {
           expect(viewParams.users).to.deep.equal(users)
           expect(viewParams.groupSize).to.equal(subscription.membersLimit)
           expect(viewParams.managedUsersActive).to.equal(false)
+          expect(viewParams.customerIoEnabled).to.equal(true)
         },
       })
     })
@@ -357,7 +372,9 @@ describe('UserMembershipController', () => {
         SessionManager,
       }) => {
         expect.assertions(1)
-        SessionManager.getLoggedInUserId.mockReturnValue('mock-user-id')
+        SessionManager.getLoggedInUserId.mockReturnValue(
+          '507f191e810c19729de860ea'
+        )
         await UserMembershipController.manageGroupMembers(req, {
           render: (viewPath, viewParams) => {
             expect(viewParams.canUseAddSeatsFeature).to.equal(false)
@@ -432,13 +449,14 @@ describe('UserMembershipController', () => {
       req,
       user,
     }) => {
-      expect.assertions(2)
+      expect.assertions(3)
       req.user = user
       req.entityConfig = EntityConfigs.groupManagers
       await UserMembershipController.manageGroupManagers(req, {
         render: (viewPath, viewParams) => {
           expect(viewPath).to.equal('user_membership/group-managers-react')
           expect(viewParams.groupSize).to.equal(undefined)
+          expect(viewParams.customerIoEnabled).to.equal(true)
         },
       })
     })
@@ -449,7 +467,7 @@ describe('UserMembershipController', () => {
       user,
       institution,
     }) => {
-      expect.assertions(3)
+      expect.assertions(4)
       req.user = user
       req.entity = institution
       req.entityConfig = EntityConfigs.institution
@@ -460,6 +478,7 @@ describe('UserMembershipController', () => {
           )
           expect(viewParams.name).to.equal('Test Institution Name')
           expect(viewParams.groupSize).to.equal(undefined)
+          expect(viewParams.customerIoEnabled).to.equal(undefined)
         },
       })
     })
@@ -467,7 +486,7 @@ describe('UserMembershipController', () => {
 
   describe('add', () => {
     beforeEach(ctx => {
-      ctx.req.body.email = ctx.newUser.email
+      ctx.req.body = { email: ctx.newUser.email }
       ctx.req.entity = ctx.subscription
       ctx.req.entityConfig = EntityConfigs.groupManagers
     })
@@ -497,7 +516,7 @@ describe('UserMembershipController', () => {
               },
             },
             newUser.email,
-            { initiatorId: 'mock-user-id', ipAddress: '1.2.3.4' }
+            { initiatorId: '507f191e810c19729de860ea', ipAddress: '1.2.3.4' }
           )
         },
       })
@@ -568,7 +587,7 @@ describe('UserMembershipController', () => {
 
     it('handle invalid email', async ({ UserMembershipController, req }) => {
       expect.assertions(1)
-      req.body.email = 'not_valid_email'
+      req.body = { email: 'not_valid_email' }
       await UserMembershipController.add(req, {
         status: () => ({
           json: payload => {
@@ -577,11 +596,27 @@ describe('UserMembershipController', () => {
         }),
       })
     })
+
+    describe('request validation', () => {
+      beforeEach(() => {
+        setReqValidationModeForTests('enforce')
+      })
+
+      it('rejects a body with an unrecognized field', async ({
+        UserMembershipController,
+        req,
+      }) => {
+        req.body = { email: 'user@example.com', extra: 'nope' }
+        await UserMembershipController.add(req, {}).should.be.rejectedWith(
+          InvalidRequestError
+        )
+      })
+    })
   })
 
   describe('remove', () => {
     beforeEach(ctx => {
-      ctx.req.params.userId = ctx.newUser._id
+      ctx.req.params = { id: entityId, userId: ctx.newUser._id }
       ctx.req.entity = ctx.subscription
       ctx.req.entityConfig = EntityConfigs.groupManagers
     })
@@ -616,7 +651,7 @@ describe('UserMembershipController', () => {
               },
             },
             newUser._id,
-            { initiatorId: 'mock-user-id', ipAddress: '1.2.3.4' }
+            { initiatorId: '507f191e810c19729de860ea', ipAddress: '1.2.3.4' }
           )
         },
       })
@@ -637,7 +672,7 @@ describe('UserMembershipController', () => {
       user,
     }) => {
       expect.assertions(1)
-      req.params.userId = user._id
+      req.params = { id: entityId, userId: user._id }
       await UserMembershipController.remove(req, {
         status: () => ({
           json: payload => {
@@ -662,6 +697,22 @@ describe('UserMembershipController', () => {
             expect(payload.error.code).to.equal('managers_cannot_remove_admin')
           },
         }),
+      })
+    })
+
+    describe('request validation', () => {
+      beforeEach(() => {
+        setReqValidationModeForTests('enforce')
+      })
+
+      it('rejects a malformed userId', async ({
+        UserMembershipController,
+        req,
+      }) => {
+        req.params = { id: entityId, userId: 'not-an-object-id' }
+        await UserMembershipController.remove(req, {}).should.be.rejectedWith(
+          InvalidParamsError
+        )
       })
     })
   })
@@ -769,8 +820,7 @@ describe('UserMembershipController', () => {
 
   describe('new', () => {
     beforeEach(ctx => {
-      ctx.req.params.name = 'publisher'
-      ctx.req.params.id = 'abc'
+      ctx.req.params = { name: 'publisher', id: 'abc' }
     })
 
     it('renders view', async ({ UserMembershipController, req }) => {
@@ -782,13 +832,29 @@ describe('UserMembershipController', () => {
         },
       })
     })
+
+    describe('request validation', () => {
+      beforeEach(() => {
+        setReqValidationModeForTests('enforce')
+      })
+
+      it('rejects params with an unrecognized field', ({
+        UserMembershipController,
+        req,
+      }) => {
+        req.params = { name: 'publisher', id: 'abc', extra: 'nope' }
+        expect(() => UserMembershipController.new(req, {})).to.throw(
+          InvalidParamsError
+        )
+      })
+    })
   })
 
   describe('create', () => {
     beforeEach(ctx => {
-      ctx.req.params.name = 'institution'
+      // Express route params are always strings on the wire.
+      ctx.req.params = { name: 'institution', id: '123' }
       ctx.req.entityConfig = EntityConfigs.institution
-      ctx.req.params.id = 123
     })
 
     it('creates institution', async ({
@@ -799,10 +865,10 @@ describe('UserMembershipController', () => {
       expect.assertions(2)
       await UserMembershipController.create(req, {
         redirect: path => {
-          expect(path).to.eq(EntityConfigs.institution.pathsFor(123).index)
+          expect(path).to.eq(EntityConfigs.institution.pathsFor('123').index)
           expect(
             UserMembershipHandler.promises.createEntity
-          ).toHaveBeenCalledWith(123, {
+          ).toHaveBeenCalledWith('123', {
             fields: {
               access: 'managerIds',
               membership: 'member_ids',
@@ -815,6 +881,43 @@ describe('UserMembershipController', () => {
             pathsFor: EntityConfigs.institution.pathsFor,
           })
         },
+      })
+    })
+
+    describe('request validation', () => {
+      beforeEach(() => {
+        setReqValidationModeForTests('enforce')
+      })
+
+      it('rejects params with an unrecognized field', async ({
+        UserMembershipController,
+        req,
+      }) => {
+        req.params = { name: 'institution', id: '123', extra: 'nope' }
+        await UserMembershipController.create(req, {}).should.be.rejectedWith(
+          InvalidParamsError
+        )
+      })
+
+      it('accepts a plain route-segment id', async ({
+        UserMembershipController,
+        req,
+      }) => {
+        req.params = { name: 'institution', id: '123' }
+        await UserMembershipController.create(req, {
+          redirect: () => {},
+        })
+      })
+
+      it('rejects a path-traversal id', async ({
+        UserMembershipController,
+        req,
+      }) => {
+        req.params = { name: 'publisher', id: '../../admin' }
+        req.entityConfig = EntityConfigs.publisher
+        await UserMembershipController.create(req, {}).should.be.rejectedWith(
+          InvalidParamsError
+        )
       })
     })
   })

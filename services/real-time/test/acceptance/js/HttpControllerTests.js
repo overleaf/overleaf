@@ -27,6 +27,25 @@ describe('HttpControllerTests', function () {
         expect(error.response.status).to.equal(404)
       }
     })
+
+    it('should return a schema-validation 404 for a __proto__-shaped client id', async function () {
+      const clientId = '__proto__'
+      try {
+        await fetchNothing(`http://127.0.0.1:3026/clients/${clientId}`)
+        expect.fail('request should have failed')
+      } catch (error) {
+        expect(error).to.be.instanceof(RequestFailedError)
+        expect(error.response.status).to.equal(404)
+        // The domain-level 404 (`res.sendStatus(404)` for an id that parses
+        // but has no matching client) has no JSON body. Asserting a JSON
+        // body with a statusCode/error here proves this request was
+        // rejected by the client_id schema (InvalidParamsError via
+        // handleValidationError), not by the "client not found" check.
+        const body = JSON.parse(error.body)
+        expect(body).to.have.property('statusCode', 404)
+        expect(body.error).to.be.a('string')
+      }
+    })
   })
 
   describe('with a user and after joining a project', function () {
@@ -83,7 +102,7 @@ describe('HttpControllerTests', function () {
         last_name: 'Bloggs',
         project_id: this.project_id,
         user_id: this.user_id,
-        rooms: [this.project_id, this.doc_id],
+        rooms: [this.project_id],
       })
     })
   })

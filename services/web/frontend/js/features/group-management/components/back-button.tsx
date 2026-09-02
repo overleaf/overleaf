@@ -1,4 +1,4 @@
-import IconButton from '@/shared/components/button/icon-button'
+import OLIconButton from '@/shared/components/ol/ol-icon-button'
 
 type BackButtonProps = {
   href: string
@@ -7,7 +7,7 @@ type BackButtonProps = {
 
 function BackButton({ href, accessibilityLabel }: BackButtonProps) {
   return (
-    <IconButton
+    <OLIconButton
       variant="ghost"
       href={href}
       size="lg"

@@ -10,9 +10,6 @@ describe('Workbench', { scrollBehavior: false }, function () {
   beforeEach(function () {
     cy.window().then(win => {
       win.metaAttributesCache.set('ol-showAiFeatures', true)
-      win.metaAttributesCache.set('ol-splitTestVariants', {
-        'ai-workbench-release': 'enabled',
-      })
       win.metaAttributesCache.set('ol-inactiveTutorials', [
         AI_CONSENT_TUTORIAL_KEY,
       ])
@@ -30,13 +27,13 @@ describe('Workbench', { scrollBehavior: false }, function () {
     </EditorViewContext.Provider>
   )
 
-  const Providers: FC<PropsWithChildren<{ aiAssistEnabled?: boolean }>> = ({
+  const Providers: FC<PropsWithChildren<{ aiUsageQuota?: string }>> = ({
     children,
-    aiAssistEnabled = true,
+    aiUsageQuota = 'unlimited',
   }) => {
     return (
       <EditorProviders
-        features={{ aiErrorAssistant: aiAssistEnabled }}
+        features={{ aiUsageQuota: aiUsageQuota }}
         providers={{ EditorViewProvider, TutorialProvider }}
       >
         <div style={{ backgroundColor: '#1b222c' }}>{children}</div>
@@ -47,7 +44,7 @@ describe('Workbench', { scrollBehavior: false }, function () {
   describe('when AI assist is enabled and consent is given', function () {
     it('should show the chat interface', function () {
       cy.mount(
-        <Providers aiAssistEnabled>
+        <Providers aiUsageQuota="unlimited">
           <Workbench />
         </Providers>
       )
@@ -70,7 +67,7 @@ describe('Workbench', { scrollBehavior: false }, function () {
       })
 
       cy.mount(
-        <Providers aiAssistEnabled>
+        <Providers aiUsageQuota="unlimited">
           <Workbench />
         </Providers>
       )
@@ -111,7 +108,7 @@ describe('Workbench', { scrollBehavior: false }, function () {
         win.metaAttributesCache.set('ol-showAiFeatures', false)
       })
       cy.mount(
-        <Providers aiAssistEnabled={false}>
+        <Providers aiUsageQuota="free">
           <Workbench />
         </Providers>
       )

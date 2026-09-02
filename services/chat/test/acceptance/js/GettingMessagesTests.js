@@ -1,5 +1,6 @@
 import { ObjectId } from '../../../app/js/mongodb.js'
 import { expect } from 'chai'
+import { expectValidationErrorRaw } from '@overleaf/validation-tools/testUtils.js'
 
 import * as ChatClient from './helpers/ChatClient.js'
 import * as ChatApp from './helpers/ChatApp.js'
@@ -8,7 +9,7 @@ async function getCount() {
   return await ChatClient.getMetric(line => {
     return (
       line.includes('timer_http_request_count') &&
-      line.includes('path="project_{projectId}_messages"') &&
+      line.includes('path="project_projectId_messages"') &&
       line.includes('method="POST"')
     )
   })
@@ -159,6 +160,33 @@ describe('Getting messages', async function () {
       expect(thread1.messages[0].user_id).to.equal(userId1)
       expect(thread1.messages[1].content).to.equal('three')
       expect(thread1.messages[1].user_id).to.equal(userId1)
+    })
+  })
+
+  describe('with a malformed thread id in the list', function () {
+    it('should return a graceful error', async function () {
+      const projectId = new ObjectId().toString()
+      const { response } = await ChatClient.generateThreadData(projectId, [
+        'malformed-thread-id',
+      ])
+      expectValidationErrorRaw(response, 400, 'threads')
+    })
+  })
+
+  describe('with a malformed projectId', function () {
+    it('should return a not found error for threads', async function () {
+      const { response } = await ChatClient.asyncRequest({
+        method: 'get',
+        url: `/project/malformed-project/threads`,
+        json: true,
+      })
+      expectValidationErrorRaw(response, 404, 'projectId')
+    })
+
+    it('should return a not found error for global messages', async function () {
+      const { response } =
+        await ChatClient.getGlobalMessages('malformed-project')
+      expectValidationErrorRaw(response, 404, 'projectId')
     })
   })
 })

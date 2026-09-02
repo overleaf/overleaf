@@ -1,5 +1,6 @@
 import { Select } from '@/shared/components/select'
 import { Meta } from '@storybook/react-webpack5'
+import { themedDecorator } from '../utils/themed-decorator'
 
 type Args = Pick<
   React.ComponentProps<typeof Select>,
@@ -74,6 +75,7 @@ const meta: Meta<typeof Select> = {
     isCiam: false,
     defaultText: 'Choose an item',
   },
+  decorators: [themedDecorator],
 }
 
 export default meta

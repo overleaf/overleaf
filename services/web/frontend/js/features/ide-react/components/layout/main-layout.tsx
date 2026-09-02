@@ -5,6 +5,7 @@ import PdfPreview from '@/features/pdf-preview/components/pdf-preview'
 import { RailLayout } from '../rail/rail'
 import { Toolbar } from '../toolbar/toolbar'
 import { HorizontalToggler } from '@/features/ide-react/components/resize/horizontal-toggler'
+import { EditingPausedBanner } from '../toolbar/editing-paused-banner'
 import { useTranslation } from 'react-i18next'
 import { usePdfPane } from '@/features/ide-react/hooks/use-pdf-pane'
 import { useLayoutContext } from '@/shared/context/layout-context'
@@ -46,6 +47,7 @@ export default function MainLayout() {
   return (
     <div className="ide-redesign-main">
       <Toolbar />
+      <EditingPausedBanner />
       <div className="ide-redesign-body">
         <PanelGroup
           autoSaveId="ide-redesign-outer-layout"

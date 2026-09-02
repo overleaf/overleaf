@@ -8,14 +8,16 @@ import {
 import useTag from '../../hooks/use-tag'
 import { getTagColor } from '../../util/tag'
 import {
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownItem,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export default function TagsList() {
   const { t } = useTranslation()
+  const isSharedWorkspaceEnabled = useFeatureFlag('shared-workspace')
   const {
     tags,
     projectsPerTag,
@@ -40,7 +42,7 @@ export default function TagsList() {
         aria-hidden="true"
         data-testid="organize-projects"
       >
-        {t('organize_tags')}
+        {isSharedWorkspaceEnabled ? t('your_tags') : t('organize_tags')}
       </li>
       <li className="tag">
         <button type="button" className="tag-name" onClick={openCreateTagModal}>
@@ -77,31 +79,31 @@ export default function TagsList() {
               </span>
             </button>
 
-            <Dropdown align="end" className="tag-menu">
-              <DropdownToggle
+            <OLDropdown align="end" className="tag-menu">
+              <OLDropdownToggle
                 aria-label={t('open_action_menu', { name: tag.name })}
                 id={`${tag._id}-dropdown-toggle`}
                 data-testid="tag-dropdown-toggle"
               >
                 <DotsThreeVertical weight="bold" />
-              </DropdownToggle>
-              <DropdownMenu className="dropdown-menu-sm-width">
-                <DropdownItem
+              </OLDropdownToggle>
+              <OLDropdownMenu className="dropdown-menu-sm-width">
+                <OLDropdownItem
                   as="li"
                   className="tag-action"
                   onClick={e => handleEditTag(e, tag._id)}
                 >
                   {t('edit')}
-                </DropdownItem>
-                <DropdownItem
+                </OLDropdownItem>
+                <OLDropdownItem
                   as="li"
                   className="tag-action"
                   onClick={e => handleDeleteTag(e, tag._id)}
                 >
                   {t('delete')}
-                </DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
+                </OLDropdownItem>
+              </OLDropdownMenu>
+            </OLDropdown>
           </li>
         )
       })}

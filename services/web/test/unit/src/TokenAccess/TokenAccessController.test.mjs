@@ -1,6 +1,11 @@
-import { expect, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
+import {
+  InvalidParamsError,
+  InvalidRequestError,
+  setReqValidationModeForTests,
+} from '@overleaf/validation-tools'
 import MockRequest from '../helpers/MockRequest.mjs'
 import MockResponse from '../helpers/MockResponse.mjs'
 import PrivilegeLevels from '../../../../app/src/Features/Authorization/PrivilegeLevels.mjs'
@@ -275,6 +280,10 @@ describe('TokenAccessController', function () {
     )
 
     ctx.TokenAccessController = (await import(MODULE_PATH)).default
+  })
+
+  afterEach(function () {
+    setReqValidationModeForTests(null)
   })
 
   describe('grantTokenAccessReadAndWrite', function () {
@@ -1029,7 +1038,7 @@ describe('TokenAccessController', function () {
 
   describe('ensureUserCanUseSharingUpdatesConsentPage', function () {
     beforeEach(function (ctx) {
-      ctx.req.params = { Project_id: ctx.project._id }
+      ctx.req.params = { Project_id: ctx.project._id.toString() }
     })
 
     describe('when not in link sharing changes test', function () {
@@ -1082,10 +1091,10 @@ describe('TokenAccessController', function () {
           expect(
             ctx.CollaboratorsGetter.promises
               .isUserInvitedReadWriteMemberOfProject
-          ).to.have.been.calledWith(ctx.user._id, ctx.project._id)
+          ).to.have.been.calledWith(ctx.user._id, ctx.project._id.toString())
           expect(
             ctx.CollaboratorsGetter.promises.userIsReadWriteTokenMember
-          ).to.have.been.calledWith(ctx.user._id, ctx.project._id)
+          ).to.have.been.calledWith(ctx.user._id, ctx.project._id.toString())
           expect(ctx.next).to.have.been.calledOnce
           expect(ctx.next.firstCall.args[0]).to.not.exist
         })
@@ -1147,7 +1156,7 @@ describe('TokenAccessController', function () {
 
   describe('moveReadWriteToCollaborators', function () {
     beforeEach(function (ctx) {
-      ctx.req.params = { Project_id: ctx.project._id }
+      ctx.req.params = { Project_id: ctx.project._id.toString() }
     })
 
     describe('when there are collaborator slots available', function () {
@@ -1175,11 +1184,11 @@ describe('TokenAccessController', function () {
         it('sets the privilege level to read and write for the invited viewer', function (ctx) {
           expect(
             ctx.TokenAccessHandler.promises.removeReadAndWriteUserFromProject
-          ).to.have.been.calledWith(ctx.user._id, ctx.project._id)
+          ).to.have.been.calledWith(ctx.user._id, ctx.project._id.toString())
           expect(
             ctx.CollaboratorsHandler.promises.addUserIdToProject
           ).to.have.been.calledWith(
-            ctx.project._id,
+            ctx.project._id.toString(),
             undefined,
             ctx.user._id,
             PrivilegeLevels.READ_AND_WRITE
@@ -1214,11 +1223,11 @@ describe('TokenAccessController', function () {
         it('sets the privilege level to read only for the invited viewer (pendingEditor)', function (ctx) {
           expect(
             ctx.TokenAccessHandler.promises.removeReadAndWriteUserFromProject
-          ).to.have.been.calledWith(ctx.user._id, ctx.project._id)
+          ).to.have.been.calledWith(ctx.user._id, ctx.project._id.toString())
           expect(
             ctx.CollaboratorsHandler.promises.addUserIdToProject
           ).to.have.been.calledWith(
-            ctx.project._id,
+            ctx.project._id.toString(),
             undefined,
             ctx.user._id,
             PrivilegeLevels.READ_ONLY,
@@ -1232,7 +1241,7 @@ describe('TokenAccessController', function () {
 
   describe('moveReadWriteToReadOnly', function () {
     beforeEach(function (ctx) {
-      ctx.req.params = { Project_id: ctx.project._id }
+      ctx.req.params = { Project_id: ctx.project._id.toString() }
     })
 
     describe('previously joined token access user moving to anonymous viewer', function () {
@@ -1250,7 +1259,7 @@ describe('TokenAccessController', function () {
       it('removes them from read write token access refs and adds them to read only token access refs', function (ctx) {
         expect(
           ctx.TokenAccessHandler.promises.moveReadAndWriteUserToReadOnly
-        ).to.have.been.calledWith(ctx.user._id, ctx.project._id)
+        ).to.have.been.calledWith(ctx.user._id, ctx.project._id.toString())
         expect(ctx.res.sendStatus).toHaveBeenCalledWith(204)
       })
 
@@ -1258,10 +1267,102 @@ describe('TokenAccessController', function () {
         expect(
           ctx.ProjectAuditLogHandler.promises.addEntry
         ).to.have.been.calledWith(
-          ctx.project._id,
+          ctx.project._id.toString(),
           'readonly-via-sharing-updates',
           ctx.user._id,
           ctx.req.ip
+        )
+      })
+    })
+  })
+
+  describe('request validation', function () {
+    beforeEach(function () {
+      setReqValidationModeForTests('enforce')
+    })
+
+    it('rejects a grant read-and-write request body with an unrecognized field', async function (ctx) {
+      ctx.req.params = { token: ctx.token }
+      ctx.req.body = { confirmedByUser: true, extraField: 'nope' }
+      await new Promise(resolve => {
+        ctx.TokenAccessController.grantTokenAccessReadAndWrite(
+          ctx.req,
+          ctx.res,
+          err => {
+            expect(err).to.be.instanceof(InvalidRequestError)
+            resolve()
+          }
+        )
+      })
+    })
+
+    it('rejects a grant read-only request body with an unrecognized field', async function (ctx) {
+      ctx.req.params = { token: ctx.token }
+      ctx.req.body = { confirmedByUser: true, extraField: 'nope' }
+      await new Promise(resolve => {
+        ctx.TokenAccessController.grantTokenAccessReadOnly(
+          ctx.req,
+          ctx.res,
+          err => {
+            expect(err).to.be.instanceof(InvalidRequestError)
+            resolve()
+          }
+        )
+      })
+    })
+
+    it('rejects a malformed Project_id when checking sharing-updates consent eligibility', async function (ctx) {
+      ctx.req.params = { Project_id: 'not-an-object-id' }
+      await new Promise(resolve => {
+        ctx.TokenAccessController.ensureUserCanUseSharingUpdatesConsentPage(
+          ctx.req,
+          ctx.res,
+          err => {
+            expect(err).to.be.instanceof(InvalidParamsError)
+            resolve()
+          }
+        )
+      })
+    })
+
+    it('rejects a malformed Project_id on the sharing-updates consent page', async function (ctx) {
+      ctx.req.params = { Project_id: 'not-an-object-id' }
+      await new Promise(resolve => {
+        ctx.TokenAccessController.sharingUpdatesConsent(
+          ctx.req,
+          ctx.res,
+          err => {
+            expect(err).to.be.instanceof(InvalidParamsError)
+            resolve()
+          }
+        )
+      })
+    })
+
+    it('rejects a malformed Project_id when moving to collaborators', async function (ctx) {
+      ctx.req.params = { Project_id: 'not-an-object-id' }
+      await new Promise(resolve => {
+        ctx.TokenAccessController.moveReadWriteToCollaborators(
+          ctx.req,
+          ctx.res,
+          err => {
+            expect(err).to.be.instanceof(InvalidParamsError)
+            resolve()
+          }
+        )
+      })
+    })
+
+    it('rejects a malformed Project_id when moving to read-only', async function (ctx) {
+      ctx.req.params = { Project_id: 'not-an-object-id' }
+      await new Promise(resolve => {
+        ctx.TokenAccessController.moveReadWriteToReadOnly(
+          ctx.req,
+          ctx.res,
+          err => {
+            expect(err).to.be.instanceof(InvalidParamsError)
+            resolve()
+          }
         )
       })
     })

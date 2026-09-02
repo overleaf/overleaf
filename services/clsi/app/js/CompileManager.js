@@ -4,6 +4,7 @@ import Path from 'node:path'
 import { callbackify } from 'node:util'
 import Settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
+import Metrics from '@overleaf/metrics'
 import OError from '@overleaf/o-error'
 import ResourceWriter from './ResourceWriter.js'
 import LatexRunner from './LatexRunner.js'
@@ -23,6 +24,7 @@ import SafeReader from './SafeReader.js'
 import LatexMetrics from './LatexMetrics.js'
 import { callbackifyMultiResult } from '@overleaf/promise-utils'
 import * as HistoryResourceWriter from './HistoryResourceWriter.js'
+import Png2Pdf from './Png2Pdf.js'
 
 const { downloadLatestCompileCache, downloadOutputDotSynctexFromCompileCache } =
   CLSICacheHandler
@@ -114,7 +116,8 @@ async function doCompile(request, stats, timings) {
           userId,
           request,
           compileDir,
-          timings
+          timings,
+          stats
         ))
     } else {
       // NOTE: resourceList is insecure, it should only be used to exclude files from the output list
@@ -168,7 +171,7 @@ async function doCompile(request, stats, timings) {
   )
 
   // set up environment variables for chktex
-  const env = {
+  let env = {
     OVERLEAF_PROJECT_ID: request.project_id,
   }
   if (Settings.texliveOpenoutAny && Settings.texliveOpenoutAny !== '') {
@@ -192,10 +195,11 @@ async function doCompile(request, stats, timings) {
     }
   }
 
-  // Pass through checkpoint setting
-  if (request.enableCheckpoint) {
-    env.ENABLE_CHECKPOINT = '1'
-  }
+  // the requested compile options may need a variant of the requested image,
+  // which brings its own environment
+  const imageVariantSettings = _getImageVariantSettings(request)
+  request.imageName = imageVariantSettings.imageName
+  env = { ...env, ...imageVariantSettings.env }
 
   const compileStart = Date.now()
 
@@ -279,6 +283,24 @@ async function doCompile(request, stats, timings) {
 
   timings.compile = Date.now() - compileStart
 
+  // Record the PNGs this compile flagged as "slow" so the next sync can convert
+  // them to PDFs (see HistoryResourceWriter).
+  // todo: generated for every project for analytics, filter to only  request.png2pdf once rollout completes
+  if (request.isCompileFromHistory && Png2Pdf.isEnabled()) {
+    try {
+      const slowPngs = stats.latexmk?.['latexmk-png-slow'] || []
+      await HistoryResourceWriter.saveSlowPngList(
+        Path.basename(compileDir),
+        slowPngs
+      )
+    } catch (err) {
+      logger.warn(
+        { err, projectId, userId },
+        'failed to save png2pdf slow-png list'
+      )
+    }
+  }
+
   logger.debug(
     {
       projectId: request.project_id,
@@ -342,7 +364,6 @@ async function doCompile(request, stats, timings) {
       'sampled performance log'
     )
   }
-
   return { outputFiles, buildId, baseHistoryVersion }
 }
 
@@ -549,6 +570,7 @@ async function _checkFileExists(dir, filename) {
     if (error.code === 'ENOENT') {
       throw new Errors.NotFoundError('no output file')
     }
+    throw error
   }
   if (!stats.isFile()) {
     throw new Error('not a file')
@@ -649,7 +671,43 @@ async function _runSynctex(projectId, userId, command, opts) {
   )
 }
 
-async function wordcount(projectId, userId, filename, image) {
+async function _syncResourcesForWordcount(
+  projectId,
+  userId,
+  filename,
+  compileDir,
+  request
+) {
+  // Always write, rather than skipping when the root file is already there:
+  // texcount reads every included file, so they all have to be current.
+  const lock = LockManager.acquire(compileDir)
+  try {
+    Metrics.inc('wordcount_sync_resources')
+    if (request.isCompileFromHistory) {
+      await HistoryResourceWriter.syncResourcesToDisk(
+        projectId,
+        userId,
+        request,
+        compileDir,
+        {}, // timings
+        {} // stats
+      )
+    } else {
+      await ResourceWriter.promises.syncResourcesToDisk(request, compileDir)
+    }
+  } catch (err) {
+    if (err instanceof Errors.MissingUpdatesError) throw err
+    throw OError.tag(err, 'error syncing resources for wordcount', {
+      projectId,
+      userId,
+      filename,
+    })
+  } finally {
+    lock.release()
+  }
+}
+
+async function wordcount(projectId, userId, filename, image, request) {
   logger.debug({ projectId, userId, filename, image }, 'running wordcount')
   const filePath = `$COMPILE_DIR/${filename}`
   const command = ['texcount', '-nocol', '-inc', filePath]
@@ -662,14 +720,39 @@ async function wordcount(projectId, userId, filename, image) {
     throw new Errors.InvalidParameter('invalid image')
   }
 
+  let isNewCompileDir
   try {
-    await fsPromises.mkdir(compileDir, { recursive: true })
+    isNewCompileDir =
+      (await fsPromises.mkdir(compileDir, { recursive: true })) === compileDir
   } catch (err) {
     throw OError.tag(err, 'error ensuring dir for wordcount', {
       projectId,
       userId,
       filename,
     })
+  }
+
+  if (isNewCompileDir && request?.compileFromClsiCache) {
+    // We are bootstrapping the compile dir on this clsi. Restore the cached
+    // outputs too, so the next compile does not start from scratch.
+    try {
+      await downloadLatestCompileCache(projectId, userId, compileDir)
+    } catch (err) {
+      logger.warn(
+        { err, projectId, userId },
+        'failed to populate compile dir from cache'
+      )
+    }
+  }
+
+  if (request) {
+    await _syncResourcesForWordcount(
+      projectId,
+      userId,
+      filename,
+      compileDir,
+      request
+    )
   }
 
   try {
@@ -750,10 +833,45 @@ function _parseWordcountFromOutput(output) {
   return results
 }
 
+function _getAllowedImages() {
+  return Settings.clsi?.docker?.allowedImages
+}
+
 function _isImageNameAllowed(imageName) {
-  const ALLOWED_IMAGES =
-    Settings.clsi && Settings.clsi.docker && Settings.clsi.docker.allowedImages
-  return !ALLOWED_IMAGES || ALLOWED_IMAGES.includes(imageName)
+  const allowedImages = _getAllowedImages()
+  return !allowedImages || allowedImages.includes(imageName)
+}
+
+// Variants are images built on top of a base image, tagged with a suffix, eg
+// texlive-full:2026.1.checkpointing is the checkpointing variant of
+// texlive-full:2026.1. Returns the settings needed to compile the request on
+// the variant its options call for: the image to run and the environment that
+// image needs. Falls back to the requested image when no variant applies, or
+// when the variant is not available on this host.
+function _getImageVariantSettings(request) {
+  const { imageName } = request
+
+  // checkpointing compiles run on the checkpointing variant of the image
+  if (request.enableCheckpoint) {
+    const checkpointingImageName = `${imageName}.checkpointing`
+    if (imageName && _getAllowedImages()?.includes(checkpointingImageName)) {
+      return {
+        imageName: checkpointingImageName,
+        env: { ENABLE_CHECKPOINT: '1' },
+      }
+    }
+    // variant either doesnt exist when it should, or user was able to make a request they shouldnt be able to
+    logger.error(
+      {
+        projectId: request.project_id,
+        userId: request.user_id,
+        imageName,
+      },
+      'no checkpointing variant available for image, compiling without it'
+    )
+  }
+
+  return { imageName, env: {} }
 }
 
 function _emitMetrics(request, status, stats, timings) {
@@ -828,6 +946,7 @@ function _emitMetrics(request, status, stats, timings) {
     stop_on_first_error: request.stopOnFirstError ? 'true' : 'false',
     passes,
     type: request.syncType,
+    png2pdf: request.png2pdf ? 'true' : 'false',
   })
 
   if (timings.sync != null) {

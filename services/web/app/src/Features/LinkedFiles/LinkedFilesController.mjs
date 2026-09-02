@@ -12,6 +12,7 @@
  */
 import SessionManager from '../Authentication/SessionManager.mjs'
 import Settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
 import _ from 'lodash'
 import AnalyticsManager from '../../../../app/src/Features/Analytics/AnalyticsManager.mjs'
 import LinkedFilesHandler from './LinkedFilesHandler.mjs'
@@ -19,8 +20,10 @@ import LinkedFilesErrors from './LinkedFilesErrors.mjs'
 import {
   OutputFileFetchFailedError,
   FileTooLargeError,
+  TooManyFilesError,
 } from '../Errors/Errors.js'
 import Modules from '../../infrastructure/Modules.mjs'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 import { plainTextResponse } from '../../infrastructure/Response.mjs'
 import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
 import EditorRealTimeController from '../Editor/EditorRealTimeController.mjs'
@@ -47,7 +50,84 @@ const {
 
 let LinkedFilesController
 
+// Per-provider shape of the client-submitted `data` object. This mirrors
+// overleaf-editor-core's `rawLinkedFileData` discriminated union (the
+// *stored* linkedFileData shape), but is not identical to it: `provider`
+// lives as a sibling of `data` here rather than inside it, `importedAt` is
+// never client-submitted (set server-side after validation), and a couple
+// of fields are intentionally looser than the stored shape because the
+// agents apply defaults/coercions between validation and storage --
+// `zotero`'s `format` defaults to 'bibtex' when absent (ZoteroAgent
+// `_getFormat`), and `project_file`/`project_output_file`'s
+// `v1_source_doc_id` may arrive as a number (existing callers do this; the
+// agent's `_canCreate` check rejects v1 ids with its own 403, so this must
+// not be intercepted by validation first).
 const createLinkedFileSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+  }),
+  body: z.discriminatedUnion('provider', [
+    z.strictObject({
+      name: z.string(),
+      parent_folder_id: zz.objectId(),
+      provider: z.literal('url'),
+      data: z.strictObject({
+        url: z.string(),
+      }),
+    }),
+    z.strictObject({
+      name: z.string(),
+      parent_folder_id: zz.objectId(),
+      provider: z.literal('project_file'),
+      data: z.strictObject({
+        source_project_id: zz.objectId().optional(),
+        v1_source_doc_id: z.union([z.string(), z.number()]).optional(),
+        source_entity_path: z.string(),
+      }),
+    }),
+    z.strictObject({
+      name: z.string(),
+      parent_folder_id: zz.objectId(),
+      provider: z.literal('project_output_file'),
+      data: z.strictObject({
+        source_project_id: zz.objectId().optional(),
+        v1_source_doc_id: z.union([z.string(), z.number()]).optional(),
+        source_output_file_path: z.string(),
+        build_id: zz.buildId().optional(),
+        clsiServerId: z.string().optional(),
+      }),
+    }),
+    z.strictObject({
+      name: z.string(),
+      parent_folder_id: zz.objectId(),
+      provider: z.literal('mendeley'),
+      data: z.strictObject({
+        group_id: zz.routeSegment().optional(),
+      }),
+    }),
+    z.strictObject({
+      name: z.string(),
+      parent_folder_id: zz.objectId(),
+      provider: z.literal('zotero'),
+      data: z.strictObject({
+        format: z.enum(['bibtex', 'biblatex']).optional(),
+        group_id: zz.routeSegment().optional(),
+      }),
+    }),
+    z.strictObject({
+      name: z.string(),
+      parent_folder_id: zz.objectId(),
+      provider: z.literal('papers'),
+      data: z.strictObject({
+        group_id: zz.routeSegment().optional(),
+      }),
+    }),
+  ]),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const createLinkedFileFallbackSchema = z.object({
   params: z.object({
     project_id: zz.objectId(),
   }),
@@ -59,8 +139,63 @@ const createLinkedFileSchema = z.object({
   }),
 })
 
+const refreshLinkedFileSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+    file_id: zz.objectId(),
+  }),
+  body: z.strictObject({
+    clientId: z.string().optional(),
+    shouldReindexReferences: z.boolean().optional(),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const refreshLinkedFileFallbackSchema = z.object({
+  params: z.object({
+    project_id: zz.objectId(),
+    file_id: zz.objectId(),
+  }),
+  body: z.object({
+    clientId: z.string().optional(),
+    shouldReindexReferences: z.boolean().optional(),
+  }),
+})
+
+// Keys whose values are safe to log as-is. Every other key is kept (so the shape of the data stays visible in the log) but its value is replaced.
+const LINKED_FILE_DATA_ALLOW_LIST = [
+  'provider',
+  'importedAt',
+  'source_project_id',
+  'v1_source_doc_id',
+  'source_entity_path',
+  'source_output_file_path',
+  'format',
+  'group_id',
+  'clsiServerId',
+]
+
+function redactLinkedFileData(data) {
+  return Object.fromEntries(
+    Object.entries(data).map(([key, value]) => {
+      if (LINKED_FILE_DATA_ALLOW_LIST.includes(key)) return [key, value]
+      if (key === 'url') {
+        try {
+          return [key, new URL(value).origin + '/<redacted>']
+        } catch {
+          return [key, '<bad input>']
+        }
+      }
+      return [key, '<redacted>']
+    })
+  )
+}
+
 async function createLinkedFile(req, res, next) {
-  const { params, body } = parseReq(req, createLinkedFileSchema)
+  const { params, body } = parseReq(req, createLinkedFileSchema, {
+    fallbackSchema: createLinkedFileFallbackSchema,
+  })
   const { project_id: projectId } = params
   const { name, provider, data, parent_folder_id: parentFolderId } = body
   const userId = SessionManager.getLoggedInUserId(req.session)
@@ -73,13 +208,21 @@ async function createLinkedFile(req, res, next) {
   data.provider = provider
   data.importedAt = new Date().toISOString()
 
+  const historySource = await SplitTestHandler.promises.featureFlagEnabled(
+    req,
+    res,
+    'linked-file-from-history',
+    { includeReferer: true }
+  )
+
   try {
     const newFileId = await Agent.promises.createLinkedFile(
       projectId,
       data,
       name,
       parentFolderId,
-      userId
+      userId,
+      historySource
     )
     if (name.endsWith('.bib')) {
       AnalyticsManager.recordEventForSession(req.session, 'linked-bib-file', {
@@ -88,13 +231,23 @@ async function createLinkedFile(req, res, next) {
     }
     return res.json({ new_file_id: newFileId })
   } catch (err) {
-    return LinkedFilesController.handleError(err, req, res, next)
+    return LinkedFilesController.handleError(
+      err,
+      { projectId, userId, parentFolderId },
+      data,
+      req,
+      res,
+      next
+    )
   }
 }
 
 async function refreshLinkedFile(req, res, next) {
-  const { project_id: projectId, file_id: fileId } = req.params
-  const { clientId } = req.body
+  const { params, body } = parseReq(req, refreshLinkedFileSchema, {
+    fallbackSchema: refreshLinkedFileFallbackSchema,
+  })
+  const { project_id: projectId, file_id: fileId } = params
+  const { clientId, shouldReindexReferences } = body
   const userId = SessionManager.getLoggedInUserId(req.session)
 
   const { file, parentFolder } = await LinkedFilesHandler.promises.getFileById(
@@ -122,6 +275,14 @@ async function refreshLinkedFile(req, res, next) {
   }
 
   linkedFileData.importedAt = new Date().toISOString()
+
+  const historySource = await SplitTestHandler.promises.featureFlagEnabled(
+    req,
+    res,
+    'linked-file-from-history',
+    { includeReferer: true }
+  )
+
   let newFileId
   try {
     newFileId = await Agent.promises.refreshLinkedFile(
@@ -129,13 +290,21 @@ async function refreshLinkedFile(req, res, next) {
       linkedFileData,
       name,
       parentFolderId,
-      userId
+      userId,
+      historySource
     )
   } catch (err) {
-    return LinkedFilesController.handleError(err, req, res, next)
+    return LinkedFilesController.handleError(
+      err,
+      { projectId, userId, parentFolderId },
+      linkedFileData,
+      req,
+      res,
+      next
+    )
   }
 
-  if (req.body.shouldReindexReferences) {
+  if (shouldReindexReferences) {
     // Signal to clients that they should re-index references
     EditorRealTimeController.emitToRoom(
       projectId,
@@ -184,7 +353,16 @@ export default LinkedFilesController = {
 
   refreshLinkedFile: expressify(refreshLinkedFile),
 
-  handleError(error, req, res, next) {
+  handleError(error, info, linkedFileData, req, res, next) {
+    logger.warn(
+      {
+        error,
+        req,
+        ...info,
+        linkedFileData: redactLinkedFileData(linkedFileData),
+      },
+      'failed to create/refresh linked file'
+    )
     if (error instanceof AccessDeniedError) {
       res.status(403)
       plainTextResponse(
@@ -250,6 +428,8 @@ export default LinkedFilesController = {
     } else if (error instanceof RemoteServiceError) {
       if (error.info?.statusCode === 403) {
         res.status(400).json({ relink: true })
+      } else if (error.info?.statusCode === 429) {
+        res.status(429).json({ message: 'rate_limited' })
       } else {
         res.status(502)
         plainTextResponse(res, 'The remote service produced an error')
@@ -257,7 +437,7 @@ export default LinkedFilesController = {
     } else if (error instanceof FileCannotRefreshError) {
       res.status(400)
       plainTextResponse(res, 'This file cannot be refreshed')
-    } else if (error.message === 'project_has_too_many_files') {
+    } else if (error instanceof TooManyFilesError) {
       res.status(400)
       plainTextResponse(res, 'too many files')
     } else if (/\bECONNREFUSED\b/.test(error.message)) {

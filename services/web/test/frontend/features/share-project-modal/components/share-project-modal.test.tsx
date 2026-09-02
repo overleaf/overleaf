@@ -647,10 +647,10 @@ describe('<ShareProjectModal/>', function () {
 
     const user = userEvent.setup()
     await user.click(screen.getByTestId('add-collaborator-select'))
-    await user.click(screen.getByText('Viewer'))
+    await user.click(await screen.findByRole('option', { name: 'Viewer' }))
 
     const submitButton = screen.getByRole('button', { name: 'Invite' })
-    await userEvent.click(submitButton)
+    await user.click(submitButton)
 
     let calls: CallLog[] = []
     await waitFor(
@@ -704,9 +704,9 @@ describe('<ShareProjectModal/>', function () {
 
     const user = userEvent.setup()
     await user.click(screen.getByTestId('add-collaborator-select'))
-    const editorOption = screen.getByText('Editor').closest('button')
-    const reviewerOption = screen.getByText('Reviewer').closest('button')
-    const viewerOption = screen.getByText('Viewer').closest('button')
+    const editorOption = await screen.findByRole('option', { name: 'Editor' })
+    const reviewerOption = screen.getByRole('option', { name: /Reviewer/ })
+    const viewerOption = screen.getByRole('option', { name: 'Viewer' })
 
     expect(editorOption?.classList.contains('disabled')).to.be.true
     expect(reviewerOption?.classList.contains('disabled')).to.be.true
@@ -742,9 +742,9 @@ describe('<ShareProjectModal/>', function () {
     const user = userEvent.setup()
     await user.click(screen.getByTestId('add-collaborator-select'))
 
-    const editorOption = screen.getByText('Editor').closest('button')
-    const reviewerOption = screen.getByText('Reviewer').closest('button')
-    const viewerOption = screen.getByText('Viewer').closest('button')
+    const editorOption = await screen.findByRole('option', { name: 'Editor' })
+    const reviewerOption = screen.getByRole('option', { name: /Reviewer/ })
+    const viewerOption = screen.getByRole('option', { name: 'Viewer' })
 
     expect(editorOption?.classList.contains('disabled')).to.be.true
     expect(reviewerOption?.classList.contains('disabled')).to.be.true
@@ -1042,6 +1042,7 @@ describe('<ShareProjectModal/>', function () {
     beforeEach(function () {
       window.metaAttributesCache.set('ol-splitTestVariants', {
         'sharing-updates': 'enabled',
+        'sharing-updates-new-link': 'enabled',
       })
     })
 
@@ -1127,7 +1128,7 @@ describe('<ShareProjectModal/>', function () {
         expect(screen.queryByText('1 person invited')).to.be.null
       })
 
-      it('shows the invited people count, including the owner, when there are collaborators', async function () {
+      it('shows the invited people count, excluding the owner, when there are collaborators', async function () {
         const members: ProjectMember[] = [
           {
             _id: 'member-author' as UserId,
@@ -1150,7 +1151,27 @@ describe('<ShareProjectModal/>', function () {
           createContextProps({ publicAccessLevel: 'private', members })
         )
 
-        await screen.findByText('3 people invited')
+        await screen.findByText('2 people invited')
+        expect(screen.queryByText('No one invited yet')).to.be.null
+      })
+
+      it('shows "1 person invited" when there is a single collaborator', async function () {
+        const members: ProjectMember[] = [
+          {
+            _id: 'member-author' as UserId,
+            email: 'member-author@example.com',
+            privileges: 'readAndWrite',
+            first_name: 'Member',
+            last_name: 'Author',
+          },
+        ]
+
+        renderWithEditorContext(
+          <ShareProjectModal {...modalProps} />,
+          createContextProps({ publicAccessLevel: 'private', members })
+        )
+
+        await screen.findByText('1 person invited')
         expect(screen.queryByText('No one invited yet')).to.be.null
       })
     })
@@ -1286,10 +1307,70 @@ describe('<ShareProjectModal/>', function () {
     expect(screen.queryByRole('link', { name: 'Give feedback' })).to.be.null
   })
 
+  describe('sharing-updates enabled, new sharing links disabled', function () {
+    // The new reusable-link functionality is gated behind
+    // `sharing-updates-new-link`. With only `sharing-updates` on, the modal
+    // shows the new UI wired to legacy token-based link sharing: two options
+    // ("Only invited people" / "Via sharing links") driven by publicAccessLevel.
+    beforeEach(function () {
+      window.metaAttributesCache.set('ol-splitTestVariants', {
+        'sharing-updates': 'enabled',
+      })
+    })
+
+    afterEach(function () {
+      window.metaAttributesCache.delete('ol-splitTestVariants')
+    })
+
+    it('shows "Via sharing links" without the legacy label when `publicAccessLevel` is `tokenBased`', async function () {
+      fetchMock.get(`/project/${shareModalProjectDefaults._id}/tokens`, {})
+
+      renderWithEditorContext(
+        <ShareProjectModal {...modalProps} />,
+        createContextProps({ publicAccessLevel: 'tokenBased' })
+      )
+
+      await screen.findByText('Via sharing links')
+      expect(screen.queryByText('Via sharing links (legacy)')).to.be.null
+    })
+
+    it('shows "Only invited people" when `publicAccessLevel` is `private`, without calling the sharing-link endpoint', async function () {
+      // Deliberately not mocking /sharing-link: it must not be requested when
+      // the new-link flag is off (fetch-mock throws on unmatched routes).
+      renderWithEditorContext(
+        <ShareProjectModal {...modalProps} />,
+        createContextProps({ publicAccessLevel: 'private' })
+      )
+
+      await screen.findByText('Only invited people')
+      // The copy-sharing-link button is for the new reusable links only.
+      expect(screen.queryByRole('button', { name: 'Copy sharing link' })).to.be
+        .null
+    })
+
+    it('offers only the two legacy access options, not "Anyone with the link"', async function () {
+      fetchMock.get(`/project/${shareModalProjectDefaults._id}/tokens`, {})
+
+      renderWithEditorContext(
+        <ShareProjectModal {...modalProps} />,
+        createContextProps({ publicAccessLevel: 'tokenBased' })
+      )
+
+      const toggle = await screen.findByRole('button', {
+        name: 'Via sharing links',
+      })
+      await userEvent.click(toggle)
+
+      await screen.findByText('Only invited people')
+      expect(screen.queryByText('Anyone with the link')).to.be.null
+    })
+  })
+
   describe('with "sharing-updates" feature flag', function () {
     beforeEach(function () {
       window.metaAttributesCache.set('ol-splitTestVariants', {
         'sharing-updates': 'enabled',
+        'sharing-updates-new-link': 'enabled',
       })
     })
 

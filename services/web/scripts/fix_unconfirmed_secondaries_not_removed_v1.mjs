@@ -74,7 +74,6 @@ async function removeAffiliationV1(userId, email) {
       password: Settings.apis.v1.pass,
     },
     signal: AbortSignal.timeout(Settings.apis.v1.timeout),
-    defaultErrorMessage: "Couldn't remove affiliation",
   })
 }
 

@@ -2,29 +2,26 @@ import { FC, Fragment, memo, useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom'
 import { getTooltip } from '@codemirror/view'
 import {
-  Dropdown,
-  DropdownMenu,
-  DropdownItem,
-  DropdownDivider,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownMenu,
+  OLDropdownItem,
+  OLDropdownDivider,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import {
   useCodeMirrorStateContext,
   useCodeMirrorViewContext,
 } from './codemirror-context'
 import { contextMenuStateField } from '../extensions/context-menu'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useContextMenuItems } from '../hooks/use-context-menu-items'
 import DropdownListItem from '@/shared/components/dropdown/dropdown-list-item'
-import { EditorContextMenuFeedback } from './editor-context-menu-feedback'
 import { sendContextMenuEvent } from '../utils/context-menu-analytics'
 
 const EditorContextMenu: FC = () => {
   const state = useCodeMirrorStateContext()
   const view = useCodeMirrorViewContext()
-  const editorContextMenuEnabled = useFeatureFlag('editor-context-menu')
 
   const menuState = state.field(contextMenuStateField, false)
-  if (!editorContextMenuEnabled || !menuState?.tooltip) {
+  if (!menuState?.tooltip) {
     return null
   }
 
@@ -48,15 +45,15 @@ const EditorContextMenuContent: FC = memo(function EditorContextMenuContent() {
   }, [])
 
   return (
-    <Dropdown show onToggle={onToggle}>
+    <OLDropdown show onToggle={onToggle}>
       <div onContextMenu={event => event.preventDefault()}>
-        <DropdownMenu
+        <OLDropdownMenu
           ref={menuRef}
           show
           tabIndex={0}
           className="dropdown-menu-unpositioned"
           onKeyDown={event => {
-            switch (event.code) {
+            switch (event.key) {
               case 'Escape':
               case 'Tab':
                 event.preventDefault()
@@ -67,9 +64,9 @@ const EditorContextMenuContent: FC = memo(function EditorContextMenuContent() {
         >
           {menuItems.map((menuItem, index) => (
             <Fragment key={index}>
-              {menuItem.separatorAbove && <DropdownDivider />}
+              {menuItem.separatorAbove && <OLDropdownDivider />}
               <DropdownListItem>
-                <DropdownItem
+                <OLDropdownItem
                   as="button"
                   onClick={() => menuItem.handler()}
                   disabled={menuItem.disabled}
@@ -80,14 +77,13 @@ const EditorContextMenuContent: FC = memo(function EditorContextMenuContent() {
                   }
                 >
                   {menuItem.label}
-                </DropdownItem>
+                </OLDropdownItem>
               </DropdownListItem>
             </Fragment>
           ))}
-          <EditorContextMenuFeedback />
-        </DropdownMenu>
+        </OLDropdownMenu>
       </div>
-    </Dropdown>
+    </OLDropdown>
   )
 })
 

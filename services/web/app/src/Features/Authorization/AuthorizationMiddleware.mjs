@@ -1,8 +1,6 @@
 import AuthorizationManager from './AuthorizationManager.mjs'
 import logger from '@overleaf/logger'
-import mongodb from 'mongodb-legacy'
 
-import Errors from '../Errors/Errors.js'
 import HttpErrorHandler from '../Errors/HttpErrorHandler.mjs'
 import AuthenticationController from '../Authentication/AuthenticationController.mjs'
 import SessionManager from '../Authentication/SessionManager.mjs'
@@ -11,8 +9,41 @@ import { expressify } from '@overleaf/promise-utils'
 import AdminAuthorizationHelper from '../Helpers/AdminAuthorizationHelper.mjs'
 import UrlHelper from '../Helpers/UrlHelper.mjs'
 import ChatApiHandler from '../Chat/ChatApiHandler.mjs'
+import {
+  getRawReqInput,
+  parseReq,
+  z,
+  zz,
+} from '../../infrastructure/Validation.mjs'
 
-const { ObjectId } = mongodb
+// middleware schemas are non-strict: they validate only the fields this
+// middleware consumes; the route schema stays responsible for strictness
+const projectIdsQuerySchema = z.object({
+  query: z.object({ project_ids: z.string().optional() }),
+})
+
+const projectIdParamsSchema = z.object({
+  params: z.object({
+    project_id: zz.objectId().optional(),
+    Project_id: zz.objectId().optional(),
+  }),
+})
+
+const threadIdParamsSchema = z.object({
+  params: z.object({ thread_id: zz.objectId().optional() }),
+})
+
+const messageIdParamsSchema = z.object({
+  params: z.object({ message_id: zz.objectId().optional() }),
+})
+
+const settingsBodySchema = z.object({
+  body: z.object({ name: z.string().optional() }),
+})
+
+const restrictedQuerySchema = z.object({
+  query: z.object({ from: z.string().optional() }),
+})
 
 function _handleAdminDomainRedirect(req, res) {
   if (
@@ -28,7 +59,8 @@ function _handleAdminDomainRedirect(req, res) {
 }
 
 async function ensureUserCanReadMultipleProjects(req, res, next) {
-  const projectIds = (req.query.project_ids || '').split(',')
+  const { query } = parseReq(req, projectIdsQuerySchema, { logOnly: true })
+  const projectIds = (query.project_ids || '').split(',')
   const userId = _getUserId(req)
   for (const projectId of projectIds) {
     const token = TokenAccessHandler.getRequestToken(req, projectId)
@@ -81,8 +113,9 @@ async function ensureUserCanWriteProjectSettings(req, res, next) {
   const projectId = _getProjectId(req)
   const userId = _getUserId(req)
   const token = TokenAccessHandler.getRequestToken(req, projectId)
+  const { body } = parseReq(req, settingsBodySchema, { logOnly: true })
 
-  if (req.body.name != null) {
+  if (body.name != null) {
     const canRename = await AuthorizationManager.promises.canUserRenameProject(
       userId,
       projectId,
@@ -93,7 +126,11 @@ async function ensureUserCanWriteProjectSettings(req, res, next) {
     }
   }
 
-  const otherParams = Object.keys(req.body).filter(x => x !== 'name')
+  // raw access justified: inspects the key set (not the values) to decide
+  // which authorization check applies; the route schema validates the values
+  const otherParams = Object.keys(getRawReqInput(req).body).filter(
+    x => x !== 'name'
+  )
   if (otherParams.length > 0) {
     const canWrite =
       await AuthorizationManager.promises.canUserWriteProjectSettings(
@@ -243,34 +280,26 @@ async function ensureUserIsSiteAdmin(req, res, next) {
 }
 
 function _getProjectId(req) {
-  const projectId = req.params.project_id || req.params.Project_id
+  const { params } = parseReq(req, projectIdParamsSchema)
+  const projectId = params.project_id || params.Project_id
   if (!projectId) {
     throw new Error('Expected project_id in request parameters')
-  }
-  if (!ObjectId.isValid(projectId)) {
-    throw new Errors.NotFoundError(`invalid projectId: ${projectId}`)
   }
   return projectId
 }
 
 function _getThreadId(req) {
-  const threadId = req.params.thread_id
+  const threadId = parseReq(req, threadIdParamsSchema).params.thread_id
   if (!threadId) {
     throw new Error('Expected thread_id in request parameters')
-  }
-  if (!ObjectId.isValid(threadId)) {
-    throw new Errors.NotFoundError(`invalid threadId: ${threadId}`)
   }
   return threadId
 }
 
 function _getMessageId(req) {
-  const messageId = req.params.message_id
+  const messageId = parseReq(req, messageIdParamsSchema).params.message_id
   if (!messageId) {
     throw new Error('Expected message_id in request parameters')
-  }
-  if (!ObjectId.isValid(messageId)) {
-    throw new Errors.NotFoundError(`invalid messageId: ${messageId}`)
   }
   return messageId
 }
@@ -292,7 +321,9 @@ function restricted(req, res, next) {
   if (SessionManager.isUserLoggedIn(req.session)) {
     return res.render('user/restricted', { title: 'restricted' })
   }
-  const { from } = req.query
+  const { from } = parseReq(req, restrictedQuerySchema, {
+    logOnly: true,
+  }).query
   logger.debug({ from }, 'redirecting to login')
   if (from) {
     AuthenticationController.setRedirectInSession(req, from)

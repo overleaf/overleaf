@@ -21,6 +21,7 @@ IMAGE_CACHE ?= $(IMAGE_REPO):cache-$(shell cat \
 	$(MONOREPO)/libraries/logger/package.json \
 	$(MONOREPO)/libraries/metrics/package.json \
 	$(MONOREPO)/libraries/o-error/package.json \
+	$(MONOREPO)/libraries/overleaf-editor-core/package.json \
 	$(MONOREPO)/libraries/promise-utils/package.json \
 	$(MONOREPO)/libraries/redis-wrapper/package.json \
 	$(MONOREPO)/libraries/settings/package.json \
@@ -28,7 +29,7 @@ IMAGE_CACHE ?= $(IMAGE_REPO):cache-$(shell cat \
 	$(MONOREPO)/services/real-time/package.json \
 	$(MONOREPO)/.yarn/patches/* \
 | sha256sum | cut -d '-' -f1)
-export MOCHA_GREP ?=
+export TEST_NAME_PATTERN ?=
 
 DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml
 DOCKER_COMPOSE := docker compose ${DOCKER_COMPOSE_FLAGS}
@@ -59,13 +60,16 @@ clean:
 	-docker rmi $(IMAGE_CI)
 	-docker rmi $(IMAGE_REPO_FINAL)
 	-$(DOCKER_COMPOSE_TEST_UNIT) down --remove-orphans --rmi local --timeout 0 --volumes
-	-$(DOCKER_COMPOSE_TEST_ACCEPTANCE) down --remove-orphans --rmi local --timeout 0 --volumes
+	-for project in $$(docker compose ls -a -q | grep -E '^test_acceptance_$(PROJECT_NAME)(_|$$)'); do \
+		COMPOSE_PROJECT_NAME=$$project $(DOCKER_COMPOSE) down --remove-orphans --rmi local --timeout 0 --volumes; \
+	done
 	-rm -rf reports/
 
 # Run the linting commands in the scope of the monorepo.
 # Eslint and prettier (plus some configs) are on the root.
 RUN_LINTING = ../../bin/run -w /overleaf/services/$(PROJECT_NAME) monorepo yarn run --silent
 RUN_LINTING_MONOREPO = ../../bin/run monorepo yarn run --silent
+
 
 RUN_LINTING_CI = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/eslint.config.mjs:/overleaf/eslint.config.mjs --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc.cjs:/overleaf/.prettierrc.cjs --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/real-time/reports:/overleaf/services/real-time/reports --volume $(MONOREPO)/.cache:/overleaf/.cache $(IMAGE_CI) yarn run --silent
 RUN_LINTING_CI_MONOREPO = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/eslint.config.mjs:/overleaf/eslint.config.mjs --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc.cjs:/overleaf/.prettierrc.cjs --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/real-time/reports:/overleaf/services/real-time/reports --volume $(MONOREPO)/.cache:/overleaf/.cache -w /overleaf $(IMAGE_CI) yarn run --silent

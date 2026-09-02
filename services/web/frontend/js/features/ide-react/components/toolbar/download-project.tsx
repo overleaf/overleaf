@@ -1,5 +1,5 @@
 import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provider'
-import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
+import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import { isSmallDevice, sendMB } from '@/infrastructure/event-tracking'
 import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
@@ -31,14 +31,14 @@ export const DownloadProjectZip = () => {
   )
 
   return (
-    <OLDropdownMenuItem
+    <DropdownMenuItem
       href={`/project/${projectId}/download/zip`}
       target="_blank"
       rel="noreferrer"
       onClick={sendDownloadEvent}
     >
       {t('download_as_source_zip')}
-    </OLDropdownMenuItem>
+    </DropdownMenuItem>
   )
 }
 
@@ -75,7 +75,7 @@ export const DownloadProjectPDF = () => {
   )
 
   const button = (
-    <OLDropdownMenuItem
+    <DropdownMenuItem
       href={pdfDownloadUrl || pdfUrl}
       target="_blank"
       rel="noreferrer"
@@ -83,7 +83,7 @@ export const DownloadProjectPDF = () => {
       disabled={!pdfUrl}
     >
       {t('download_as_pdf')}
-    </OLDropdownMenuItem>
+    </DropdownMenuItem>
   )
 
   if (!pdfUrl) {

@@ -1,4 +1,4 @@
-import { DropdownHeader } from '@/shared/components/dropdown/dropdown-menu'
+import { OLDropdownHeader } from '@/shared/components/ol/ol-dropdown-menu'
 import { ToolbarButtonMenu } from './button-menu'
 import MaterialIcon from '../../../../shared/components/material-icon'
 import { useTranslation } from 'react-i18next'
@@ -43,10 +43,11 @@ export const TableDropdown = memo(function TableDropdown() {
           disablePopover={selectSizeDropdown.open}
           icon={<MaterialIcon type="table_chart" />}
         >
-          <DropdownHeader className="ol-cm-toolbar-header mx-2">
+          <OLDropdownHeader className="ol-cm-toolbar-header mx-2">
             {t('toolbar_table_insert_table_lowercase')}
-          </DropdownHeader>
+          </OLDropdownHeader>
           <OLListGroupItem
+            className={showAiFeaturesDisabled ? 'opacity-50' : ''}
             aria-label={t('toolbar_generate_table')}
             disabled={showAiFeaturesDisabled}
             disabledReason={t('ai_features_unavailable_on_this_project')}
@@ -66,9 +67,7 @@ export const TableDropdown = memo(function TableDropdown() {
               src={sparkleWhite}
               aria-hidden="true"
             />
-            <span className={showAiFeaturesDisabled ? 'opacity-50' : ''}>
-              {t('generate_from_text_or_image')}
-            </span>
+            <span>{t('generate_from_text_or_image')}</span>
           </OLListGroupItem>
           <div className="ol-cm-toolbar-dropdown-divider mx-2 my-0" />
           <OLListGroupItem

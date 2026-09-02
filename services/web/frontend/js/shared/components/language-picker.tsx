@@ -1,11 +1,11 @@
 import React from 'react'
 import {
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
-  DropdownHeader,
-} from './dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownItem,
+  OLDropdownMenu,
+  OLDropdownToggle,
+  OLDropdownHeader,
+} from './ol/ol-dropdown-menu'
 import { useTranslation } from 'react-i18next'
 import getMeta from '@/utils/meta'
 import MaterialIcon from '@/shared/components/material-icon'
@@ -19,8 +19,8 @@ function LanguagePicker({ showHeader } = { showHeader: false }) {
   const currentUrlWithQueryParams = window.location.pathname
 
   return (
-    <Dropdown drop="up">
-      <DropdownToggle
+    <OLDropdown drop="up">
+      <OLDropdownToggle
         id="language-picker-toggle"
         aria-label={t('select_a_language')}
         data-bs-toggle="dropdown"
@@ -32,13 +32,15 @@ function LanguagePicker({ showHeader } = { showHeader: false }) {
         <span className="language-picker-text">
           {translatedLanguages?.[currentLangCode]}
         </span>
-      </DropdownToggle>
+      </OLDropdownToggle>
 
-      <DropdownMenu
+      <OLDropdownMenu
         className="dropdown-menu-sm-width"
         aria-labelledby="language-picker-toggle"
       >
-        {showHeader ? <DropdownHeader>{t('language')}</DropdownHeader> : null}
+        {showHeader ? (
+          <OLDropdownHeader>{t('language')}</OLDropdownHeader>
+        ) : null}
         {subdomainLang &&
           Object.entries(subdomainLang).map(([subdomain, subdomainDetails]) => {
             if (
@@ -50,19 +52,19 @@ function LanguagePicker({ showHeader } = { showHeader: false }) {
             const isActive = subdomainDetails.lngCode === currentLangCode
             return (
               <li role="none" key={subdomain} translate="no">
-                <DropdownItem
+                <OLDropdownItem
                   href={`${subdomainDetails.url}${currentUrlWithQueryParams}`}
                   active={isActive}
                   aria-current={isActive ? 'true' : false}
                   trailingIcon={isActive ? 'check' : null}
                 >
                   {translatedLanguages?.[subdomainDetails.lngCode]}
-                </DropdownItem>
+                </OLDropdownItem>
               </li>
             )
           })}
-      </DropdownMenu>
-    </Dropdown>
+      </OLDropdownMenu>
+    </OLDropdown>
   )
 }
 

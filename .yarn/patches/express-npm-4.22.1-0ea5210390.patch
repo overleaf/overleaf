@@ -1,0 +1,287 @@
+diff --git a/lib/lockdown.js b/lib/lockdown.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..7acc55484421812ddb66edf015cdf0e1125b1cab
+--- /dev/null
++++ b/lib/lockdown.js
+@@ -0,0 +1,157 @@
++/*!
++ * Overleaf request-input lockdown.
++ *
++ * Captures parsed request input in symbol-keyed fields and, when
++ * REQ_LOCKDOWN_MODE is 'warn' or 'throw', turns the public req.body,
++ * req.query and req.params properties into lockdown accessors:
++ *
++ *  - reads log a warning ('warn' mode) or throw ('throw' mode); request
++ *    input must be read through parseReq() from @overleaf/validation-tools,
++ *    which validates it against a zod schema, or through getRawReqInput()
++ *    for allowlisted middleware
++ *  - writes always work and are stored in the symbol-keyed fields, so body
++ *    parsers and middleware that assign req.body keep functioning unchanged
++ *
++ * With REQ_LOCKDOWN_MODE unset (or 'off') nothing is installed and express
++ * behaves exactly like the unpatched package.
++ *
++ * The symbols are registered in the global symbol registry so that
++ * @overleaf/validation-tools can read the raw fields without importing
++ * express internals. Express' own internals (router param processing, the
++ * query middleware, res.jsonp) go through the helpers below instead of the
++ * public properties so that only application code trips the lockdown.
++ *
++ * Note: unlike the stock properties, the locked accessors are defined
++ * non-enumerable so that iterating/serializing a request (e.g. in logging)
++ * does not trip the lockdown.
++ */
++
++'use strict';
++
++var RAW_BODY = Symbol.for('overleaf.lockdown.rawBody');
++var RAW_QUERY = Symbol.for('overleaf.lockdown.rawQuery');
++var RAW_PARAMS = Symbol.for('overleaf.lockdown.rawParams');
++var INSTALLED = Symbol.for('overleaf.lockdown.installed');
++
++var VALID_MODES = ['off', 'warn', 'throw'];
++var cachedMode = null;
++
++function mode() {
++  if (cachedMode === null) {
++    var m = process.env.REQ_LOCKDOWN_MODE || 'off';
++    cachedMode = VALID_MODES.indexOf(m) === -1 ? 'off' : m;
++  }
++  return cachedMode;
++}
++
++/**
++ * Override the mode for tests. Pass null to re-read REQ_LOCKDOWN_MODE on the
++ * next access. Only affects requests that have not been handled yet.
++ */
++function setModeForTests(m) {
++  if (m === null) {
++    cachedMode = null;
++  } else {
++    cachedMode = VALID_MODES.indexOf(m) === -1 ? 'off' : m;
++  }
++}
++
++var warned = new Set();
++
++function report(req, field) {
++  var route = req.route && req.route.path;
++  var location =
++    (req.method || 'UNKNOWN') +
++    ' ' +
++    (route || req.originalUrl || req.url || 'unknown');
++  if (mode() === 'warn') {
++    var key = location + ' ' + field;
++    if (!warned.has(key)) {
++      warned.add(key);
++      var stack = new Error('trace').stack.split('\n').slice(2, 7).join('\n');
++      console.warn(
++        'req-lockdown: raw request input read: req.' +
++          field +
++          ' at ' +
++          location +
++          '\n' +
++          stack
++      );
++    }
++    return;
++  }
++  var err = new Error(
++    'raw request input is forbidden — use parseReq() (read req.' +
++      field +
++      ' at ' +
++      location +
++      ')'
++  );
++  err.code = 'ERR_RAW_REQ_INPUT';
++  throw err;
++}
++
++/**
++ * Install the lockdown accessors on a request. Idempotent, no-op in 'off'
++ * mode. Called from the router, the query middleware and expressInit so that
++ * every request is covered no matter how the app is assembled.
++ */
++function install(req) {
++  if (mode() === 'off') return;
++  if (req[INSTALLED]) return;
++  req[INSTALLED] = true;
++  lockField(req, 'body', RAW_BODY);
++  lockField(req, 'query', RAW_QUERY);
++  lockField(req, 'params', RAW_PARAMS);
++}
++
++function lockField(req, field, symbol) {
++  // preserve a value assigned before lockdown was installed
++  if (Object.prototype.hasOwnProperty.call(req, field)) {
++    req[symbol] = req[field];
++    delete req[field];
++  }
++  Object.defineProperty(req, field, {
++    configurable: true,
++    enumerable: false,
++    get: function () {
++      report(this, field);
++      return this[symbol]; // only reached in 'warn' mode
++    },
++    set: function (value) {
++      this[symbol] = value;
++    },
++  });
++}
++
++/**
++ * Effective params/query for express internals: the raw fields once lockdown
++ * is installed, the plain properties otherwise.
++ */
++function getParams(req) {
++  return req[INSTALLED] ? req[RAW_PARAMS] : req.params;
++}
++
++function getQuery(req) {
++  return req[INSTALLED] ? req[RAW_QUERY] : req.query;
++}
++
++/**
++ * Property key under which the router saves/restores params on the request.
++ */
++function paramsProp(req) {
++  return req[INSTALLED] ? RAW_PARAMS : 'params';
++}
++
++module.exports = {
++  RAW_BODY: RAW_BODY,
++  RAW_QUERY: RAW_QUERY,
++  RAW_PARAMS: RAW_PARAMS,
++  INSTALLED: INSTALLED,
++  mode: mode,
++  setModeForTests: setModeForTests,
++  install: install,
++  getParams: getParams,
++  getQuery: getQuery,
++  paramsProp: paramsProp,
++};
+diff --git a/lib/middleware/init.js b/lib/middleware/init.js
+index dfd042747bdb971d9760e9575241ddaa1b776cd8..162ec6da452bde5f5384d3d5bd79d5727742ed8f 100644
+--- a/lib/middleware/init.js
++++ b/lib/middleware/init.js
+@@ -14,6 +14,7 @@
+  */
+ 
+ var setPrototypeOf = require('setprototypeof')
++var lockdown = require('../lockdown')
+ 
+ /**
+  * Initialization middleware, exposing the
+@@ -27,6 +28,7 @@ var setPrototypeOf = require('setprototypeof')
+ 
+ exports.init = function(app){
+   return function expressInit(req, res, next){
++    lockdown.install(req);
+     if (app.enabled('x-powered-by')) res.setHeader('X-Powered-By', 'Express');
+     req.res = res;
+     res.req = req;
+diff --git a/lib/middleware/query.js b/lib/middleware/query.js
+index 7e9166947aff3be10f7ffec3771c92581ce211da..aad897b7ecd43477c1768e135ac06211a2424d36 100644
+--- a/lib/middleware/query.js
++++ b/lib/middleware/query.js
+@@ -15,6 +15,7 @@
+ var merge = require('utils-merge')
+ var parseUrl = require('parseurl');
+ var qs = require('qs');
++var lockdown = require('../lockdown');
+ 
+ /**
+  * @param {Object} options
+@@ -37,7 +38,9 @@ module.exports = function query(options) {
+   }
+ 
+   return function query(req, res, next){
+-    if (!req.query) {
++    lockdown.install(req);
++
++    if (!lockdown.getQuery(req)) {
+       var val = parseUrl(req).query;
+       req.query = queryparse(val, opts);
+     }
+diff --git a/lib/response.js b/lib/response.js
+index 2b654f4c6629c821bbeaaeee970b199a420fd8b3..103df49d3d94abf017022cdcf4611e62cad84a74 100644
+--- a/lib/response.js
++++ b/lib/response.js
+@@ -29,6 +29,7 @@ var normalizeType = require('./utils').normalizeType;
+ var normalizeTypes = require('./utils').normalizeTypes;
+ var setCharset = require('./utils').setCharset;
+ var cookie = require('cookie');
++var lockdown = require('./lockdown');
+ var send = require('send');
+ var extname = path.extname;
+ var mime = send.mime;
+@@ -312,7 +313,7 @@ res.jsonp = function jsonp(obj) {
+   var replacer = app.get('json replacer');
+   var spaces = app.get('json spaces');
+   var body = stringify(val, replacer, spaces, escape)
+-  var callback = this.req.query[app.get('jsonp callback name')];
++  var callback = lockdown.getQuery(this.req)[app.get('jsonp callback name')];
+ 
+   // content-type
+   if (!this.get('Content-Type')) {
+diff --git a/lib/router/index.js b/lib/router/index.js
+index abb3a6f589e834c5e105f2a96907ed2eb6fc0185..66fef252003098bcc268ef2ebcef0d20b3cce62b 100644
+--- a/lib/router/index.js
++++ b/lib/router/index.js
+@@ -22,6 +22,7 @@ var deprecate = require('depd')('express');
+ var flatten = require('array-flatten');
+ var parseUrl = require('parseurl');
+ var setPrototypeOf = require('setprototypeof')
++var lockdown = require('../lockdown');
+ 
+ /**
+  * Module variables.
+@@ -136,6 +137,8 @@ proto.param = function param(name, fn) {
+ proto.handle = function handle(req, res, out) {
+   var self = this;
+ 
++  lockdown.install(req);
++
+   debug('dispatching %s %s', req.method, req.url);
+ 
+   var idx = 0;
+@@ -153,9 +156,9 @@ proto.handle = function handle(req, res, out) {
+   var stack = self.stack;
+ 
+   // manage inter-router variables
+-  var parentParams = req.params;
++  var parentParams = lockdown.getParams(req);
+   var parentUrl = req.baseUrl || '';
+-  var done = restore(out, req, 'baseUrl', 'next', 'params');
++  var done = restore(out, req, 'baseUrl', 'next', lockdown.paramsProp(req));
+ 
+   // setup next layer
+   req.next = next;
+@@ -368,7 +371,7 @@ proto.process_params = function process_params(layer, called, req, res, done) {
+     paramIndex = 0;
+     key = keys[i++];
+     name = key.name;
+-    paramVal = req.params[name];
++    paramVal = lockdown.getParams(req)[name];
+     paramCallbacks = params[name];
+     paramCalled = called[name];
+ 
+@@ -380,7 +383,7 @@ proto.process_params = function process_params(layer, called, req, res, done) {
+     if (paramCalled && (paramCalled.match === paramVal
+       || (paramCalled.error && paramCalled.error !== 'route'))) {
+       // restore value
+-      req.params[name] = paramCalled.value;
++      lockdown.getParams(req)[name] = paramCalled.value;
+ 
+       // next param
+       return param(paramCalled.error);
+@@ -400,7 +403,7 @@ proto.process_params = function process_params(layer, called, req, res, done) {
+     var fn = paramCallbacks[paramIndex++];
+ 
+     // store updated value
+-    paramCalled.value = req.params[key.name];
++    paramCalled.value = lockdown.getParams(req)[key.name];
+ 
+     if (err) {
+       // store error

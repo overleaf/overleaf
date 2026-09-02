@@ -1,28 +1,15 @@
-import {
-  Decoration,
-  DecorationSet,
-  EditorView,
-  showTooltip,
-  Tooltip,
-  TooltipView,
-} from '@codemirror/view'
+import { EditorView, showTooltip, Tooltip, TooltipView } from '@codemirror/view'
 import {
   Extension,
   StateField,
   StateEffect,
-  Range,
-  SelectionRange,
   EditorState,
   Transaction,
   Compartment,
   TransactionSpec,
 } from '@codemirror/state'
-import { v4 as uuid } from 'uuid'
 import { isContextMenuMouseEvent } from '../utils/context-menu-mouse-event'
-
-export const addNewCommentRangeEffect = StateEffect.define<Range<Decoration>>()
-
-export const removeNewCommentRangeEffect = StateEffect.define<string>()
+import { addCommentRangesField } from './add-comment'
 
 const mouseDownEffect = StateEffect.define()
 const mouseUpEffect = StateEffect.define()
@@ -43,40 +30,22 @@ const mouseDownStateField = StateField.define<boolean>({
   },
 })
 
-export const buildAddNewCommentRangeEffect = (range: SelectionRange) => {
-  return addNewCommentRangeEffect.of(
-    Decoration.mark({
-      tagName: 'span',
-      class: `ol-cm-change ol-cm-change-c`,
-      opType: 'c',
-      id: uuid(),
-    }).range(range.from, range.to)
-  )
-}
-
 const reviewTooltipCompartment = new Compartment()
 
-export const reviewTooltip = (
-  enabled: boolean,
-  editorContextMenuEnabled: boolean = false
-): Extension => {
-  return reviewTooltipCompartment.of(
-    enabled ? reviewTooltipEnabled(editorContextMenuEnabled) : []
-  )
+export const reviewTooltip = (enabled: boolean): Extension => {
+  return [
+    addCommentRangesField,
+    reviewTooltipCompartment.of(enabled ? reviewTooltipMenu() : []),
+  ]
 }
 
-export const setReviewTooltip = (
-  enabled: boolean,
-  editorContextMenuEnabled: boolean
-): TransactionSpec => ({
+export const setReviewTooltip = (enabled: boolean): TransactionSpec => ({
   effects: reviewTooltipCompartment.reconfigure(
-    enabled ? reviewTooltipEnabled(editorContextMenuEnabled) : []
+    enabled ? reviewTooltipMenu() : []
   ),
 })
 
-export const reviewTooltipEnabled = (
-  editorContextMenuEnabled = false
-): Extension => {
+const reviewTooltipMenu = (): Extension => {
   let mouseUpListener: null | (() => void) = null
   const disableMouseUpListener = () => {
     if (mouseUpListener) {
@@ -86,12 +55,12 @@ export const reviewTooltipEnabled = (
 
   return [
     reviewTooltipTheme,
-    reviewTooltipStateField,
+    reviewTooltipField,
     mouseDownStateField,
     EditorView.domEventHandlers({
       mousedown: (event, view) => {
         // Hide tooltip when opening the context menu
-        if (editorContextMenuEnabled && isContextMenuMouseEvent(event)) {
+        if (isContextMenuMouseEvent(event)) {
           return false
         }
 
@@ -110,39 +79,14 @@ export const reviewTooltipEnabled = (
   ]
 }
 
-export const reviewTooltipStateField = StateField.define<{
-  tooltip: Tooltip | null
-  addCommentRanges: DecorationSet
-}>({
+export const reviewTooltipField = StateField.define<Tooltip | null>({
   create() {
-    return { tooltip: null, addCommentRanges: Decoration.none }
+    return null
   },
 
-  update(field, tr) {
-    let { tooltip, addCommentRanges } = field
-
-    addCommentRanges = addCommentRanges.map(tr.changes)
-
-    for (const effect of tr.effects) {
-      if (effect.is(removeNewCommentRangeEffect)) {
-        const threadId = effect.value
-        addCommentRanges = addCommentRanges.update({
-          filter: (_from, _to, value) => {
-            return value.spec.id !== threadId
-          },
-        })
-      }
-
-      if (effect.is(addNewCommentRangeEffect)) {
-        const rangeToAdd = effect.value
-        addCommentRanges = addCommentRanges.update({
-          add: [rangeToAdd],
-        })
-      }
-    }
-
+  update(tooltip, tr) {
     if (tr.state.selection.main.empty) {
-      return { tooltip: null, addCommentRanges }
+      return null
     }
 
     if (
@@ -152,24 +96,21 @@ export const reviewTooltipStateField = StateField.define<{
     ) {
       if (tr.selection) {
         // selection was changed, remove the tooltip
-        return { tooltip: null, addCommentRanges }
+        return null
       }
       // for any other update, we keep the tooltip because it could be created in previous transaction
       // and we are still waiting for "mouse up" event to show it
-      return { tooltip, addCommentRanges }
+      return tooltip
     }
 
     const isMouseDown = tr.state.field(mouseDownStateField)
     // if "isMouseDown" is true, tooltip will be created but still hidden
     // the reason why we cant just create the tooltip on mouse up is because transaction.userEvent is empty at that point
 
-    return { tooltip: buildTooltip(tr.state, isMouseDown), addCommentRanges }
+    return buildTooltip(tr.state, isMouseDown)
   },
 
-  provide: field => [
-    EditorView.decorations.from(field, field => field.addCommentRanges),
-    showTooltip.compute([field], state => state.field(field).tooltip),
-  ],
+  provide: field => showTooltip.from(field),
 })
 
 function buildTooltip(state: EditorState, hidden: boolean): Tooltip | null {

@@ -13,26 +13,29 @@ services:
       target: base
     volumes:
       - .:/overleaf/services/history-v1
-      - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
       - ../../package.json:/overleaf/package.json
       - ../../.yarnrc.yml:/overleaf/.yarnrc.yml
       - ../../yarn.lock:/overleaf/yarn.lock
       - ../../.yarn:/overleaf/.yarn
+      - ../../.pnp.cjs:/overleaf/.pnp.cjs
+      - ../../.pnp.loader.mjs:/overleaf/.pnp.loader.mjs
+      - ../../.pnp.register.mjs:/overleaf/.pnp.register.mjs
       - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
       - ../../tools/migrations:/overleaf/tools/migrations
     working_dir: /overleaf/services/history-v1
     environment:
-      MOCHA_GREP: ${MOCHA_GREP}
+      TEST_NAME_PATTERN: ${TEST_NAME_PATTERN}
       LOG_LEVEL: ${LOG_LEVEL:-}
       MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       NODE_ENV: test
-      NODE_OPTIONS: "--unhandled-rejections=strict"
+      NODE_OPTIONS: "--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --unhandled-rejections=strict"
       REDIS_HOST: redis_test
       HISTORY_REDIS_HOST: redis_test
       QUEUES_REDIS_HOST: redis_test
       ANALYTICS_QUEUES_REDIS_HOST: redis_test
       ANALYTICS_QUEUES_BQ_SINK_REDIS_HOST: redis_test
+      REQ_VALIDATION_MODE: enforce
     entrypoint: /overleaf/bin/shared/wait_for_it mongo:27017 --timeout=60 --
     command: yarn run --silent test:unit
     user: node
@@ -49,12 +52,14 @@ services:
       target: base
     volumes:
       - .:/overleaf/services/history-v1
-      - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
       - ../../package.json:/overleaf/package.json
       - ../../.yarnrc.yml:/overleaf/.yarnrc.yml
       - ../../yarn.lock:/overleaf/yarn.lock
       - ../../.yarn:/overleaf/.yarn
+      - ../../.pnp.cjs:/overleaf/.pnp.cjs
+      - ../../.pnp.loader.mjs:/overleaf/.pnp.loader.mjs
+      - ../../.pnp.register.mjs:/overleaf/.pnp.register.mjs
       - minio-certs:/certs
       - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
       - ../../tools/migrations:/overleaf/tools/migrations
@@ -78,10 +83,12 @@ services:
       GCS_API_ENDPOINT: http://gcs:9090
       GCS_PROJECT_ID: fake
       STORAGE_EMULATOR_HOST: http://gcs:9090/storage/v1
-      MOCHA_GREP: ${MOCHA_GREP}
+      TEST_NAME_PATTERN: ${TEST_NAME_PATTERN}
       LOG_LEVEL: ${LOG_LEVEL:-}
       NODE_ENV: test
-      NODE_OPTIONS: "--unhandled-rejections=strict"
+      NODE_OPTIONS: "--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --unhandled-rejections=strict"
+      REQ_LOCKDOWN_MODE: throw
+      REQ_VALIDATION_MODE: enforce
     user: node
     depends_on:
       mongo:
@@ -103,6 +110,9 @@ services:
 
   redis_test:
     image: redis:7.4.8
+    # Throw-away test data in tmpfs: the image declares a VOLUME here, which would otherwise leave an anonymous volume behind after every run.
+    tmpfs:
+      - /data
     healthcheck:
       test: ping=$$(redis-cli ping) && [ "$$ping" = 'PONG' ]
       interval: 1s
@@ -114,6 +124,10 @@ services:
     volumes:
       - ../../bin/shared/mongodb-init-replica-set.js:/docker-entrypoint-initdb.d/mongodb-init-replica-set.js
       - ../../bin/shared/mongodb-docker-entrypoint-wait.sh:/mongodb-docker-entrypoint-wait.sh
+    # Throw-away test data in tmpfs: the image declares a VOLUME here, which would otherwise leave an anonymous volume behind after every run.
+    tmpfs:
+      - /data/db
+      - /data/configdb
     entrypoint: /mongodb-docker-entrypoint-wait.sh
     environment:
       MONGO_INITDB_DATABASE: sharelatex
@@ -125,6 +139,9 @@ services:
 
   postgres:
     image: postgres:14
+    # Throw-away test data in tmpfs: the image declares a VOLUME here, which would otherwise leave an anonymous volume behind after every run.
+    tmpfs:
+      - /var/lib/postgresql/data
     environment:
       POSTGRES_USER: overleaf
       POSTGRES_PASSWORD: overleaf
@@ -139,7 +156,7 @@ services:
   certs:
     build:
       dockerfile_inline: |
-        FROM node:24.14.1
+        FROM node:24.18.1
         RUN wget -O /certgen "https://github.com/minio/certgen/releases/download/v1.3.0/certgen-linux-"`dpkg --print-architecture`
         RUN chmod +x /certgen
     volumes:
@@ -159,6 +176,9 @@ services:
   minio:
     image: minio/minio:RELEASE.2024-10-13T13-34-11Z
     command: server /data
+    # Throw-away test data in tmpfs: the image declares a VOLUME here, which would otherwise leave an anonymous volume behind after every run.
+    tmpfs:
+      - /data
     volumes:
       - minio-certs:/root/.minio/certs
     environment:
@@ -177,17 +197,12 @@ services:
     image: minio/mc:RELEASE.2024-10-08T09-37-26Z
     volumes:
       - minio-certs:/root/.mc/certs/CAs
-    entrypoint: sh
+      - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
+    entrypoint: /overleaf/bin/shared/wait_for_it minio:9000 --timeout=60 --
     command:
+      - sh
       - "-cex"
       - |
-        sleep 1
-        mc alias set s3 https://minio:9000 MINIO_ROOT_USER MINIO_ROOT_PASSWORD \
-        || sleep 3 && \
-        mc alias set s3 https://minio:9000 MINIO_ROOT_USER MINIO_ROOT_PASSWORD \
-        || sleep 3 && \
-        mc alias set s3 https://minio:9000 MINIO_ROOT_USER MINIO_ROOT_PASSWORD \
-        || sleep 3 && \
         mc alias set s3 https://minio:9000 MINIO_ROOT_USER MINIO_ROOT_PASSWORD
         mc mb --ignore-existing s3/overleaf-test-history-chunks
         mc mb --ignore-existing s3/overleaf-test-history-deks

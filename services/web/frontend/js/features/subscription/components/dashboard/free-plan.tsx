@@ -17,7 +17,10 @@ function FreePlan() {
         <li>{t('dropbox_integration_lowercase')}</li>
         <li>{t('github_integration_lowercase')}</li>
       </ul>
-      <a className="btn btn-primary me-1" href="/user/subscription/plans">
+      <a
+        className="btn btn-primary me-1"
+        href="/user/subscription/choose-your-plan"
+      >
         {t('upgrade_now')}
       </a>
       {hasAiAssistViaWritefull && (

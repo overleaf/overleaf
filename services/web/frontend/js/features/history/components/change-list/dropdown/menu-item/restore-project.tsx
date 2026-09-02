@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
+import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
 import { useTranslation } from 'react-i18next'
 import { RestoreProjectModal } from '../../../diff-view/modals/restore-project-modal'
 import { useSplitTestContext } from '@/shared/context/split-test-context'
@@ -44,13 +44,13 @@ const RestoreProject = ({
 
   return (
     <>
-      <OLDropdownMenuItem
+      <DropdownMenuItem
         as="button"
         leadingIcon={<MaterialIcon type="undo" />}
         onClick={handleClick}
       >
         {t('restore_project_to_this_version')}
-      </OLDropdownMenuItem>
+      </DropdownMenuItem>
       <RestoreProjectModal
         setShow={setShowModal}
         show={showModal}

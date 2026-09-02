@@ -21,8 +21,8 @@ describe('DocumentUpdaterManager', function () {
       redis: {
         documentupdater: {
           key_schema: {
-            pendingUpdates({ doc_id: docId }) {
-              return `PendingUpdates:${docId}`
+            pendingProjectUpdates({ project_id: projectId }) {
+              return `PendingProjectUpdates:${projectId}`
             },
           },
         },
@@ -239,7 +239,7 @@ describe('DocumentUpdaterManager', function () {
   describe('queueChange', function () {
     beforeEach(function (ctx) {
       ctx.change = {
-        doc: '1234567890',
+        doc: ctx.doc_id,
         op: [{ d: 'test', p: 345 }],
         v: 789,
       }
@@ -255,22 +255,22 @@ describe('DocumentUpdaterManager', function () {
         )
       })
 
-      it('should push the change', function (ctx) {
+      it('should push the change onto the per-project queue with its doc id', function (ctx) {
         ctx.rclient.rpush
           .calledWith(
-            `PendingUpdates:${ctx.doc_id}`,
+            `PendingProjectUpdates:${ctx.project_id}`,
             JSON.stringify(ctx.change)
           )
           .should.equal(true)
       })
 
-      it('should notify the doc updater of the change via the pending-updates-list queue', function (ctx) {
+      it('should notify the doc updater with a bare project id marker on the pending-updates-list queue', function (ctx) {
         // The second call should be to a pending-updates-list key (either base or sharded)
         const secondCall = ctx.rclient.rpush.secondCall
         secondCall.should.exist
         const queueKey = secondCall.args[0]
         queueKey.should.match(/^pending-updates-list(-\d+)?$/)
-        secondCall.args[1].should.equal(`${ctx.project_id}:${ctx.doc_id}`)
+        secondCall.args[1].should.equal(ctx.project_id)
       })
     })
 
@@ -381,7 +381,7 @@ describe('DocumentUpdaterManager', function () {
       it('should remove the invalid keys from the change', function (ctx) {
         ctx.rclient.rpush
           .calledWith(
-            `PendingUpdates:${ctx.doc_id}`,
+            `PendingProjectUpdates:${ctx.project_id}`,
             JSON.stringify({ op: ctx.change.op })
           )
           .should.equal(true)

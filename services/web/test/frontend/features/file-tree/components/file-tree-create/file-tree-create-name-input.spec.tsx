@@ -62,7 +62,7 @@ describe('<FileTreeCreateNameInput/>', function () {
     // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(100)
 
-    cy.get<HTMLInputElement>('@input').then(element => {
+    cy.get<JQuery<HTMLInputElement>>('@input').then(element => {
       expect(element.get(0).selectionStart).to.equal(0)
       expect(element.get(0).selectionEnd).to.equal(4)
     })

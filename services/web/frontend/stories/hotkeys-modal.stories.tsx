@@ -1,4 +1,5 @@
 import { ComponentProps } from 'react'
+import { SplitTestProvider } from '@/shared/context/split-test-context'
 import HotkeysModal from '../js/features/hotkeys-modal/components/hotkeys-modal'
 
 type HotkeysModalProps = ComponentProps<typeof HotkeysModal>
@@ -27,4 +28,11 @@ export default {
   argTypes: {
     handleHide: { action: 'handleHide' },
   },
+  decorators: [
+    (Story: React.ComponentType) => (
+      <SplitTestProvider>
+        <Story />
+      </SplitTestProvider>
+    ),
+  ],
 }

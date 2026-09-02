@@ -41,63 +41,6 @@ const ExportDocumentErrorToast = ({ data }: { data?: any }) => {
   )
 }
 
-const ExportDocumentSuccessToast = ({ data }: { data?: any }) => {
-  const type = data?.type
-  if (type === 'docx') {
-    return (
-      <Trans
-        i18nKey="docx_export_feedback_message"
-        components={[
-          // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
-          <a
-            href="https://forms.gle/Fg4BUXV2yv61hStX8"
-            target="_BLANK"
-            rel="noopener noreferrer"
-          />,
-        ]}
-      />
-    )
-  } else if (type === 'markdown') {
-    return (
-      <Trans
-        i18nKey="markdown_export_feedback_message"
-        components={[
-          // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
-          <a
-            href="https://forms.gle/wc43zEukeqpec9mAA"
-            target="_BLANK"
-            rel="noopener noreferrer"
-          />,
-        ]}
-      />
-    )
-  } else if (type === 'html') {
-    return (
-      <Trans
-        i18nKey="html_export_feedback_message"
-        components={[
-          // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
-          <a
-            href="https://forms.gle/nBUVGqPYwLcWHSmt5"
-            target="_BLANK"
-            rel="noopener noreferrer"
-          />,
-        ]}
-      />
-    )
-  } else {
-    return (
-      <Trans
-        i18nKey="generic_export_feedback_message"
-        components={[
-          // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
-          <a href="/contact" target="_BLANK" rel="noopener noreferrer" />,
-        ]}
-      />
-    )
-  }
-}
-
 const generators: GlobalToastGeneratorEntry[] = [
   {
     key: 'export-document:error',
@@ -116,16 +59,6 @@ const generators: GlobalToastGeneratorEntry[] = [
       content: <PreparingExportToast />,
       type: 'info',
       autoHide: false,
-      isDismissible: true,
-    }),
-  },
-  {
-    key: 'export-document:success',
-    generator: (data: any) => ({
-      content: <ExportDocumentSuccessToast data={data} />,
-      type: 'success',
-      autoHide: true,
-      delay: 45000,
       isDismissible: true,
     }),
   },
@@ -170,16 +103,6 @@ export const hidePreparingExportToast = (handle: string) => {
   window.dispatchEvent(
     new CustomEvent('ide:dismiss-toast', {
       detail: { key: 'export-document:preparing', handle },
-    })
-  )
-}
-
-export const showExportDocumentSuccess = (
-  type: 'docx' | 'markdown' | 'html'
-) => {
-  window.dispatchEvent(
-    new CustomEvent('ide:show-toast', {
-      detail: { key: 'export-document:success', type },
     })
   )
 }

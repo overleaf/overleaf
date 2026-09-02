@@ -5,6 +5,83 @@
  * This file can be deleted once the Recurly to Stripe migration is complete.
  */
 
+/**
+ * Get ISO timestamp for logging
+ */
+function timestamp() {
+  return new Date().toISOString()
+}
+
+// =============================================================================
+// LOGGING UTILITIES
+// =============================================================================
+
+/**
+ * Debug mode flag - controlled by --verbose/-v CLI arg.
+ * (Intentionally not controlled via env var to avoid accidental noisy logs.)
+ */
+let DEBUG_MODE = false
+
+/**
+ * Enable or disable debug mode.
+ * @param {boolean} enabled
+ */
+export function setDebugMode(enabled) {
+  DEBUG_MODE = !!enabled
+}
+
+/**
+ * Check if debug mode is enabled.
+ * @returns {boolean}
+ */
+export function isDebugMode() {
+  return DEBUG_MODE
+}
+
+/**
+ * Log an info message with timestamp
+ */
+export function logInfo(message, context = {}) {
+  const contextStr =
+    Object.keys(context).length > 0 ? ` ${JSON.stringify(context)}` : ''
+  console.info(`[${timestamp()}] INFO: ${message}${contextStr}`)
+}
+
+/**
+ * Log a warning message with timestamp
+ */
+export function logWarn(message, context = {}) {
+  const contextStr =
+    Object.keys(context).length > 0 ? ` ${JSON.stringify(context)}` : ''
+  console.warn(`[${timestamp()}] WARN: ${message}${contextStr}`)
+}
+
+/**
+ * Log an error message with timestamp and optional stack trace
+ */
+export function logError(message, error = null, context = {}) {
+  const contextStr =
+    Object.keys(context).length > 0 ? ` ${JSON.stringify(context)}` : ''
+  console.error(`[${timestamp()}] ERROR: ${message}${contextStr}`)
+  if (error?.stack) {
+    console.error(`[${timestamp()}] STACK: ${error.stack}`)
+  }
+}
+
+/**
+ * Log a message with timestamp.
+ *
+ * By default, logs at INFO level.
+ * When { verboseOnly: true }, only logs when DEBUG_MODE is enabled.
+ */
+export function logDebug(message, context = {}, { verboseOnly = false } = {}) {
+  if (verboseOnly && !DEBUG_MODE) return
+  const contextStr =
+    Object.keys(context).length > 0 ? ` ${JSON.stringify(context)}` : ''
+  const level = verboseOnly ? 'DEBUG' : 'INFO'
+  console.log(`[${timestamp()}] ${level}: ${message}${contextStr}`)
+}
+
 export function coalesceOrEqualOrThrow(a, b, fieldName) {
   const isSetA = !!a
   const isSetB = !!b
@@ -1071,47 +1148,105 @@ export function sanitizeBillingInfo(billingInfo) {
 }
 
 /**
+ * Whether Stripe cannot resolve the customer's address to a tax location.
+ *
+ * This is the authoritative, region-agnostic signal for the address-pending
+ * migration cohort: it covers both US/CA country-only addresses and arbitrary
+ * broken/incomplete non-US/CA addresses (e.g. an India address with a postal but
+ * no state/city) that a postal-only heuristic can't predict. Read it after
+ * pushing the Recurly address to Stripe (the customer must be retrieved or
+ * updated with `expand: ['tax']`).
+ *
+ * @param {Stripe.Customer} customer - a Stripe customer with `tax` expanded
+ * @returns {boolean}
+ */
+export function isCustomerAddressUnrecognized(customer) {
+  return customer?.tax?.automatic_tax === 'unrecognized_location'
+}
+
+/**
  *
  * @param {Stripe.PaymentMethod[]} paymentMethods
  * @param {string} stripeCustomerId
  * @param {object|null} billingInfo - Recurly billing info object
- * @returns {Stripe.PaymentMethod} valid payment method
- * @throws {Error} if no valid payment method found
+ * @returns {Stripe.PaymentMethod | null } valid payment method or null if no valid method found
  */
-export function coalesceOrThrowPaymentMethod(
+export function matchPaymentMethod(
   paymentMethods,
   stripeCustomerId,
   billingInfo
 ) {
   if (paymentMethods.length === 0) {
-    throw new Error(
-      `Stripe customer ${stripeCustomerId} has no usable payment method`
-    )
+    logInfo(`Stripe customer ${stripeCustomerId} has no usable payment method`)
+    return null
   }
 
-  const matchingPaymentMethods = paymentMethods.filter(method =>
-    areStripeAndRecurlyCardDetailsEqual(method, billingInfo?.paymentMethod)
-  )
+  const paymentMethodsWithMatchType = paymentMethods.map(method => ({
+    method,
+    matchType: getStripeRecurlyCardMatchType(
+      method,
+      billingInfo?.paymentMethod
+    ),
+  }))
+
+  const matchingPaymentMethods = paymentMethodsWithMatchType
+    // A last4 match is sufficient: card updaters routinely change the expiry
+    // (and other card details) while keeping the same underlying card, so we do
+    // not reject earlier/expired expiry dates here. The match type is retained
+    // for reporting only.
+    .filter(({ matchType }) => matchType !== 'none')
+    .map(({ method }) => method)
+    .sort((a, b) => {
+      // sort by latest expiry date first, as a proxy for card recency
+      const aExpiry = toComparableExpiry({
+        month: a.card?.exp_month,
+        year: a.card?.exp_year,
+      })
+      const bExpiry = toComparableExpiry({
+        month: b.card?.exp_month,
+        year: b.card?.exp_year,
+      })
+
+      const aComparable = aExpiry ?? 0
+      const bComparable = bExpiry ?? 0
+      return bComparable - aComparable
+    })
 
   if (matchingPaymentMethods.length === 0) {
-    throw new Error(
-      `Stripe customer ${stripeCustomerId} has no usable payment method`
+    const failedMatchTypes = paymentMethodsWithMatchType.reduce(
+      (acc, { matchType }) => {
+        acc[matchType] += 1
+        return acc
+      },
+      { none: 0, exact: 0, later: 0, expired: 0, earlier: 0, invalid_expiry: 0 }
     )
+
+    logInfo(
+      `Stripe customer ${stripeCustomerId} has no matching usable payment method. Match type counts: ${JSON.stringify(
+        failedMatchTypes
+      )}`
+    )
+    return null
   }
 
-  return matchingPaymentMethods[0]
+  return matchingPaymentMethods[0] || null
 }
 
 /**
- * Compare Stripe card details with Recurly card details to determine if they likely represent the same card.
+ * Compare Stripe card details with Recurly card details and return a match type.
  *
- * Checks last4 and expiry month/year.
+ * Match types:
+ * - none: not comparable / card details do not match
+ * - exact: same last4 and same expiry
+ * - later: same last4 and Stripe expiry is later than Recurly expiry
+ * - expired: same last4 and Stripe card is already expired relative to current month
+ * - earlier: same last4 and Stripe expiry is earlier than Recurly expiry
  *
  * @param {Stripe.PaymentMethod} stripePaymentMethod
  * @param {object} recurlyPaymentMethod - Recurly billingInfo.paymentMethod object
- * @returns {boolean} true if details match, false otherwise
+ * @returns {'none'|'exact'|'later'|'expired'|'earlier'|'invalid_expiry'}
  */
-export function areStripeAndRecurlyCardDetailsEqual(
+export function getStripeRecurlyCardMatchType(
   stripePaymentMethod,
   recurlyPaymentMethod
 ) {
@@ -1121,14 +1256,62 @@ export function areStripeAndRecurlyCardDetailsEqual(
     !stripePaymentMethod.card ||
     !recurlyPaymentMethod?.lastFour
   ) {
-    return false
+    return 'none'
   }
 
-  return (
-    stripePaymentMethod.card.last4 === recurlyPaymentMethod.lastFour &&
-    stripePaymentMethod.card.exp_month === recurlyPaymentMethod.expMonth &&
-    stripePaymentMethod.card.exp_year === recurlyPaymentMethod.expYear
-  )
+  if (stripePaymentMethod.card.last4 !== recurlyPaymentMethod.lastFour) {
+    return 'none'
+  }
+
+  const stripeExpiryComparable = toComparableExpiry({
+    month: stripePaymentMethod.card.exp_month,
+    year: stripePaymentMethod.card.exp_year,
+  })
+  const recurlyExpiryComparable = toComparableExpiry({
+    month: recurlyPaymentMethod.expMonth,
+    year: recurlyPaymentMethod.expYear,
+  })
+
+  if (stripeExpiryComparable === null || recurlyExpiryComparable === null) {
+    return 'invalid_expiry'
+  }
+
+  const currentYearMonthComparable = getCurrentYearMonthComparable()
+  if (stripeExpiryComparable < currentYearMonthComparable) {
+    return 'expired'
+  }
+
+  if (stripeExpiryComparable === recurlyExpiryComparable) return 'exact'
+  if (stripeExpiryComparable > recurlyExpiryComparable) return 'later'
+
+  return 'earlier'
+}
+
+function getCurrentYearMonthComparable() {
+  const now = new Date()
+  return now.getFullYear() * 100 + (now.getMonth() + 1)
+}
+
+/**
+ * Convert an expiry shape to a comparable YYYYMM number.
+ * Returns null when month/year are missing or invalid.
+ *
+ * @param {*} expiry {month: number|string, year: number|string}
+ * @returns {number|null}
+ */
+function toComparableExpiry(expiry) {
+  if (!expiry) return null
+
+  const month = Number.parseInt(String(expiry.month), 10)
+  const rawYear = Number.parseInt(String(expiry.year), 10)
+
+  if (!Number.isInteger(month) || month < 1 || month > 12) return null
+  if (!Number.isInteger(rawYear) || rawYear < 0) return null
+
+  // Handle occasional 2-digit years defensively (e.g. 26 -> 2026).
+  const year = rawYear < 100 ? 2000 + rawYear : rawYear
+
+  return year * 100 + month
 }
 
 // =============================================================================
@@ -1374,6 +1557,7 @@ export async function resolveCustomerIdentity(account, fetchCollectionMethod) {
  * @param {() => Promise<string|null>} options.fetchCollectionMethod - Callback to get subscription collection method
  * @param {Array} options.stripePaymentMethods - Pre-fetched Stripe payment methods
  * @param {string} options.stripeServiceName - 'stripe-us' or 'stripe-uk'
+ * @param {boolean} [options.isPaymentMethodPending] - True when the Stripe subscription is flagged `paymentMethodPending` (migrated manual subscription without a default payment method); suppresses the default-payment-method drift diff.
  * @returns {Promise<Record<string, { recurly: any, stripe: any }>>} - Per-field diffs (empty = no drift)
  */
 export async function compareAccountFields({
@@ -1383,6 +1567,7 @@ export async function compareAccountFields({
   fetchCollectionMethod,
   stripePaymentMethods,
   stripeServiceName,
+  isPaymentMethodPending = false,
 }) {
   const { name, address, companyName, vatNumber } =
     await resolveCustomerIdentity(account, fetchCollectionMethod)
@@ -1558,6 +1743,7 @@ export async function compareAccountFields({
     (account.billingInfo?.updatedAt?.getTime() || 0) / 1000
   const recurlyPaymentMethodIsNewer =
     stripePaymentMethodCreatedAt < recurlyPaymentMethodUpdatedAt
+  const skipPaymentMethodDiffForPaymentMethodPending = isPaymentMethodPending
   const paymentMethodIsMissing =
     (!stripeDefaultPaymentMethod && expectedPaymentMethod) ||
     (stripeDefaultPaymentMethod && !expectedPaymentMethod)
@@ -1566,7 +1752,23 @@ export async function compareAccountFields({
     expectedPaymentMethod?.type === 'paypal' &&
     stripeDefaultPaymentMethod?.type === 'paypal'
 
-  if (bothArePaypal) {
+  // A last4 match means we treat the Stripe card as the same card, regardless
+  // of expiry or when it was created/updated (this mirrors the pipeline and
+  // upsert matching, which only require last4). We only flag genuine card
+  // drift: a payment method present on one side but not the other, or two
+  // payment methods that do not match on last4.
+  const bothHavePaymentMethod =
+    Boolean(stripeDefaultPaymentMethod) && Boolean(expectedPaymentMethod)
+  const cardsMatchOnLast4 =
+    getStripeRecurlyCardMatchType(
+      stripeDefaultPaymentMethod,
+      expectedPaymentMethod
+    ) !== 'none'
+
+  if (skipPaymentMethodDiffForPaymentMethodPending) {
+    // Migrated manual subscription without a payment method: the missing
+    // default payment method is expected, so don't flag a diff for it.
+  } else if (bothArePaypal) {
     // Both are PayPal — the payment method itself matches, but flag if
     // Recurly billing info was updated after the Stripe payment method was
     // created.
@@ -1587,11 +1789,7 @@ export async function compareAccountFields({
     }
   } else if (
     paymentMethodIsMissing ||
-    (!areStripeAndRecurlyCardDetailsEqual(
-      stripeDefaultPaymentMethod,
-      expectedPaymentMethod
-    ) &&
-      recurlyPaymentMethodIsNewer)
+    (bothHavePaymentMethod && !cardsMatchOnLast4)
   ) {
     diffs.default_payment_method = {
       recurly: {

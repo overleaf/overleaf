@@ -1,9 +1,15 @@
 project-history
 --dependencies=mongo,redis
 --deploy-pipeline=project-history
---env-add=
+--env-add-acceptance=REQ_LOCKDOWN_MODE=throw,REQ_VALIDATION_MODE=enforce
+--env-add-unit=REQ_VALIDATION_MODE=enforce
 --env-pass-through=
 --esmock-loader=True
---node-version=24.14.1
+--extra-focus-packages=@overleaf/document-updater
+--extra-jenkins-includes=google-ops/kubernetes/kustomize/base/cron-scripts/**
+--jenkins-include-kustomize-app=project-history
+--node-version=24.18.1
 --pipeline-owner=44
 --public-repo=False
+--test-acceptance-runner=mocha
+--test-unit-runner=mocha

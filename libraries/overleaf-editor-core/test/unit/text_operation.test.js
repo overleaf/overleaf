@@ -109,6 +109,29 @@ describe('TextOperation', function () {
     expect(o.isNoop()).to.be.false
   })
 
+  it('does not treat a tracked-change retain as a no-op when composing for undo', function () {
+    // A single retain with a tracking directive changes the file's tracked
+    // changes when applied, so isNoop() reports false and
+    // canBeComposedWithForUndo() does not group it with other operations.
+    const trackedDelete = new TextOperation().retain(5, {
+      tracking: new TrackingProps(
+        'delete',
+        'user-1',
+        new Date('2026-07-10T00:00:00.000Z')
+      ),
+    })
+
+    const file = new StringFileData('lorem')
+    file.edit(trackedDelete)
+    expect(file.getTrackedChanges().asSorted()).to.have.length(1)
+
+    expect(trackedDelete.isNoop()).to.be.false
+
+    const unrelatedInsert = new TextOperation().retain(5).insert('x')
+    expect(trackedDelete.canBeComposedWithForUndo(unrelatedInsert)).to.be.false
+    expect(unrelatedInsert.canBeComposedWithForUndo(trackedDelete)).to.be.false
+  })
+
   it('converts to string', function () {
     const o = new TextOperation()
     o.retain(2)
@@ -368,6 +391,13 @@ describe('TextOperation', function () {
   })
 
   describe('compose', function () {
+    it('rejects a second operation built on different content', function () {
+      const a = new TextOperation().retain(4)
+      const b = new TextOperation().retain(7)
+
+      expect(() => a.compose(b)).to.throw(TextOperation.UnprocessableError)
+    })
+
     it(
       'composes (randomised)',
       random.test(numTrials, () => {
@@ -444,9 +474,70 @@ describe('TextOperation', function () {
           c: c.toJSON(),
         })
 
-        expect(ab_c_file.toRaw()).to.deep.equal(a_bc_file.toRaw(), fuzzingError)
+        // See 'compose associativity does not handle timestamps' test below
+        // for why we ignore timestamps here.
+        expect(stripTrackedChangeTimestamps(ab_c_file.toRaw())).to.deep.equal(
+          stripTrackedChangeTimestamps(a_bc_file.toRaw()),
+          fuzzingError
+        )
       })
     )
+
+    it('compose associativity does not handle timestamps', function () {
+      const str = 'AB'
+      const comments = []
+
+      // a tracks both chars as a delete @2023
+      const a = TextOperation.fromJSON({
+        textOperation: [
+          {
+            r: 2,
+            tracking: {
+              type: 'delete',
+              userId: 'user1',
+              ts: '2023-01-01T00:00:00.000Z',
+            },
+          },
+        ],
+      })
+      // b re-tracks the first char as a delete @2022 (same user), leaving the
+      // second char as an untracked retain (still @2023 from a, and adjacent)
+      const b = TextOperation.fromJSON({
+        textOperation: [
+          {
+            r: 1,
+            tracking: {
+              type: 'delete',
+              userId: 'user1',
+              ts: '2022-01-01T00:00:00.000Z',
+            },
+          },
+          1,
+        ],
+      })
+      // c inserts between the two chars, breaking their adjacency
+      const c = TextOperation.fromJSON({ textOperation: [1, 'X', 1] })
+
+      const ab_c = a.compose(b).compose(c)
+      const a_bc = a.compose(b.compose(c))
+
+      const ab_c_file = new StringFileData(str, comments)
+      ab_c.apply(ab_c_file)
+
+      const a_bc_file = new StringFileData(str, comments)
+      a_bc.apply(a_bc_file)
+
+      // The two composition orders diverge, but only on the tracked-change
+      // timestamp: (a∘b)∘c merges char 1 down to @2022 before c splits it,
+      // while a∘(b∘c) leaves char 1 at @2023.
+      //
+      // If we fix the associativity for timestamps, feel free to update the
+      // assertions below
+      expect(ab_c_file.toRaw()).to.not.deep.equal(a_bc_file.toRaw())
+      expect(stripTrackedChangeTimestamps(ab_c_file.toRaw())).to.deep.equal(
+        stripTrackedChangeTimestamps(a_bc_file.toRaw())
+      )
+    })
 
     it('composes two operations with comments', function () {
       expect(
@@ -644,6 +735,20 @@ describe('TextOperation', function () {
   })
 
   describe('transform', function () {
+    it('rejects operations built on different content', function () {
+      // Two operations that do not describe the same starting content cannot be
+      // transformed against each other. That is the pair being wrong, not this
+      // process, and a caller that answers a client has to be able to tell the
+      // difference -- an internal error reads as worth retrying, and the same
+      // pair fails the same way every time.
+      const a = new TextOperation().retain(4)
+      const b = new TextOperation().retain(7)
+
+      expect(() => TextOperation.transform(a, b)).to.throw(
+        TextOperation.UnprocessableError
+      )
+    })
+
     it(
       'transforms (randomised)',
       random.test(numTrials, () => {
@@ -1025,4 +1130,20 @@ function transform(fileData, a, b) {
   expect(resultA).to.deep.equal(resultB)
 
   return aFileData.toRaw()
+}
+
+/**
+ * @param {import('../../lib/types').StringFileRawData} raw
+ */
+function stripTrackedChangeTimestamps(raw) {
+  if (!raw.trackedChanges) {
+    return raw
+  }
+  return {
+    ...raw,
+    trackedChanges: raw.trackedChanges.map(change => {
+      const { ts, ...tracking } = change.tracking
+      return { ...change, tracking }
+    }),
+  }
 }

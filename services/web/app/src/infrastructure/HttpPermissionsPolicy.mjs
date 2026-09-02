@@ -3,7 +3,10 @@
 import Settings from '@overleaf/settings'
 
 /**
- * @import { HttpPermissionsPolicy } from './types'
+ * @typedef {import('express').Request} Request
+ * @typedef {import('express').Response} Response
+ * @typedef {import('express').NextFunction} NextFunction
+ * @typedef {import('./types').HttpPermissionsPolicy} HttpPermissionsPolicy
  */
 
 class HttpPermissionsPolicyMiddleware {
@@ -73,16 +76,17 @@ class HttpPermissionsPolicyMiddleware {
   }
 
   /**
-   * @param {any} req
-   * @param {any} res
-   * @param {any} next
+   * @param {Request} req
+   * @param {Response} res
+   * @param {NextFunction} next
    */
   middleware(req, res, next) {
-    if (this.policy && Settings.useHttpPermissionsPolicy) {
+    const policy = this.policy
+    if (policy && Settings.useHttpPermissionsPolicy) {
       const originalRender = res.render
 
       res.render = (/** @type {any} */ ...args) => {
-        res.setHeader('Permissions-Policy', this.policy)
+        res.setHeader('Permissions-Policy', policy)
         originalRender.apply(res, args)
       }
     }

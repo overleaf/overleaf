@@ -27,7 +27,6 @@ const config = require('config')
 // We depend on this via object-persistor.
 // eslint-disable-next-line import/no-extraneous-dependencies
 const { Storage } = require('@google-cloud/storage')
-const isValidUtf8 = require('utf-8-validate')
 // zip-stream@7 uses ESM default export
 const ZipStream = require('zip-stream').default
 
@@ -43,6 +42,7 @@ function createStorage() {
 }
 
 const core = require('overleaf-editor-core')
+const { getStringLengthOfFile } = require('overleaf-editor-core/lib/blob_utils')
 const projectKey = require('@overleaf/object-persistor/src/ProjectKey.js')
 const streams = require('../lib/streams')
 
@@ -112,27 +112,9 @@ async function loadChunk(historyPathname, blobStore) {
   return new core.Chunk(history, 0)
 }
 
-// TODO: it would be nice to export / expose this from BlobStore;
-// currently this is a copy of the method there.
-async function getStringLengthOfFile(byteLength, pathname) {
-  // We have to read the file into memory to get its UTF-8 length, so don't
-  // bother for files that are too large for us to edit anyway.
-  if (byteLength > core.Blob.MAX_EDITABLE_BYTE_LENGTH_BOUND) {
-    return null
-  }
-
-  // We need to check if the file contains nonBmp or null characters
-  let data = await fs.promises.readFile(pathname)
-  if (!isValidUtf8(data)) return null
-  data = data.toString()
-  if (data.length > core.TextOperation.MAX_STRING_LENGTH) return null
-  if (core.util.containsNonBmpChars(data)) return null
-  if (data.indexOf('\x00') !== -1) return null
-  return data.length
-}
-
-class RecoveryBlobStore {
+class RecoveryBlobStore extends core.BlobStoreBase {
   constructor(historyId, tmp) {
+    super()
     this.historyId = historyId
     this.tmp = tmp
     this.blobs = new Map()
@@ -183,7 +165,7 @@ class RecoveryBlobStore {
     return new core.Blob(hash, byteLength, stringLength)
   }
 
-  async getString(hash) {
+  async fetchString(hash) {
     const stream = await this.getStream(hash)
     const buffer = await streams.readStreamToBuffer(stream)
     return buffer.toString()

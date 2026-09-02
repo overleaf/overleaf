@@ -108,6 +108,50 @@ const getEntryText = (state: EditorState, node: SyntaxNodeRef): string => {
   return titleParts.join('')
 }
 
+export const readSectioningCommandOutlineItem = (
+  state: EditorState,
+  command: SyntaxNode
+): FlatOutlineItem | false | undefined => {
+  const name = command.getChild('SectioningArgument')?.getChild('LongArg')
+
+  if (!name) {
+    return
+  }
+
+  const parent = command.parent
+
+  // Filter out descendants of newcommand/renewcommand
+  for (
+    let ancestor: SyntaxNode | null = parent;
+    ancestor;
+    ancestor = ancestor.parent
+  ) {
+    if (ancestor.type.is('NewCommand') || ancestor.type.is('RenewCommand')) {
+      return false
+    }
+  }
+
+  const getCommandName = () => {
+    const ctrlSeq = command.firstChild
+    if (!ctrlSeq) return ''
+    // Ignore the \
+    return state.doc.sliceString(ctrlSeq.from + 1, ctrlSeq.to)
+  }
+
+  const nestingLevel = parent?.type.is('$Section')
+    ? getNestingLevel(parent.type.id)
+    : getNestingLevel(getCommandName())
+
+  return {
+    line: state.doc.lineAt(command.from).number,
+    toLine: state.doc.lineAt(command.to).number,
+    title: getEntryText(state, name),
+    from: command.from,
+    to: command.to,
+    level: nestingLevel,
+  }
+}
+
 /**
  * Extracts FlatOutlineItem instances from the syntax tree
  */
@@ -118,51 +162,19 @@ export const enterNode = (
   nodeIntersectsChange: NodeIntersectsChangeFn
 ): any => {
   if (node.type.is('SectioningCommand')) {
-    const command = node.node
-    const parent = command.parent
-
-    if (!nodeIntersectsChange(command)) {
+    if (!nodeIntersectsChange(node)) {
       // This should already be in `items`
       return
     }
-    const name = command.getChild('SectioningArgument')?.getChild('LongArg')
 
-    if (!name) {
+    const titleNode = readSectioningCommandOutlineItem(state, node.node)
+
+    if (typeof titleNode === 'object') {
+      items.push(titleNode)
       return
     }
 
-    // Filter out descendants of newcommand/renewcommand
-    for (
-      let ancestor: SyntaxNode | null = parent;
-      ancestor;
-      ancestor = ancestor.parent
-    ) {
-      if (ancestor.type.is('NewCommand') || ancestor.type.is('RenewCommand')) {
-        return false
-      }
-    }
-
-    const getCommandName = () => {
-      const ctrlSeq = command.firstChild
-      if (!ctrlSeq) return ''
-      // Ignore the \
-      return state.doc.sliceString(ctrlSeq.from + 1, ctrlSeq.to)
-    }
-
-    const nestingLevel = parent?.type.is('$Section')
-      ? getNestingLevel(parent.type.id)
-      : getNestingLevel(getCommandName())
-
-    const thisNode = {
-      line: state.doc.lineAt(command.from).number,
-      toLine: state.doc.lineAt(command.to).number,
-      title: getEntryText(state, name),
-      from: command.from,
-      to: command.to,
-      level: nestingLevel,
-    }
-
-    items.push(thisNode)
+    return titleNode // false to skip iterating over this node's children, or undefined
   }
   if (node.type.is('$Environment')) {
     const environmentNode = node.node

@@ -17,12 +17,30 @@ import { z, zz } from '@overleaf/validation-tools'
 import { parseReq } from '../../infrastructure/Validation.mjs'
 
 const downloadFromCacheSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+    editorBuildId: zz.editorBuildId(),
+    filename: zz.filepath().refine(s => ClsiCacheHandler.isAllowedFilename(s), {
+      message: 'path is not allowed',
+    }),
+  }),
+})
+
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const downloadFromCacheFallbackSchema = z.object({
   params: z.object({
     Project_id: zz.objectId(),
     editorBuildId: zz.editorBuildId(),
     filename: zz.filepath().refine(s => ClsiCacheHandler.isAllowedFilename(s), {
       message: 'path is not allowed',
     }),
+  }),
+})
+
+const getLatestBuildFromCacheSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
   }),
 })
 
@@ -36,7 +54,9 @@ const downloadFromCacheSchema = z.object({
 async function downloadFromCache(req, res) {
   const {
     params: { Project_id: projectId, editorBuildId, filename },
-  } = parseReq(req, downloadFromCacheSchema)
+  } = parseReq(req, downloadFromCacheSchema, {
+    fallbackSchema: downloadFromCacheFallbackSchema,
+  })
   return await _downloadFromCacheWithParams(
     req,
     res,
@@ -173,7 +193,10 @@ async function _downloadFromCacheWithParams(
  * @return {Promise<void>}
  */
 async function getLatestBuildFromCache(req, res) {
-  const { Project_id: projectId } = req.params
+  const { params } = parseReq(req, getLatestBuildFromCacheSchema, {
+    logOnly: true,
+  })
+  const projectId = params.Project_id
   const userId = CompileController._getUserIdForCompile(req)
   try {
     const {

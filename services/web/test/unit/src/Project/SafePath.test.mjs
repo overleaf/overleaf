@@ -10,7 +10,8 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-import { assert, expect } from 'vitest'
+import { assert, beforeEach, describe, expect, it } from 'vitest'
+import { zz } from '@overleaf/validation-tools'
 
 import sinon from 'sinon'
 const modulePath = '../../../../app/src/Features/Project/SafePath'
@@ -124,84 +125,140 @@ describe('SafePath', function () {
   })
 
   describe('isCleanPath', function () {
+    // Cross-checked against zz.safePath() (libraries/validation-tools/
+    // zodHelpers.js), which validates project doc/file paths for
+    // document-updater -- every case here is expected to agree with it, so
+    // the two validators can't silently drift apart again.
+    function checkIsCleanPath(ctx, inputPath, expected) {
+      const result = ctx.SafePath.isCleanPath(inputPath)
+      expect(zz.safePath().safeParse(inputPath).success).toBe(expected)
+      return result.should.equal(expected)
+    }
+
+    it('should not accept an empty path', function (ctx) {
+      return checkIsCleanPath(ctx, '', false)
+    })
+
     it('should accept a valid filename "main.tex"', function (ctx) {
-      const result = ctx.SafePath.isCleanPath('main.tex')
-      return result.should.equal(true)
+      return checkIsCleanPath(ctx, 'main.tex', true)
     })
 
     it('should accept a valid path "foo/main.tex"', function (ctx) {
-      const result = ctx.SafePath.isCleanPath('foo/main.tex')
-      return result.should.equal(true)
+      return checkIsCleanPath(ctx, 'foo/main.tex', true)
     })
 
     it('should accept empty path elements', function (ctx) {
-      const result = ctx.SafePath.isCleanPath('foo//main.tex')
-      return result.should.equal(true)
+      return checkIsCleanPath(ctx, 'foo//main.tex', true)
     })
 
     it('should not accept an empty filename', function (ctx) {
-      const result = ctx.SafePath.isCleanPath('foo/bar/')
-      return result.should.equal(false)
+      return checkIsCleanPath(ctx, 'foo/bar/', false)
     })
 
     it('should accept a path that starts with a slash', function (ctx) {
-      const result = ctx.SafePath.isCleanPath('/etc/passwd')
-      return result.should.equal(true)
+      return checkIsCleanPath(ctx, '/etc/passwd', true)
+    })
+
+    it('should not accept path traversal', function (ctx) {
+      return checkIsCleanPath(ctx, '../output.pdf', false)
+    })
+
+    it('should not accept a path that is exactly "."', function (ctx) {
+      return checkIsCleanPath(ctx, '.', false)
+    })
+
+    it('should not accept a path segment with leading whitespace', function (ctx) {
+      return checkIsCleanPath(ctx, 'foo/ bar.tex', false)
+    })
+
+    it('should not accept a path segment with trailing whitespace', function (ctx) {
+      return checkIsCleanPath(ctx, 'foo/bar.tex ', false)
+    })
+
+    it('should not accept a path containing a null byte', function (ctx) {
+      return checkIsCleanPath(
+        ctx,
+        'foo/' + String.fromCharCode(0) + '.tex',
+        false
+      )
+    })
+
+    it('should not accept a path containing a C1 control character', function (ctx) {
+      // \x80-\x9F, per BADCHAR_RX
+      return checkIsCleanPath(
+        ctx,
+        'foo/' + String.fromCharCode(0x90) + '.tex',
+        false
+      )
+    })
+
+    it('should not accept a path containing a lone surrogate', function (ctx) {
+      // \uD800-\uDFFF, per BADCHAR_RX
+      return checkIsCleanPath(ctx, 'foo/\uD800.tex', false)
+    })
+
+    it('should not accept a path containing a backslash', function (ctx) {
+      return checkIsCleanPath(ctx, 'foo/bar\\baz.tex', false)
     })
 
     it('should not accept a path that has an asterisk as the 0th element', function (ctx) {
-      const result = ctx.SafePath.isCleanPath('*/foo/bar')
-      return result.should.equal(false)
+      return checkIsCleanPath(ctx, '*/foo/bar', false)
     })
 
     it('should not accept a path that has an asterisk as a middle element', function (ctx) {
-      const result = ctx.SafePath.isCleanPath('foo/*/bar')
-      return result.should.equal(false)
+      return checkIsCleanPath(ctx, 'foo/*/bar', false)
     })
 
     it('should not accept a path that has an asterisk as the filename', function (ctx) {
-      const result = ctx.SafePath.isCleanPath('foo/bar/*')
-      return result.should.equal(false)
+      return checkIsCleanPath(ctx, 'foo/bar/*', false)
     })
 
     it('should not accept a path that contains an asterisk in the 0th element', function (ctx) {
-      const result = ctx.SafePath.isCleanPath('f*o/bar/baz')
-      return result.should.equal(false)
+      return checkIsCleanPath(ctx, 'f*o/bar/baz', false)
     })
 
     it('should not accept a path that contains an asterisk in a middle element', function (ctx) {
-      const result = ctx.SafePath.isCleanPath('foo/b*r/baz')
-      return result.should.equal(false)
+      return checkIsCleanPath(ctx, 'foo/b*r/baz', false)
     })
 
     it('should not accept a path that contains an asterisk in the filename', function (ctx) {
-      const result = ctx.SafePath.isCleanPath('foo/bar/b*z')
-      return result.should.equal(false)
+      return checkIsCleanPath(ctx, 'foo/bar/b*z', false)
     })
 
     it('should not accept multiple problematic elements', function (ctx) {
-      const result = ctx.SafePath.isCleanPath('f*o/b*r/b*z')
-      return result.should.equal(false)
+      return checkIsCleanPath(ctx, 'f*o/b*r/b*z', false)
     })
 
     it('should not accept a problematic path with an empty element', function (ctx) {
-      const result = ctx.SafePath.isCleanPath('foo//*/bar')
-      return result.should.equal(false)
+      return checkIsCleanPath(ctx, 'foo//*/bar', false)
     })
 
     it('should not accept javascript property names', function (ctx) {
-      const result = ctx.SafePath.isCleanPath('prototype')
-      return result.should.equal(false)
+      return checkIsCleanPath(ctx, 'prototype', false)
+    })
+
+    it('should not accept a path that is exactly "constructor"', function (ctx) {
+      return checkIsCleanPath(ctx, 'constructor', false)
     })
 
     it('should not accept javascript property names in the prototype', function (ctx) {
-      const result = ctx.SafePath.isCleanPath('hasOwnProperty')
-      return result.should.equal(false)
+      return checkIsCleanPath(ctx, 'hasOwnProperty', false)
     })
 
     it('should not accept javascript property names resulting from substitutions', function (ctx) {
-      const result = ctx.SafePath.isCleanPath('  proto  ')
-      return result.should.equal(false)
+      return checkIsCleanPath(ctx, '  proto  ', false)
+    })
+
+    it('should accept a nested javascript property name (only the top-level path is checked)', function (ctx) {
+      return checkIsCleanPath(ctx, 'foo/prototype', true)
+    })
+
+    it('should accept a __proto__ path segment as a non-empty folder', function (ctx) {
+      return checkIsCleanPath(ctx, '__proto__/output.pdf', true)
+    })
+
+    it('should accept a nested segment matching a built-in Object.prototype method name', function (ctx) {
+      return checkIsCleanPath(ctx, 'foo/toString', true)
     })
   })
 

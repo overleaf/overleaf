@@ -21,7 +21,7 @@ export default function ManagedUserCannotJoin() {
             tOptions={{ interpolation: { escapeValue: true } }}
             components={[
               /* eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key */
-              <a href="/learn/how-to/Understanding_Managed_Overleaf_Accounts" />,
+              <a href="https://docs.overleaf.com/accounts-and-security/understanding-managed-accounts" />,
             ]}
           />
         </p>

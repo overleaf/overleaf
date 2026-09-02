@@ -10,7 +10,8 @@ export default ProjectEditorHandler = {
     ownerMember,
     members,
     invites,
-    isRestrictedUser
+    isRestrictedUser,
+    accessRequestData = {}
   ) {
     const result = {
       _id: project._id,
@@ -23,6 +24,8 @@ export default ProjectEditorHandler = {
       compiler: project.compiler,
       description: project.description,
       spellCheckLanguage: project.spellCheckLanguage,
+      referenceFormat: project.referenceFormat,
+      png2pdf: project.png2pdf,
       deletedByExternalDataSource: project.deletedByExternalDataSource || false,
       imageName:
         project.imageName != null
@@ -38,6 +41,13 @@ export default ProjectEditorHandler = {
       result.owner = this.buildUserModelView(ownerMember)
       result.members = members.map(this.buildUserModelView)
       result.invites = this.buildInvitesView(invites)
+    }
+
+    if (accessRequestData.editAccessRequests !== undefined) {
+      result.editAccessRequests = accessRequestData.editAccessRequests
+    }
+    if (accessRequestData.myAccessRequest !== undefined) {
+      result.myAccessRequest = accessRequestData.myAccessRequest
     }
 
     result.features = _.defaults(ownerMember?.user?.features || {}, {

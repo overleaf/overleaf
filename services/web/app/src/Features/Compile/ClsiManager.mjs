@@ -1,3 +1,4 @@
+import Path from 'node:path'
 import { callbackify } from 'node:util'
 import { callbackifyMultiResult } from '@overleaf/promise-utils'
 import {
@@ -42,6 +43,10 @@ const CLSI_COOKIES_ENABLED = (Settings.clsiCookie?.key ?? '') !== ''
 
 // The timeout in services/clsi/app.js is 10 minutes, so we'll be on the safe side with 12 minutes
 const COMPILE_REQUEST_TIMEOUT_MS = 12 * 60 * 1000
+
+// Number of times to attempt each project-history operation (flush, chunk
+// fetch) when compiling from history before giving up.
+const HISTORY_MAX_ATTEMPTS = 3
 
 // Enable clsi-cache for all compiles for 20min when detecting low capacity.
 const ENABLE_COMPILE_FROM_CACHE_ON_503_MS = 20 * 60 * 1000
@@ -924,25 +929,68 @@ function collectGlobalBlobsFromRawSnapshot(rawSnapshot, globalBlobs) {
   }
 }
 
+/**
+ * Run an async project-history operation.
+ *
+ * Try at most HISTORY_MAX_ATTEMPTS times before throwing an error.
+ *
+ * @template T
+ * @param {() => Promise<T>} fn
+ * @param {string} metricName
+ * @param {string} msg
+ * @param {object} info
+ * @return {Promise<T>}
+ */
+async function withRetries(fn, metricName, msg, info) {
+  let lastErr
+  for (let attempt = 1; attempt <= HISTORY_MAX_ATTEMPTS; attempt++) {
+    if (lastErr) {
+      Metrics.inc(metricName)
+      logger.warn({ err: lastErr, attempt, ...info }, `${msg}, retrying`)
+    }
+    try {
+      return await fn()
+    } catch (err) {
+      lastErr = err
+    }
+  }
+  throw OError.tag(lastErr, msg, info)
+}
+
+/**
+ * Flush pending updates to project-history before compiling from history,
+ * retrying on any error.
+ *
+ * @param {string} projectId
+ * @param {string} historyId
+ */
+async function _flushHistoryForCompile(projectId, historyId) {
+  await withRetries(
+    () => HistoryManager.promises.flushProject(projectId),
+    'compile-from-history-flush-retry',
+    'failed to flush project for compile-from-history',
+    { projectId, historyId }
+  )
+}
+
 async function _buildRequestFromHistoryFull(
   projectId,
   historyId,
   options,
   project
 ) {
-  await HistoryManager.promises.flushProject(projectId)
-  const [
-    {
-      chunk: {
-        history: { snapshot: rawSnapshot, changes: rawChanges },
-        startVersion,
-      },
+  await _flushHistoryForCompile(projectId, historyId)
+  const {
+    chunk: {
+      history: { snapshot: rawSnapshot, changes: rawChanges },
+      startVersion,
     },
-    /* ensureNoResyncPending throws */
-  ] = await Promise.all([
-    HistoryManager.promises.getLatestHistoryWithHistoryId(historyId),
-    HistoryManager.promises.ensureNoResyncPending(projectId),
-  ])
+  } = await withRetries(
+    () => HistoryManager.promises.getLatestHistoryWithHistoryId(historyId),
+    'compile-from-history-chunk-retry',
+    'failed to get history chunk',
+    { projectId, historyId }
+  )
   const rawChangeOperations = _rawChangeOperationsFromChanges(rawChanges)
   const globalBlobs = _collectGlobalBlobs(rawChangeOperations)
   collectGlobalBlobsFromRawSnapshot(rawSnapshot, globalBlobs)
@@ -965,17 +1013,20 @@ async function _buildRequestFromHistoryIncremental(
   project,
   baseHistoryVersion
 ) {
-  await HistoryManager.promises.flushProject(projectId)
+  await _flushHistoryForCompile(projectId, historyId)
   const rawChangeOperations = []
   let hasMore = true
   let since = baseHistoryVersion
   let size = 0
   while (hasMore) {
     let changes
-    ;[{ changes, hasMore } /* resyncPending throws */] = await Promise.all([
-      HistoryManager.promises.getChangesWithHistoryId(historyId, { since }),
-      HistoryManager.promises.ensureNoResyncPending(projectId),
-    ])
+    ;({ changes, hasMore } = await withRetries(
+      () =>
+        HistoryManager.promises.getChangesWithHistoryId(historyId, { since }),
+      'compile-from-history-changes-retry',
+      'failed to get history changes',
+      { projectId, historyId, since }
+    ))
     since += changes.length
     const newRawChangeOperations = _rawChangeOperationsFromChanges(changes)
     size += Buffer.from(JSON.stringify(newRawChangeOperations)).byteLength
@@ -1131,7 +1182,9 @@ function _finaliseRequest(projectId, options, project, docs, files) {
   if (options.fileLineErrors) {
     flags = ['-file-line-error']
   }
-
+  const hasPremiumCompiles = ['alpha', 'priority'].includes(
+    options.compileGroup
+  )
   return {
     compile: {
       options: {
@@ -1142,6 +1195,13 @@ function _finaliseRequest(projectId, options, project, docs, files) {
         timeout: options.timeout,
         imageName: project.imageName,
         draft: Boolean(options.draft),
+        // enable for premium compiles only
+        png2pdf: Boolean(options.png2pdf) && hasPremiumCompiles,
+        // enable for premium compiles on an image that has a checkpointing build
+        enableCheckpoint:
+          Boolean(options.checkpointing) &&
+          hasPremiumCompiles &&
+          _imageHasCheckpointing(project.imageName),
         stopOnFirstError: Boolean(options.stopOnFirstError),
         check: options.check,
         syncType: options.syncType,
@@ -1150,7 +1210,7 @@ function _finaliseRequest(projectId, options, project, docs, files) {
         // Overleaf alpha/staff users get compileGroup=alpha (via getProjectCompileLimits in CompileManager), enroll them into the premium rollout of clsi-cache.
         compileFromClsiCache:
           // enable for premium compiles
-          (['alpha', 'priority'].includes(options.compileGroup) ||
+          (hasPremiumCompiles ||
             // enable for free for short period when we saw low capacity
             enableCompileFromCacheUntil > Date.now()) &&
           options.compileFromClsiCache,
@@ -1158,7 +1218,6 @@ function _finaliseRequest(projectId, options, project, docs, files) {
         enablePdfCaching:
           (Settings.enablePdfCaching && options.enablePdfCaching) || false,
         pdfCachingMinChunkSize: options.pdfCachingMinChunkSize,
-        enableCheckpoint: Boolean(options.enableCheckpoint),
         flags,
         metricsMethod: options.compileGroup,
         metricsPath: options.metricsPath,
@@ -1173,6 +1232,21 @@ function _finaliseRequest(projectId, options, project, docs, files) {
   }
 }
 
+// checkpointing compiles run on a checkpointing build of the project's image,
+// which is only available for some TeX Live years
+function _imageHasCheckpointing(imageName) {
+  if (!imageName) {
+    return false
+  }
+  // allowedImageNames holds bare image names, so drop the hosting URL first
+  const bareImageName = Path.basename(imageName)
+  return Boolean(
+    Settings.allowedImageNames?.find(
+      allowedImage => allowedImage.imageName === bareImageName
+    )?.hasCheckpointing
+  )
+}
+
 async function buildDocumentConversionRequest(projectId, userId, options) {
   return await _buildRequest(null, projectId, userId, {
     ...options,
@@ -1183,9 +1257,29 @@ async function buildDocumentConversionRequest(projectId, userId, options) {
   })
 }
 
-async function wordCount(projectId, userId, file, limits, clsiserverid) {
+async function wordCount(
+  projectId,
+  userId,
+  file,
+  limits,
+  clsiserverid,
+  { rootResourcePath, baseHistoryVersion } = {}
+) {
   const { compileBackendClass, compileGroup } = limits
-  const req = await _buildRequest(null, projectId, userId, limits)
+  // texcount reads the sources from the compile dir on the clsi, which only a
+  // previous compile on that same clsi populates. Send the project state along
+  // with the request so the clsi can write it out itself when it has none --
+  // e.g. when the editor served the PDF from clsi-cache without compiling.
+  const req = await _buildRequest(null, projectId, userId, {
+    ...limits,
+    compileFromHistory: true,
+    // let the clsi restore the cached outputs when this request is what
+    // bootstraps the compile dir, so the next compile is not slower for it
+    compileFromClsiCache: true,
+    rootResourcePath,
+    baseHistoryVersion,
+    metricsPath: 'wordcount',
+  })
   const filename = file || req.compile.rootResourcePath
   const url = _getCompilerUrl(
     compileBackendClass,
@@ -1197,19 +1291,46 @@ async function wordCount(projectId, userId, file, limits, clsiserverid) {
   url.searchParams.set('file', filename)
   url.searchParams.set('image', req.compile.options.imageName)
 
-  const opts = {
-    method: 'GET',
+  const requestWordCount = async opts => {
+    const { body } = await _makeRequestWithClsiServerId(
+      projectId,
+      userId,
+      compileGroup,
+      compileBackendClass,
+      url,
+      opts,
+      clsiserverid
+    )
+    return body
   }
-  const { body } = await _makeRequestWithClsiServerId(
-    projectId,
-    userId,
-    compileGroup,
-    compileBackendClass,
-    url,
-    opts,
-    clsiserverid
-  )
-  return body
+
+  try {
+    return await requestWordCount({ method: 'POST', json: req })
+  } catch (err) {
+    if (!(err instanceof RequestFailedError)) throw err
+    const { status } = err.response
+    if (status === 409 && baseHistoryVersion === undefined) {
+      // The clsi could not apply the history changes onto the snapshot it
+      // holds. Retry once from the version it asked for.
+      let retryFrom = -1
+      try {
+        ;({ baseHistoryVersion: retryFrom } = JSON.parse(err.body))
+      } catch {}
+      return await wordCount(projectId, userId, file, limits, clsiserverid, {
+        rootResourcePath,
+        baseHistoryVersion: retryFrom,
+      })
+    }
+    if (status === 404 || status === 413 || status === 423) {
+      // 404: the clsi predates the POST route (deploy or rollback window).
+      // 413: the project is over the clsi's compileSizeLimit.
+      // 423: a compile holds the compile dir lock. Compiles can run for a
+      //      while, so count what is on disk rather than failing the request.
+      Metrics.inc('clsi_wordcount_get_fallback', 1, { status })
+      return await requestWordCount({ method: 'GET' })
+    }
+    throw err
+  }
 }
 
 async function syncTeX(

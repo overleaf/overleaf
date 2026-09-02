@@ -91,7 +91,7 @@ function resetMeta() {
     editableFilenames: ['latexmkrc', '.latexmkrc', 'makefile', 'gnumakefile'],
     validRootDocExtensions: ['tex', 'Rtex', 'ltx', 'Rnw'],
     fileIgnorePattern:
-      '**/{{__MACOSX,.git,.texpadtmp,.R}{,/**},.!(latexmkrc),*.{dvi,aux,log,toc,out,pdfsync,synctex,synctex(busy),fdb_latexmk,fls,nlo,ind,glo,gls,glg,bbl,blg,doc,docx,gz,swp}}',
+      '**/{{__MACOSX,.git,.texpadtmp,.R,.venv,venv}{,/**},.!(latexmkrc),*.{dvi,aux,log,toc,out,pdfsync,synctex,synctex(busy),fdb_latexmk,fls,nlo,ind,glo,gls,glg,bbl,blg,doc,docx,gz,swp}}',
     projectUploadTimeout: 12000,
   })
 }
@@ -150,12 +150,22 @@ export default definePreview({
   globalTypes: {
     theme: {
       name: 'Theme',
-      description: 'Editor theme',
-      defaultValue: 'main-',
+      description: 'Page theme',
+      // This drives the data-theme attribute that the decorator below puts on
+      // every story, so it affects all of them and not just editor ones. Every
+      // page outside the editor sets data-theme="light" (see layout-base.pug),
+      // so that is what most stories should be drawn against. Defaulting to
+      // dark was giving them dark page tokens on a white background, which
+      // showed up as, among other things, a secondary button rendering dark
+      // rather than light.
+      defaultValue: 'main-light-',
       toolbar: {
         icon: 'circlehollow',
         items: [
-          { value: 'main-', title: 'Default' },
+          // The values are the stylesheet's own names for the two token sets,
+          // so the dark one is "main-". The titles match what the product
+          // calls them in the editor settings.
+          { value: 'main-', title: 'Dark' },
           { value: 'main-light-', title: 'Light' },
         ],
       },

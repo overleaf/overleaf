@@ -12,6 +12,15 @@ import { z, parseReq } from '../../infrastructure/Validation.mjs'
 import Features from '../../infrastructure/Features.mjs'
 
 const setNewUserPasswordSchema = z.object({
+  body: z.strictObject({
+    email: z.string().optional(),
+    password: z.string(),
+    passwordResetToken: z.string(),
+  }),
+})
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const setNewUserPasswordFallbackSchema = z.object({
   body: z.object({
     email: z.string().optional(),
     password: z.string(),
@@ -21,7 +30,9 @@ const setNewUserPasswordSchema = z.object({
 
 async function setNewUserPassword(req, res, next) {
   let user
-  const { body } = parseReq(req, setNewUserPasswordSchema)
+  const { body } = parseReq(req, setNewUserPasswordSchema, {
+    fallbackSchema: setNewUserPasswordFallbackSchema,
+  })
   let { passwordResetToken, password, email } = body
   if (!passwordResetToken || !password) {
     return res.status(400).json({
@@ -114,13 +125,22 @@ async function setNewUserPassword(req, res, next) {
 }
 
 const requestResetSchema = z.object({
+  body: z.strictObject({
+    email: z.string(),
+  }),
+})
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const requestResetFallbackSchema = z.object({
   body: z.object({
     email: z.string(),
   }),
 })
 
 async function requestReset(req, res, next) {
-  const { body } = parseReq(req, requestResetSchema)
+  const { body } = parseReq(req, requestResetSchema, {
+    fallbackSchema: requestResetFallbackSchema,
+  })
   const email = EmailsHelper.parseEmail(body.email)
   if (!email) {
     return res.status(400).json({

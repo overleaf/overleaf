@@ -68,16 +68,14 @@ $footer-width-delta: 320px;
   }
 
   @include theme('default') {
-    .ide-redesign-main,
-    .project-ds-nav-page {
-      .cookie-banner {
-        @include cookie-banner-dark;
-      }
+    .cookie-banner {
+      @include cookie-banner-dark;
+    }
 
-      .fat-footer {
-        @include footer-dark;
-        @include socials-dark;
-      }
+    .website-redesign-fat-footer,
+    .website-redesign .fat-footer {
+      @include footer-dark;
+      @include socials-dark;
     }
   }
 }
@@ -161,6 +159,11 @@ footer.site-footer {
     i {
       font-size: var(--font-size-05);
     }
+  }
+
+  .copyright-notice {
+    font-size: var(--font-size-02);
+    line-height: calc($thin-footer-height / 2);
   }
 }
 

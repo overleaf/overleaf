@@ -318,9 +318,9 @@ function LinkSharingInfo() {
       description={t('learn_more_about_link_sharing')}
     >
       <a
-        href="/learn/how-to/What_is_Link_Sharing%3F"
+        href="https://docs.overleaf.com/collaborating/sharing-a-project"
         target="_blank"
-        rel="noopener"
+        rel="noopener noreferrer"
       >
         <MaterialIcon type="help" className="align-middle" />
       </a>

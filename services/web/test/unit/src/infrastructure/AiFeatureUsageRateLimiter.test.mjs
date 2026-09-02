@@ -1,4 +1,4 @@
-import { expect, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
 const ObjectId = mongodb.ObjectId
@@ -34,6 +34,10 @@ describe('AiFeatureUsageRateLimiter', function () {
             },
           },
         }),
+      }),
+      // limit-reached marker write; win it by default
+      updateOne: sinon.stub().returns({
+        exec: sinon.stub().resolves({ modifiedCount: 1 }),
       }),
     }
 
@@ -89,6 +93,21 @@ describe('AiFeatureUsageRateLimiter', function () {
       },
     }
 
+    ctx.AnalyticsManager = {
+      recordEventForUserInBackground: sinon.stub(),
+    }
+
+    ctx.SubscriptionViewModelBuilder = {
+      promises: {
+        getUsersSubscriptionDetails: sinon.stub().resolves({
+          bestSubscription: {
+            type: 'individual',
+            plan: { planCode: 'professional' },
+          },
+        }),
+      },
+    }
+
     vi.doMock('@overleaf/settings', () => ({
       default: ctx.settings,
     }))
@@ -107,6 +126,20 @@ describe('AiFeatureUsageRateLimiter', function () {
     vi.doMock('../../../../app/src/Features/User/UserGetter.mjs', () => ({
       default: ctx.UserGetter,
     }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Analytics/AnalyticsManager.mjs',
+      () => ({
+        default: ctx.AnalyticsManager,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/SubscriptionViewModelBuilder.mjs',
+      () => ({
+        default: ctx.SubscriptionViewModelBuilder,
+      })
+    )
 
     vi.doMock(
       '../../../../app/src/Features/SplitTests/SplitTestHandler.mjs',
@@ -197,6 +230,29 @@ describe('AiFeatureUsageRateLimiter', function () {
         )
       })
 
+      it('fires ai-usage-limit-reached on the served request that reaches the allowance', async function (ctx) {
+        stubUsage(ctx, ctx.settings.quotaGrants.ai.basic)
+
+        await expect(
+          ctx.AiFeatureUsageRateLimiter.useFeature(ctx.userId, buildRes(), 1, {
+            auditLogTool: 'workbench-usage',
+          })
+        ).to.not.be.rejected
+
+        expect(
+          ctx.AnalyticsManager.recordEventForUserInBackground
+        ).to.have.been.calledOnceWithExactly(
+          ctx.userId,
+          'ai-usage-limit-reached',
+          {
+            limit: ctx.settings.quotaGrants.ai.basic,
+            feature: 'workbench-usage',
+            'plan-code': 'professional',
+            'plan-type': 'individual',
+          }
+        )
+      })
+
       it('writes an audit log entry when usage is already over the allowance', async function (ctx) {
         stubUsage(ctx, ctx.settings.quotaGrants.ai.basic + 1)
 
@@ -240,6 +296,192 @@ describe('AiFeatureUsageRateLimiter', function () {
         expect(ctx.UserAuditLogHandler.addEntryInBackground).to.not.have.been
           .called
       })
+
+      it('does not fire the event but still rejects when the marker write fails', async function (ctx) {
+        stubUsage(ctx, ctx.settings.quotaGrants.ai.basic + 1)
+        ctx.UserFeatureUsageModel.updateOne = sinon.stub().returns({
+          exec: sinon.stub().rejects(new Error('mongo down')),
+        })
+
+        await expect(
+          ctx.AiFeatureUsageRateLimiter.useFeature(ctx.userId, buildRes(), 1, {
+            auditLogTool: 'workbench-usage',
+          })
+        ).to.be.rejectedWith('aiFeatureUsage rate limit exceeded')
+
+        expect(ctx.AnalyticsManager.recordEventForUserInBackground).to.not.have
+          .been.called
+      })
+
+      it('skips the event but still audits when periodStart is missing', async function (ctx) {
+        // usage over the cap, but the returned doc has no periodStart
+        ctx.UserFeatureUsageModel.findOneAndUpdate = sinon.stub().returns({
+          exec: sinon.stub().resolves({
+            features: {
+              aiFeatureUsage: { usage: ctx.settings.quotaGrants.ai.basic + 1 },
+            },
+          }),
+        })
+
+        await expect(
+          ctx.AiFeatureUsageRateLimiter.useFeature(ctx.userId, buildRes(), 1, {
+            auditLogTool: 'workbench-usage',
+          })
+        ).to.be.rejectedWith('aiFeatureUsage rate limit exceeded')
+
+        expect(ctx.UserAuditLogHandler.addEntryInBackground).to.have.been
+          .calledOnce
+        expect(ctx.AnalyticsManager.recordEventForUserInBackground).to.not.have
+          .been.called
+      })
+
+      it('fires the event once but audits every time across repeated at-limit requests', async function (ctx) {
+        stubUsage(ctx, ctx.settings.quotaGrants.ai.basic + 1)
+        // first request records the marker, later ones do not
+        const recordFirstReachExec = sinon.stub()
+        recordFirstReachExec.onFirstCall().resolves({ modifiedCount: 1 })
+        recordFirstReachExec.resolves({ modifiedCount: 0 })
+        ctx.UserFeatureUsageModel.updateOne = sinon
+          .stub()
+          .returns({ exec: recordFirstReachExec })
+
+        const useAtLimit = () =>
+          expect(
+            ctx.AiFeatureUsageRateLimiter.useFeature(
+              ctx.userId,
+              buildRes(),
+              1,
+              {
+                auditLogTool: 'workbench-usage',
+              }
+            )
+          ).to.be.rejectedWith('aiFeatureUsage rate limit exceeded')
+
+        await useAtLimit()
+        await useAtLimit()
+        await useAtLimit()
+
+        expect(ctx.AnalyticsManager.recordEventForUserInBackground).to.have.been
+          .calledOnce
+        expect(ctx.UserAuditLogHandler.addEntryInBackground).to.have.been
+          .calledThrice
+      })
+    })
+  })
+
+  describe('_recordLimitReachedEvent', function () {
+    it('records ai-usage-limit-reached with plan-code, plan-type, limit and feature', async function (ctx) {
+      await ctx.AiFeatureUsageRateLimiter._recordLimitReachedEvent(
+        ctx.userId,
+        10,
+        'workbench-usage'
+      )
+
+      expect(
+        ctx.AnalyticsManager.recordEventForUserInBackground
+      ).to.have.been.calledOnceWithExactly(
+        ctx.userId,
+        'ai-usage-limit-reached',
+        {
+          limit: 10,
+          feature: 'workbench-usage',
+          'plan-code': 'professional',
+          'plan-type': 'individual',
+        }
+      )
+    })
+
+    it('records plan-type commons while plan-code reads as professional', async function (ctx) {
+      ctx.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails =
+        sinon.stub().resolves({
+          bestSubscription: {
+            type: 'commons',
+            plan: { planCode: 'professional' },
+          },
+        })
+
+      await ctx.AiFeatureUsageRateLimiter._recordLimitReachedEvent(
+        ctx.userId,
+        10,
+        'workbench-usage'
+      )
+
+      expect(
+        ctx.AnalyticsManager.recordEventForUserInBackground
+      ).to.have.been.calledOnceWithExactly(
+        ctx.userId,
+        'ai-usage-limit-reached',
+        {
+          limit: 10,
+          feature: 'workbench-usage',
+          'plan-code': 'professional',
+          'plan-type': 'commons',
+        }
+      )
+    })
+
+    it('omits plan-code but records plan-type free for free users', async function (ctx) {
+      ctx.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails =
+        sinon.stub().resolves({ bestSubscription: { type: 'free' } })
+
+      await ctx.AiFeatureUsageRateLimiter._recordLimitReachedEvent(
+        ctx.userId,
+        5,
+        'suggest-fix'
+      )
+
+      expect(
+        ctx.AnalyticsManager.recordEventForUserInBackground
+      ).to.have.been.calledOnceWithExactly(
+        ctx.userId,
+        'ai-usage-limit-reached',
+        {
+          limit: 5,
+          feature: 'suggest-fix',
+          'plan-type': 'free',
+        }
+      )
+    })
+
+    it('omits feature when no tool is provided', async function (ctx) {
+      await ctx.AiFeatureUsageRateLimiter._recordLimitReachedEvent(
+        ctx.userId,
+        10
+      )
+
+      expect(
+        ctx.AnalyticsManager.recordEventForUserInBackground
+      ).to.have.been.calledOnceWithExactly(
+        ctx.userId,
+        'ai-usage-limit-reached',
+        {
+          limit: 10,
+          'plan-code': 'professional',
+          'plan-type': 'individual',
+        }
+      )
+    })
+
+    it('still records the event when the plan lookup fails', async function (ctx) {
+      ctx.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails =
+        sinon.stub().rejects(new Error('boom'))
+
+      await ctx.AiFeatureUsageRateLimiter._recordLimitReachedEvent(
+        ctx.userId,
+        5,
+        'suggest-fix'
+      )
+
+      expect(
+        ctx.AnalyticsManager.recordEventForUserInBackground
+      ).to.have.been.calledOnceWithExactly(
+        ctx.userId,
+        'ai-usage-limit-reached',
+        {
+          limit: 5,
+          feature: 'suggest-fix',
+        }
+      )
     })
   })
 

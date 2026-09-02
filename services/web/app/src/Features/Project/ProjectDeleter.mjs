@@ -120,8 +120,17 @@ async function expireDeletedProjectsAfterDuration() {
     'expiring batch of deleted projects'
   )
   try {
+    let processedCount = 0
     for (const projectId of projectIds) {
       await expireDeletedProject(projectId)
+      processedCount++
+      if (Settings.shuttingDown) {
+        logger.warn(
+          { projectCount: projectIds.length, processedCount },
+          'graceful shutdown in progress, stopping batch of deleted projects early'
+        )
+        return
+      }
     }
     logger.info(
       { projectCount: projectIds.length },

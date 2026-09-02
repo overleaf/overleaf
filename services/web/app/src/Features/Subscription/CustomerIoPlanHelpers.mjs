@@ -2,6 +2,7 @@
 import Settings from '@overleaf/settings'
 import { AI_ADD_ON_CODE, isStandaloneAiAddOnPlanCode } from './AiHelper.mjs'
 import FeaturesHelper from './FeaturesHelper.mjs'
+import PlansLocator from './PlansLocator.mjs'
 
 /**
  * @typedef {InstanceType<typeof import('../../models/Subscription.mjs').Subscription>} MongoSubscription
@@ -120,9 +121,7 @@ function normalizePlanTypeFromPlanCode(planCode) {
   if (!planCode) {
     return ''
   }
-  const plan = /** @type {Plan[]} */ (Settings.plans).find(
-    candidate => candidate.planCode === planCode
-  )
+  const plan = PlansLocator.findLocalPlanInSettings(planCode)
   return normalizePlanType({
     plan: {
       planCode,
@@ -162,18 +161,6 @@ function getFriendlyPlanName(planType) {
 }
 
 /**
- * @param {Nullable<BestSubscription>} [bestSubscription]
- * @returns {'annual' | 'monthly' | null}
- */
-function getPlanCadence(bestSubscription) {
-  if (!bestSubscription?.plan) {
-    return null
-  }
-
-  return bestSubscription.plan.annual ? 'annual' : 'monthly'
-}
-
-/**
  * @param {Nullable<string>} [planCode]
  * @returns {'annual' | 'monthly' | null}
  */
@@ -182,11 +169,9 @@ function getPlanCadenceFromPlanCode(planCode) {
     return null
   }
 
-  const plan = /** @type {Plan[]} */ (Settings.plans).find(
-    candidate => candidate.planCode === planCode
-  )
+  const plan = PlansLocator.findLocalPlanInSettings(planCode)
   if (plan) {
-    return plan.annual ? 'annual' : 'monthly'
+    return PlansLocator.getPlanCadence({ plan })
   }
 
   if (planCode.includes('annual')) {
@@ -348,7 +333,7 @@ function getAiPlanCadence(
 
   if (aiPlan === 'ai-assist-add-on') {
     return (
-      getPlanCadence(bestSubscription) ||
+      PlansLocator.getPlanCadence(bestSubscription) ||
       getPlanCadenceFromPlanCode(individualSubscription?.planCode)
     )
   }
@@ -365,10 +350,7 @@ function hasPlanAiEnabled(plan) {
     return false
   }
 
-  return (
-    plan.features.aiUsageQuota === Settings.aiFeatures.unlimitedQuota ||
-    plan.features.aiErrorAssistant === true
-  )
+  return plan.features.aiUsageQuota === Settings.aiFeatures.unlimitedQuota
 }
 
 /**
@@ -446,9 +428,7 @@ function getGroupSize(
   }
 
   return allGroupSubscriptions.reduce((largestGroupSize, subscription) => {
-    const plan = /** @type {Plan[]} */ (Settings.plans).find(
-      candidate => candidate.planCode === subscription.planCode
-    )
+    const plan = PlansLocator.findLocalPlanInSettings(subscription.planCode)
     const groupSize = subscription.membersLimit ?? plan?.membersLimit ?? 0
 
     return Math.max(largestGroupSize, groupSize)
@@ -545,7 +525,7 @@ function getGroupRole(
  * Customer.io properties derived from a user's institutional affiliations.
  *
  * @param {UserEmailData[]} userEmails - email data from UserGetter.getUserFullEmails
- * @returns {{ enterprise_commons: boolean, domain_capture: boolean }}
+ * @returns {{ enterprise_commons: boolean, commons_ai: boolean, domain_capture: boolean }}
  */
 function getAffiliationProperties(userEmails) {
   const enterpriseCommons = userEmails.some(
@@ -554,11 +534,17 @@ function getAffiliationProperties(userEmails) {
       emailData.affiliation?.institution?.commonsAccount &&
       emailData.affiliation?.institution?.enterpriseCommons
   )
+  const commonsAi = userEmails.some(
+    emailData =>
+      emailData.emailHasInstitutionLicence &&
+      emailData.affiliation?.institution?.writefullCommonsAccount === true
+  )
   const domainCapture = userEmails.some(
     emailData => emailData.affiliation?.group?.domainCaptureEnabled
   )
   return {
     enterprise_commons: enterpriseCommons,
+    commons_ai: commonsAi,
     domain_capture: domainCapture,
   }
 }
@@ -592,7 +578,7 @@ function getPlanProperties({
 }) {
   const planType = normalizePlanType(bestSubscription)
   const displayPlanType = getFriendlyPlanName(planType)
-  const planTermLabel = getPlanCadence(bestSubscription)
+  const planTermLabel = PlansLocator.getPlanCadence(bestSubscription)
   const aiPlan = getAiPlanType(
     bestSubscription,
     individualSubscription,

@@ -298,6 +298,70 @@ describe('Project blobs API', function () {
       expect(newBlobResponseText).to.equal(fileContents.toString())
     })
 
+    it('rejects copying a blob that exceeds the size limit', async function () {
+      const targetProjectId = '456'
+      const targetClient =
+        await testServer.createClientForProject(targetProjectId)
+      const targetToken = testServer.createTokenForProject(targetProjectId)
+      const url = new URL(
+        testServer.url(
+          `/api/projects/${targetProjectId}/blobs/${testFiles.HELLO_TXT_HASH}`
+        )
+      )
+      url.searchParams.append('copyFrom', projectId)
+      url.searchParams.append(
+        'sizeLimit',
+        (testFiles.HELLO_TXT_BYTE_LENGTH - 1).toString()
+      )
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${targetToken}` },
+      })
+      expect(response.status).to.equal(HTTPStatus.REQUEST_ENTITY_TOO_LARGE)
+      const body = await response.json()
+      expect(body.size).to.equal(testFiles.HELLO_TXT_BYTE_LENGTH)
+
+      // check that it did not copy the blob to the target project
+      await expectHttpError(
+        targetClient.apis.Project.getProjectBlob({
+          project_id: targetProjectId,
+          hash: testFiles.HELLO_TXT_HASH,
+        }),
+        HTTPStatus.NOT_FOUND
+      )
+    })
+
+    it('copies a blob that is within the size limit', async function () {
+      const targetProjectId = '456'
+      const targetClient =
+        await testServer.createClientForProject(targetProjectId)
+      const targetToken = testServer.createTokenForProject(targetProjectId)
+      const url = new URL(
+        testServer.url(
+          `/api/projects/${targetProjectId}/blobs/${testFiles.HELLO_TXT_HASH}`
+        )
+      )
+      url.searchParams.append('copyFrom', projectId)
+      url.searchParams.append(
+        'sizeLimit',
+        testFiles.HELLO_TXT_BYTE_LENGTH.toString()
+      )
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${targetToken}` },
+      })
+      expect(response.status).to.equal(HTTPStatus.CREATED)
+
+      const newBlobResponse = await targetClient.apis.Project.getProjectBlob({
+        project_id: targetProjectId,
+        hash: testFiles.HELLO_TXT_HASH,
+      })
+      const newBlobResponseText = await newBlobResponse.data.text()
+      expect(newBlobResponseText).to.equal(fileContents.toString())
+    })
+
     it('skips copying a blob to another project if it already exists', async function () {
       const targetProjectId = '456'
       const targetClient =
@@ -366,6 +430,41 @@ describe('Project blobs API', function () {
         headers: { Authorization: `Bearer ${targetToken}` },
       })
       expect(response.status).to.equal(HTTPStatus.NO_CONTENT)
+    })
+  })
+
+  describe('validation', function () {
+    it('rejects a project_id that is not a Mongo ObjectId or Postgres id', async function () {
+      const badProjectId = 'a/../../../../../etc'
+      const badToken = testServer.createTokenForProject(badProjectId)
+      const response = await fetch(
+        testServer.url(
+          `/api/projects/${encodeURIComponent(badProjectId)}/blobs/${testFiles.HELLO_TXT_HASH}`
+        ),
+        { headers: { Authorization: `Bearer ${badToken}` } }
+      )
+      expect(response.status).to.equal(HTTPStatus.NOT_FOUND)
+      const body = await response.json()
+      expect(body.error).to.include('project_id')
+    })
+
+    it('rejects a copyFrom that is not a Mongo ObjectId or Postgres id', async function () {
+      const targetProjectId = '456'
+      const targetToken = testServer.createTokenForProject(targetProjectId)
+      const url = new URL(
+        testServer.url(
+          `/api/projects/${targetProjectId}/blobs/${testFiles.HELLO_TXT_HASH}`
+        )
+      )
+      url.searchParams.append('copyFrom', 'a/../../../../../etc')
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${targetToken}` },
+      })
+      expect(response.status).to.equal(HTTPStatus.UNPROCESSABLE_ENTITY)
+      const body = await response.json()
+      expect(body.error).to.include('copyFrom')
     })
   })
 })

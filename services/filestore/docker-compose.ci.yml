@@ -19,6 +19,7 @@ services:
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
       VITEST_NO_CACHE: true
+      REQ_VALIDATION_MODE: enforce
 
   test_acceptance:
     image: ci/$PROJECT_NAME:$BRANCH_NAME_TAG_SAFE-$BUILD_NUMBER
@@ -37,7 +38,7 @@ services:
       GCS_API_ENDPOINT: http://gcs:9090
       GCS_PROJECT_ID: fake
       STORAGE_EMULATOR_HOST: http://gcs:9090/storage/v1
-      MOCHA_GREP: ${MOCHA_GREP}
+      TEST_NAME_PATTERN: ${TEST_NAME_PATTERN}
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
       ENABLE_CONVERSIONS: true
@@ -48,6 +49,8 @@ services:
       AWS_S3_TEMPLATE_FILES_BUCKET_NAME: fake-template-files
       GCS_USER_FILES_BUCKET_NAME: fake-gcs-user-files
       GCS_TEMPLATE_FILES_BUCKET_NAME: fake-gcs-template-files
+      REQ_LOCKDOWN_MODE: throw
+      REQ_VALIDATION_MODE: enforce
     volumes:
       - ./reports:/overleaf/services/filestore/reports
       - minio-certs:/certs
@@ -74,7 +77,7 @@ services:
   certs:
     build:
       dockerfile_inline: |
-        FROM node:24.14.1
+        FROM node:24.18.1
         RUN wget -O /certgen "https://github.com/minio/certgen/releases/download/v1.3.0/certgen-linux-"`dpkg --print-architecture`
         RUN chmod +x /certgen
     volumes:
@@ -94,6 +97,9 @@ services:
   minio:
     image: minio/minio:RELEASE.2024-10-13T13-34-11Z
     command: server /data
+    # Throw-away test data in tmpfs: the image declares a VOLUME here, which would otherwise leave an anonymous volume behind after every run.
+    tmpfs:
+      - /data
     volumes:
       - minio-certs:/root/.minio/certs
     environment:
@@ -112,17 +118,12 @@ services:
     image: minio/mc:RELEASE.2024-10-08T09-37-26Z
     volumes:
       - minio-certs:/root/.mc/certs/CAs
-    entrypoint: sh
+      - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
+    entrypoint: /overleaf/bin/shared/wait_for_it minio:9000 --timeout=60 --
     command:
+      - sh
       - "-cex"
       - |
-        sleep 1
-        mc alias set s3 https://minio:9000 MINIO_ROOT_USER MINIO_ROOT_PASSWORD \
-        || sleep 3 && \
-        mc alias set s3 https://minio:9000 MINIO_ROOT_USER MINIO_ROOT_PASSWORD \
-        || sleep 3 && \
-        mc alias set s3 https://minio:9000 MINIO_ROOT_USER MINIO_ROOT_PASSWORD \
-        || sleep 3 && \
         mc alias set s3 https://minio:9000 MINIO_ROOT_USER MINIO_ROOT_PASSWORD
         mc mb --ignore-existing s3/fake-user-files
         mc mb --ignore-existing s3/fake-user-files-dek

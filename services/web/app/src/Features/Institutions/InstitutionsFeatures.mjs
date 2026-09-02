@@ -9,18 +9,17 @@ import Features from '../../infrastructure/Features.mjs'
 async function _getInstitutionsAddons(userId) {
   if (!Features.hasFeature('saas')) return {}
   const affiliates =
-    await InstitutionsGetter.promises.getCurrentAffiliations(userId)
+    await InstitutionsGetter.promises.getCurrentEntitledAffiliations(userId)
   // currently only addOn available to institutions is assist/WF bundle,
   //  which is denoted by the presence of writefullCommonsAccount on the institution
+
   const hasAssistBundle = affiliates.some(
     affiliate => affiliate?.institution?.writefullCommonsAccount === true
   )
 
   // todo: seperate quota value depending on source of entitlement if needed
-  // todo: quota clean-up: remove aiErrorAssistant once migration finishes
   const bundleFeatures = {
     aiUsageQuota: Settings.writefull.quotaTierGranted,
-    aiErrorAssistant: true,
   }
   return hasAssistBundle ? bundleFeatures : {}
 }

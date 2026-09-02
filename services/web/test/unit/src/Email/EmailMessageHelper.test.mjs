@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { expect } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 
 const MODULE_PATH = path.join(
   import.meta.dirname,

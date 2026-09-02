@@ -194,7 +194,7 @@ describe('clientTracking', function () {
     })
   })
 
-  return describe('when an anonymous client updates its cursor location', function () {
+  describe('when an anonymous client updates its cursor location', function () {
     before(function (done) {
       return async.series(
         [
@@ -286,6 +286,163 @@ describe('clientTracking', function () {
           name: '',
         },
       ])
+    })
+  })
+
+  describe('when a client updates its cursor location with no document open', function () {
+    describe('with doc_id set to null', function () {
+      before(function (done) {
+        return async.series(
+          [
+            cb => {
+              return FixturesManager.setUpProject(
+                {
+                  privilegeLevel: 'owner',
+                  project: { name: 'Test Project' },
+                },
+                (error, { user_id: userId, project_id: projectId }) => {
+                  if (error) return done(error)
+                  this.user_id = userId
+                  this.project_id = projectId
+                  return cb()
+                }
+              )
+            },
+
+            cb => {
+              this.client = RealTimeClient.connect(this.project_id, cb)
+            },
+
+            cb => {
+              return this.client.emit(
+                'clientTracking.updatePosition',
+                {
+                  row: 42,
+                  column: 36,
+                  doc_id: null,
+                },
+                error => {
+                  this.error = error
+                  // Give a possible disconnect a chance to happen.
+                  return setTimeout(cb, 300)
+                }
+              )
+            },
+          ],
+          done
+        )
+      })
+
+      it('should not return an error', function () {
+        expect(this.error).to.not.exist
+      })
+
+      it('should keep the client connected', function () {
+        expect(this.client.socket.connected).to.equal(true)
+      })
+    })
+
+    describe('with doc_id omitted', function () {
+      before(function (done) {
+        return async.series(
+          [
+            cb => {
+              return FixturesManager.setUpProject(
+                {
+                  privilegeLevel: 'owner',
+                  project: { name: 'Test Project' },
+                },
+                (error, { user_id: userId, project_id: projectId }) => {
+                  if (error) return done(error)
+                  this.user_id = userId
+                  this.project_id = projectId
+                  return cb()
+                }
+              )
+            },
+
+            cb => {
+              this.client = RealTimeClient.connect(this.project_id, cb)
+            },
+
+            cb => {
+              return this.client.emit(
+                'clientTracking.updatePosition',
+                {
+                  row: 42,
+                  column: 36,
+                },
+                error => {
+                  this.error = error
+                  // Give a possible disconnect a chance to happen.
+                  return setTimeout(cb, 300)
+                }
+              )
+            },
+          ],
+          done
+        )
+      })
+
+      it('should not return an error', function () {
+        expect(this.error).to.not.exist
+      })
+
+      it('should keep the client connected', function () {
+        expect(this.client.socket.connected).to.equal(true)
+      })
+    })
+
+    describe('with an invalid doc_id', function () {
+      before(function (done) {
+        return async.series(
+          [
+            cb => {
+              return FixturesManager.setUpProject(
+                {
+                  privilegeLevel: 'owner',
+                  project: { name: 'Test Project' },
+                },
+                (error, { user_id: userId, project_id: projectId }) => {
+                  if (error) return done(error)
+                  this.user_id = userId
+                  this.project_id = projectId
+                  return cb()
+                }
+              )
+            },
+
+            cb => {
+              this.client = RealTimeClient.connect(this.project_id, cb)
+            },
+
+            cb => {
+              return this.client.emit(
+                'clientTracking.updatePosition',
+                {
+                  row: 42,
+                  column: 36,
+                  doc_id: 'not-a-valid-id',
+                },
+                error => {
+                  this.error = error
+                  // Give the disconnect a chance to happen.
+                  return setTimeout(cb, 300)
+                }
+              )
+            },
+          ],
+          done
+        )
+      })
+
+      it('should return an invalid id error', function () {
+        return this.error.message.should.equal('invalid Mongo ObjectId')
+      })
+
+      it('should disconnect the client', function () {
+        return expect(this.client.socket.connected).to.equal(false)
+      })
     })
   })
 })

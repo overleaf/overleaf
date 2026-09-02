@@ -3,7 +3,7 @@
 /**
  * @import { PaymentProvider } from '../../../../types/subscription/dashboard/subscription'
  * @import { CurrencyCode, StripeCurrencyCode } from '../../../../types/subscription/currency'
- * @import { AddOn } from '../../../../types/subscription/plan'
+ * @import { AddOn, StripeLookupKeyVersion } from '../../../../types/subscription/plan'
  */
 
 /**
@@ -156,9 +156,15 @@ export class PaymentProviderSubscription {
    * @param {string} planCode - the new plan code
    * @param {number} [quantity] - the quantity of the plan
    * @param {boolean} [shouldChangeAtTermEnd] - whether the change should be applied at the end of the term
+   * @param {StripeLookupKeyVersion} [lookupKeyVersion] - the price version to charge the new plan at
    * @return {PaymentProviderSubscriptionChangeRequest}
    */
-  getRequestForPlanChange(planCode, quantity, shouldChangeAtTermEnd) {
+  getRequestForPlanChange(
+    planCode,
+    quantity,
+    shouldChangeAtTermEnd,
+    lookupKeyVersion
+  ) {
     const timeframe = shouldChangeAtTermEnd ? 'term_end' : 'now'
     const baseAddOns = this.#getBaseAddOnsForChangeRequest(timeframe)
 
@@ -198,6 +204,7 @@ export class PaymentProviderSubscription {
       timeframe,
       planCode,
       addOnUpdates,
+      lookupKeyVersion,
     })
 
     return changeRequest
@@ -538,6 +545,9 @@ export class PaymentProviderSubscriptionChangeRequest {
    * @param {"now" | "term_end"} props.timeframe
    * @param {string} [props.planCode]
    * @param {PaymentProviderSubscriptionAddOnUpdate[]} [props.addOnUpdates]
+   * @param {StripeLookupKeyVersion} [props.lookupKeyVersion] - price version to
+   * use for the resulting subscription items. When omitted, the version of the
+   * subscription's current plan price is preserved.
    */
   constructor(props) {
     if (props.planCode == null && props.addOnUpdates == null) {
@@ -549,6 +559,7 @@ export class PaymentProviderSubscriptionChangeRequest {
     this.timeframe = props.timeframe
     this.planCode = props.planCode ?? null
     this.addOnUpdates = props.addOnUpdates ?? null
+    this.lookupKeyVersion = props.lookupKeyVersion ?? null
   }
 }
 

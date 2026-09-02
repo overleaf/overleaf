@@ -20,6 +20,7 @@ module.exports = defineConfig({
     include: ['test/unit/js/*.test.{js,ts}'],
     setupFiles: ['./test/unit/setup.js'],
     isolate: true,
+    testNamePattern: process.env.TEST_NAME_PATTERN || undefined,
     ...reporterOptions,
   },
 })

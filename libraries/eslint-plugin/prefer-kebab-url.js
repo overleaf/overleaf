@@ -29,7 +29,7 @@ const getSuggestion = routePath => {
 
   if (routePath instanceof RegExp) {
     const words = removeTextBetweenBrackets(routePath.source).match(/[\w-]+/g)
-    if (!words) return routePath
+    if (!words) return null
 
     let newSource = routePath.source
     for (const word of words) {
@@ -42,9 +42,7 @@ const getSuggestion = routePath => {
     }
 
     const kebabed = new RegExp(newSource, routePath.flags)
-    return kebabed.source.toString() === routePath.source.toString()
-      ? null
-      : kebabed
+    return kebabed.source === routePath.source ? null : kebabed.toString()
   }
 }
 

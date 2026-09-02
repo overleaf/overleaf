@@ -7,6 +7,7 @@ import {
   OLModalHeader,
   OLModalTitle,
 } from '@/shared/components/ol/ol-modal'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 // show modal when editor is forcefully disconnected
 function ForceDisconnected() {
@@ -14,6 +15,7 @@ function ForceDisconnected() {
   const { t } = useTranslation()
   const [secondsUntilRefresh, setSecondsUntilRefresh] = useState(0)
   const [show, setShow] = useState(false)
+  const themed = useFeatureFlag('themed-modals')
 
   useEffect(() => {
     if (
@@ -55,6 +57,7 @@ function ForceDisconnected() {
       className="lock-editor-modal"
       backdrop={false}
       keyboard={false}
+      themed={themed}
     >
       <OLModalHeader closeButton={false}>
         <OLModalTitle>{t('please_wait')}</OLModalTitle>

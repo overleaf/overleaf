@@ -3,7 +3,7 @@ import { useCombobox } from 'downshift'
 import classnames from 'classnames'
 import { escapeRegExp } from 'lodash'
 import OLFormControl from '@/shared/components/ol/ol-form-control'
-import { DropdownItem } from '@/shared/components/dropdown/dropdown-menu'
+import { OLDropdownItem } from '@/shared/components/ol/ol-dropdown-menu'
 import OLFormLabel from '@/shared/components/ol/ol-form-label'
 import DSFormLabel from '@/shared/components/ds/ds-form-label'
 import DSFormControl from '@/shared/components/ds/ds-form-control'
@@ -97,9 +97,9 @@ function Downshift({
     >
       {showSuggestedText && inputItems.length > 0 && (
         <li>
-          <DropdownItem as="span" role={undefined} disabled>
+          <OLDropdownItem as="span" role={undefined} disabled>
             {itemsTitle}
-          </DropdownItem>
+          </OLDropdownItem>
         </li>
       )}
       {inputItems.map((item, index) => (
@@ -109,7 +109,7 @@ function Downshift({
           {...getItemProps({ item, index })}
           aria-selected={selectedItem === item}
         >
-          <DropdownItem
+          <OLDropdownItem
             as="span"
             role={undefined}
             className={classnames({
@@ -119,7 +119,7 @@ function Downshift({
             trailingIcon={selectedItem === item ? tickIcon() : undefined}
           >
             {highlightMatchedCharacters(item, inputValue)}
-          </DropdownItem>
+          </OLDropdownItem>
         </li>
       ))}
     </ul>

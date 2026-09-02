@@ -53,6 +53,12 @@ describe('WebsocketLoadBalancer', function () {
       }),
     }))
 
+    vi.doMock('../../../app/js/DocumentUpdaterController', () => ({
+      default: (ctx.DocumentUpdaterController = {
+        handleAppliedOpMessage: sinon.stub(),
+      }),
+    }))
+
     ctx.WebsocketLoadBalancer = (await import(modulePath)).default
     ctx.io = {}
     ctx.WebsocketLoadBalancer.rclientPubList = [{ publish: sinon.stub() }]
@@ -64,7 +70,9 @@ describe('WebsocketLoadBalancer', function () {
     ]
 
     ctx.room_id = 'room-id'
-    ctx.message = 'otUpdateApplied'
+    // any non-restricted message name (must be on the restricted-user message
+    // pass list so the restricted-client cases receive it)
+    ctx.message = 'projectNameUpdated'
     ctx.payload = ['argument one', 42]
   })
 
@@ -337,7 +345,90 @@ describe('WebsocketLoadBalancer', function () {
           .should.equal(true)
         ctx.emit3.called.should.equal(false)
       })
+
+      it('should not forward the message to the DocumentUpdaterController', function (ctx) {
+        ctx.DocumentUpdaterController.handleAppliedOpMessage.called.should.equal(
+          false
+        )
+      })
     }) // duplicate client should be ignored
+
+    describe('with an applied op from document-updater', function () {
+      beforeEach(function (ctx) {
+        ctx.appliedOpMessage = {
+          project_id: 'project-id-123',
+          doc_id: 'doc-id-123',
+          op: { v: 42, doc: 'doc-id-123' },
+          _id: 'doc:host:rnd-1',
+          message: 'otUpdateApplied',
+        }
+        ctx.io.sockets = { clients: sinon.stub().returns([]) }
+        ctx.WebsocketLoadBalancer._processEditorEvent(
+          ctx.io,
+          'editor-events:project-id-123',
+          JSON.stringify(ctx.appliedOpMessage)
+        )
+      })
+
+      it('should forward the message for broadcasting to the project room', function (ctx) {
+        ctx.DocumentUpdaterController.handleAppliedOpMessage
+          .calledWith(ctx.io, ctx.appliedOpMessage, 'project-id-123')
+          .should.equal(true)
+      })
+
+      it('should not emit the message as an editor event', function (ctx) {
+        ctx.io.sockets.clients.called.should.equal(false)
+      })
+    })
+
+    describe('with an applied-op error from document-updater', function () {
+      beforeEach(function (ctx) {
+        ctx.appliedOpMessage = {
+          project_id: 'project-id-123',
+          doc_id: 'doc-id-123',
+          error: 'Something went wrong',
+          message: 'otUpdateError',
+        }
+        ctx.io.sockets = { clients: sinon.stub().returns([]) }
+        ctx.WebsocketLoadBalancer._processEditorEvent(
+          ctx.io,
+          'editor-events:project-id-123',
+          JSON.stringify(ctx.appliedOpMessage)
+        )
+      })
+
+      it('should forward the message for broadcasting to the project room', function (ctx) {
+        ctx.DocumentUpdaterController.handleAppliedOpMessage
+          .calledWith(ctx.io, ctx.appliedOpMessage, 'project-id-123')
+          .should.equal(true)
+      })
+    })
+
+    describe('with an applied op without a project_id', function () {
+      beforeEach(function (ctx) {
+        ctx.appliedOpMessage = {
+          doc_id: 'doc-id-123',
+          op: { v: 42, doc: 'doc-id-123' },
+          message: 'otUpdateApplied',
+        }
+        ctx.io.sockets = { clients: sinon.stub().returns([]) }
+        ctx.WebsocketLoadBalancer._processEditorEvent(
+          ctx.io,
+          'editor-events',
+          JSON.stringify(ctx.appliedOpMessage)
+        )
+      })
+
+      it('should log an error', function (ctx) {
+        ctx.logger.error.called.should.equal(true)
+      })
+
+      it('should not forward the message', function (ctx) {
+        ctx.DocumentUpdaterController.handleAppliedOpMessage.called.should.equal(
+          false
+        )
+      })
+    })
 
     describe('with a designated room, and restricted clients, not restricted message', function () {
       beforeEach(function (ctx) {

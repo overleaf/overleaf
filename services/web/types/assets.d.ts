@@ -18,6 +18,11 @@ declare module '*.mp4' {
   export default src
 }
 
+declare module '*.ort' {
+  const src: string
+  export default src
+}
+
 declare module '*.wasm' {
   const src: string
   export default src

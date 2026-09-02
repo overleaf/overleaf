@@ -1,6 +1,8 @@
 import { beforeAll, beforeEach, describe, it, vi, expect } from 'vitest'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
+import { RequestFailedError } from '@overleaf/fetch-utils'
+import { FileTooLargeError } from '../../../../app/src/Features/Errors/Errors.js'
 import {
   cleanupTestDatabase,
   db,
@@ -8,6 +10,12 @@ import {
 } from '../../../../app/src/infrastructure/mongodb.mjs'
 
 const { ObjectId } = mongodb
+
+// Ensure the module under test and this test file share the same
+// FileTooLargeError class, so `instanceof` checks line up.
+vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
+  vi.importActual('../../../../app/src/Features/Errors/Errors.js')
+)
 
 const MODULE_PATH = '../../../../app/src/Features/History/HistoryManager'
 
@@ -40,6 +48,7 @@ describe('HistoryManager', function () {
     ctx.FetchUtils = {
       fetchJson: sinon.stub(),
       fetchNothing: sinon.stub().resolves(),
+      RequestFailedError,
     }
     ctx.projectHistoryUrl = 'http://project_history.example.com'
     ctx.v1HistoryUrl = 'http://v1_history.example.com'
@@ -343,6 +352,106 @@ describe('HistoryManager', function () {
     })
   })
 
+  describe('copyBlob', function () {
+    const sourceHistoryId = 'source-history-id'
+    const targetHistoryId = 'target-history-id'
+    const hash = 'abcdef0123456789abcdef0123456789abcdef01'
+
+    it('should call the v1-history service without a size limit', async function (ctx) {
+      await ctx.HistoryManager.promises.copyBlob(
+        sourceHistoryId,
+        targetHistoryId,
+        hash
+      )
+      expect(ctx.FetchUtils.fetchNothing).to.have.been.calledOnce
+      const [url, opts] = ctx.FetchUtils.fetchNothing.getCall(0).args
+      expect(url.toString()).to.equal(
+        `${ctx.v1HistoryUrl}/projects/${targetHistoryId}/blobs/${hash}?copyFrom=${sourceHistoryId}`
+      )
+      expect(opts).to.deep.equal({
+        method: 'POST',
+        basicAuth: {
+          user: ctx.v1HistoryUser,
+          password: ctx.v1HistoryPassword,
+        },
+      })
+    })
+
+    it('should pass the size limit as a query parameter', async function (ctx) {
+      await ctx.HistoryManager.promises.copyBlob(
+        sourceHistoryId,
+        targetHistoryId,
+        hash,
+        1234
+      )
+      const [url] = ctx.FetchUtils.fetchNothing.getCall(0).args
+      expect(url.searchParams.get('copyFrom')).to.equal(sourceHistoryId)
+      expect(url.searchParams.get('sizeLimit')).to.equal('1234')
+    })
+
+    it('should throw a FileTooLargeError with the size on a 413 response', async function (ctx) {
+      ctx.FetchUtils.fetchNothing.rejects(
+        new RequestFailedError(
+          `${ctx.v1HistoryUrl}/projects/${targetHistoryId}/blobs/${hash}`,
+          { method: 'POST' },
+          { status: 413 },
+          JSON.stringify({ size: 9000 })
+        )
+      )
+      await expect(
+        ctx.HistoryManager.promises.copyBlob(
+          sourceHistoryId,
+          targetHistoryId,
+          hash,
+          1234
+        )
+      ).to.be.rejected.then(err => {
+        expect(err).to.be.instanceof(FileTooLargeError)
+        expect(err.info.size).to.equal(9000)
+      })
+    })
+
+    it('should throw a FileTooLargeError even if the 413 body is not valid JSON', async function (ctx) {
+      ctx.FetchUtils.fetchNothing.rejects(
+        new RequestFailedError(
+          `${ctx.v1HistoryUrl}/projects/${targetHistoryId}/blobs/${hash}`,
+          { method: 'POST' },
+          { status: 413 },
+          'not json'
+        )
+      )
+      await expect(
+        ctx.HistoryManager.promises.copyBlob(
+          sourceHistoryId,
+          targetHistoryId,
+          hash,
+          1234
+        )
+      ).to.be.rejected.then(err => {
+        expect(err).to.be.instanceof(FileTooLargeError)
+        expect(err.info.size).to.be.undefined
+      })
+    })
+
+    it('should rethrow non-413 request failures', async function (ctx) {
+      const err = new RequestFailedError(
+        `${ctx.v1HistoryUrl}/projects/${targetHistoryId}/blobs/${hash}`,
+        { method: 'POST' },
+        { status: 500 },
+        ''
+      )
+      ctx.FetchUtils.fetchNothing.rejects(err)
+      await expect(
+        ctx.HistoryManager.promises.copyBlob(
+          sourceHistoryId,
+          targetHistoryId,
+          hash,
+          1234
+        )
+      ).to.be.rejectedWith(err)
+    })
+  })
+
   describe('deleteProject', function () {
     const projectId = new ObjectId()
     const historyId = new ObjectId()
@@ -354,7 +463,7 @@ describe('HistoryManager', function () {
     it('should call the project-history service', async function (ctx) {
       expect(ctx.FetchUtils.fetchNothing).to.have.been.calledWith(
         `${ctx.projectHistoryUrl}/project/${projectId}`,
-        { method: 'DELETE' }
+        { method: 'DELETE', signal: sinon.match.instanceOf(AbortSignal) }
       )
     })
 
@@ -367,6 +476,7 @@ describe('HistoryManager', function () {
             user: ctx.v1HistoryUser,
             password: ctx.v1HistoryPassword,
           },
+          signal: sinon.match.instanceOf(AbortSignal),
         }
       )
     })

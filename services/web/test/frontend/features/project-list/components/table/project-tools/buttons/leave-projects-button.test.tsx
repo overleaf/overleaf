@@ -5,6 +5,7 @@ import {
   ProjectListContext,
   ProjectListContextValue,
 } from '../../../../../../../../frontend/js/features/project-list/context/project-list-context'
+import { SplitTestProvider } from '@/shared/context/split-test-context'
 
 const { leavableList } = makeLongProjectList(40)
 
@@ -17,9 +18,11 @@ describe('<LeaveProjectsButton />', function () {
     } as ProjectListContextValue
 
     render(
-      <ProjectListContext.Provider value={value}>
-        <LeaveProjectsButton />
-      </ProjectListContext.Provider>
+      <SplitTestProvider>
+        <ProjectListContext.Provider value={value}>
+          <LeaveProjectsButton />
+        </ProjectListContext.Provider>
+      </SplitTestProvider>
     )
     const btn = screen.getByRole('button', { name: /leave/i })
     fireEvent.click(btn)

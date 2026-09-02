@@ -9,7 +9,8 @@ const modifierKey = /Mac/i.test(navigator.platform) ? 'Cmd' : 'Ctrl'
 
 function DetachCompileButton() {
   const { t } = useTranslation()
-  const { compiling, startCompile, hasChanges } = useDetachCompileContext()
+  const { compiling, startCompile, hasChanges, isNetworkStalled } =
+    useDetachCompileContext()
 
   const tooltipElement = (
     <>
@@ -29,10 +30,11 @@ function DetachCompileButton() {
         <OLButton
           variant="primary"
           onClick={() => startCompile()}
-          disabled={compiling}
+          disabled={compiling || isNetworkStalled}
           className={classnames('detach-compile-button', {
             'btn-striped-animated': hasChanges,
-            'detach-compile-button-disabled': compiling,
+            'detach-compile-button-disabled': compiling || isNetworkStalled,
+            'compile-button-network-stalled': isNetworkStalled,
           })}
           size="sm"
           isLoading={compiling}

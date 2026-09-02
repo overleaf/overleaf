@@ -4,6 +4,7 @@
   --file-tree-item-color: var(--content-primary-dark);
   --file-tree-bg: var(--bg-dark-primary);
   --file-tree-item-selected-color: var(--green-10);
+  --file-tree-item-disabled-color: var(--content-disabled-dark);
   --file-tree-item-dragging-bg: var(--green-40);
   --file-tree-item-dragging-color: var(--content-primary-dark);
   --file-tree-item-icon-dragging-color: var(--file-tree-item-dragging-color);
@@ -12,6 +13,10 @@
   --file-tree-line-height: 2.05;
   --file-tree-icon-colour: var(--content-primary-dark);
   --file-tree-expand-button-color: var(--content-primary-dark);
+
+  // Modals follow the page theme only when opted in, so this defaults to the
+  // light value and is overridden for .modal-themed below.
+  --modal-new-file-conflict-bg-color: var(--bg-danger-03);
 }
 
 @include theme('light') {
@@ -20,6 +25,7 @@
   --file-tree-item-color: var(--content-primary);
   --file-tree-bg: var(--white);
   --file-tree-item-selected-color: var(--green-70);
+  --file-tree-item-disabled-color: var(--content-disabled);
   --file-tree-item-dragging-bg: var(--green-60);
   --file-tree-item-dragging-color: var(--white);
   --file-tree-item-icon-dragging-color: var(--file-tree-item-dragging-color);
@@ -90,6 +96,11 @@
 
   &:active {
     color: var(--file-tree-expand-button-color);
+  }
+
+  &[disabled],
+  &:disabled {
+    border-color: transparent;
   }
 }
 
@@ -399,7 +410,7 @@
         }
       }
 
-      .file-tree-bib-badge {
+      .file-tree-beta-badge {
         position: absolute;
         right: var(--spacing-09);
         top: 0;
@@ -411,6 +422,7 @@
           font-size: var(--font-size-03);
 
           &.labs-badge {
+            padding: var(--spacing-01);
             color: var(--white);
           }
 
@@ -420,7 +432,7 @@
         }
       }
 
-      .file-tree-has-bib-badge .item-name {
+      .file-tree-has-beta-badge .item-name {
         padding-right: var(--spacing-09);
       }
 
@@ -503,6 +515,13 @@
         }
       }
     }
+
+    ul.file-tree-list li.entity-disabled > .entity > .entity-name {
+      &,
+      & .file-tree-icon {
+        color: var(--file-tree-item-disabled-color) !important;
+      }
+    }
   }
 
   // while dragging, the previously selected item gets no highlight
@@ -580,8 +599,22 @@
   }
 }
 
+@include theme('default') {
+  .modal-themed {
+    --modal-new-file-conflict-bg-color: var(--red-70);
+  }
+}
+
 .modal-new-file {
   padding: 0;
+
+  .form-label {
+    color: var(--content-secondary-themed);
+
+    &:has(+ .form-control[disabled], + .form-control-wrapper-disabled) {
+      color: var(--content-disabled-themed);
+    }
+  }
 
   table {
     width: 100%;
@@ -611,14 +644,14 @@
 }
 
 .modal-new-file-list {
-  background-color: var(--bg-light-secondary);
+  background-color: var(--bg-secondary-themed);
   width: 220px;
 
   ul {
     li {
       /* old modal (a) */
       a {
-        color: var(--content-secondary);
+        color: var(--content-secondary-themed);
         padding: var(--spacing-03);
         display: block;
         text-decoration: none;
@@ -626,7 +659,7 @@
 
       /* new modal (button) */
       .btn {
-        color: var(--content-secondary);
+        color: var(--content-secondary-themed);
         padding: var(--spacing-03);
       }
 
@@ -637,27 +670,27 @@
       .btn:focus {
         outline: none;
         text-decoration: none;
-        background-color: white;
+        background-color: var(--bg-primary-themed);
       }
     }
 
     li.active {
-      background-color: white;
+      background-color: var(--bg-primary-themed);
 
       /* old modal (a) */
       a {
-        color: var(--link-ui);
+        color: var(--link-ui-themed);
       }
 
       /* new modal (button) */
       .btn {
-        color: var(--link-ui);
+        color: var(--link-ui-themed);
         text-decoration: none;
       }
     }
 
     li:hover {
-      background-color: white;
+      background-color: var(--bg-primary-themed);
     }
   }
 }
@@ -666,6 +699,10 @@
   text-align: center;
   color: var(--content-secondary-dark);
   padding: 20px;
+}
+
+.file-tree-modal-create-folder .form-label {
+  color: var(--content-secondary-themed);
 }
 
 .file-tree-modal-alert {
@@ -699,11 +736,11 @@
 }
 
 .modal-new-file-body-conflict {
-  background-color: var(--bg-danger-03);
-  border: 1px dashed var(--border-danger);
+  background-color: var(--modal-new-file-conflict-bg-color);
+  border: 1px dashed var(--border-danger-themed);
   min-height: 400px;
   border-radius: 3px;
-  color: var(--content-primary);
+  color: var(--content-primary-themed);
   display: flex;
   flex-direction: column;
   justify-content: center;

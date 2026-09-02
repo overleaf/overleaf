@@ -22,6 +22,7 @@ import OLFormLabel from '@/shared/components/ol/ol-form-label'
 import OLButton from '@/shared/components/ol/ol-button'
 import Notification from '@/shared/components/notification'
 import OLFormControl from '@/shared/components/ol/ol-form-control'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 type EditTagModalProps = {
   id: string
@@ -35,6 +36,7 @@ export function EditTagModal({ id, tag, onEdit, onClose }: EditTagModalProps) {
   const { t } = useTranslation()
   const { isLoading, isError, runAsync, status } = useAsync()
   const { autoFocusedRef } = useRefWithAutoFocus<HTMLInputElement>()
+  const themed = useFeatureFlag('themed-modals')
 
   const [newTagName, setNewTagName] = useState<string | undefined>()
   const [validationError, setValidationError] = useState<string>()
@@ -88,14 +90,22 @@ export function EditTagModal({ id, tag, onEdit, onClose }: EditTagModalProps) {
   }
 
   return (
-    <OLModal show animation onHide={onClose} id={id} backdrop="static">
+    <OLModal
+      show
+      animation
+      onHide={onClose}
+      id={id}
+      backdrop="static"
+      themed={themed}
+      className="project-list-modal"
+    >
       <OLModalHeader>
         <OLModalTitle>{t('edit_tag')}</OLModalTitle>
       </OLModalHeader>
 
       <OLModalBody>
         <OLForm onSubmit={handleSubmit}>
-          <OLFormGroup controlId="edit-tag-modal">
+          <OLFormGroup controlId="edit-tag-modal-form">
             <OLFormLabel>{t('edit_tag_name')}</OLFormLabel>
             <OLFormControl
               ref={autoFocusedRef}

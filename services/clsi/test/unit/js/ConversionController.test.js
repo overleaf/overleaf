@@ -9,6 +9,21 @@ const MODULE_PATH = Path.join(
   '../../../app/js/ConversionController'
 )
 
+// A minimal but schema-valid multer file object (zz.uploadedFile()), keyed
+// off the temp path used throughout these tests.
+function uploadedFile(path) {
+  return {
+    fieldname: 'qqfile',
+    originalname: Path.basename(path),
+    encoding: '7bit',
+    mimetype: 'application/octet-stream',
+    size: 1234,
+    destination: Path.dirname(path),
+    filename: Path.basename(path),
+    path,
+  }
+}
+
 describe('ConversionController', function () {
   beforeEach(async function (ctx) {
     ctx.conversionDir = '/path/to/conversion/result'
@@ -49,10 +64,10 @@ describe('ConversionController', function () {
       },
     }
 
+    // HistoryResourceWriter is consumed via a namespace import, so the named
+    // export lives at the top level (not under `.promises`).
     ctx.HistoryResourceWriter = {
-      promises: {
-        syncResourcesToDisk: sinon.stub().resolves(),
-      },
+      syncResourcesToDisk: sinon.stub().resolves(),
     }
 
     ctx.RequestParser = {
@@ -131,7 +146,7 @@ describe('ConversionController', function () {
       beforeEach(async function (ctx) {
         ctx.Settings.enablePandocConversions = false
         ctx.req = {
-          file: { path: '/path/to/uploaded/file.docx' },
+          file: uploadedFile('/path/to/uploaded/file.docx'),
           query: { type: 'docx' },
         }
         ctx.res.sendStatus = sinon.stub()
@@ -157,20 +172,26 @@ describe('ConversionController', function () {
     describe('when conversionType is missing', function () {
       beforeEach(async function (ctx) {
         ctx.req = {
-          file: { path: '/path/to/uploaded/file.docx' },
+          file: uploadedFile('/path/to/uploaded/file.docx'),
           query: {},
         }
-        ctx.res.sendStatus = sinon.stub()
 
-        await ctx.ConversionController.convertDocumentToLaTeX(ctx.req, ctx.res)
+        try {
+          await ctx.ConversionController.convertDocumentToLaTeX(
+            ctx.req,
+            ctx.res
+          )
+        } catch (err) {
+          ctx.error = err
+        }
       })
 
       it('should remove the uploaded file', function (ctx) {
         sinon.assert.calledWith(ctx.fs.unlink, ctx.req.file.path)
       })
 
-      it('should return 400', function (ctx) {
-        sinon.assert.calledWith(ctx.res.sendStatus, 400)
+      it('should reject with a validation error', function (ctx) {
+        expect(ctx.error).to.be.instanceOf(Error)
       })
 
       it('should not call the conversion manager', function (ctx) {
@@ -183,20 +204,26 @@ describe('ConversionController', function () {
     describe('when conversionType is unsupported', function () {
       beforeEach(async function (ctx) {
         ctx.req = {
-          file: { path: '/path/to/uploaded/file.docx' },
+          file: uploadedFile('/path/to/uploaded/file.docx'),
           query: { type: 'invalid' },
         }
-        ctx.res.sendStatus = sinon.stub()
 
-        await ctx.ConversionController.convertDocumentToLaTeX(ctx.req, ctx.res)
+        try {
+          await ctx.ConversionController.convertDocumentToLaTeX(
+            ctx.req,
+            ctx.res
+          )
+        } catch (err) {
+          ctx.error = err
+        }
       })
 
       it('should remove the uploaded file', function (ctx) {
         sinon.assert.calledWith(ctx.fs.unlink, ctx.req.file.path)
       })
 
-      it('should return 400', function (ctx) {
-        sinon.assert.calledWith(ctx.res.sendStatus, 400)
+      it('should reject with a validation error', function (ctx) {
+        expect(ctx.error).to.be.instanceOf(Error)
       })
 
       it('should not call the conversion manager', function (ctx) {
@@ -209,7 +236,7 @@ describe('ConversionController', function () {
     describe('successfully', function () {
       beforeEach(async function (ctx) {
         ctx.req = {
-          file: { path: '/path/to/uploaded/file.docx' },
+          file: uploadedFile('/path/to/uploaded/file.docx'),
           query: { type: 'docx' },
         }
 
@@ -258,7 +285,7 @@ describe('ConversionController', function () {
     describe('with conversionType=markdown', function () {
       beforeEach(async function (ctx) {
         ctx.req = {
-          file: { path: '/path/to/uploaded/file.md' },
+          file: uploadedFile('/path/to/uploaded/file.md'),
           query: { type: 'markdown' },
         }
 
@@ -277,6 +304,30 @@ describe('ConversionController', function () {
       })
     })
 
+    describe('with web-supplied compileBackendClass/compileGroup query params', function () {
+      beforeEach(async function (ctx) {
+        ctx.req = {
+          file: uploadedFile('/path/to/uploaded/file.md'),
+          query: {
+            type: 'markdown',
+            compileBackendClass: 'premium',
+            compileGroup: 'priority',
+          },
+        }
+
+        await ctx.ConversionController.convertDocumentToLaTeX(ctx.req, ctx.res)
+      })
+
+      it('should not reject the request', function (ctx) {
+        sinon.assert.calledWith(
+          ctx.ConversionManager.promises.convertToLaTeXWithLock,
+          sinon.match.string,
+          ctx.req.file.path,
+          'markdown'
+        )
+      })
+    })
+
     describe('unsuccessfully', function () {
       describe('on streaming error', function () {
         it('should propagate the error and still clean up', async function (ctx) {
@@ -287,7 +338,7 @@ describe('ConversionController', function () {
           res.setHeader = sinon.stub()
 
           const req = {
-            file: { path: '/path/to/uploaded/file.docx' },
+            file: uploadedFile('/path/to/uploaded/file.docx'),
             query: { type: 'docx' },
           }
 
@@ -304,7 +355,7 @@ describe('ConversionController', function () {
           ctx.jsonStub = sinon.stub()
           ctx.res.status = sinon.stub().returns({ json: ctx.jsonStub })
           ctx.req = {
-            file: { path: '/path/to/uploaded/file.docx' },
+            file: uploadedFile('/path/to/uploaded/file.docx'),
             query: { type: 'docx' },
           }
           ctx.ConversionManager.promises.convertToLaTeXWithLock.rejects(
@@ -339,7 +390,7 @@ describe('ConversionController', function () {
           ctx.jsonStub = sinon.stub()
           ctx.res.status = sinon.stub().returns({ json: ctx.jsonStub })
           ctx.req = {
-            file: { path: '/path/to/uploaded/file.docx' },
+            file: uploadedFile('/path/to/uploaded/file.docx'),
             query: { type: 'docx' },
           }
           ctx.ConversionManager.promises.convertToLaTeXWithLock.rejects(
@@ -371,8 +422,11 @@ describe('ConversionController', function () {
   describe('convertProjectToDocument', function () {
     beforeEach(function (ctx) {
       ctx.req = {
-        body: {},
-        params: { project_id: 'test-project-id', user_id: 'test-user-id' },
+        body: { compile: {} },
+        params: {
+          project_id: 'test-project-id',
+          user_id: '0123456789abcdef01234567',
+        },
         query: { type: 'docx' },
       }
       ctx.fs.stat.resolves(ctx.documentStat)
@@ -405,17 +459,18 @@ describe('ConversionController', function () {
     describe('when an unsupported type is requested', function () {
       beforeEach(async function (ctx) {
         ctx.req.query = { type: 'unsupported' }
-        ctx.res.sendStatus = sinon.stub()
+        ctx.next = sinon.stub()
 
         await ctx.ConversionController.convertProjectToDocument(
           ctx.req,
           ctx.res,
-          sinon.stub()
+          ctx.next
         )
       })
 
-      it('should return 400', function (ctx) {
-        sinon.assert.calledWith(ctx.res.sendStatus, 400)
+      it('should call next with a validation error', function (ctx) {
+        sinon.assert.calledOnce(ctx.next)
+        expect(ctx.next.firstCall.args[0]).to.be.instanceOf(Error)
       })
 
       it('should not sync resources or call the conversion manager', function (ctx) {
@@ -428,6 +483,33 @@ describe('ConversionController', function () {
 
     const uuidDirPattern =
       /^\/compiles\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+
+    describe('when compiling from history', function () {
+      beforeEach(async function (ctx) {
+        ctx.parsedRequest.isCompileFromHistory = true
+        // Even if the request asked for png2pdf, conversions must disable it.
+        ctx.parsedRequest.png2pdf = true
+
+        await ctx.ConversionController.convertProjectToDocument(
+          ctx.req,
+          ctx.res,
+          sinon.stub()
+        )
+      })
+
+      it('should sync resources via the history writer with png2pdf disabled', function (ctx) {
+        sinon.assert.calledWith(
+          ctx.HistoryResourceWriter.syncResourcesToDisk,
+          'test-project-id',
+          '0123456789abcdef01234567',
+          sinon.match({ png2pdf: false }),
+          sinon.match(uuidDirPattern),
+          sinon.match.object, // timings
+          sinon.match.object // stats
+        )
+        sinon.assert.notCalled(ctx.ResourceWriter.promises.syncResourcesToDisk)
+      })
+    })
 
     describe('successfully (default streaming response)', function () {
       beforeEach(async function (ctx) {
@@ -563,7 +645,7 @@ describe('ConversionController', function () {
 
     describe('with conversionType=markdown', function () {
       beforeEach(async function (ctx) {
-        ctx.req.query = { type: 'markdown', projectName: 'My_Project' }
+        ctx.req.query = { type: 'markdown' }
         ctx.fs.stat.resolves(ctx.documentStat)
 
         await ctx.ConversionController.convertProjectToDocument(
@@ -589,6 +671,32 @@ describe('ConversionController', function () {
 
       it('should set the attachment filename with .zip extension', function (ctx) {
         sinon.assert.calledWith(ctx.res.attachment, 'output.zip')
+      })
+    })
+
+    describe('with web-supplied compileBackendClass/compileGroup query params', function () {
+      beforeEach(async function (ctx) {
+        ctx.req.query = {
+          type: 'docx',
+          compileBackendClass: 'premium',
+          compileGroup: 'priority',
+        }
+
+        await ctx.ConversionController.convertProjectToDocument(
+          ctx.req,
+          ctx.res,
+          sinon.stub()
+        )
+      })
+
+      it('should not reject the request', function (ctx) {
+        sinon.assert.calledWith(
+          ctx.ConversionManager.promises.convertLaTeXToDocumentInDirWithLock,
+          sinon.match.string,
+          sinon.match.string,
+          'main.tex',
+          'docx'
+        )
       })
     })
 

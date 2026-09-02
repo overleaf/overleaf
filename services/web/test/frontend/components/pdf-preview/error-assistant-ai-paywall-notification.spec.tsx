@@ -6,7 +6,8 @@ import {
   makeEditorProvider,
 } from '../../helpers/editor-providers'
 
-const PAYWALL_TEXT = 'You’ve reached the fair usage limit on your plan'
+const PAYWALL_TEXT = 'You’ve hit your daily AI limit'
+const FAIR_USAGE_TEXT = 'You’ve reached the fair usage limit on your plan'
 
 const futureDate = () => new Date(Date.now() + 60 * 60 * 1000)
 
@@ -39,14 +40,17 @@ function makeShowLogsCompileProvider(initialShowLogs: boolean) {
   return Provider
 }
 
-function mountSuggestFixPaywall(initialShowLogs = true) {
+function mountSuggestFixPaywall(
+  initialShowLogs = true,
+  { hasUnlimitedAi = false }: { hasUnlimitedAi?: boolean } = {}
+) {
   cy.window().then(win => {
     win.metaAttributesCache.set('ol-showAiFeatures', true)
+    win.metaAttributesCache.set('ol-hasUnlimitedAi', hasUnlimitedAi)
   })
 
   cy.mount(
     <EditorProviders
-      features={{ aiErrorAssistant: true }}
       providers={{
         EditorProvider: makeEditorProvider({
           hasSuggestionsLeft: false,
@@ -70,6 +74,13 @@ describe('<ErrorAssistantAiPaywallNotification />', function () {
     mountSuggestFixPaywall()
     dispatchSuggestFixPaywall()
     cy.contains(PAYWALL_TEXT).should('be.visible')
+  })
+
+  it('renders the fair usage limit paywall for users with unlimited AI', function () {
+    mountSuggestFixPaywall(true, { hasUnlimitedAi: true })
+    dispatchSuggestFixPaywall()
+    cy.contains(FAIR_USAGE_TEXT).should('be.visible')
+    cy.contains(PAYWALL_TEXT).should('not.exist')
   })
 
   it('ignores paywall events from other origins', function () {

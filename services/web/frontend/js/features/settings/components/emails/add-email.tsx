@@ -22,16 +22,12 @@ import { ConfirmEmailForm } from '@/features/settings/components/emails/confirm-
 import RecaptchaConditions from '@/shared/components/recaptcha-conditions'
 import SsoLinkingInfoGroup from './add-email/sso-linking-info-group'
 import Notification from '@/shared/components/notification'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 
-function isDomainCapturedByGroup(
-  domainInfo: DomainInfo,
-  domainCapturedByGroupRolloutFlagEnabled: boolean
-): boolean {
-  return domainCapturedByGroupRolloutFlagEnabled
-    ? (domainInfo.capturedByGroup && domainInfo.group?.domainCaptureEnabled) ||
-        false
-    : domainInfo.group?.domainCaptureEnabled || false
+function isDomainCapturedByGroup(domainInfo: DomainInfo): boolean {
+  return (
+    (domainInfo.capturedByGroup && domainInfo.group?.domainCaptureEnabled) ||
+    false
+  )
 }
 
 function AddEmail() {
@@ -59,10 +55,6 @@ function AddEmail() {
 
   const emailAddressLimit = getMeta('ol-emailAddressLimit') || 10
   const { ref: recaptchaRef, getReCaptchaToken } = useRecaptcha()
-
-  const domainCapturedByGroupRolloutFlagEnabled = useFeatureFlag(
-    'domain-captured-by-group'
-  )
 
   useEffect(() => {
     setUserEmailsContextLoading(isLoading)
@@ -212,10 +204,7 @@ function AddEmail() {
   }
 
   const isDomainCaptured = newEmailMatchedDomain
-    ? isDomainCapturedByGroup(
-        newEmailMatchedDomain,
-        domainCapturedByGroupRolloutFlagEnabled
-      )
+    ? isDomainCapturedByGroup(newEmailMatchedDomain)
     : false
   const isSsoAvailableForDomain =
     newEmailMatchedDomain &&

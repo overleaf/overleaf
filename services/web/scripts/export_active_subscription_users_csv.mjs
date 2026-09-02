@@ -102,11 +102,8 @@ function getPlanCadence(subscription, plan) {
   return ''
 }
 
-function userHasPremiumAiFeatures(user) {
-  return (
-    user?.features?.aiErrorAssistant === true ||
-    user?.features?.aiUsageQuota === Settings.aiFeatures.unlimitedQuota
-  )
+function userHasUnlimitedAiTier(user) {
+  return user?.features?.aiUsageQuota === Settings.aiFeatures.unlimitedQuota
 }
 
 async function userHasCurrentInstitutionLicence(userId, commonsCache) {
@@ -156,7 +153,7 @@ function getAiPlanForUser({
     return baseAiPlan
   }
 
-  if (!userHasActiveOverleafSubscription && userHasPremiumAiFeatures(user)) {
+  if (!userHasActiveOverleafSubscription && userHasUnlimitedAiTier(user)) {
     return 'ai-assist'
   }
 
@@ -302,7 +299,6 @@ function getSupplementaryUserQuery() {
   return {
     $or: [
       { 'writefull.isPremium': true },
-      { 'features.aiErrorAssistant': true },
       { 'features.aiUsageQuota': Settings.aiFeatures.unlimitedQuota },
       {
         emails: {

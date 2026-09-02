@@ -1,4 +1,4 @@
-import { vi, assert } from 'vitest'
+import { assert, beforeEach, describe, it, vi } from 'vitest'
 import sinon from 'sinon'
 import PaymentProviderEntities from '../../../../app/src/Features/Subscription/PaymentProviderEntities.mjs'
 import SubscriptionHelper from '../../../../app/src/Features/Subscription/SubscriptionHelper.mjs'
@@ -108,6 +108,49 @@ describe('SubscriptionViewModelBuilder', function () {
 
     ctx.Settings = {
       institutionPlanCode: ctx.commonsPlanCode,
+      plans: [
+        { planCode: 'student', name: 'Student', price_in_cents: 1000 },
+        {
+          planCode: 'student-annual',
+          name: 'Student Annual',
+          price_in_cents: 10000,
+          annual: true,
+        },
+        { planCode: 'collaborator', name: 'Standard', price_in_cents: 2100 },
+        {
+          planCode: 'collaborator-annual',
+          name: 'Standard Annual',
+          price_in_cents: 21000,
+          annual: true,
+        },
+        {
+          planCode: 'professional',
+          name: 'Professional',
+          price_in_cents: 4200,
+        },
+        {
+          planCode: 'professional-annual',
+          name: 'Professional Annual',
+          price_in_cents: 42000,
+          annual: true,
+        },
+      ],
+      localizedPlanPricing: {
+        USD: {
+          student: { monthly: 10, annual: 100 },
+          collaborator: { monthly: 21, annual: 210 },
+          professional: { monthly: 42, annual: 420 },
+        },
+      },
+      localizedPlanPricingByVersion: {
+        jan2099: {
+          USD: {
+            student: { monthly: 12 },
+            collaborator: { monthly: 25 },
+            professional: { monthly: 50 },
+          },
+        },
+      },
     }
     ctx.SubscriptionLocator = {
       promises: {
@@ -702,11 +745,10 @@ describe('SubscriptionViewModelBuilder', function () {
             },
           ],
           totalLicenses: 0,
-          nextPaymentDueAt: 'February 20th, 2025 12:00 PM UTC',
-          nextPaymentDueDate: 'February 20th, 2025',
+          periodEnd: new Date('2025-02-20T12:00:00.000Z'),
           currency: 'EUR',
+          planPrice: 13,
           state: 'active',
-          trialEndsAtFormatted: null,
           trialEndsAt: null,
           activeCoupons: [],
           accountEmail: 'example@example.com',
@@ -1077,6 +1119,134 @@ describe('SubscriptionViewModelBuilder', function () {
           '/user/subscription/payment/account-management'
         )
       })
+    })
+  })
+  describe('buildPlansListForSubscriptionDash', function () {
+    it('quotes the default price version when no other version is given', function (ctx) {
+      const { plans } =
+        ctx.SubscriptionViewModelBuilder.buildPlansListForSubscriptionDash(
+          undefined,
+          false,
+          { currency: 'USD', priceVersion: 'feb2026' }
+        )
+      const pricesByPlanCode = Object.fromEntries(
+        plans.map(plan => [plan.planCode, plan.listPrice])
+      )
+      assert.deepEqual(pricesByPlanCode, {
+        student: 10,
+        'student-annual': 100,
+        collaborator: 21,
+        'collaborator-annual': 210,
+        professional: 42,
+        'professional-annual': 420,
+      })
+    })
+
+    it('quotes the given price version with its overrides applied', function (ctx) {
+      const { plans } =
+        ctx.SubscriptionViewModelBuilder.buildPlansListForSubscriptionDash(
+          undefined,
+          false,
+          { currency: 'USD', priceVersion: 'jan2099' }
+        )
+      const pricesByPlanCode = Object.fromEntries(
+        plans.map(plan => [plan.planCode, plan.listPrice])
+      )
+      assert.deepEqual(pricesByPlanCode, {
+        student: 12,
+        'student-annual': 100,
+        collaborator: 25,
+        'collaborator-annual': 210,
+        professional: 50,
+        'professional-annual': 420,
+      })
+    })
+
+    it("quotes the user's current plan at the subscription's actual price", function (ctx) {
+      const { plans } =
+        ctx.SubscriptionViewModelBuilder.buildPlansListForSubscriptionDash(
+          undefined,
+          false,
+          {
+            currency: 'USD',
+            priceVersion: 'jan2099',
+            subscriptionPlanCode: 'collaborator',
+            subscriptionPlanPrice: 21,
+          }
+        )
+      const pricesByPlanCode = Object.fromEntries(
+        plans.map(plan => [plan.planCode, plan.listPrice])
+      )
+      assert.deepEqual(pricesByPlanCode, {
+        student: 12,
+        'student-annual': 100,
+        collaborator: 21,
+        'collaborator-annual': 210,
+        professional: 50,
+        'professional-annual': 420,
+      })
+    })
+
+    it('matches the current plan ignoring any trial suffix', function (ctx) {
+      const { plans } =
+        ctx.SubscriptionViewModelBuilder.buildPlansListForSubscriptionDash(
+          undefined,
+          true,
+          {
+            currency: 'USD',
+            priceVersion: 'jan2099',
+            subscriptionPlanCode: 'collaborator_free_trial_7_days',
+            subscriptionPlanPrice: 21,
+          }
+        )
+      const collaborator = plans.find(plan => plan.planCode === 'collaborator')
+      assert.equal(collaborator.listPrice, 21)
+    })
+
+    it('falls back to the versioned price when the subscription price is unknown', function (ctx) {
+      const { plans } =
+        ctx.SubscriptionViewModelBuilder.buildPlansListForSubscriptionDash(
+          undefined,
+          false,
+          {
+            currency: 'USD',
+            priceVersion: 'jan2099',
+            subscriptionPlanCode: 'collaborator',
+          }
+        )
+      const collaborator = plans.find(plan => plan.planCode === 'collaborator')
+      assert.equal(collaborator.listPrice, 25)
+    })
+
+    it('leaves the price unset for a currency with no pricing', function (ctx) {
+      const { plans } =
+        ctx.SubscriptionViewModelBuilder.buildPlansListForSubscriptionDash(
+          undefined,
+          false,
+          { currency: 'XYZ', priceVersion: 'feb2026' }
+        )
+      assert.isTrue(plans.every(plan => plan.listPrice === undefined))
+    })
+
+    it('leaves the price unset when no currency or version is given', function (ctx) {
+      const { plans } =
+        ctx.SubscriptionViewModelBuilder.buildPlansListForSubscriptionDash(
+          undefined,
+          false,
+          {}
+        )
+      assert.isTrue(plans.every(plan => plan.listPrice === undefined))
+    })
+
+    it('does not write prices onto the shared plans in settings', function (ctx) {
+      ctx.SubscriptionViewModelBuilder.buildPlansListForSubscriptionDash(
+        undefined,
+        false,
+        { currency: 'USD', priceVersion: 'jan2099' }
+      )
+      assert.isTrue(
+        ctx.Settings.plans.every(plan => plan.listPrice === undefined)
+      )
     })
   })
 })

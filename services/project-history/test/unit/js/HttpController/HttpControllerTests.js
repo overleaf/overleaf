@@ -9,6 +9,7 @@ describe('HttpController', function () {
   beforeEach(async function () {
     this.UpdatesProcessor = {
       processUpdatesForProject: sinon.stub().yields(),
+      flushResyncUpdates: sinon.stub().yields(),
     }
     this.SummarizedUpdatesManager = {
       getSummarizedProjectUpdates: sinon.stub(),
@@ -88,7 +89,7 @@ describe('HttpController', function () {
 
   describe('getProjectBlob', function () {
     beforeEach(function () {
-      this.blobHash = 'abcd'
+      this.blobHash = 'a'.repeat(40)
       this.stream = {}
       this.historyId = new ObjectId().toString()
       this.HistoryStoreManager.getProjectBlobStream.yields(null, this.stream)
@@ -298,7 +299,7 @@ describe('HttpController', function () {
     })
 
     it('should flush the queue', function () {
-      this.UpdatesProcessor.processUpdatesForProject
+      this.UpdatesProcessor.flushResyncUpdates
         .calledWith(this.projectId)
         .should.equal(true)
     })
@@ -414,7 +415,7 @@ describe('HttpController', function () {
         body: {
           version: (this.version = 1),
           comment: (this.comment = 'a comment'),
-          created_at: (this.created_at = Date.now().toString()),
+          created_at: (this.created_at = new Date()),
           validate_exists: true,
           user_id: this.userId,
         },

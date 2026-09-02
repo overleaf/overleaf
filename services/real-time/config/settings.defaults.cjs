@@ -61,8 +61,8 @@ const settings = {
         process.env.REDIS_PASSWORD ||
         '',
       key_schema: {
-        pendingUpdates({ doc_id }) {
-          return `PendingUpdates:{${doc_id}}`
+        pendingProjectUpdates({ project_id }) {
+          return `PendingProjectUpdates:{${project_id}}`
         },
       },
       maxRetriesPerRequest: parseInt(

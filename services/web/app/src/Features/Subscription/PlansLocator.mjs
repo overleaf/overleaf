@@ -4,10 +4,13 @@ import Settings from '@overleaf/settings'
 
 import logger from '@overleaf/logger'
 
+import { DEFAULT_PRICE_VERSION, PRICE_VERSIONS } from './PriceVersions.mjs'
+
 /**
  * @typedef {import('../../../../types/subscription/plan').RecurlyPlanCode} RecurlyPlanCode
  * @typedef {import('../../../../types/subscription/plan').StripeLookupKey} StripeLookupKey
  * @typedef {import('../../../../types/subscription/plan').StripeBaseLookupKey} StripeBaseLookupKey
+ * @typedef {import('../../../../types/subscription/plan').StripeLookupKeyVersion} StripeLookupKeyVersion
  * @typedef {import('../../../../types/subscription/plan').Plan} Plan
  * @typedef {import('../../../../types/subscription/currency').StripeCurrencyCode} StripeCurrencyCode
  * @typedef {import('stripe').Stripe.Price.Recurring.Interval} BillingCycleInterval
@@ -57,20 +60,46 @@ const recurlyCodeToStripeBaseLookupKey = {
   'assistant-annual': 'assistant_annual',
 }
 
-// Keep in sync with StripeLookupKeyVersion in types/subscription/plan.ts
-const LATEST_STRIPE_LOOKUP_KEY_VERSION = 'feb2026'
+const DEFAULT_STRIPE_LOOKUP_KEY_VERSION = DEFAULT_PRICE_VERSION
+const STRIPE_LOOKUP_KEY_VERSIONS = PRICE_VERSIONS
+
+/**
+ * Extract the version from a Stripe lookup key, so that changes to an existing
+ * subscription can be priced at the version it was created with.
+ *
+ * Only currently served versions are recognised: a subscription still priced at
+ * a retired version returns undefined, so we fall back to the default.
+ *
+ * @param {string|null|undefined} lookupKey
+ * @returns {StripeLookupKeyVersion|undefined} undefined if the key has no
+ * currently served version
+ */
+function getVersionFromStripeLookupKey(lookupKey) {
+  if (!lookupKey) {
+    return undefined
+  }
+  return STRIPE_LOOKUP_KEY_VERSIONS.find(version =>
+    lookupKey.includes(`_${version}_`)
+  )
+}
 
 /**
  * Build the Stripe lookup key, will be in this format:
- * `${productCode}_${billingInterval}_${latestVersion}_${currency}`
+ * `${productCode}_${billingInterval}_${version}_${currency}`
  * (for example: 'assistant_annual_jun2025_clp')
  *
  * @param {RecurlyPlanCode} recurlyCode
  * @param {StripeCurrencyCode} currency
  * @param {BillingCycleInterval} [billingCycleInterval] -- needed for handling 'assistant' add-on
+ * @param {StripeLookupKeyVersion} [lookupKeyVersion]
  * @returns {StripeLookupKey|null}
  */
-function buildStripeLookupKey(recurlyCode, currency, billingCycleInterval) {
+function buildStripeLookupKey(
+  recurlyCode,
+  currency,
+  billingCycleInterval,
+  lookupKeyVersion = DEFAULT_STRIPE_LOOKUP_KEY_VERSION
+) {
   let stripeBaseLookupKey = recurlyCodeToStripeBaseLookupKey[recurlyCode]
 
   // Recurly always uses 'assistant' as the code regardless of the subscription duration
@@ -87,7 +116,7 @@ function buildStripeLookupKey(recurlyCode, currency, billingCycleInterval) {
     return null
   }
 
-  return `${stripeBaseLookupKey}_${LATEST_STRIPE_LOOKUP_KEY_VERSION}_${currency}`
+  return `${stripeBaseLookupKey}_${lookupKeyVersion}_${currency}`
 }
 
 /**
@@ -134,6 +163,18 @@ function isRecurlyPlanCode(key) {
 function getPlanTypeAndPeriodFromRecurlyPlanCode(recurlyPlanCode) {
   if (!isRecurlyPlanCode(recurlyPlanCode)) return undefined
   return recurlyPlanCodeToPlanTypeAndPeriod[recurlyPlanCode]
+}
+
+/**
+ * Prefer this over `getPlanTypeAndPeriodFromRecurlyPlanCode` when you have the
+ * plan: that map misses legacy plan codes and license-count group plan codes.
+ *
+ * @param {{ plan?: { annual?: boolean } } | null} [subscription] anything carrying a local plan
+ * @returns {'annual' | 'monthly' | null}
+ */
+function getPlanCadence(subscription) {
+  if (!subscription?.plan) return null
+  return subscription.plan.annual ? 'annual' : 'monthly'
 }
 
 /**
@@ -190,7 +231,10 @@ export default {
   findLocalPlanInSettings,
   buildStripeLookupKey,
   getPlanTypeAndPeriodFromRecurlyPlanCode,
+  getPlanCadence,
   isGroupPlanCode,
   convertLegacyGroupPlanCodeToConsolidatedGroupPlanCodeIfNeeded,
-  LATEST_STRIPE_LOOKUP_KEY_VERSION,
+  getVersionFromStripeLookupKey,
+  DEFAULT_STRIPE_LOOKUP_KEY_VERSION,
+  STRIPE_LOOKUP_KEY_VERSIONS,
 }

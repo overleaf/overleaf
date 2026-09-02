@@ -1,9 +1,9 @@
 import {
-  Dropdown,
-  DropdownDivider,
-  DropdownMenu,
-  DropdownToggle,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownDivider,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useTranslation } from 'react-i18next'
@@ -12,13 +12,15 @@ import { useEditorContext } from '@/shared/context/editor-context'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { DownloadProjectPDF, DownloadProjectZip } from './download-project'
 import { useCallback, useState } from 'react'
-import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
+import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
 import EditableLabel from './editable-label'
 import { DuplicateProject } from './duplicate-project'
 import { ExportProjectWithConversionButton } from './export-project-with-conversion-button'
 
-const [publishModalModules] = importOverleafModules('publishModal')
-const SubmitProjectButton = publishModalModules?.import.NewPublishDropdownButton
+const [publishModalModules] = importOverleafModules(
+  'publishModalDropdownButton'
+)
+const SubmitProjectButton = publishModalModules?.import.default
 
 export const ToolbarProjectTitle = () => {
   const { cobranding } = useEditorContext()
@@ -57,8 +59,8 @@ export const ToolbarProjectTitle = () => {
   }
 
   return (
-    <Dropdown align="end" className="ide-redesign-toolbar-project-dropdown">
-      <DropdownToggle
+    <OLDropdown align="end" className="ide-redesign-toolbar-project-dropdown">
+      <OLDropdownToggle
         id="project-title-options"
         aria-label={t('project_title_options')}
         className="ide-redesign-toolbar-project-dropdown-toggle ide-redesign-toolbar-dropdown-toggle-subdued fw-bold ide-redesign-toolbar-button-subdued"
@@ -67,12 +69,12 @@ export const ToolbarProjectTitle = () => {
           {name}
         </span>
         <MaterialIcon type="keyboard_arrow_down" />
-      </DropdownToggle>
-      <DropdownMenu renderOnMount>
+      </OLDropdownToggle>
+      <OLDropdownMenu renderOnMount>
         {shouldDisplaySubmitButton && !cobranding && (
           <>
             <SubmitProjectButton />
-            <DropdownDivider />
+            <OLDropdownDivider />
           </>
         )}
         <DownloadProjectPDF />
@@ -95,17 +97,17 @@ export const ToolbarProjectTitle = () => {
           label={t('export_as_html')}
           menuBarId="export-as-html"
         />
-        <DropdownDivider />
+        <OLDropdownDivider />
         <DuplicateProject />
-        <OLDropdownMenuItem
+        <DropdownMenuItem
           onClick={() => {
             setIsRenaming(true)
           }}
           disabled={!hasRenamePermissions}
         >
           {t('rename')}
-        </OLDropdownMenuItem>
-      </DropdownMenu>
-    </Dropdown>
+        </DropdownMenuItem>
+      </OLDropdownMenu>
+    </OLDropdown>
   )
 }

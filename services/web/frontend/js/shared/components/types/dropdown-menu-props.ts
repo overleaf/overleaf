@@ -1,13 +1,13 @@
 import type { ElementType, ReactNode, PropsWithChildren, AriaRole } from 'react'
 import type { ButtonProps } from '@/shared/components/types/button-props'
-import type { DropdownMenuProps as BS5DropdownMenuProps } from 'react-bootstrap'
+import type { DropdownMenuProps } from 'react-bootstrap'
 
 type SplitButtonVariants = Extract<
   ButtonProps['variant'],
   'primary' | 'secondary' | 'danger' | 'link' | 'ghost'
 >
 
-export type DropdownProps = {
+export type OLDropdownProps = {
   align?:
     | 'start'
     | 'end'
@@ -29,61 +29,68 @@ export type DropdownProps = {
   role?: AriaRole
 }
 
-export type DropdownItemProps = PropsWithChildren<{
-  active?: boolean
+export type OLDropdownItemProps = PropsWithChildren<
+  {
+    active?: boolean
+    as?: ElementType
+    type?: string
+    description?: ReactNode
+    disabled?: boolean
+    eventKey?: string | number
+    href?: string
+    leadingIcon?: string | React.ReactNode
+    onClick?: React.MouseEventHandler
+    onMouseEnter?: React.MouseEventHandler
+    trailingIcon?: string | React.ReactNode
+    variant?: 'default' | 'danger'
+    className?: string
+    role?: string
+    form?: string
+    tabIndex?: number
+    target?: string
+    download?: boolean | string
+    rel?: string
+    translate?: React.HTMLAttributes<HTMLElement>['translate']
+  } & React.AriaAttributes & { [key: `data-${string}`]: unknown }
+>
+
+export type OLDropdownToggleProps = PropsWithChildren<
+  {
+    bsPrefix?: string
+    className?: string
+    disabled?: boolean
+    split?: boolean
+    id?: string // necessary for assistive technologies
+    variant?: SplitButtonVariants
+    as?: ElementType
+    size?: 'sm' | 'lg' | undefined
+    tabIndex?: number
+    role?: string
+    onMouseEnter?: React.MouseEventHandler
+  } & React.AriaAttributes & { [key: `data-${string}`]: unknown }
+>
+
+export type OLDropdownMenuProps = PropsWithChildren<
+  {
+    as?: ElementType
+    disabled?: boolean
+    show?: boolean
+    className?: string
+    flip?: boolean
+    id?: string
+    renderOnMount?: boolean
+    popperConfig?: DropdownMenuProps['popperConfig']
+    tabIndex?: number
+    onKeyDown?: (event: React.KeyboardEvent) => void
+  } & React.AriaAttributes
+>
+
+export type OLDropdownDividerProps = PropsWithChildren<{
   as?: ElementType
-  type?: string
-  description?: ReactNode
-  disabled?: boolean
-  eventKey?: string | number
-  href?: string
-  leadingIcon?: string | React.ReactNode
-  onClick?: React.MouseEventHandler
-  onMouseEnter?: React.MouseEventHandler
-  trailingIcon?: string | React.ReactNode
-  variant?: 'default' | 'danger'
   className?: string
-  role?: string
-  tabIndex?: number
-  target?: string
-  download?: boolean | string
-  rel?: string
-  translate?: React.HTMLAttributes<HTMLElement>['translate']
 }>
 
-export type DropdownToggleProps = PropsWithChildren<{
-  bsPrefix?: string
-  className?: string
-  disabled?: boolean
-  split?: boolean
-  id?: string // necessary for assistive technologies
-  variant?: SplitButtonVariants
-  as?: ElementType
-  size?: 'sm' | 'lg' | undefined
-  tabIndex?: number
-  'aria-label'?: string
-  onMouseEnter?: React.MouseEventHandler
-}>
-
-export type DropdownMenuProps = PropsWithChildren<{
-  as?: ElementType
-  disabled?: boolean
-  show?: boolean
-  className?: string
-  flip?: boolean
-  id?: string
-  renderOnMount?: boolean
-  popperConfig?: BS5DropdownMenuProps['popperConfig']
-  tabIndex?: number
-  onKeyDown?: (event: React.KeyboardEvent) => void
-}>
-
-export type DropdownDividerProps = PropsWithChildren<{
-  as?: ElementType
-  className?: string
-}>
-
-export type DropdownHeaderProps = PropsWithChildren<{
+export type OLDropdownHeaderProps = PropsWithChildren<{
   as?: ElementType
   className?: string
 }>

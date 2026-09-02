@@ -1,4 +1,5 @@
 const path = require('node:path')
+const { File } = require('overleaf-editor-core')
 
 exports.path = function (pathname) {
   return path.join(__dirname, '..', 'files', pathname)
@@ -19,7 +20,7 @@ exports.NON_BMP_TXT_BYTE_LENGTH = 57
 exports.NULL_CHARACTERS_TXT_HASH = '4227ca4e8736af63036e7457e2db376ddf7e5795'
 exports.NULL_CHARACTERS_TXT_BYTE_LENGTH = 3
 
-exports.EMPTY_FILE_HASH = 'e69de29bb2d1d6434b8b29ae775ad8c2e48c5391'
+exports.EMPTY_FILE_HASH = File.EMPTY_FILE_HASH
 exports.EMPTY_FILE_BYTE_LENGTH = 0
 
 // git hashes of some short strings for testing

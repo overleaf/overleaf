@@ -307,7 +307,7 @@ const settings = {
 
 // This secret is used for encrypting sharing link tokens in the database
 if (process.env.OVERLEAF_INVITE_TOKEN_SECRET) {
-  module.exports.projectInviteEncryptorOptions = {
+  settings.projectInviteEncryptorOptions = {
     cipherLabel: '2026.3-v3',
     cipherPasswords: {
       '2026.3-v3': process.env.OVERLEAF_INVITE_TOKEN_SECRET,
@@ -338,6 +338,14 @@ if (process.env.OVERLEAF_RIGHT_FOOTER != null) {
 
 if (process.env.OVERLEAF_HEADER_IMAGE_URL != null) {
   settings.nav.custom_logo = process.env.OVERLEAF_HEADER_IMAGE_URL
+}
+
+if (process.env.OVERLEAF_HEADER_IMAGE_URL_LIGHT != null) {
+  settings.nav.custom_logo_light = process.env.OVERLEAF_HEADER_IMAGE_URL_LIGHT
+}
+
+if (process.env.OVERLEAF_HEADER_IMAGE_URL_DARK != null) {
+  settings.nav.custom_logo_dark = process.env.OVERLEAF_HEADER_IMAGE_URL_DARK
 }
 
 if (process.env.OVERLEAF_HEADER_EXTRAS != null) {

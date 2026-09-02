@@ -3,6 +3,7 @@ import { ServerWordCountData } from '@/features/word-count-modal/components/word
 import { WordCountError } from '@/features/word-count-modal/components/word-count-error'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useLocalCompileContext } from '@/shared/context/local-compile-context'
+import { useRootDoc } from '@/shared/hooks/use-root-doc'
 import useAbortController from '@/shared/hooks/use-abort-controller'
 import { getJSON } from '@/infrastructure/fetch-json'
 import { debugConsole } from '@/utils/debugging'
@@ -12,6 +13,7 @@ import LoadingSpinner from '@/shared/components/loading-spinner'
 export const WordCountServer: FC = () => {
   const { projectId } = useProjectContext()
   const { clsiServerId } = useLocalCompileContext()
+  const getRootDocInfo = useRootDoc()
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -24,6 +26,7 @@ export const WordCountServer: FC = () => {
     if (clsiServerId) {
       url.searchParams.set('clsiserverid', clsiServerId)
     }
+    url.searchParams.set('rootResourcePath', getRootDocInfo().rootResourcePath)
 
     getJSON(url.toString(), { signal })
       .then(data => {
@@ -36,7 +39,7 @@ export const WordCountServer: FC = () => {
       .finally(() => {
         setLoading(false)
       })
-  }, [projectId, clsiServerId, signal])
+  }, [projectId, clsiServerId, getRootDocInfo, signal])
 
   return (
     <>

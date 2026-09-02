@@ -1,9 +1,11 @@
-import { expect, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import mongodb from 'mongodb-legacy'
 import sinon from 'sinon'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
 import MockResponse from '../helpers/MockResponse.mjs'
 import MockRequest from '../helpers/MockRequest.mjs'
+import { asZodError } from '@overleaf/validation-tools/testUtils.js'
+import { getRawReqInput } from '@overleaf/validation-tools'
 
 const ObjectId = mongodb.ObjectId
 
@@ -19,11 +21,16 @@ describe('TpdsController', function () {
       entityType: 'doc',
       rev: 2,
     }
+    ctx.resolvedProject = {
+      _id: new ObjectId(),
+      overleaf: { history: { id: 42, otMigrationStage: 1 } },
+    }
     ctx.TpdsUpdateHandler = {
       promises: {
         newUpdate: sinon.stub().resolves(ctx.metadata),
         deleteUpdate: sinon.stub().resolves(ctx.metadata.entityId),
         createFolder: sinon.stub().resolves(),
+        getOrCreateProject: sinon.stub().resolves(ctx.resolvedProject),
       },
     }
     ctx.UpdateMerger = {
@@ -58,6 +65,10 @@ describe('TpdsController', function () {
         generateUniqueName: sinon.stub().resolves('unique'),
       },
     }
+
+    vi.doMock('../../../../app/src/Features/Errors/Errors.js', () => ({
+      default: Errors,
+    }))
 
     vi.doMock(
       '../../../../app/src/Features/ThirdPartyDataStore/TpdsUpdateHandler',
@@ -114,7 +125,7 @@ describe('TpdsController', function () {
 
     ctx.TpdsController = (await import(MODULE_PATH)).default
 
-    ctx.user_id = 'dsad29jlkjas'
+    ctx.user_id = new ObjectId().toString()
   })
 
   describe('creating a project', function () {
@@ -122,7 +133,7 @@ describe('TpdsController', function () {
       await new Promise(resolve => {
         const res = new MockResponse(vi)
         const req = new MockRequest(vi)
-        req.params.user_id = ctx.user_id
+        req.params = { ...getRawReqInput(req).params, user_id: ctx.user_id }
         req.body = { projectName: 'foo' }
         res.callback = err => {
           if (err) resolve(err)
@@ -147,13 +158,147 @@ describe('TpdsController', function () {
     })
   })
 
+  describe('resolving a project', function () {
+    beforeEach(function (ctx) {
+      ctx.req = {
+        params: { user_id: ctx.user_id },
+        body: {},
+      }
+    })
+
+    it('should throw without any input', async function (ctx) {
+      const next = sinon.stub()
+      await ctx.TpdsController.resolveProject(ctx.req, {}, next)
+      expect(next).to.have.been.calledWithMatch({
+        name: 'InvalidRequestError',
+        zodError: asZodError({
+          code: 'invalid_union',
+          errors: [
+            [
+              {
+                expected: 'string',
+                code: 'invalid_type',
+                path: ['projectId'],
+                message: 'Invalid input: expected string, received undefined',
+              },
+            ],
+            [
+              {
+                expected: 'string',
+                code: 'invalid_type',
+                path: ['projectName'],
+                message: 'Invalid input: expected string, received undefined',
+              },
+            ],
+          ],
+          path: ['body'],
+          message: 'Invalid input',
+        }),
+      })
+    })
+
+    it('should throw when a malformed projectId is sent with a projectName', async function (ctx) {
+      const next = sinon.stub()
+      ctx.req.body = { projectId: 'not-an-object-id', projectName: 'a name' }
+      await ctx.TpdsController.resolveProject(ctx.req, {}, next)
+      expect(next).to.have.been.calledWithMatch({
+        name: 'InvalidRequestError',
+      })
+      expect(ctx.TpdsUpdateHandler.promises.getOrCreateProject).to.not.have.been
+        .called
+    })
+
+    it('should resolve by name', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.req.body = { projectName: 'projectName' }
+        const res = {
+          json: payload => {
+            expect(payload).to.deep.equal({
+              status: 'success',
+              projectId: ctx.resolvedProject._id.toString(),
+              historyId: 42,
+              otMigrationStage: 1,
+            })
+            ctx.TpdsUpdateHandler.promises.getOrCreateProject.should.have.been.calledWith(
+              ctx.user_id,
+              undefined,
+              'projectName'
+            )
+            resolve()
+          },
+        }
+        ctx.TpdsController.resolveProject(ctx.req, res)
+      })
+    })
+
+    it('should resolve by id', async function (ctx) {
+      await new Promise(resolve => {
+        const projectId = ctx.resolvedProject._id.toString()
+        ctx.req.body = { projectId }
+        const res = {
+          json: payload => {
+            expect(payload).to.deep.equal({
+              status: 'success',
+              projectId: ctx.resolvedProject._id.toString(),
+              historyId: 42,
+              otMigrationStage: 1,
+            })
+            ctx.TpdsUpdateHandler.promises.getOrCreateProject.should.have.been.calledWith(
+              ctx.user_id,
+              projectId,
+              undefined
+            )
+            resolve()
+          },
+        }
+        ctx.TpdsController.resolveProject(ctx.req, res)
+      })
+    })
+
+    it('should default the otMigrationStage to zero when unset', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.TpdsUpdateHandler.promises.getOrCreateProject.resolves({
+          _id: ctx.resolvedProject._id,
+          overleaf: { history: { id: 1337 } },
+        })
+        ctx.req.body = { projectName: 'projectName' }
+        const res = {
+          json: payload => {
+            expect(payload).to.deep.equal({
+              status: 'success',
+              projectId: ctx.resolvedProject._id.toString(),
+              historyId: 1337,
+              otMigrationStage: 0,
+            })
+            resolve()
+          },
+        }
+        ctx.TpdsController.resolveProject(ctx.req, res)
+      })
+    })
+
+    it('should indicate in the response when the project could not be resolved', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.TpdsUpdateHandler.promises.getOrCreateProject.resolves(null)
+        ctx.req.body = { projectName: 'projectName' }
+        const res = {
+          json: payload => {
+            expect(payload).to.deep.equal({ status: 'rejected' })
+            resolve()
+          },
+        }
+        ctx.TpdsController.resolveProject(ctx.req, res)
+      })
+    })
+  })
+
   describe('getting an update', function () {
     beforeEach(function (ctx) {
       ctx.projectName = 'projectName'
       ctx.path = '/here.txt'
       ctx.req = {
         params: {
-          0: `${ctx.projectName}${ctx.path}`,
+          path: `${ctx.projectName}${ctx.path}`,
           user_id: ctx.user_id,
           project_id: '',
         },
@@ -208,9 +353,11 @@ describe('TpdsController', function () {
     it('should process the update with the update receiver by id', async function (ctx) {
       await new Promise(resolve => {
         const path = '/here.txt'
+        // project_id is validated as a Mongo ObjectId
+        const projectId = new ObjectId().toString()
         const req = {
           pause() {},
-          params: { 0: path, user_id: ctx.user_id, project_id: '123' },
+          params: { path, user_id: ctx.user_id, project_id: projectId },
           session: {
             destroy() {},
           },
@@ -222,7 +369,7 @@ describe('TpdsController', function () {
           json: () => {
             ctx.TpdsUpdateHandler.promises.newUpdate.should.have.been.calledWith(
               ctx.user_id,
-              '123',
+              projectId,
               '', // projectName
               '/here.txt',
               req,
@@ -249,37 +396,16 @@ describe('TpdsController', function () {
       })
     })
 
-    it('should return a 400 error when the project is too big', async function (ctx) {
-      await new Promise(resolve => {
-        ctx.TpdsUpdateHandler.promises.newUpdate.rejects({
-          message: 'project_has_too_many_files',
-        })
-        const res = {
-          sendStatus: status => {
-            expect(status).to.equal(400)
-            ctx.NotificationsBuilder.promises.tpdsFileLimit.should.have.been.calledWith(
-              ctx.user_id
-            )
-            resolve()
-          },
-        }
-        ctx.TpdsController.mergeUpdate(ctx.req, res)
-      })
-    })
-
-    it('should return a 429 error when the update receiver fails due to too many requests error', async function (ctx) {
-      await new Promise(resolve => {
-        ctx.TpdsUpdateHandler.promises.newUpdate.rejects(
-          new Errors.TooManyRequestsError('project on cooldown')
-        )
-        const res = {
-          sendStatus: status => {
-            expect(status).to.equal(429)
-            resolve()
-          },
-        }
-        ctx.TpdsController.mergeUpdate(ctx.req, res)
-      })
+    it('should notify and rethrow when the project is too big', async function (ctx) {
+      const err = new Errors.TooManyFilesError('project has too many files')
+      ctx.TpdsUpdateHandler.promises.newUpdate.rejects(err)
+      const res = { json: sinon.stub() }
+      const next = sinon.stub()
+      await ctx.TpdsController.mergeUpdate(ctx.req, res, next)
+      expect(next).to.have.been.calledWith(err)
+      ctx.NotificationsBuilder.promises.tpdsFileLimit.should.have.been.calledWith(
+        ctx.user_id
+      )
     })
   })
 
@@ -288,7 +414,7 @@ describe('TpdsController', function () {
       await new Promise(resolve => {
         const path = '/projectName/here.txt'
         const req = {
-          params: { 0: path, user_id: ctx.user_id, project_id: '' },
+          params: { path, user_id: ctx.user_id, project_id: '' },
           session: {
             destroy() {},
           },
@@ -317,8 +443,10 @@ describe('TpdsController', function () {
     it('should process the delete with the update receiver by id', async function (ctx) {
       await new Promise(resolve => {
         const path = '/here.txt'
+        // project_id is validated as a Mongo ObjectId
+        const projectId = new ObjectId().toString()
         const req = {
-          params: { 0: path, user_id: ctx.user_id, project_id: '123' },
+          params: { path, user_id: ctx.user_id, project_id: projectId },
           session: {
             destroy() {},
           },
@@ -330,7 +458,7 @@ describe('TpdsController', function () {
           sendStatus: () => {
             ctx.TpdsUpdateHandler.promises.deleteUpdate.should.have.been.calledWith(
               ctx.user_id,
-              '123',
+              projectId,
               '', // projectName
               '/here.txt',
               ctx.source
@@ -413,7 +541,7 @@ describe('TpdsController', function () {
   describe('parseParams', function () {
     it('should take the project name off the start and replace with slash', function (ctx) {
       const path = 'noSlashHere'
-      const req = { params: { 0: path, user_id: ctx.user_id } }
+      const req = { params: { path, user_id: ctx.user_id } }
       const result = ctx.TpdsController.parseParams(req)
       result.userId.should.equal(ctx.user_id)
       result.filePath.should.equal('/')
@@ -422,7 +550,7 @@ describe('TpdsController', function () {
 
     it('should take the project name off the start and it with no slashes in', function (ctx) {
       const path = '/project/file.tex'
-      const req = { params: { 0: path, user_id: ctx.user_id } }
+      const req = { params: { path, user_id: ctx.user_id } }
       const result = ctx.TpdsController.parseParams(req)
       result.userId.should.equal(ctx.user_id)
       result.filePath.should.equal('/file.tex')
@@ -431,7 +559,7 @@ describe('TpdsController', function () {
 
     it('should take the project name of and return a slash for the file path', function (ctx) {
       const path = '/project_name'
-      const req = { params: { 0: path, user_id: ctx.user_id } }
+      const req = { params: { path, user_id: ctx.user_id } }
       const result = ctx.TpdsController.parseParams(req)
       result.projectName.should.equal('project_name')
       result.filePath.should.equal('/')
@@ -442,8 +570,9 @@ describe('TpdsController', function () {
     beforeEach(async function (ctx) {
       ctx.req = {
         params: {
-          0: (ctx.path = 'chapters/main.tex'),
-          project_id: (ctx.project_id = 'project-id-123'),
+          path: (ctx.path = 'chapters/main.tex'),
+          // project_id is validated as a Mongo ObjectId
+          project_id: (ctx.project_id = new ObjectId().toString()),
         },
         session: {
           destroy: sinon.stub(),
@@ -483,8 +612,9 @@ describe('TpdsController', function () {
     beforeEach(async function (ctx) {
       ctx.req = {
         params: {
-          0: (ctx.path = 'chapters/main.tex'),
-          project_id: (ctx.project_id = 'project-id-123'),
+          path: (ctx.path = 'chapters/main.tex'),
+          // project_id is validated as a Mongo ObjectId
+          project_id: (ctx.project_id = new ObjectId().toString()),
         },
         session: {
           destroy: sinon.stub(),

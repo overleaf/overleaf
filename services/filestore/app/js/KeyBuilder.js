@@ -1,5 +1,14 @@
 import settings from '@overleaf/settings'
 import projectKey from '@overleaf/object-persistor/src/ProjectKey.js'
+import { parseReq } from '@overleaf/validation-tools'
+import {
+  bucketFileParamsSchema,
+  globalBlobFileParamsSchema,
+  projectBlobFileParamsSchema,
+  projectBlobFileParamsFallbackSchema,
+  templateFileParamsSchema,
+  templateFileParamsFallbackSchema,
+} from './schemas.js'
 
 export default {
   getConvertedFolderKey,
@@ -31,34 +40,43 @@ function addCachingToKey(key, opts) {
 }
 
 function bucketFileKeyMiddleware(req, res, next) {
-  req.bucket = req.params.bucket
-  req.key = req.params[0]
+  const { params } = parseReq(req, bucketFileParamsSchema, {
+    logOnly: true,
+  })
+  req.bucket = params.bucket
+  req.key = params.key
   next()
 }
 
 function globalBlobFileKeyMiddleware(req, res, next) {
+  const { params } = parseReq(req, globalBlobFileParamsSchema, {
+    logOnly: true,
+  })
   req.bucket = settings.filestore.stores.global_blobs
-  const { hash } = req.params
+  const { hash } = params
   req.key = `${hash.slice(0, 2)}/${hash.slice(2, 4)}/${hash.slice(4)}`
   req.useSubdirectories = true
   next()
 }
 
 function projectBlobFileKeyMiddleware(req, res, next) {
+  const { params } = parseReq(req, projectBlobFileParamsSchema, {
+    logOnly: true,
+    fallbackSchema: projectBlobFileParamsFallbackSchema,
+  })
   req.bucket = settings.filestore.stores.project_blobs
-  const { historyId, hash } = req.params
+  const { historyId, hash } = params
   req.key = `${projectKey.format(historyId)}/${hash.slice(0, 2)}/${hash.slice(2)}`
   req.useSubdirectories = true
   next()
 }
 
 function templateFileKeyMiddleware(req, res, next) {
-  const {
-    template_id: templateId,
-    format,
-    version,
-    sub_type: subType,
-  } = req.params
+  const { params } = parseReq(req, templateFileParamsSchema, {
+    logOnly: true,
+    fallbackSchema: templateFileParamsFallbackSchema,
+  })
+  const { template_id: templateId, format, version, sub_type: subType } = params
 
   req.key = `${templateId}/v/${version}/${format}`
 

@@ -10,6 +10,10 @@
   @return url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path fill='none' stroke='#{$color}' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10h8'/></svg>");
 }
 
+@function form-select-caret-svg($color) {
+  @return url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='none' stroke='#{$color}' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/></svg>");
+}
+
 @mixin form-check-light {
   --checkbox-label-color: var(--content-primary);
   --checkbox-border-color: var(--border-primary);
@@ -94,6 +98,37 @@
     )};
 }
 
+@mixin form-select-light {
+  --form-select-bg: var(--bg-light-primary);
+  --form-select-color: var(--content-primary);
+  --form-select-border-color: var(--border-primary);
+  --form-select-bg-img: #{escape-svg(form-select-caret-svg($content-primary))};
+  --form-select-disabled-bg-img: #{escape-svg(
+      form-select-caret-svg($content-disabled)
+    )};
+  --form-select-disabled-bg: var(--bg-light-disabled);
+  --form-select-disabled-color: var(--content-disabled);
+  --form-select-label-color: var(--content-primary);
+  --form-select-option-disabled-color: var(--content-disabled);
+}
+
+@mixin form-select-dark {
+  --form-select-bg: var(--bg-dark-primary);
+  --form-select-color: var(--content-primary-dark);
+  --form-select-border-color: var(--border-primary-dark);
+  --form-select-bg-img: #{escape-svg(
+      form-select-caret-svg($content-primary-dark)
+    )};
+  --form-select-disabled-bg-img: #{escape-svg(
+      form-select-caret-svg($content-disabled-dark)
+    )};
+  --form-select-disabled-bg: var(--bg-light-disabled);
+  --form-select-disabled-color: var(--content-disabled-dark);
+  --form-select-label-color: var(--content-primary);
+  --form-select-option-disabled-color: var(--content-disabled-dark);
+}
+
+// Keep in sync with services/web/frontend/js/features/source-editor/extensions/command-tooltip.ts
 @mixin light-input {
   --input-field-color: var(--content-primary);
   --input-field-bg: var(--bg-light-primary);
@@ -115,17 +150,16 @@
 :root {
   @include form-check-light;
   @include light-input;
+  @include form-select-light;
 }
 
 @include theme('default') {
-  .ide-redesign-main,
-  .project-ds-nav-page {
-    @include form-check-dark;
+  @include form-check-dark;
+  @include form-select-dark;
 
-    .form-control,
-    .form-control-wrapper {
-      @include dark-input;
-    }
+  .form-control,
+  .form-control-wrapper {
+    @include dark-input;
   }
 }
 
@@ -398,8 +432,14 @@
   }
 }
 
-.form-control,
-.form-select {
+.form-control {
+  &[disabled],
+  &:disabled {
+    &::placeholder {
+      color: var(--input-field-content-disabled);
+    }
+  }
+
   &:focus,
   &:invalid:focus,
   &.is-invalid:focus,
@@ -411,6 +451,40 @@
     outline: 0;
     border-color: $input-focus-border-color;
     box-shadow: $input-focus-box-shadow;
+  }
+}
+
+.form-select {
+  &:focus,
+  &:invalid:focus,
+  &.is-invalid:focus,
+  &:focus-visible,
+  &:invalid:focus-visible,
+  &.is-invalid:focus-visible {
+    color: var(--form-select-color);
+    background-color: var(--form-select-bg);
+    outline: 0;
+    border-color: var(--form-select-border-color);
+    box-shadow: $input-focus-box-shadow;
+  }
+
+  --bs-form-select-bg-img: var(--form-select-bg-img);
+
+  color: var(--form-select-color);
+  background-color: var(--form-select-bg);
+  border-color: var(--form-select-border-color);
+
+  &[disabled],
+  &:disabled {
+    --bs-form-select-bg-img: var(--form-select-disabled-bg-img);
+
+    background-color: var(--form-select-disabled-bg);
+    color: var(--form-select-disabled-color);
+  }
+
+  option[disabled],
+  option:disabled {
+    color: var(--form-select-option-disabled-color);
   }
 }
 
@@ -456,17 +530,11 @@ input[type='range'] {
   @include form-control-validation($bg-danger-01);
 }
 
-.form-control {
-  &[disabled],
-  &:disabled {
-    &::placeholder {
-      color: var(--input-field-content-disabled);
-    }
-  }
-}
-
 input.form-control[type='text'],
-input.form-control[type='search'] {
+input.form-control[type='search'],
+input.form-control[type='number'],
+input.form-control[type='url'],
+textarea.form-control {
   color: var(--input-field-color);
   background-color: var(--input-field-bg);
   border-color: var(--input-field-border-color);

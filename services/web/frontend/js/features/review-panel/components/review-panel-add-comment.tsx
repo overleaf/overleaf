@@ -6,14 +6,17 @@ import {
 import { EditorSelection } from '@codemirror/state'
 import { useTranslation } from 'react-i18next'
 import { useThreadsActionsContext } from '../context/threads-context'
-import { removeNewCommentRangeEffect } from '@/features/source-editor/extensions/review-tooltip'
-import AutoExpandingTextArea from '@/shared/components/auto-expanding-text-area'
+import { removeNewCommentRangeEffect } from '@/features/source-editor/extensions/add-comment'
 import { ReviewPanelEntry } from './review-panel-entry'
 import { ThreadId } from '../../../../../types/review-panel/review-panel'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { debugConsole } from '@/utils/debugging'
 import OLButton from '@/shared/components/ol/ol-button'
-import { isFormSubmitKeypressEvent } from '@/features/review-panel/utils/form-events'
+import {
+  MentionsInput,
+  MentionsInputHandle,
+} from '@/shared/components/mentions-input'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export const ReviewPanelAddComment = memo<{
   docId: string
@@ -23,6 +26,7 @@ export const ReviewPanelAddComment = memo<{
   top: number | undefined
 }>(function ReviewPanelAddComment({ from, to, threadId, top, docId }) {
   const { t } = useTranslation()
+  const commentMentionsEnabled = useFeatureFlag('comment-mentions')
   const view = useCodeMirrorViewContext()
   const state = useCodeMirrorStateContext()
   const { addComment } = useThreadsActionsContext()
@@ -36,55 +40,32 @@ export const ReviewPanelAddComment = memo<{
     })
   }, [view, threadId])
 
-  const submitForm = useCallback(async () => {
-    if (content.trim().length === 0) {
-      return
-    }
-
-    setSubmitting(true)
-
-    const text = view.state.sliceDoc(from, to)
-
-    try {
-      await addComment(from, text, content)
-      handleClose()
-      view.dispatch({
-        selection: EditorSelection.cursor(view.state.selection.main.anchor),
-      })
-    } catch (err) {
-      debugConsole.error(err)
-      showGenericMessageModal(
-        t('add_comment_error_title'),
-        t('add_comment_error_message')
-      )
-    }
-    setSubmitting(false)
-  }, [
-    content,
-    view,
-    from,
-    to,
-    addComment,
-    handleClose,
-    showGenericMessageModal,
-    t,
-  ])
-
-  const handleKeyPress = useCallback(
-    (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-      if (isFormSubmitKeypressEvent(event)) {
-        event.preventDefault()
-        submitForm()
+  const submitForm = useCallback(
+    async (commentContent: string) => {
+      if (commentContent.trim().length === 0) {
+        return
       }
-    },
-    [submitForm]
-  )
 
-  const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setContent(e.target.value)
+      setSubmitting(true)
+
+      const text = view.state.sliceDoc(from, to)
+
+      try {
+        await addComment(from, text, commentContent)
+        handleClose()
+        view.dispatch({
+          selection: EditorSelection.cursor(view.state.selection.main.anchor),
+        })
+      } catch (err) {
+        debugConsole.error(err)
+        showGenericMessageModal(
+          t('add_comment_error_title'),
+          t('add_comment_error_message')
+        )
+      }
+      setSubmitting(false)
     },
-    []
+    [view, from, to, addComment, handleClose, showGenericMessageModal, t]
   )
 
   const handleBlur = useCallback(() => {
@@ -98,15 +79,16 @@ export const ReviewPanelAddComment = memo<{
   const handleSubmit = useCallback<FormEventHandler>(
     event => {
       event.preventDefault()
-      submitForm()
+      submitForm(content)
     },
-    [submitForm]
+    [submitForm, content]
   )
 
   // We only ever want to focus the element once
   const hasBeenFocused = useRef(false)
+  const commentInputRef = useRef<MentionsInputHandle | null>(null)
 
-  // Auto-focus the textarea once the element has been correctly positioned.
+  // Auto-focus the input once the element has been correctly positioned.
   // We cannot use the autofocus attribute as we need to wait until the parent element
   // has been positioned (with the "top" attribute) to avoid scrolling to the initial
   // position of the element
@@ -118,9 +100,7 @@ export const ReviewPanelAddComment = memo<{
     for (const mutation of mutationList) {
       const target = mutation.target as HTMLElement
       if (target.style.top) {
-        const textArea = target.getElementsByTagName('textarea')[0]
-        if (textArea) {
-          textArea.focus()
+        if (commentInputRef.current?.focus()) {
           hasBeenFocused.current = true
         }
       }
@@ -171,13 +151,16 @@ export const ReviewPanelAddComment = memo<{
         onSubmit={handleSubmit}
         ref={handleElement}
       >
-        <AutoExpandingTextArea
-          name="message"
-          className="review-panel-add-comment-textarea"
-          onChange={handleChange}
-          onKeyPress={handleKeyPress}
-          placeholder={t('add_your_comment_here')}
-          value={content}
+        <MentionsInput
+          ref={commentInputRef}
+          className="review-panel-add-comment-editor"
+          onChange={setContent}
+          onSubmit={submitForm}
+          placeholder={
+            commentMentionsEnabled
+              ? t('comment_or_mention_someone')
+              : t('add_your_comment_here')
+          }
           disabled={submitting}
         />
         <div className="review-panel-add-comment-buttons">

@@ -2,13 +2,13 @@ import { Fragment } from 'react'
 import type { Meta } from '@storybook/react-webpack5'
 import { useTranslation } from 'react-i18next'
 import {
-  Dropdown,
-  DropdownHeader,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
-} from '@/shared/components/dropdown/dropdown-menu'
-import Button from '@/shared/components/button/button'
+  OLDropdown,
+  OLDropdownHeader,
+  OLDropdownItem,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
+import OLButton from '@/shared/components/ol/ol-button'
 import { ButtonGroup } from 'react-bootstrap'
 import { figmaDesignUrl } from '../../../.storybook/utils/figma-design-url'
 
@@ -26,32 +26,32 @@ export const Sizes = () => {
       <h4>{label}</h4>
       <div style={{ display: 'inline-flex', gap: '10px' }}>
         {variants.map(variant => (
-          <Dropdown key={variant} as={ButtonGroup}>
-            <Button variant={variant} size={size}>
+          <OLDropdown key={variant} as={ButtonGroup}>
+            <OLButton variant={variant} size={size}>
               Split Button
-            </Button>
-            <DropdownToggle
+            </OLButton>
+            <OLDropdownToggle
               split
               variant={variant}
               id={`split-btn-${variant}-${size}`}
               size={size}
               aria-label={t('expand')}
             />
-            <DropdownMenu>
-              <DropdownHeader>Header</DropdownHeader>
-              <DropdownItem as="button">Action 1</DropdownItem>
-              <DropdownItem as="button">Action 2</DropdownItem>
-              <DropdownItem as="button">Action 3</DropdownItem>
-            </DropdownMenu>
-          </Dropdown>
+            <OLDropdownMenu>
+              <OLDropdownHeader>Header</OLDropdownHeader>
+              <OLDropdownItem as="button">Action 1</OLDropdownItem>
+              <OLDropdownItem as="button">Action 2</OLDropdownItem>
+              <OLDropdownItem as="button">Action 3</OLDropdownItem>
+            </OLDropdownMenu>
+          </OLDropdown>
         ))}
       </div>
     </Fragment>
   ))
 }
-const meta: Meta<typeof Dropdown> = {
+const meta: Meta<typeof OLDropdown> = {
   title: 'Shared/Components/SplitButton',
-  component: Dropdown,
+  component: OLDropdown,
   args: {
     align: { sm: 'start' },
   },

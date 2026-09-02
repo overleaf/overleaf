@@ -1,4 +1,4 @@
-import { vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -10,6 +10,7 @@ import sinon from 'sinon'
 import MockRequest from '../helpers/MockRequest.mjs'
 import MockResponse from '../helpers/MockResponse.mjs'
 import { DocumentConversionError } from '../../../../app/src/Features/Errors/Errors.js'
+import { setReqValidationModeForTests } from '@overleaf/validation-tools'
 
 vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
   vi.importActual('../../../../app/src/Features/Errors/Errors.js')
@@ -19,7 +20,7 @@ const modulePath =
 
 describe('ProjectDownloadsController', function () {
   beforeEach(async function (ctx) {
-    ctx.project_id = 'project-id-123'
+    ctx.project_id = '507f191e810c19729de860ea'
     ctx.req = new MockRequest(vi)
     ctx.res = new MockResponse(vi)
     ctx.next = sinon.stub()
@@ -113,6 +114,10 @@ describe('ProjectDownloadsController', function () {
     ctx.ProjectDownloadsController = (await import(modulePath)).default
   })
 
+  afterEach(function () {
+    setReqValidationModeForTests(null)
+  })
+
   describe('downloadProject', function () {
     beforeEach(function (ctx) {
       ctx.stream = { pipe: sinon.stub() }
@@ -194,13 +199,72 @@ describe('ProjectDownloadsController', function () {
     })
   })
 
+  describe('downloadProject with an invalid Project_id', function () {
+    beforeEach(function (ctx) {
+      ctx.stream = { pipe: sinon.stub() }
+      ctx.ProjectZipStreamManager.createZipStreamForProject = sinon
+        .stub()
+        .yields(null, ctx.stream)
+      ctx.req.params = { Project_id: 'not-a-valid-object-id' }
+      ctx.req.ip = '192.168.1.1'
+      ctx.req.session = {
+        user: {
+          _id: 'user-id-123',
+          email: 'user@example.com',
+        },
+      }
+      ctx.ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, {
+        name: 'a project',
+        overleaf: { history: { id: 123 } },
+      })
+      ctx.DocumentUpdaterHandler.flushProjectToMongo = sinon
+        .stub()
+        .callsArgWith(1)
+    })
+
+    it('should still process the request in log mode', function (ctx) {
+      setReqValidationModeForTests('log')
+      ctx.ProjectDownloadsController.downloadProject(ctx.req, ctx.res, ctx.next)
+      sinon.assert.notCalled(ctx.next)
+      sinon.assert.calledWith(
+        ctx.ProjectZipStreamManager.createZipStreamForProject,
+        'not-a-valid-object-id'
+      )
+    })
+
+    describe('when enforced', function () {
+      afterEach(function () {
+        setReqValidationModeForTests(null)
+      })
+
+      it('should reject the request', function (ctx) {
+        setReqValidationModeForTests('enforce')
+        let error
+        try {
+          ctx.ProjectDownloadsController.downloadProject(
+            ctx.req,
+            ctx.res,
+            ctx.next
+          )
+        } catch (err) {
+          error = err
+        }
+        expect(error).to.exist
+        expect(error.name).to.equal('InvalidParamsError')
+        sinon.assert.notCalled(
+          ctx.ProjectZipStreamManager.createZipStreamForProject
+        )
+      })
+    })
+  })
+
   describe('downloadMultipleProjects', function () {
     beforeEach(function (ctx) {
       ctx.stream = { pipe: sinon.stub() }
       ctx.ProjectZipStreamManager.createZipStreamForMultipleProjects = sinon
         .stub()
         .yields(null, ctx.stream)
-      ctx.project_ids = ['project-1', 'project-2']
+      ctx.project_ids = ['507f191e810c19729de860ea', '507f191e810c19729de860eb']
       ctx.req.query = { project_ids: ctx.project_ids.join(',') }
       ctx.req.ip = '192.168.1.1'
       ctx.req.session = {
@@ -270,6 +334,67 @@ describe('ProjectDownloadsController', function () {
           )
           .should.equal(true)
       }
+    })
+  })
+
+  describe('downloadMultipleProjects with an invalid project id', function () {
+    beforeEach(function (ctx) {
+      ctx.stream = { pipe: sinon.stub() }
+      ctx.ProjectZipStreamManager.createZipStreamForMultipleProjects = sinon
+        .stub()
+        .yields(null, ctx.stream)
+      ctx.req.query = {
+        project_ids: 'not-a-valid-object-id,507f191e810c19729de860eb',
+      }
+      ctx.req.ip = '192.168.1.1'
+      ctx.req.session = {
+        user: {
+          _id: 'user-id-123',
+          email: 'user@example.com',
+        },
+      }
+      ctx.DocumentUpdaterHandler.flushMultipleProjectsToMongo = sinon
+        .stub()
+        .callsArgWith(1)
+    })
+
+    it('should still process the request via the fallback schema in log mode', function (ctx) {
+      setReqValidationModeForTests('log')
+      ctx.ProjectDownloadsController.downloadMultipleProjects(
+        ctx.req,
+        ctx.res,
+        ctx.next
+      )
+      sinon.assert.notCalled(ctx.next)
+      sinon.assert.calledWith(
+        ctx.ProjectZipStreamManager.createZipStreamForMultipleProjects,
+        ['not-a-valid-object-id', '507f191e810c19729de860eb']
+      )
+    })
+
+    describe('when enforced', function () {
+      afterEach(function () {
+        setReqValidationModeForTests(null)
+      })
+
+      it('should reject the request', function (ctx) {
+        setReqValidationModeForTests('enforce')
+        let error
+        try {
+          ctx.ProjectDownloadsController.downloadMultipleProjects(
+            ctx.req,
+            ctx.res,
+            ctx.next
+          )
+        } catch (err) {
+          error = err
+        }
+        expect(error).to.exist
+        expect(error.name).to.equal('InvalidRequestError')
+        sinon.assert.notCalled(
+          ctx.ProjectZipStreamManager.createZipStreamForMultipleProjects
+        )
+      })
     })
   })
 

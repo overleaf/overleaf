@@ -32,7 +32,7 @@ function deleteTestSuite(deleteDoc) {
     this.doc_id = new ObjectId()
     this.lines = ['original', 'lines']
     this.version = 42
-    this.ranges = []
+    this.ranges = {}
     await DocstoreApp.ensureRunning()
     await DocstoreClient.createDoc(
       this.project_id,
@@ -350,7 +350,7 @@ describe("Destroying a project's documents", function () {
     this.doc_id = new ObjectId()
     this.lines = ['original', 'lines']
     this.version = 42
-    this.ranges = []
+    this.ranges = {}
     await DocstoreApp.ensureRunning()
     await DocstoreClient.createDoc(
       this.project_id,

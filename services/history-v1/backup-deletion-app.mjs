@@ -9,6 +9,12 @@ import logger from '@overleaf/logger'
 import Metrics from '@overleaf/metrics'
 import { hasValidBasicAuthCredentials } from './api/middleware/security.js'
 import {
+  handleValidationError,
+  parseReq,
+  z,
+  zz,
+} from '@overleaf/validation-tools'
+import {
   deleteProjectBackupCb,
   healthCheck,
   healthCheckCb,
@@ -32,8 +38,21 @@ function basicAuth(req, res, next) {
   res.sendStatus(401)
 }
 
+const deleteProjectBackupSchema = z.object({
+  params: z.strictObject({
+    projectId: zz.objectId(),
+  }),
+})
+
 app.delete('/project/:projectId/backup', basicAuth, (req, res, next) => {
-  deleteProjectBackupCb(req.params.projectId, err => {
+  // Rollout-temporary: main read req.params directly here; log-only while
+  // REQ_VALIDATION_MODE=log rolls this new call site out. No transforms in
+  // deleteProjectBackupSchema, so a raw passthrough on failure needs no
+  // fallback.
+  const { params } = parseReq(req, deleteProjectBackupSchema, {
+    logOnly: true,
+  })
+  deleteProjectBackupCb(params.projectId, err => {
     if (err) {
       return next(err)
     }
@@ -51,6 +70,8 @@ app.get('/health_check', (req, res, next) => {
     res.sendStatus(200)
   })
 })
+
+app.use(handleValidationError)
 
 app.use((err, req, res, next) => {
   req.logger.addFields({ err })

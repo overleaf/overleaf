@@ -1,13 +1,15 @@
-import { ProjectMember } from '@/shared/context/types/project-metadata'
+import {
+  ProjectMember,
+  RequestedPrivilegeLevel,
+} from '@/shared/context/types/project-metadata'
 import {
   deleteJSON,
   getJSON,
   postJSON,
   putJSON,
 } from '../../../infrastructure/fetch-json'
-import { executeV2Captcha } from './captcha'
-import getMeta from '@/utils/meta'
 import { PermissionsLevel } from '@/features/ide-react/types/permissions'
+import { useFetchWithRecaptcha } from '@/shared/hooks/fetch-with-recaptcha/fetch-with-recaptcha'
 
 export type SharingLinkPrivileges =
   | 'readAndWrite'
@@ -35,22 +37,24 @@ export function updateSharingLink(
   })
 }
 
-export function sendInvite(
+export function sendInviteParams(
   projectId: string,
   email: string,
   privileges: PermissionsLevel
 ) {
-  return executeV2Captcha(
-    getMeta('ol-ExposedSettings').recaptchaDisabled?.invite
-  ).then(grecaptchaResponse => {
-    return postJSON(`/project/${projectId}/invite`, {
+  return [
+    `/project/${projectId}/invite`,
+    {
       body: {
         email, // TODO: normalisedEmail?
         privileges,
-        'g-recaptcha-response': grecaptchaResponse,
       },
-    })
-  })
+    },
+  ] as const
+}
+
+export function useSendInvite() {
+  return useFetchWithRecaptcha(postJSON, { action: 'invite' })
 }
 
 export function resendInvite(projectId: string, invite: ProjectMember) {
@@ -78,6 +82,36 @@ export function removeMemberFromProject(
   return deleteJSON(`/project/${projectId}/users/${member._id}`)
 }
 
+export function requestAccess(
+  projectId: string,
+  privilegeLevel: RequestedPrivilegeLevel
+) {
+  return postJSON(`/project/${projectId}/request-access`, {
+    body: { privilegeLevel },
+  })
+}
+
+export function declineAccessRequest(
+  projectId: string,
+  userId: string,
+  notify: boolean
+) {
+  return deleteJSON(`/project/${projectId}/access-requests/${userId}`, {
+    body: { notify },
+  })
+}
+
+export function grantAccessRequest(
+  projectId: string,
+  userId: string,
+  privilegeLevel: RequestedPrivilegeLevel,
+  notify: boolean
+) {
+  return postJSON(`/project/${projectId}/access-requests/${userId}/grant`, {
+    body: { privilegeLevel, notify },
+  })
+}
+
 export function transferProjectOwnership(
   projectId: string,
   member: ProjectMember
@@ -100,6 +134,10 @@ export function setPublicAccessLevel(
 
 export function listProjectMembers(projectId: string) {
   return getJSON(`/project/${projectId}/members`)
+}
+
+export function listProjectAccessRequests(projectId: string) {
+  return getJSON(`/project/${projectId}/access-requests`)
 }
 
 export function listProjectInvites(projectId: string) {

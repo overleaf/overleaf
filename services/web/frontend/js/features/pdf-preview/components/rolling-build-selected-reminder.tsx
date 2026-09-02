@@ -1,4 +1,4 @@
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import { useTranslation, Trans } from 'react-i18next'
 import { useProjectContext } from '@/shared/context/project-context'
 import { onRollingBuild } from '@/shared/utils/rolling-build'
@@ -21,12 +21,14 @@ const RollingBuildSelectedReminder = () => {
   )
 
   return (
-    <OLNotification
-      title={t('this_project_is_compiled_using_untested_version')}
-      content={content}
-      type="info"
-      className="mb-0"
-    />
+    <div className="notification-list">
+      <Notification
+        title={t('this_project_is_compiled_using_untested_version')}
+        content={content}
+        type="info"
+        className="mb-0"
+      />
+    </div>
   )
 }
 

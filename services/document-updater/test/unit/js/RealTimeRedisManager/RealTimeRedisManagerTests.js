@@ -28,12 +28,12 @@ describe('RealTimeRedisManager', function () {
           createClient: config =>
             config.name === 'pubsub' ? this.pubsubClient : this.rclient,
         },
-        '@overleaf/settings': {
+        '@overleaf/settings': (this.Settings = {
           redis: {
             documentupdater: (this.settings = {
               key_schema: {
-                pendingUpdates({ doc_id: docId }) {
-                  return `PendingUpdates:${docId}`
+                pendingProjectUpdates({ project_id: projectId }) {
+                  return `PendingProjectUpdates:${projectId}`
                 },
               },
             }),
@@ -41,7 +41,7 @@ describe('RealTimeRedisManager', function () {
               name: 'pubsub',
             },
           },
-        },
+        }),
         crypto: (this.crypto = {
           randomBytes: sinon
             .stub()
@@ -61,36 +61,36 @@ describe('RealTimeRedisManager', function () {
     return (this.callback = sinon.stub())
   })
 
-  describe('getPendingUpdatesForDoc', function () {
+  describe('getPendingProjectUpdates', function () {
     beforeEach(function () {
       this.rclient.llen = sinon.stub()
       this.rclient.lrange = sinon.stub()
-      return (this.rclient.ltrim = sinon.stub())
+      this.rclient.ltrim = sinon.stub()
     })
 
     describe('successfully', function () {
       beforeEach(function () {
         this.updates = [
-          { op: [{ i: 'foo', p: 4 }] },
-          { op: [{ i: 'foo', p: 4 }] },
+          { doc: 'doc-1', op: [{ i: 'foo', p: 4 }] },
+          { doc: 'doc-2', op: [{ i: 'bar', p: 6 }] },
         ]
         this.jsonUpdates = this.updates.map(update => JSON.stringify(update))
         this.rclient.exec = sinon.stub().yields(null, [2, this.jsonUpdates])
-        return this.RealTimeRedisManager.getPendingUpdatesForDoc(
-          this.doc_id,
+        return this.RealTimeRedisManager.getPendingProjectUpdates(
+          this.project_id,
           this.callback
         )
       })
 
-      it('should get the pending updates', function () {
+      it('should get the pending updates from the per-project queue', function () {
         return this.rclient.lrange
-          .calledWith(`PendingUpdates:${this.doc_id}`, 0, 7)
+          .calledWith(`PendingProjectUpdates:${this.project_id}`, 0, 7)
           .should.equal(true)
       })
 
       it('should delete the pending updates', function () {
         return this.rclient.ltrim
-          .calledWith(`PendingUpdates:${this.doc_id}`, 8, -1)
+          .calledWith(`PendingProjectUpdates:${this.project_id}`, 8, -1)
           .should.equal(true)
       })
 
@@ -102,12 +102,12 @@ describe('RealTimeRedisManager', function () {
     return describe("when the JSON doesn't parse", function () {
       beforeEach(function () {
         this.jsonUpdates = [
-          JSON.stringify({ op: [{ i: 'foo', p: 4 }] }),
+          JSON.stringify({ doc: 'doc-1', op: [{ i: 'foo', p: 4 }] }),
           'broken json',
         ]
         this.rclient.exec = sinon.stub().yields(null, [2, this.jsonUpdates])
-        return this.RealTimeRedisManager.getPendingUpdatesForDoc(
-          this.doc_id,
+        return this.RealTimeRedisManager.getPendingProjectUpdates(
+          this.project_id,
           this.callback
         )
       })
@@ -120,18 +120,18 @@ describe('RealTimeRedisManager', function () {
     })
   })
 
-  describe('getUpdatesLength', function () {
+  describe('getProjectUpdatesLength', function () {
     beforeEach(function () {
-      this.rclient.llen = sinon.stub().yields(null, (this.length = 3))
-      return this.RealTimeRedisManager.getUpdatesLength(
-        this.doc_id,
+      this.rclient.llen = sinon.stub().yields(null, (this.length = 4))
+      return this.RealTimeRedisManager.getProjectUpdatesLength(
+        this.project_id,
         this.callback
       )
     })
 
-    it('should look up the length', function () {
+    it('should look up the length of the per-project queue', function () {
       return this.rclient.llen
-        .calledWith(`PendingUpdates:${this.doc_id}`)
+        .calledWith(`PendingProjectUpdates:${this.project_id}`)
         .should.equal(true)
     })
 
@@ -143,25 +143,71 @@ describe('RealTimeRedisManager', function () {
   return describe('sendData', function () {
     beforeEach(function () {
       this.message_id = 'doc:somehost:01020304-0'
-      return this.RealTimeRedisManager.sendData({ op: 'thisop' })
+      this.data = {
+        project_id: this.project_id,
+        doc_id: this.doc_id,
+        op: 'thisop',
+      }
+      this.blob = JSON.stringify({
+        ...this.data,
+        _id: this.message_id,
+        message: 'otUpdateApplied',
+      })
     })
 
-    it('should send the op with a message id', function () {
-      return this.pubsubClient.publish
-        .calledWith(
-          'applied-ops',
-          JSON.stringify({ op: 'thisop', _id: this.message_id })
-        )
-        .should.equal(true)
+    describe('on the base editor-events channel', function () {
+      beforeEach(function () {
+        this.RealTimeRedisManager.sendData(this.data)
+      })
+
+      it('should send the op with a message id and message name', function () {
+        return this.pubsubClient.publish
+          .calledWith('editor-events', this.blob)
+          .should.equal(true)
+      })
+
+      it('should track the payload size', function () {
+        return this.metrics.summary
+          .calledWith('redis.publish.applied-ops', this.blob.length, {
+            path: 'editor-events',
+          })
+          .should.equal(true)
+      })
     })
 
-    return it('should track the payload size', function () {
-      return this.metrics.summary
-        .calledWith(
-          'redis.publish.applied-ops',
-          JSON.stringify({ op: 'thisop', _id: this.message_id }).length
-        )
-        .should.equal(true)
+    describe('on the per-project editor-events channel', function () {
+      beforeEach(function () {
+        this.Settings.publishOnIndividualChannels = true
+        this.RealTimeRedisManager.sendData(this.data)
+      })
+
+      it('should send the op on the per-project channel', function () {
+        return this.pubsubClient.publish
+          .calledWith(`editor-events:${this.project_id}`, this.blob)
+          .should.equal(true)
+      })
+    })
+
+    describe('with an error', function () {
+      beforeEach(function () {
+        this.data = {
+          project_id: this.project_id,
+          doc_id: this.doc_id,
+          error: 'something went wrong',
+        }
+        this.blob = JSON.stringify({
+          ...this.data,
+          _id: this.message_id,
+          message: 'otUpdateError',
+        })
+        this.RealTimeRedisManager.sendData(this.data)
+      })
+
+      it('should send the error with the otUpdateError message name', function () {
+        return this.pubsubClient.publish
+          .calledWith('editor-events', this.blob)
+          .should.equal(true)
+      })
     })
   })
 })

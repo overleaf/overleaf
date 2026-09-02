@@ -3,10 +3,14 @@
   "version": "0.0.1",
   "description": "utilities to help working with mongo",
   "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./*": "./*"
+  },
   "scripts": {
     "test": "yarn run lint && yarn run types:check && yarn run test:unit",
     "test:unit": "mocha --exit test/**/*.{js,cjs}",
-    "lint": "eslint --cache --cache-location ../../.cache/eslint/ --ext .cjs,.js,.jsx,.mjs,.ts --max-warnings 0 --format unix .",
+    "lint": "eslint --cache --cache-location ../../.cache/eslint/ --ext .cjs,.js,.jsx,.mjs,.ts --max-warnings 0 .",
     "lint:fix": "eslint --cache --cache-location ../../.cache/eslint/ --fix --ext .cjs,.js,.jsx,.mjs,.ts .",
     "test:ci": "yarn run test:unit",
     "types:check": "tsc --noEmit"
@@ -18,7 +22,9 @@
     "mongodb-legacy": "6.1.3"
   },
   "devDependencies": {
+    "@types/node": "^24.5.2",
     "chai": "^4.3.6",
+    "eslint": "^10.4.0",
     "mocha": "^11.1.0",
     "mocha-junit-reporter": "^2.2.1",
     "mocha-multi-reporters": "^1.5.1",

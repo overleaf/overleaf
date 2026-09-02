@@ -2,8 +2,8 @@
 
 declare -a vitest_args=("$@")
 
-if [[ -n "$MOCHA_GREP" ]]; then
-  vitest_args+=("--testNamePattern" "$MOCHA_GREP")
+if [[ -n "$TEST_NAME_PATTERN" ]]; then
+  vitest_args+=("--testNamePattern" "$TEST_NAME_PATTERN")
 fi
 
 if [[ -n "$VITEST_NO_CACHE" ]]; then

@@ -17,23 +17,27 @@ export const ReviewPanelResolvedThreadsMenu: FC = () => {
 
   const { projectRanges, loading } = useProjectRanges()
 
-  const docNameForThread = useMemo(() => {
-    const docNameForThread = new Map<string, string>()
+  const docForThread = useMemo(() => {
+    const docForThread = new Map<string, { id: string; name: string }>()
     const otMigrationStage = getMeta('ol-otMigrationStage')
 
-    for (const [docId, ranges] of projectRanges?.entries() ?? []) {
-      const docName = docs?.find(
-        doc => (otMigrationStage === 1 ? doc.path : doc.doc.id) === docId
-      )?.doc.name
-      if (docName !== undefined) {
+    for (const [key, ranges] of projectRanges?.entries() ?? []) {
+      // history-ot keys project ranges by pathname, sharejs-text-ot by doc id
+      const matchingDoc = docs?.find(
+        doc => (otMigrationStage === 1 ? doc.path : doc.doc.id) === key
+      )
+      if (matchingDoc !== undefined) {
         for (const comment of ranges.comments) {
           const threadId = comment.op.t
-          docNameForThread.set(threadId, docName)
+          docForThread.set(threadId, {
+            id: matchingDoc.doc.id,
+            name: matchingDoc.doc.name,
+          })
         }
       }
     }
 
-    return docNameForThread
+    return docForThread
   }, [docs, projectRanges])
 
   const allComments = useMemo(() => {
@@ -72,8 +76,10 @@ export const ReviewPanelResolvedThreadsMenu: FC = () => {
       return Date.parse(b.thread.resolved_at) - Date.parse(a.thread.resolved_at)
     })
 
-    return allResolvedThreads.filter(thread => allComments.has(thread.id))
-  }, [threads, allComments])
+    return allResolvedThreads.filter(
+      thread => allComments.has(thread.id) && docForThread.has(thread.id)
+    )
+  }, [threads, allComments, docForThread])
 
   if (loading) {
     return <LoadingSpinner className="ms-auto me-auto" />
@@ -103,7 +109,8 @@ export const ReviewPanelResolvedThreadsMenu: FC = () => {
       </div>
       {resolvedThreads.map(thread => {
         const comment = allComments.get(thread.id)
-        if (!comment) {
+        const doc = docForThread.get(thread.id)
+        if (!comment || !doc) {
           return null
         }
 
@@ -112,7 +119,8 @@ export const ReviewPanelResolvedThreadsMenu: FC = () => {
             key={thread.id}
             id={thread.id as ThreadId}
             comment={comment}
-            docName={docNameForThread.get(thread.id) ?? t('unknown')}
+            docId={doc.id}
+            docName={doc.name}
           />
         )
       })}

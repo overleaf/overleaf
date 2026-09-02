@@ -29,7 +29,7 @@ import OLFormCheckbox from '@/shared/components/ol/ol-form-checkbox'
 import { useContactUsModal } from '@/shared/hooks/use-contact-us-modal'
 import { UserProvider } from '@/shared/context/user-context'
 import OLButton from '@/shared/components/ol/ol-button'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import handleStripePaymentAction from '@/features/subscription/util/handle-stripe-payment-action'
 
 const educationalPercentDiscount = 40
@@ -311,16 +311,18 @@ export function ChangeToGroupModal() {
             </p>
             <hr className="thin my-3" />
             {error && (
-              <OLNotification
-                type="error"
-                aria-live="polite"
-                content={
-                  <>
-                    {t('generic_something_went_wrong')}. {t('try_again')}.{' '}
-                    {t('generic_if_problem_continues_contact_us')}.
-                  </>
-                }
-              />
+              <div className="notification-list">
+                <Notification
+                  type="error"
+                  aria-live="polite"
+                  content={
+                    <>
+                      {t('generic_something_went_wrong')}. {t('try_again')}.{' '}
+                      {t('generic_if_problem_continues_contact_us')}.
+                    </>
+                  }
+                />
+              </div>
             )}
             <OLButton
               variant="primary"

@@ -1,8 +1,10 @@
-import { FormGroupProps } from 'react-bootstrap'
-import FormGroup from '@/shared/components/form/form-group'
+import { FormGroup, FormGroupProps } from 'react-bootstrap'
+import classnames from 'classnames'
 
-function OLFormGroup(props: FormGroupProps) {
-  return <FormGroup {...props} />
+function OLFormGroup({ className, ...props }: FormGroupProps) {
+  return (
+    <FormGroup className={classnames('form-group', className)} {...props} />
+  )
 }
 
 export default OLFormGroup

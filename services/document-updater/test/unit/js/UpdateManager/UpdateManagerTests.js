@@ -10,7 +10,7 @@ describe('UpdateManager', function () {
     this.project_id = 'project-id-123'
     this.projectHistoryId = 'history-id-123'
     this.doc_id = 'document-id-123'
-    this.lockValue = 'mock-lock-value'
+    this.projectLockValue = 'mock-project-lock-value'
     this.pathname = '/a/b/c.tex'
 
     this.Metrics = {
@@ -23,10 +23,10 @@ describe('UpdateManager', function () {
     this.Profiler.prototype.log = sinon.stub().returns({ end: sinon.stub() })
     this.Profiler.prototype.end = sinon.stub()
 
-    this.LockManager = {
+    this.ProjectLockManager = {
       promises: {
-        tryLock: sinon.stub().resolves(this.lockValue),
-        getLock: sinon.stub().resolves(this.lockValue),
+        getLock: sinon.stub().resolves(this.projectLockValue),
+        extendLock: sinon.stub().resolves(),
         releaseLock: sinon.stub().resolves(),
       },
     }
@@ -42,9 +42,14 @@ describe('UpdateManager', function () {
     this.RealTimeRedisManager = {
       sendData: sinon.stub(),
       promises: {
-        getUpdatesLength: sinon.stub(),
-        getPendingUpdatesForDoc: sinon.stub(),
+        getProjectUpdatesLength: sinon.stub().resolves(0),
+        getPendingProjectUpdates: sinon.stub().resolves([]),
       },
+    }
+
+    this.HistoryOTUpdateManager = {
+      isHistoryOTEditOperationUpdate: sinon.stub().returns(false),
+      applyUpdate: sinon.stub().resolves(),
     }
 
     this.ShareJsUpdateManager = {
@@ -56,8 +61,6 @@ describe('UpdateManager', function () {
     this.HistoryManager = {
       recordAndFlushHistoryOps: sinon.stub(),
     }
-
-    this.Settings = {}
 
     this.DocumentManager = {
       promises: {
@@ -89,52 +92,36 @@ describe('UpdateManager', function () {
       },
     }
 
+    this.buildSparseChangePreviews = sinon.stub().returns([])
     this.UpdateManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        './LockManager': this.LockManager,
+        './ProjectLockManager': this.ProjectLockManager,
         './RedisManager': this.RedisManager,
         './RealTimeRedisManager': this.RealTimeRedisManager,
         './ShareJsUpdateManager': this.ShareJsUpdateManager,
         './HistoryManager': this.HistoryManager,
+        './HistoryOTUpdateManager': this.HistoryOTUpdateManager,
         './Metrics': this.Metrics,
-        '@overleaf/settings': this.Settings,
         './DocumentManager': this.DocumentManager,
         './RangesManager': this.RangesManager,
         './SnapshotManager': this.SnapshotManager,
         './WebApiManager': this.WebApiManager,
         './Profiler': this.Profiler,
         './ProjectHistoryRedisManager': this.ProjectHistoryRedisManager,
+        './TrackedChangePreview': {
+          buildSparseChangePreviews: this.buildSparseChangePreviews,
+        },
       },
     })
   })
 
-  describe('processOutstandingUpdates', function () {
-    beforeEach(async function () {
-      this.UpdateManager.promises.fetchAndApplyUpdates = sinon.stub().resolves()
-      await this.UpdateManager.promises.processOutstandingUpdates(
-        this.project_id,
-        this.doc_id
-      )
-    })
-
-    it('should apply the updates', function () {
-      this.UpdateManager.promises.fetchAndApplyUpdates
-        .calledWith(this.project_id, this.doc_id)
-        .should.equal(true)
-    })
-
-    it('should time the execution', function () {
-      this.Metrics.Timer.prototype.done.called.should.equal(true)
-    })
-  })
-
   describe('processOutstandingUpdatesWithLock', function () {
-    describe('when the lock is free', function () {
+    describe('when the project lock is free', function () {
       beforeEach(function () {
         this.UpdateManager.promises.continueProcessingUpdatesWithLock = sinon
           .stub()
           .resolves()
-        this.UpdateManager.promises.processOutstandingUpdates = sinon
+        this.UpdateManager.promises.fetchAndApplyProjectUpdates = sinon
           .stub()
           .resolves()
       })
@@ -142,83 +129,140 @@ describe('UpdateManager', function () {
       describe('successfully', function () {
         beforeEach(async function () {
           await this.UpdateManager.promises.processOutstandingUpdatesWithLock(
-            this.project_id,
-            this.doc_id
+            this.project_id
           )
         })
 
-        it('should acquire the lock', function () {
-          this.LockManager.promises.tryLock
-            .calledWith(this.doc_id)
+        it('should acquire the project lock', function () {
+          this.ProjectLockManager.promises.getLock
+            .calledWith(this.project_id)
             .should.equal(true)
         })
 
-        it('should free the lock', function () {
-          this.LockManager.promises.releaseLock
-            .calledWith(this.doc_id, this.lockValue)
+        it('should free the project lock', function () {
+          this.ProjectLockManager.promises.releaseLock
+            .calledWith(this.project_id, this.projectLockValue)
             .should.equal(true)
         })
 
-        it('should process the outstanding updates', function () {
-          this.UpdateManager.promises.processOutstandingUpdates
-            .calledWith(this.project_id, this.doc_id)
+        it('should drain the per-project queue', function () {
+          this.UpdateManager.promises.fetchAndApplyProjectUpdates
+            .calledWith(this.project_id)
             .should.equal(true)
         })
 
         it('should do everything with the lock acquired', function () {
-          this.UpdateManager.promises.processOutstandingUpdates
-            .calledAfter(this.LockManager.promises.tryLock)
+          this.UpdateManager.promises.fetchAndApplyProjectUpdates
+            .calledAfter(this.ProjectLockManager.promises.getLock)
             .should.equal(true)
-          this.UpdateManager.promises.processOutstandingUpdates
-            .calledBefore(this.LockManager.promises.releaseLock)
+          this.UpdateManager.promises.fetchAndApplyProjectUpdates
+            .calledBefore(this.ProjectLockManager.promises.releaseLock)
             .should.equal(true)
         })
 
         it('should continue processing new updates that may have come in', function () {
           this.UpdateManager.promises.continueProcessingUpdatesWithLock
-            .calledWith(this.project_id, this.doc_id)
+            .calledWith(this.project_id)
             .should.equal(true)
         })
       })
 
-      describe('when processOutstandingUpdates returns an error', function () {
+      describe('when fetchAndApplyProjectUpdates returns an error', function () {
         beforeEach(async function () {
           this.error = new Error('Something went wrong')
-          this.UpdateManager.promises.processOutstandingUpdates = sinon
+          this.UpdateManager.promises.fetchAndApplyProjectUpdates = sinon
             .stub()
             .rejects(this.error)
           await expect(
             this.UpdateManager.promises.processOutstandingUpdatesWithLock(
-              this.project_id,
-              this.doc_id
+              this.project_id
             )
           ).to.be.rejectedWith(this.error)
         })
 
-        it('should free the lock', function () {
-          this.LockManager.promises.releaseLock
-            .calledWith(this.doc_id, this.lockValue)
+        it('should free the project lock', function () {
+          this.ProjectLockManager.promises.releaseLock
+            .calledWith(this.project_id, this.projectLockValue)
             .should.equal(true)
         })
       })
     })
+  })
 
-    describe('when the lock is taken', function () {
+  describe('fetchAndApplyProjectUpdates', function () {
+    beforeEach(function () {
+      this.UpdateManager.promises.applyUpdate = sinon.stub().resolves()
+    })
+
+    describe('with updates carrying their doc id', function () {
       beforeEach(async function () {
-        this.LockManager.promises.tryLock.resolves(null)
-        this.UpdateManager.promises.processOutstandingUpdates = sinon
-          .stub()
-          .resolves()
-        await this.UpdateManager.promises.processOutstandingUpdatesWithLock(
+        this.updates = [
+          { doc: 'doc-1', op: 'a' },
+          { doc: 'doc-2', op: 'b' },
+        ]
+        this.RealTimeRedisManager.promises.getPendingProjectUpdates.resolves(
+          this.updates
+        )
+        await this.UpdateManager.promises.fetchAndApplyProjectUpdates(
           this.project_id,
-          this.doc_id
+          new this.Profiler()
         )
       })
 
-      it('should not process the updates', function () {
-        this.UpdateManager.promises.processOutstandingUpdates.called.should.equal(
-          false
+      it('should read the per-project queue', function () {
+        this.RealTimeRedisManager.promises.getPendingProjectUpdates
+          .calledWith(this.project_id)
+          .should.equal(true)
+      })
+
+      it('should apply each update to the doc it carries', function () {
+        this.UpdateManager.promises.applyUpdate.should.have.been.calledWith(
+          this.project_id,
+          'doc-1',
+          this.updates[0]
         )
+        this.UpdateManager.promises.applyUpdate.should.have.been.calledWith(
+          this.project_id,
+          'doc-2',
+          this.updates[1]
+        )
+      })
+    })
+
+    describe('with a history-OT update', function () {
+      beforeEach(async function () {
+        this.update = { doc: 'doc-1', op: 'a' }
+        this.RealTimeRedisManager.promises.getPendingProjectUpdates.resolves([
+          this.update,
+        ])
+        this.HistoryOTUpdateManager.isHistoryOTEditOperationUpdate.returns(true)
+        await this.UpdateManager.promises.fetchAndApplyProjectUpdates(
+          this.project_id,
+          new this.Profiler()
+        )
+      })
+
+      it('should route it to the history-OT update manager', function () {
+        this.HistoryOTUpdateManager.applyUpdate.should.have.been.calledWith(
+          this.project_id,
+          'doc-1',
+          this.update
+        )
+        this.UpdateManager.promises.applyUpdate.called.should.equal(false)
+      })
+    })
+
+    describe('with no updates', function () {
+      beforeEach(async function () {
+        this.RealTimeRedisManager.promises.getPendingProjectUpdates.resolves([])
+        await this.UpdateManager.promises.fetchAndApplyProjectUpdates(
+          this.project_id,
+          new this.Profiler()
+        )
+      })
+
+      it('should not apply any update', function () {
+        this.UpdateManager.promises.applyUpdate.called.should.equal(false)
       })
     })
   })
@@ -226,32 +270,30 @@ describe('UpdateManager', function () {
   describe('continueProcessingUpdatesWithLock', function () {
     describe('when there are outstanding updates', function () {
       beforeEach(async function () {
-        this.RealTimeRedisManager.promises.getUpdatesLength.resolves(3)
+        this.RealTimeRedisManager.promises.getProjectUpdatesLength.resolves(3)
         this.UpdateManager.promises.processOutstandingUpdatesWithLock = sinon
           .stub()
           .resolves()
         await this.UpdateManager.promises.continueProcessingUpdatesWithLock(
-          this.project_id,
-          this.doc_id
+          this.project_id
         )
       })
 
       it('should process the outstanding updates', function () {
         this.UpdateManager.promises.processOutstandingUpdatesWithLock
-          .calledWith(this.project_id, this.doc_id)
+          .calledWith(this.project_id)
           .should.equal(true)
       })
     })
 
     describe('when there are no outstanding updates', function () {
       beforeEach(async function () {
-        this.RealTimeRedisManager.promises.getUpdatesLength.resolves(0)
+        this.RealTimeRedisManager.promises.getProjectUpdatesLength.resolves(0)
         this.UpdateManager.promises.processOutstandingUpdatesWithLock = sinon
           .stub()
           .resolves()
         await this.UpdateManager.promises.continueProcessingUpdatesWithLock(
-          this.project_id,
-          this.doc_id
+          this.project_id
         )
       })
 
@@ -259,56 +301,6 @@ describe('UpdateManager', function () {
         this.UpdateManager.promises.processOutstandingUpdatesWithLock.called.should.equal(
           false
         )
-      })
-    })
-  })
-
-  describe('fetchAndApplyUpdates', function () {
-    describe('with updates', function () {
-      beforeEach(async function () {
-        this.updates = [{ p: 1, t: 'foo' }]
-        this.updatedDocLines = ['updated', 'lines']
-        this.version = 34
-        this.RealTimeRedisManager.promises.getPendingUpdatesForDoc.resolves(
-          this.updates
-        )
-        this.UpdateManager.promises.applyUpdate = sinon.stub().resolves()
-        await this.UpdateManager.promises.fetchAndApplyUpdates(
-          this.project_id,
-          this.doc_id
-        )
-      })
-
-      it('should get the pending updates', function () {
-        this.RealTimeRedisManager.promises.getPendingUpdatesForDoc
-          .calledWith(this.doc_id)
-          .should.equal(true)
-      })
-
-      it('should apply the updates', function () {
-        this.updates.map(update =>
-          this.UpdateManager.promises.applyUpdate
-            .calledWith(this.project_id, this.doc_id, update)
-            .should.equal(true)
-        )
-      })
-    })
-
-    describe('when there are no updates', function () {
-      beforeEach(async function () {
-        this.updates = []
-        this.RealTimeRedisManager.promises.getPendingUpdatesForDoc.resolves(
-          this.updates
-        )
-        this.UpdateManager.promises.applyUpdate = sinon.stub().resolves()
-        await this.UpdateManager.promises.fetchAndApplyUpdates(
-          this.project_id,
-          this.doc_id
-        )
-      })
-
-      it('should not call applyUpdate', function () {
-        this.UpdateManager.promises.applyUpdate.called.should.equal(false)
       })
     })
   })
@@ -622,6 +614,17 @@ describe('UpdateManager', function () {
           historyUpdates: this.historyUpdates,
           removedChangeIds: ['change-1', 'change-2'],
         })
+        this.mockPreviews = [
+          {
+            sectionPath: ['Intro'],
+            startLine: 1,
+            changes: [{ d: 'x', p: 0 }],
+            slice: 'x',
+            sliceStart: 0,
+            userIds: ['author-1', 'author-2'],
+          },
+        ]
+        this.buildSparseChangePreviews.returns(this.mockPreviews)
         await this.UpdateManager.promises.applyUpdate(
           this.project_id,
           this.doc_id,
@@ -629,12 +632,23 @@ describe('UpdateManager', function () {
         )
       })
 
-      it('should notify web of the rejected tracked changes', function () {
+      it('should call buildSparseChangePreviews with the rejected changes and lines', function () {
+        this.buildSparseChangePreviews.should.have.been.calledWith({
+          changes: [
+            { id: 'change-1', metadata: { user_id: 'author-1' } },
+            { id: 'change-2', metadata: { user_id: 'author-2' } },
+          ],
+          lines: this.lines,
+        })
+      })
+
+      it('should notify web of the rejected tracked changes with the previews', function () {
         this.WebApiManager.promises.notifyTrackChangesRejected.should.have.been.calledWith(
           this.project_id,
           this.doc_id,
           this.rejectedChangeAuthorIds,
-          this.updateMeta.user_id
+          this.updateMeta.user_id,
+          this.mockPreviews
         )
       })
     })
@@ -865,7 +879,7 @@ describe('UpdateManager', function () {
         this.UpdateManager.promises.continueProcessingUpdatesWithLock = sinon
           .stub()
           .resolves()
-        this.UpdateManager.promises.processOutstandingUpdates = sinon
+        this.UpdateManager.promises.fetchAndApplyProjectUpdates = sinon
           .stub()
           .resolves()
         this.response = await this.UpdateManager.promises.lockUpdatesAndDo(
@@ -876,16 +890,24 @@ describe('UpdateManager', function () {
         )
       })
 
-      it('should lock the doc', function () {
-        this.LockManager.promises.getLock
-          .calledWith(this.doc_id)
+      it('should lock the project', function () {
+        this.ProjectLockManager.promises.getLock
+          .calledWith(this.project_id)
           .should.equal(true)
       })
 
-      it('should process any outstanding updates', function () {
-        this.UpdateManager.promises.processOutstandingUpdates.should.have.been.calledWith(
-          this.project_id,
-          this.doc_id
+      it('should refresh the project lock before running the method', function () {
+        this.ProjectLockManager.promises.extendLock
+          .calledWith(this.project_id, this.projectLockValue)
+          .should.equal(true)
+        this.method
+          .calledAfter(this.ProjectLockManager.promises.extendLock)
+          .should.equal(true)
+      })
+
+      it('should process any outstanding updates for the project', function () {
+        this.UpdateManager.promises.fetchAndApplyProjectUpdates.should.have.been.calledWith(
+          this.project_id
         )
       })
 
@@ -899,23 +921,23 @@ describe('UpdateManager', function () {
         expect(this.response).to.equal(this.methodResult)
       })
 
-      it('should release the lock', function () {
-        this.LockManager.promises.releaseLock
-          .calledWith(this.doc_id, this.lockValue)
+      it('should release the project lock', function () {
+        this.ProjectLockManager.promises.releaseLock
+          .calledWith(this.project_id, this.projectLockValue)
           .should.equal(true)
       })
 
       it('should continue processing updates', function () {
         this.UpdateManager.promises.continueProcessingUpdatesWithLock
-          .calledWith(this.project_id, this.doc_id)
+          .calledWith(this.project_id)
           .should.equal(true)
       })
     })
 
-    describe('when processOutstandingUpdates returns an error', function () {
+    describe('when fetchAndApplyProjectUpdates returns an error', function () {
       beforeEach(async function () {
         this.error = new Error('Something went wrong')
-        this.UpdateManager.promises.processOutstandingUpdates = sinon
+        this.UpdateManager.promises.fetchAndApplyProjectUpdates = sinon
           .stub()
           .rejects(this.error)
         await expect(
@@ -928,9 +950,9 @@ describe('UpdateManager', function () {
         ).to.be.rejectedWith(this.error)
       })
 
-      it('should free the lock', function () {
-        this.LockManager.promises.releaseLock
-          .calledWith(this.doc_id, this.lockValue)
+      it('should free the project lock', function () {
+        this.ProjectLockManager.promises.releaseLock
+          .calledWith(this.project_id, this.projectLockValue)
           .should.equal(true)
       })
     })
@@ -938,7 +960,7 @@ describe('UpdateManager', function () {
     describe('when the method returns an error', function () {
       beforeEach(async function () {
         this.error = new Error('something went wrong')
-        this.UpdateManager.promises.processOutstandingUpdates = sinon
+        this.UpdateManager.promises.fetchAndApplyProjectUpdates = sinon
           .stub()
           .resolves()
         this.method = sinon.stub().rejects(this.error)
@@ -952,9 +974,9 @@ describe('UpdateManager', function () {
         ).to.be.rejectedWith(this.error)
       })
 
-      it('should free the lock', function () {
-        this.LockManager.promises.releaseLock
-          .calledWith(this.doc_id, this.lockValue)
+      it('should free the project lock', function () {
+        this.ProjectLockManager.promises.releaseLock
+          .calledWith(this.project_id, this.projectLockValue)
           .should.equal(true)
       })
     })

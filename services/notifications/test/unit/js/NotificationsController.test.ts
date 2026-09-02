@@ -104,18 +104,22 @@ describe('Notifications Controller', () => {
         modifiedCount: 1,
         upsertedCount: 0,
       })
+      // addNotification's body schema is a strictObject that does not
+      // include user_id (it's only ever read from params) -- drop it here
+      // to match, same as every real caller (web's NotificationsHandler).
+      const { user_id: _user_id, ...notification } = stubbedNotification[0]
       const req = {
         params: {
           user_id: userId,
         },
-        body: stubbedNotification[0],
+        body: notification,
       }
       await new Promise<void>(resolve => {
         controller.addNotification(req, {
           sendStatus: code => {
             expect(Notifications.addNotification).toHaveBeenCalledWith(
               userId,
-              stubbedNotification[0]
+              notification
             )
             expect(code).toBe(200)
             resolve()

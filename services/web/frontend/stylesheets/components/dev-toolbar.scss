@@ -82,6 +82,26 @@
     margin-top: var(--spacing-02);
   }
 
+  .dev-toolbar-controls {
+    display: flex;
+    gap: var(--spacing-02);
+    margin-top: var(--spacing-03);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: var(--bg-dark-primary);
+    padding-bottom: var(--spacing-02);
+
+    .form-control-wrapper {
+      flex: 1 1 auto;
+    }
+
+    .form-select {
+      flex: 0 0 auto;
+      width: auto;
+    }
+  }
+
   .test-card {
     text-align: left;
     color: var(--neutral-10);

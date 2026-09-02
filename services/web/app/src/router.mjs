@@ -65,6 +65,12 @@ import { plainTextResponse } from './infrastructure/Response.mjs'
 import SocketDiagnostics from './Features/SocketDiagnostics/SocketDiagnostics.mjs'
 import ClsiCacheController from './Features/Compile/ClsiCacheController.mjs'
 import AsyncLocalStorage from './infrastructure/AsyncLocalStorage.mjs'
+import {
+  getRawReqInput,
+  parseReq,
+  z,
+  zz,
+} from './infrastructure/Validation.mjs'
 
 const { renderUnsupportedBrowserPage, unsupportedBrowserMiddleware } =
   UnsupportedBrowserMiddleware
@@ -202,6 +208,12 @@ const rateLimiters = {
     duration: 60,
   }),
 }
+
+const statusCompilerSchema = z.object({
+  params: z.strictObject({
+    Project_id: zz.objectId(),
+  }),
+})
 
 async function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.use(unsupportedBrowserMiddleware)
@@ -525,15 +537,30 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     ProjectController.projectEntitiesJson
   )
 
-  webRouter.get(
-    '/project',
-    AuthenticationController.requireLogin(),
-    RateLimiterMiddleware.rateLimit(rateLimiters.openDashboard),
-    AsyncLocalStorage.middleware,
-    await Modules.middleware('domainCaptureTestSession'),
-    PermissionsController.useCapabilities(),
-    ProjectListController.projectListPage
+  // All project dashboard navigation states render the same page. The active
+  // navigation item is derived from the URL on the frontend.
+  const domainCaptureTestSessionMiddleware = await Modules.middleware(
+    'domainCaptureTestSession'
   )
+  for (const projectDashboardRoute of [
+    '/project',
+    '/project/owned',
+    '/project/shared',
+    '/project/archived',
+    '/project/trashed',
+    '/project/untagged',
+    '/project/tags/:tag',
+  ]) {
+    webRouter.get(
+      projectDashboardRoute,
+      AuthenticationController.requireLogin(),
+      RateLimiterMiddleware.rateLimit(rateLimiters.openDashboard),
+      AsyncLocalStorage.middleware,
+      domainCaptureTestSessionMiddleware,
+      PermissionsController.useCapabilities(),
+      ProjectListController.projectListPage
+    )
+  }
   webRouter.post(
     '/project/new',
     AuthenticationController.requireLogin(),
@@ -616,7 +643,7 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
 
   webRouter.get(
-    '/download/project/:Project_id/build/:editorBuildId/output/cached/:filename(.*)',
+    '/download/project/:Project_id/build/:editorBuildId/output/cached/:filename',
     AuthorizationMiddleware.ensureUserCanReadProject,
     ClsiCacheController.downloadFromCache
   )
@@ -650,7 +677,7 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   // direct url access to output files for a specific build
   webRouter.get(
-    '/project/:Project_id/build/:build_id/output/:file(.*)',
+    '/project/:Project_id/build/:build_id/output/:file(.+)',
     rateLimiterMiddlewareOutputFiles,
     AuthorizationMiddleware.ensureUserCanReadProject,
     CompileController.getFileFromClsi
@@ -658,7 +685,7 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   // direct url access to output files for a specific user and build
   webRouter.get(
-    '/project/:Project_id/user/:user_id/build/:build_id/output/:file(.*)',
+    '/project/:Project_id/user/:user_id/build/:build_id/output/:file(.+)',
     rateLimiterMiddlewareOutputFiles,
     AuthorizationMiddleware.ensureUserCanReadProject,
     CompileController.getFileFromClsi
@@ -764,7 +791,7 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
       ProjectDownloadsController.exportProjectConversion
     )
     webRouter.get(
-      '/project/:Project_id/download/conversion/:conversionId/:type/build/:buildId/output/:file(.*)',
+      '/project/:Project_id/download/conversion/:conversionId/:type/build/:buildId/output/:file(.+)',
       AuthenticationController.requireLogin(),
       RateLimiterMiddleware.rateLimit(rateLimiters.documentExportDownload, {
         params: ['Project_id'],
@@ -966,38 +993,43 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     TpdsController.createProject
   )
   privateApiRouter.post(
+    '/user/:user_id/project/resolve',
+    AuthenticationController.requirePrivateApiAuth(),
+    TpdsController.resolveProject
+  )
+  privateApiRouter.post(
     '/tpds/folder-update',
     AuthenticationController.requirePrivateApiAuth(),
     TpdsController.updateFolder
   )
   privateApiRouter.post(
-    '/user/:user_id/update/*',
+    '/user/:user_id/update/:path(.+)',
     AuthenticationController.requirePrivateApiAuth(),
     TpdsController.mergeUpdate
   )
   privateApiRouter.delete(
-    '/user/:user_id/update/*',
+    '/user/:user_id/update/:path(.+)',
     AuthenticationController.requirePrivateApiAuth(),
     TpdsController.deleteUpdate
   )
   privateApiRouter.post(
-    '/project/:project_id/user/:user_id/update/*',
+    '/project/:project_id/user/:user_id/update/:path(.+)',
     AuthenticationController.requirePrivateApiAuth(),
     TpdsController.mergeUpdate
   )
   privateApiRouter.delete(
-    '/project/:project_id/user/:user_id/update/*',
+    '/project/:project_id/user/:user_id/update/:path(.+)',
     AuthenticationController.requirePrivateApiAuth(),
     TpdsController.deleteUpdate
   )
 
   privateApiRouter.post(
-    '/project/:project_id/contents/*',
+    '/project/:project_id/contents/:path(.+)',
     AuthenticationController.requirePrivateApiAuth(),
     TpdsController.updateProjectContents
   )
   privateApiRouter.delete(
-    '/project/:project_id/contents/*',
+    '/project/:project_id/contents/:path(.+)',
     AuthenticationController.requirePrivateApiAuth(),
     TpdsController.deleteProjectContents
   )
@@ -1176,7 +1208,9 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     RateLimiterMiddleware.rateLimit(rateLimiters.statusCompiler),
     AuthorizationMiddleware.ensureUserCanReadProject,
     function (req, res) {
-      const projectId = req.params.Project_id
+      const {
+        params: { Project_id: projectId },
+      } = parseReq(req, statusCompilerSchema, { logOnly: true })
       // use a valid user id for testing
       const testUserId = '123456789012345678901234'
       const sendRes = _.once(function (statusCode, message, clsiServerId) {
@@ -1227,10 +1261,13 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
 
   webRouter.post('/error/client', function (req, res, next) {
-    logger.warn(
-      { err: req.body.error, meta: req.body.meta },
-      'client side error'
-    )
+    // This route only logs whatever diagnostic payload the client reports
+    // (arbitrary properties copied off a JS Error, plus free-form metadata --
+    // see ide-react-context.tsx's reportError) and always 204s; it never
+    // branches on the content, so there is nothing to validate it against.
+    // (case 2: final error-handler logging)
+    const { error, meta } = getRawReqInput(req).body
+    logger.warn({ err: error, meta }, 'client side error')
     metrics.inc('client-side-error')
     res.sendStatus(204)
   })

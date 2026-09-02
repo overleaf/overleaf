@@ -1,15 +1,15 @@
 import { Form } from 'react-bootstrap'
 import type { Meta, StoryObj } from '@storybook/react-webpack5'
-import FormGroup from '@/shared/components/form/form-group'
-import FormText from '@/shared/components/form/form-text'
-import FormControl from '@/shared/components/form/form-control'
+import OLFormGroup from '@/shared/components/ol/ol-form-group'
+import OLFormText from '@/shared/components/ol/ol-form-text'
+import OLFormControl from '@/shared/components/ol/ol-form-control'
 import MaterialIcon from '@/shared/components/material-icon'
-import FormFeedback from '@/shared/components/form/form-feedback'
+import OLFormFeedback from '@/shared/components/ol/ol-form-feedback'
 import { figmaDesignUrl } from '../../../../.storybook/utils/figma-design-url'
 
-const meta: Meta<React.ComponentProps<typeof FormControl>> = {
+const meta: Meta<React.ComponentProps<typeof OLFormControl>> = {
   title: 'Shared / Components / Form / Input',
-  component: FormControl,
+  component: OLFormControl,
   parameters: {
     controls: {
       include: ['disabled'],
@@ -18,29 +18,29 @@ const meta: Meta<React.ComponentProps<typeof FormControl>> = {
 }
 export default meta
 
-type Story = StoryObj<React.ComponentProps<typeof FormControl>>
+type Story = StoryObj<React.ComponentProps<typeof OLFormControl>>
 
 export const Default: Story = {
   render: args => {
     return (
       <>
-        <FormGroup controlId="id-1">
+        <OLFormGroup controlId="id-1">
           <Form.Label>Label</Form.Label>
-          <FormControl defaultValue="Large input" size="lg" {...args} />
-          <FormText>Helper</FormText>
-        </FormGroup>
+          <OLFormControl defaultValue="Large input" size="lg" {...args} />
+          <OLFormText>Helper</OLFormText>
+        </OLFormGroup>
         <hr />
-        <FormGroup controlId="id-2">
+        <OLFormGroup controlId="id-2">
           <Form.Label>Label</Form.Label>
-          <FormControl defaultValue="Regular input" {...args} />
-          <FormText>Helper</FormText>
-        </FormGroup>
+          <OLFormControl defaultValue="Regular input" {...args} />
+          <OLFormText>Helper</OLFormText>
+        </OLFormGroup>
         <hr />
-        <FormGroup controlId="id-3">
+        <OLFormGroup controlId="id-3">
           <Form.Label>Label</Form.Label>
-          <FormControl defaultValue="Small input" size="sm" {...args} />
-          <FormText>Helper</FormText>
-        </FormGroup>
+          <OLFormControl defaultValue="Small input" size="sm" {...args} />
+          <OLFormText>Helper</OLFormText>
+        </OLFormGroup>
       </>
     )
   },
@@ -56,37 +56,37 @@ export const Info: Story = {
   render: args => {
     return (
       <>
-        <FormGroup controlId="id-1">
+        <OLFormGroup controlId="id-1">
           <Form.Label>Label</Form.Label>
-          <FormControl
+          <OLFormControl
             placeholder="Placeholder"
             defaultValue="Large input"
             size="lg"
             {...args}
           />
-          <FormText type="info">Info</FormText>
-        </FormGroup>
+          <OLFormText type="info">Info</OLFormText>
+        </OLFormGroup>
         <hr />
-        <FormGroup controlId="id-2">
+        <OLFormGroup controlId="id-2">
           <Form.Label>Label</Form.Label>
-          <FormControl
+          <OLFormControl
             placeholder="Placeholder"
             defaultValue="Regular input"
             {...args}
           />
-          <FormText type="info">Info</FormText>
-        </FormGroup>
+          <OLFormText type="info">Info</OLFormText>
+        </OLFormGroup>
         <hr />
-        <FormGroup controlId="id-3">
+        <OLFormGroup controlId="id-3">
           <Form.Label>Label</Form.Label>
-          <FormControl
+          <OLFormControl
             placeholder="Placeholder"
             defaultValue="Small input"
             size="sm"
             {...args}
           />
-          <FormText type="info">Info</FormText>
-        </FormGroup>
+          <OLFormText type="info">Info</OLFormText>
+        </OLFormGroup>
       </>
     )
   },
@@ -102,23 +102,23 @@ export const Error: Story = {
   render: args => {
     return (
       <>
-        <FormGroup controlId="id-1">
+        <OLFormGroup controlId="id-1">
           <Form.Label>Large input label</Form.Label>
-          <FormControl size="lg" isInvalid {...args} />
-          <FormFeedback type="invalid">Error</FormFeedback>
-        </FormGroup>
+          <OLFormControl size="lg" isInvalid {...args} />
+          <OLFormFeedback type="invalid">Error</OLFormFeedback>
+        </OLFormGroup>
         <hr />
-        <FormGroup controlId="id-2">
+        <OLFormGroup controlId="id-2">
           <Form.Label>Regular input label</Form.Label>
-          <FormControl isInvalid {...args} />
-          <FormFeedback type="invalid">Error</FormFeedback>
-        </FormGroup>
+          <OLFormControl isInvalid {...args} />
+          <OLFormFeedback type="invalid">Error</OLFormFeedback>
+        </OLFormGroup>
         <hr />
-        <FormGroup controlId="id-3">
+        <OLFormGroup controlId="id-3">
           <Form.Label>Small input label</Form.Label>
-          <FormControl size="sm" isInvalid {...args} />
-          <FormFeedback type="invalid">Error</FormFeedback>
-        </FormGroup>
+          <OLFormControl size="sm" isInvalid {...args} />
+          <OLFormFeedback type="invalid">Error</OLFormFeedback>
+        </OLFormGroup>
       </>
     )
   },
@@ -134,23 +134,23 @@ export const Warning: Story = {
   render: args => {
     return (
       <>
-        <FormGroup controlId="id-1">
+        <OLFormGroup controlId="id-1">
           <Form.Label>Large input label</Form.Label>
-          <FormControl size="lg" {...args} />
-          <FormText type="warning">Warning</FormText>
-        </FormGroup>
+          <OLFormControl size="lg" {...args} />
+          <OLFormText type="warning">Warning</OLFormText>
+        </OLFormGroup>
         <hr />
-        <FormGroup controlId="id-2">
+        <OLFormGroup controlId="id-2">
           <Form.Label>Regular input label</Form.Label>
-          <FormControl {...args} />
-          <FormText type="warning">Warning</FormText>
-        </FormGroup>
+          <OLFormControl {...args} />
+          <OLFormText type="warning">Warning</OLFormText>
+        </OLFormGroup>
         <hr />
-        <FormGroup controlId="id-3">
+        <OLFormGroup controlId="id-3">
           <Form.Label>Small input label</Form.Label>
-          <FormControl size="sm" {...args} />
-          <FormText type="warning">Warning</FormText>
-        </FormGroup>
+          <OLFormControl size="sm" {...args} />
+          <OLFormText type="warning">Warning</OLFormText>
+        </OLFormGroup>
       </>
     )
   },
@@ -166,23 +166,23 @@ export const Success: Story = {
   render: args => {
     return (
       <>
-        <FormGroup controlId="id-1">
+        <OLFormGroup controlId="id-1">
           <Form.Label>Large input label</Form.Label>
-          <FormControl size="lg" {...args} />
-          <FormText type="success">Success</FormText>
-        </FormGroup>
+          <OLFormControl size="lg" {...args} />
+          <OLFormText type="success">Success</OLFormText>
+        </OLFormGroup>
         <hr />
-        <FormGroup controlId="id-2">
+        <OLFormGroup controlId="id-2">
           <Form.Label>Regular input label</Form.Label>
-          <FormControl {...args} />
-          <FormText type="success">Success</FormText>
-        </FormGroup>
+          <OLFormControl {...args} />
+          <OLFormText type="success">Success</OLFormText>
+        </OLFormGroup>
         <hr />
-        <FormGroup controlId="id-3">
+        <OLFormGroup controlId="id-3">
           <Form.Label>Small input label</Form.Label>
-          <FormControl size="sm" {...args} />
-          <FormText type="success">Success</FormText>
-        </FormGroup>
+          <OLFormControl size="sm" {...args} />
+          <OLFormText type="success">Success</OLFormText>
+        </OLFormGroup>
       </>
     )
   },
@@ -202,9 +202,9 @@ export const WithIcons: Story = {
 
     return (
       <>
-        <FormGroup controlId="id-1">
+        <OLFormGroup controlId="id-1">
           <Form.Label>Label</Form.Label>
-          <FormControl
+          <OLFormControl
             type="text"
             placeholder="Search"
             prepend={<MaterialIcon type="search" />}
@@ -220,11 +220,11 @@ export const WithIcons: Story = {
             size="lg"
             {...args}
           />
-        </FormGroup>
+        </OLFormGroup>
         <hr />
-        <FormGroup controlId="id-2">
+        <OLFormGroup controlId="id-2">
           <Form.Label>Label</Form.Label>
-          <FormControl
+          <OLFormControl
             type="text"
             placeholder="Search"
             prepend={<MaterialIcon type="search" />}
@@ -239,11 +239,11 @@ export const WithIcons: Story = {
             }
             {...args}
           />
-        </FormGroup>
+        </OLFormGroup>
         <hr />
-        <FormGroup controlId="id-3">
+        <OLFormGroup controlId="id-3">
           <Form.Label>Label</Form.Label>
-          <FormControl
+          <OLFormControl
             type="text"
             placeholder="Search"
             prepend={<MaterialIcon type="search" />}
@@ -259,12 +259,12 @@ export const WithIcons: Story = {
             size="sm"
             {...args}
           />
-        </FormGroup>
+        </OLFormGroup>
         <br />
         <hr />
-        <FormGroup controlId="id-3">
+        <OLFormGroup controlId="id-3">
           <Form.Label>Disabled state</Form.Label>
-          <FormControl
+          <OLFormControl
             type="text"
             placeholder="Search"
             prepend={<MaterialIcon type="search" />}
@@ -281,7 +281,7 @@ export const WithIcons: Story = {
             disabled
             {...args}
           />
-        </FormGroup>
+        </OLFormGroup>
       </>
     )
   },

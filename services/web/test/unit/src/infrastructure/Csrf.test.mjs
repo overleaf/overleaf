@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import sinon from 'sinon'
+import { getRawReqInput } from '@overleaf/validation-tools'
 const modulePath = '../../../../app/src/infrastructure/Csrf.mjs'
 
 describe('Csrf', function () {
@@ -94,6 +95,70 @@ describe('Csrf', function () {
         csrf.middleware(ctx.req, ctx.res, ctx.next)
         expect(ctx.next.calledWith(err)).to.equal(true)
         expect(ctx.next.calledWith(ctx.err)).to.equal(false)
+      })
+    })
+
+    describe('stripping _csrf after a successful check', function () {
+      beforeEach(async function (ctx) {
+        vi.resetModules()
+        vi.doMock('csurf', () => ({
+          default: sinon.stub().returns(sinon.stub().callsArg(2)),
+        }))
+        const module = await import(modulePath)
+        ctx.Csrf = module.default
+        ctx.CsrfClass = module.Csrf
+        ctx.csrf = new ctx.CsrfClass()
+      })
+
+      it('removes _csrf from req.body, leaving other fields untouched', function (ctx) {
+        const req = {
+          path: ctx.path,
+          method: 'POST',
+          body: { _csrf: 'a-token', other: 'field' },
+        }
+        ctx.csrf.middleware(req, ctx.res, ctx.next)
+        // test assertion on raw wire data (case 3 of getRawReqInput's
+        // allowlist): inspecting exactly what the middleware left on req
+        expect(getRawReqInput(req).body).to.deep.equal({ other: 'field' })
+        expect(ctx.next.calledWith()).to.equal(true)
+      })
+
+      it('removes _csrf from req.query, leaving other fields untouched', function (ctx) {
+        const req = {
+          path: ctx.path,
+          method: 'GET',
+          query: { _csrf: 'a-token', other: 'field' },
+        }
+        ctx.csrf.middleware(req, ctx.res, ctx.next)
+        expect(getRawReqInput(req).query).to.deep.equal({ other: 'field' })
+      })
+
+      it('is a no-op when there is no _csrf field', function (ctx) {
+        const req = {
+          path: ctx.path,
+          method: 'POST',
+          body: { other: 'field' },
+        }
+        ctx.csrf.middleware(req, ctx.res, ctx.next)
+        expect(getRawReqInput(req).body).to.deep.equal({ other: 'field' })
+      })
+
+      it('does not strip _csrf on an excluded route', function (ctx) {
+        // Excluded routes (e.g. /docs) still run their own second,
+        // independent csrf check further down their middleware stack (see
+        // OpenInOverleafMiddleware.postMiddleware), which needs the field
+        // to still be there.
+        ctx.csrf.disableDefaultCsrfProtection(ctx.path, 'POST')
+        const req = {
+          path: ctx.path,
+          method: 'POST',
+          body: { _csrf: 'a-token', other: 'field' },
+        }
+        ctx.csrf.middleware(req, ctx.res, ctx.next)
+        expect(getRawReqInput(req).body).to.deep.equal({
+          _csrf: 'a-token',
+          other: 'field',
+        })
       })
     })
   })

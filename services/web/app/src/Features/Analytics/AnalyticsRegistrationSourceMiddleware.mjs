@@ -2,6 +2,8 @@ import logger from '@overleaf/logger'
 import OError from '@overleaf/o-error'
 import AnalyticsRegistrationSourceHelper from './AnalyticsRegistrationSourceHelper.mjs'
 import SessionManager from '../../Features/Authentication/SessionManager.mjs'
+import RequestHelper from './RequestHelper.mjs'
+import { parseReq } from '../../infrastructure/Validation.mjs'
 
 function setSource(medium, source) {
   return function (req, res, next) {
@@ -34,10 +36,14 @@ function setInbound() {
 
     const referrer = req.header('referrer')
     try {
+      // NOTE: The utm query flags will be removed in the next middleware.
+      const { query } = parseReq(req, RequestHelper.utmQuerySchema, {
+        logOnly: true,
+      })
       AnalyticsRegistrationSourceHelper.setInbound(
         req.session,
         req.url,
-        req.query,
+        query,
         referrer
       )
     } catch (error) {

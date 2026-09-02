@@ -109,6 +109,45 @@ describe('BlobStore', function () {
         expect(content).to.equal(helloWorldString)
       })
 
+      describe('empty content', function () {
+        // A read answers the hash of empty content without looking anything up: the
+        // hash is a property of the content, so every project has it whether or not
+        // anything wrote it, and a file may reference it before anything has. Writing
+        // it is unchanged and still stores a blob.
+        const emptyHash = Blob.EMPTY_HASH
+
+        it('is fetched without anything having stored it', async function () {
+          const blob = await blobStore.getBlob(emptyHash)
+
+          expect(blob.getHash()).to.equal(emptyHash)
+          expect(blob.getByteLength()).to.equal(0)
+          expect(blob.getStringLength()).to.equal(0)
+          expect(await blobStore.getString(emptyHash)).to.equal('')
+          const stream = await blobStore.getStream(emptyHash)
+          expect(await streams.readStreamToBuffer(stream)).to.have.length(0)
+        })
+
+        it('is fetched alongside blobs that were stored', async function () {
+          await blobStore.putString(helloWorldString)
+
+          const blobs = await blobStore.getBlobs([emptyHash, helloWorldHash])
+
+          expect(blobs.map(blob => blob.getHash())).to.have.members([
+            emptyHash,
+            helloWorldHash,
+          ])
+        })
+
+        it('is still stored when it is written', async function () {
+          const blob = await blobStore.putString('')
+
+          expect(blob.getHash()).to.equal(emptyHash)
+          expect(
+            (await blobStore.getProjectBlobs()).map(blob => blob.getHash())
+          ).to.include(emptyHash)
+        })
+      })
+
       it('can store and fetch utf-8 files', async function () {
         const testFile = 'hello.txt'
 

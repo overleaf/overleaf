@@ -1,4 +1,4 @@
-import { vi, expect } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 const modulePath =
   '../../../../app/src/Features/Institutions/InstitutionsGetter.mjs'
@@ -141,6 +141,68 @@ describe('InstitutionsGetter', function () {
       ctx.unconfirmedDomainLicensedAffiliation,
       ctx.unconfirmedEmailLicensedAffiliation,
     ]
+
+    // Fixtures for getCurrentEntitledAffiliations, which keys off
+    // emailHasInstitutionLicence (the user is entitled to a licence with that
+    // institution). That flag is derived by UserGetter via
+    // InstitutionsHelper.emailHasLicence, whose own conditions (confirmed
+    // email, confirmed institution, non-free licence, not past reconfirmation)
+    // are covered in InstitutionHelper.test.mjs.
+    ctx.entitledAffiliation = {
+      emailHasInstitutionLicence: true,
+      affiliation: { institution: { id: 456, confirmed: true } },
+    }
+    ctx.unentitledAffiliation = {
+      emailHasInstitutionLicence: false,
+      affiliation: { institution: { id: 999, confirmed: true } },
+    }
+  })
+
+  describe('getCurrentEntitledAffiliations', function () {
+    it('returns the affiliations for emails the user is entitled to a licence for and filters out the rest', async function (ctx) {
+      ctx.UserGetter.promises.getUserFullEmails.resolves([
+        ctx.entitledAffiliation,
+        ctx.unentitledAffiliation,
+      ])
+      const affiliations =
+        await ctx.InstitutionsGetter.promises.getCurrentEntitledAffiliations(
+          ctx.userId
+        )
+      expect(affiliations.map(a => a.institution.id)).to.deep.equal([456])
+    })
+
+    it('returns no affiliations when the user is not entitled to any', async function (ctx) {
+      ctx.UserGetter.promises.getUserFullEmails.resolves([
+        ctx.unentitledAffiliation,
+      ])
+      const affiliations =
+        await ctx.InstitutionsGetter.promises.getCurrentEntitledAffiliations(
+          ctx.userId
+        )
+      expect(affiliations).to.deep.equal([])
+    })
+
+    it('handles empty response', async function (ctx) {
+      ctx.UserGetter.promises.getUserFullEmails.resolves([])
+      const affiliations =
+        await ctx.InstitutionsGetter.promises.getCurrentEntitledAffiliations(
+          ctx.userId
+        )
+      expect(affiliations).to.deep.equal([])
+    })
+
+    it('handles errors', async function (ctx) {
+      ctx.UserGetter.promises.getUserFullEmails.rejects(new Error('oops'))
+      let e
+      try {
+        await ctx.InstitutionsGetter.promises.getCurrentEntitledAffiliations(
+          ctx.userId
+        )
+      } catch (error) {
+        e = error
+      }
+      expect(e.message).to.equal('oops')
+    })
   })
 
   describe('getCurrentInstitutionIds', function () {

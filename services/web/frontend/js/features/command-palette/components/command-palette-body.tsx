@@ -13,6 +13,9 @@ import classNames from 'classnames'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import useCommandPaletteResults from '../hooks/use-command-palette-results'
 import { debugConsole } from '@/utils/debugging'
+import SplitTestBadge from '@/shared/components/split-test-badge'
+import { useTranslation } from 'react-i18next'
+import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 
 type CommandPaletteBodyProps = {
   show: boolean
@@ -24,6 +27,18 @@ const CommandPaletteBody: FC<CommandPaletteBodyProps> = ({ show, onHide }) => {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const resultsRef = useRef<HTMLUListElement>(null)
   const results = useCommandPaletteResults(query)
+  const { t } = useTranslation()
+  const { sendEvent } = useEditorAnalytics()
+  const selectedResultRef = useRef(false)
+
+  useEffect(() => {
+    sendEvent('command-palette-opened')
+    return () => {
+      if (!selectedResultRef.current) {
+        sendEvent('command-palette-dismissed')
+      }
+    }
+  }, [sendEvent])
 
   useEffect(() => {
     setSelectedIndex(0)
@@ -37,6 +52,8 @@ const CommandPaletteBody: FC<CommandPaletteBodyProps> = ({ show, onHide }) => {
   }, [selectedIndex])
 
   const runResult = (result: CommandPaletteSearchResult) => {
+    selectedResultRef.current = true
+    sendEvent('command-palette-select', result.eventSegmentation)
     try {
       const res = result.onSelect(result)
       if (res instanceof Promise) {
@@ -88,18 +105,31 @@ const CommandPaletteBody: FC<CommandPaletteBodyProps> = ({ show, onHide }) => {
       animation={false}
       backdrop={false}
       clickOutsideDeactivates
+      themed
     >
       <OLModalBody>
-        <input
-          type="text"
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          onKeyDown={onKeyDown}
-          placeholder="Type a command..."
-          aria-label="Command palette search"
-          className="command-palette-input"
-        />
+        <div className="command-palette-input">
+          <input
+            type="text"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            onKeyDown={onKeyDown}
+            placeholder={t('type_a_command')}
+            aria-label={t('command_palette_search')}
+          />
+          <SplitTestBadge
+            displayOnVariants={['enabled']}
+            splitTestName="command-palette"
+          />
+        </div>
         <ul ref={resultsRef} className="command-palette-results">
+          {results.length === 0 && (
+            <li role="none" className="command-palette-result">
+              <div className="command-palette-result-title command-palette-no-matches">
+                {t('no_matches')}
+              </div>
+            </li>
+          )}
           {results.map((result, index) => (
             <li
               role="none"
@@ -110,17 +140,17 @@ const CommandPaletteBody: FC<CommandPaletteBodyProps> = ({ show, onHide }) => {
             >
               <button
                 role="menuitem"
-                onMouseEnter={() => setSelectedIndex(index)}
+                onMouseMove={() => setSelectedIndex(index)}
                 onClick={() => runResult(result)}
               >
                 <div className="command-palette-result-title">
                   {result.title}
+                  {result.description && (
+                    <span className="command-palette-result-description">
+                      {result.description}
+                    </span>
+                  )}
                 </div>
-                {result.description && (
-                  <div className="command-palette-result-description">
-                    {result.description}
-                  </div>
-                )}
               </button>
             </li>
           ))}

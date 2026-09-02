@@ -16,8 +16,13 @@ import {
   trialSubscription,
 } from '../../../../fixtures/subscriptions'
 import sinon from 'sinon'
-import { cleanUpContext } from '../../../../helpers/render-with-subscription-dash-context'
+import {
+  cleanUpContext,
+  renderWithSubscriptionDashContext,
+} from '../../../../helpers/render-with-subscription-dash-context'
 import { renderActiveSubscription } from '../../../../helpers/render-active-subscription'
+import { ActiveSubscription } from '../../../../../../../../frontend/js/features/subscription/components/dashboard/states/active/active'
+import { plans } from '../../../../fixtures/plans'
 import { cloneDeep } from 'lodash'
 import fetchMock from 'fetch-mock'
 import {
@@ -27,6 +32,10 @@ import {
 } from '@/features/subscription/data/subscription-url'
 import { location } from '@/shared/components/location'
 import { MetaTag } from '@/utils/meta'
+import {
+  formatPaymentDate,
+  formatPaymentDateTime,
+} from '@/features/subscription/util/payment-dates'
 
 describe('<ActiveSubscription />', function () {
   let sendMBSpy: sinon.SinonSpy
@@ -75,7 +84,7 @@ describe('<ActiveSubscription />', function () {
     within(screen.getByTestId('renews-on')).getByText((_, el) =>
       Boolean(
         el?.textContent?.includes(
-          `Renews on ${subscription.payment.nextPaymentDueDate}`
+          `Renews on ${formatPaymentDate(subscription.payment.periodEnd)}`
         )
       )
     )
@@ -128,6 +137,38 @@ describe('<ActiveSubscription />', function () {
           screen.getAllByRole('button', { name: 'Change to this plan' })
             .length > 0
         ).to.be.true
+    )
+  })
+
+  it('sends an event when the change plan button is clicked', function () {
+    renderActiveSubscription(monthlyActiveCollaborator)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Change plan' }))
+
+    expect(sendMBSpy).to.be.calledOnceWith(
+      'subscription-page-upgrade-button-click',
+      sinon.match({
+        plan_code: 'collaborator',
+        billing_cycle: 'monthly',
+        is_trial: false,
+        currency: 'USD',
+      })
+    )
+  })
+
+  it('sends the annual billing cycle when on an annual plan', function () {
+    renderActiveSubscription(annualActiveSubscriptionEuro)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Change plan' }))
+
+    expect(sendMBSpy).to.be.calledOnceWith(
+      'subscription-page-upgrade-button-click',
+      sinon.match({
+        plan_code: annualActiveSubscriptionEuro.planCode,
+        billing_cycle: 'annual',
+        is_trial: false,
+        currency: 'EUR',
+      })
     )
   })
 
@@ -210,7 +251,7 @@ describe('<ActiveSubscription />', function () {
     within(screen.getByTestId('trial-ending')).getByText((_, el) =>
       Boolean(
         el?.textContent?.includes(
-          `You’re on a free trial which ends on ${trialSubscription.payment.trialEndsAtFormatted}`
+          `You’re on a free trial which ends on ${formatPaymentDateTime(trialSubscription.payment.trialEndsAt)}`
         )
       )
     )
@@ -288,7 +329,7 @@ describe('<ActiveSubscription />', function () {
         { exact: false }
       )
       const dates = screen.getAllByText(
-        annualActiveSubscription.payment.nextPaymentDueAt,
+        formatPaymentDate(annualActiveSubscription.payment.periodEnd)!,
         {
           exact: false,
         }
@@ -307,7 +348,10 @@ describe('<ActiveSubscription />', function () {
         { exact: false }
       )
       const dates = screen.getAllByText(
-        trialSubscription.payment.trialEndsAtFormatted!
+        formatPaymentDate(trialSubscription.payment.trialEndsAt)!,
+        {
+          exact: false,
+        }
       )
       expect(dates.length).to.equal(3)
       const button = screen.getByRole('button', {
@@ -322,11 +366,33 @@ describe('<ActiveSubscription />', function () {
       showConfirmCancelUI()
 
       expect(sendMBSpy).to.be.calledOnceWith(
-        'subscription-page-cancel-button-click'
+        'subscription-page-cancel-button-click',
+        sinon.match({
+          plan_code: annualActiveSubscription.planCode,
+          billing_cycle: 'annual',
+          is_trial: false,
+          currency: 'USD',
+        })
       )
 
       screen.getByText('We’d love you to stay')
       screen.getByRole('button', { name: 'Cancel my subscription' })
+    })
+
+    it('sends the cancel event with trial segmentation when in a trial', function () {
+      renderActiveSubscription(trialCollaboratorSubscription)
+
+      showConfirmCancelUI()
+
+      expect(sendMBSpy).to.be.calledOnceWith(
+        'subscription-page-cancel-button-click',
+        sinon.match({
+          plan_code: trialCollaboratorSubscription.planCode,
+          billing_cycle: 'monthly',
+          is_trial: true,
+          currency: trialCollaboratorSubscription.payment.currency,
+        })
+      )
     })
 
     it('cancels subscription and redirects page', async function () {
@@ -385,6 +451,86 @@ describe('<ActiveSubscription />', function () {
 
       const hiddenText = screen.getByText('Cancel my subscription')
       expect(hiddenText.getAttribute('aria-hidden')).to.equal('true')
+    })
+
+    describe('cancel-loss-messaging split test', function () {
+      const enabledVariant: MetaTag = {
+        name: 'ol-splitTestVariants',
+        value: { 'cancel-loss-messaging': 'enabled' },
+      }
+
+      it('shows the loss messaging for a Standard subscriber when enabled', function () {
+        renderActiveSubscription(annualActiveSubscription, [enabledVariant])
+        showConfirmCancelUI()
+
+        screen.getByRole('heading', {
+          name: 'Are you sure you want to cancel?',
+        })
+        screen.getByText(
+          `Cancelling will end your subscription on ${formatPaymentDate(annualActiveSubscription.payment.periodEnd)}.`
+        )
+        screen.getByRole('heading', {
+          name: 'You’ll be moved to the Free plan',
+        })
+        screen.getByText('AI Assistant and higher AI allowance')
+        screen.getByText('10 collaborators per project')
+        screen.getByRole('button', { name: 'Keep subscription' })
+        screen.getByRole('button', { name: 'Cancel subscription' })
+      })
+
+      it('shows the Pro losses for a Professional subscriber', function () {
+        const proSubscription = cloneDeep(annualActiveSubscription)
+        proSubscription.planCode = 'professional-annual'
+        renderActiveSubscription(proSubscription, [enabledVariant])
+        showConfirmCancelUI()
+
+        screen.getByText('AI Assistant and max AI allowance')
+        screen.getByText('Unlimited collaborators per project')
+      })
+
+      it('cancels the subscription and redirects', async function () {
+        fetchMock.post(cancelSubscriptionUrl, { status: 200 })
+        renderActiveSubscription(annualActiveSubscription, [enabledVariant])
+        showConfirmCancelUI()
+        fireEvent.click(
+          screen.getByRole('button', { name: 'Cancel subscription' })
+        )
+        const assignStub = this.locationWrapperStub.assign
+        await waitFor(() => {
+          expect(assignStub).to.have.been.called
+        })
+        sinon.assert.calledWithMatch(assignStub, '/user/subscription/canceled')
+      })
+
+      it('returns to the subscription dashboard on "Keep subscription"', function () {
+        renderActiveSubscription(annualActiveSubscription, [enabledVariant])
+        showConfirmCancelUI()
+        fireEvent.click(
+          screen.getByRole('button', { name: 'Keep subscription' })
+        )
+        expect(screen.queryByText('Are you sure you want to cancel?')).to.be
+          .null
+      })
+
+      it('keeps the default confirmation for a subscriber in trial', function () {
+        renderActiveSubscription(trialCollaboratorSubscription, [
+          enabledVariant,
+        ])
+        showConfirmCancelUI()
+
+        screen.getByText('We’d love you to stay')
+        expect(screen.queryByText('Are you sure you want to cancel?')).to.be
+          .null
+      })
+
+      it('keeps the default confirmation when the split test is not enabled', function () {
+        renderActiveSubscription(annualActiveSubscription)
+        showConfirmCancelUI()
+
+        screen.getByText('We’d love you to stay')
+        expect(screen.queryByText('Are you sure you want to cancel?')).to.be
+          .null
+      })
     })
 
     describe('extend trial', function () {
@@ -547,6 +693,52 @@ describe('<ActiveSubscription />', function () {
             name: downgradeButtonText,
           })
         ).to.be.null
+      })
+
+      it('falls back to the cancellation confirmation when the downgrade plan is unavailable', async function () {
+        renderWithSubscriptionDashContext(
+          <ActiveSubscription subscription={monthlyActiveCollaborator} />,
+          {
+            metaTags: [
+              {
+                name: 'ol-plans',
+                value: plans.filter(plan => plan.planCode !== 'paid-personal'),
+              },
+              { name: 'ol-subscription', value: monthlyActiveCollaborator },
+              { name: 'ol-recommendedCurrency', value: 'USD' },
+            ],
+          }
+        )
+        showConfirmCancelUI()
+        await screen.findByRole('button', { name: 'Cancel my subscription' })
+        screen.getByRole('button', { name: 'I want to stay' })
+        expect(
+          screen.queryByRole('button', {
+            name: downgradeButtonText,
+          })
+        ).to.be.null
+      })
+
+      it('shows a loading state while the plans data is being queried', function () {
+        renderWithSubscriptionDashContext(
+          <ActiveSubscription subscription={monthlyActiveCollaborator} />,
+          {
+            metaTags: [
+              { name: 'ol-subscription', value: monthlyActiveCollaborator },
+              { name: 'ol-recommendedCurrency', value: 'USD' },
+            ],
+            queryingRecurly: true,
+          }
+        )
+        showConfirmCancelUI()
+        screen.getByRole('status')
+        expect(
+          screen.queryByRole('button', {
+            name: downgradeButtonText,
+          })
+        ).to.be.null
+        expect(screen.queryByRole('button', { name: 'Cancel my subscription' }))
+          .to.be.null
       })
 
       it('does not show option to extend trial when on a collaborator trial', function () {

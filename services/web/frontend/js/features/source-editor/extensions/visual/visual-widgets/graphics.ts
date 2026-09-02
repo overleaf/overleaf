@@ -3,8 +3,8 @@ import { placeSelectionInsideBlock } from '../selection'
 import { isEqual } from 'lodash'
 import { FigureData } from '../../figure-modal'
 import { debugConsole } from '@/utils/debugging'
-import { PreviewPath } from '../../../../../../../types/preview-path'
 import type { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api'
+import { previewByPathFacet } from '../../file-preview'
 import { PdfDestroyLock } from '../utils/pdf-destroy-lock'
 
 // Module level to synchronize across all GraphicsWidgets
@@ -25,7 +25,6 @@ export class GraphicsWidget extends WidgetType {
 
   constructor(
     public filePath: string,
-    public previewByPath: (path: string) => PreviewPath | null,
     public centered: boolean,
     public figureData: FigureData | null
   ) {
@@ -107,7 +106,7 @@ export class GraphicsWidget extends WidgetType {
   renderGraphic(element: HTMLElement, view: EditorView) {
     element.textContent = '' // ensure the element is empty
 
-    const preview = this.previewByPath(this.filePath)
+    const preview = view.state.facet(previewByPathFacet)(this.filePath)
     element.dataset.filepath = this.filePath
     element.dataset.width = this.figureData?.width?.toString()
 

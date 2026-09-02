@@ -5,6 +5,8 @@ services:
       args:
         - USER_UID
         - USER_GID
+    # Keep Chrome's shared memory in RAM, so cypress.config.ts can drop --disable-dev-shm-usage and its write-then-delete churn.
+    shm_size: 1gb
     volumes:
       - ../../:/overleaf
       - /tmp/.X11-unix:/tmp/.X11-unix
@@ -15,4 +17,8 @@ services:
     environment:
       VERBOSE_LOGGING:
       DISPLAY: ${DISPLAY:-:0}
-#      DEBUG: cypress.*
+      # Must clear ws's 30s closing-handshake timeout during teardown, or a green run exits 1 (#36734).
+      CYPRESS_INTERNAL_TEARDOWN_TIMEOUT: ${CYPRESS_INTERNAL_TEARDOWN_TIMEOUT:-45000}
+      # Cypress's CLI filters teardown errors out of stderr; either of these shows them (#36734).
+      DEBUG:
+      ELECTRON_ENABLE_LOGGING:

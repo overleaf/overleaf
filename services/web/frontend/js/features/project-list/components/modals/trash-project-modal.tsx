@@ -43,9 +43,9 @@ function TrashProjectModal({
       <p>
         {t('trashing_projects_wont_affect_collaborators')}{' '}
         <a
-          href="https://www.overleaf.com/learn/how-to/How_do_I_remove_or_delete_a_project%3F"
+          href="https://docs.overleaf.com/managing-projects-and-files/archiving-deleting-and-leaving-projects/deleting-a-project"
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
         >
           {t('find_out_more_nt')}
         </a>

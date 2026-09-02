@@ -1,4 +1,4 @@
-import { expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { iterablePaths } from '../../../../app/src/Features/Project/IterablePath.mjs'
 
 describe('iterablePaths', function () {

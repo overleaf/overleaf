@@ -9,12 +9,14 @@ import SplitTestCache from './SplitTestCache.mjs'
 import { SplitTest } from '../../models/SplitTest.mjs'
 import UserAnalyticsDataCache from '../Analytics/UserAnalyticsDataCache.mjs'
 import Features from '../../infrastructure/Features.mjs'
+import Modules from '../../infrastructure/Modules.mjs'
 import SplitTestUtils from './SplitTestUtils.mjs'
 import Settings from '@overleaf/settings'
 import SessionManager from '../Authentication/SessionManager.mjs'
 import logger from '@overleaf/logger'
 import SplitTestSessionHandler from './SplitTestSessionHandler.mjs'
 import SplitTestUserGetter from './SplitTestUserGetter.mjs'
+import { getRawReqInput } from '../../infrastructure/Validation.mjs'
 
 /**
  * @import { Assignment } from "./types"
@@ -69,7 +71,10 @@ async function getAssignment(
       await _loadSplitTestInfoInLocals(res.locals, splitTestName, req.session)
 
       if (!ignoreOverrides) {
-        let query = req.query || {}
+        // query keys are caller-supplied and dynamic (one per split test
+        // name), so this is read raw rather than by name (case 1: verbatim
+        // forwarding)
+        let query = getRawReqInput(req).query || {}
         if (includeReferer && req.headers.referer) {
           // Pick up the query of the top-level page, i.e. what's in the browsers address bar, from ajax requests.
           // E.g. /project/:id?split-test=foo -> ajax /project/:id/compile should see split-test=foo.
@@ -200,7 +205,10 @@ async function hasUserBeenAssignedToVariant(
   ignoreVersion = false
 ) {
   try {
-    const { session = {}, query = {} } = req
+    const { session = {} } = req
+    // same dynamic caller-supplied key as getAssignment() above (case 1:
+    // verbatim forwarding)
+    const { query } = getRawReqInput(req)
 
     const splitTest = await _getSplitTest(splitTestName)
     const currentVersion = SplitTestUtils.getCurrentVersion(splitTest)
@@ -916,7 +924,10 @@ async function _loadSplitTestInfoInLocals(locals, splitTestName, session) {
       badgeInfo: splitTest.badgeInfo?.[phase],
     }
 
-    if (phase === 'labs') {
+    if (
+      phase === 'labs' &&
+      (await _userMeetsLabsRequirements(splitTest, session))
+    ) {
       const variant = currentVersion.variants?.[0]
       info.labsDetails = {
         title: splitTest.labsTitle || '',
@@ -949,6 +960,38 @@ async function _loadSplitTestInfoInLocals(locals, splitTestName, session) {
     LocalsHelper.setSplitTestInfo(locals, splitTestName, {
       missing: true,
     })
+  }
+}
+
+/**
+ * Whether the user meets the requirements a labs experiment declares, e.g.
+ * having premium compiles available.
+ *
+ * The check lives in the labs module, which owns both the list of requirements
+ * and the user lookup they need, so this is a no-op when that module is not
+ * loaded. Experiments the user does not qualify for are left out of the labs
+ * details, and so never reach the frontend.
+ *
+ * @param {object} splitTest a labs-phase split test
+ * @param {object} session the request session
+ * @returns {Promise<boolean>}
+ */
+async function _userMeetsLabsRequirements(splitTest, session) {
+  try {
+    const results = await Modules.promises.hooks.fire(
+      'userMeetsLabsExperimentRequirements',
+      session,
+      splitTest
+    )
+    return results.every(result => result !== false)
+  } catch (error) {
+    // leave the experiment out rather than advertise one the user may not be
+    // able to opt into. The opt-in endpoint enforces the same requirements.
+    logger.warn(
+      { err: error, splitTestName: splitTest.name },
+      'failed to check labs experiment requirements'
+    )
+    return false
   }
 }
 

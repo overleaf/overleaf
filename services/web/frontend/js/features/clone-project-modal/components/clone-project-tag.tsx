@@ -1,14 +1,16 @@
 import { FC } from 'react'
 import { Tag as TagType } from '../../../../../app/src/Features/Tags/types'
 import { getTagColor } from '@/features/project-list/util/tag'
-import Tag from '@/shared/components/tag'
+import OLTag from '@/shared/components/ol/ol-tag'
+import classnames from 'classnames'
 
 export const CloneProjectTag: FC<{
   tag: TagType
   removeTag: (tag: TagType) => void
-}> = ({ tag, removeTag }) => {
+  themed?: boolean
+}> = ({ tag, removeTag, themed = false }) => {
   return (
-    <Tag
+    <OLTag
       prepend={
         <i
           className="badge-tag-circle"
@@ -18,9 +20,9 @@ export const CloneProjectTag: FC<{
       closeBtnProps={{
         onClick: () => removeTag(tag),
       }}
-      className="ms-2 mb-2"
+      className={classnames('ms-2 mb-2', { 'badge-themed': themed })}
     >
       {tag.name}
-    </Tag>
+    </OLTag>
   )
 }

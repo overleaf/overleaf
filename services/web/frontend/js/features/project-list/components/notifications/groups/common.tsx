@@ -152,7 +152,7 @@ function CommonNotification({ notification }: CommonNotificationProps) {
                   <a
                     href={
                       notification.messageOpts.portalPath ||
-                      'https://www.overleaf.com/learn/how-to/Institutional_Login'
+                      'https://docs.overleaf.com/accounts-and-security/email-address-and-login-options/logging-in-with-institutional-sso'
                     }
                   >
                     {t('find_out_more_nt')}
@@ -234,8 +234,9 @@ function CommonNotification({ notification }: CommonNotificationProps) {
                   components={[<b />]} // eslint-disable-line react/jsx-key
                 />{' '}
                 <a
-                  href="/learn/how-to/Dropbox_Synchronization#Troubleshooting"
+                  href="https://docs.overleaf.com/integrations-and-add-ons/dropbox"
                   target="_blank"
+                  rel="noopener noreferrer"
                 >
                   {t('learn_more')}
                 </a>
@@ -265,8 +266,9 @@ function CommonNotification({ notification }: CommonNotificationProps) {
                 t('confirm_affiliation_to_relink_dropbox')
               )}{' '}
               <a
-                href="/learn/how-to/Institutional_Email_Reconfirmation"
+                href="https://docs.overleaf.com/accounts-and-security/email-address-and-login-options/logging-in-with-institutional-sso/institutional-email-reconfirmation"
                 target="_blank"
+                rel="noopener noreferrer"
               >
                 {t('learn_more')}
               </a>

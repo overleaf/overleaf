@@ -2,8 +2,6 @@ import { StripeCurrencyCode } from './currency'
 
 export type Features = {
   aiUsageQuota: 'free' | 'basic' | 'standard' | 'unlimited'
-  // todo: quota clean-up: remove aiErrorAssistant once migration finishes
-  aiErrorAssistant?: boolean
   collaborators: number
   compileGroup: string
   compileTimeout: number
@@ -11,6 +9,7 @@ export type Features = {
   gitBridge: boolean
   github: boolean
   mendeley: boolean
+  offlineMode: boolean
   references: boolean
   referencesSearch: boolean
   symbolPalette: boolean
@@ -55,6 +54,12 @@ export type PendingPaymentProviderPlan = {
 export type Plan = {
   annual?: boolean
   displayPrice?: string
+  // list price excluding tax, in the subscription's currency, resolved from the
+  // user's assigned price version. Only set for the change plan modal.
+  listPrice?: number
+  // per-month equivalent of the annual list price, rounded per the price
+  // version's rounding rules. Only set for annual plans in the change plan modal.
+  monthlyEquivalentListPrice?: number
   featureDescription?: Record<string, unknown>[]
   addOns?: AddOn[]
   features?: Features
@@ -111,8 +116,10 @@ export type StripeBaseLookupKey =
   | 'group_standard_educational'
   | 'group_professional_educational'
 
-// Keep in sync with LATEST_STRIPE_LOOKUP_KEY_VERSION in PlansLocator.mjs
-export type StripeLookupKeyVersion = 'feb2026'
+// A version of prices we start subscriptions at: PlansLocator's
+// DEFAULT_STRIPE_LOOKUP_KEY_VERSION, or any additional versions
+// defined in settings
+export type StripeLookupKeyVersion = 'feb2026' | (string & {})
 
 export type StripeLookupKey =
   `${StripeBaseLookupKey}_${StripeLookupKeyVersion}_${StripeCurrencyCode}`

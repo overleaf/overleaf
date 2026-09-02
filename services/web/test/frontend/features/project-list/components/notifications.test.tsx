@@ -239,7 +239,7 @@ describe('<UserNotifications />', function () {
 
       const findOutMore = screen.getByRole('link', { name: /find out more/i })
       expect(findOutMore.getAttribute('href')).to.equal(
-        'https://www.overleaf.com/learn/how-to/Institutional_Login'
+        'https://docs.overleaf.com/accounts-and-security/email-address-and-login-options/logging-in-with-institutional-sso'
       )
       const linkAccount = screen.getByRole('link', { name: /link account/i })
       expect(linkAccount.getAttribute('href')).to.equal(
@@ -334,7 +334,7 @@ describe('<UserNotifications />', function () {
 
       const learnMore = screen.getByRole('link', { name: /learn more/i })
       expect(learnMore.getAttribute('href')).to.equal(
-        '/learn/how-to/Dropbox_Synchronization#Troubleshooting'
+        'https://docs.overleaf.com/integrations-and-add-ons/dropbox'
       )
       const closeBtn = screen.getByRole('button', { name: /close/i })
       fireEvent.click(closeBtn)
@@ -368,7 +368,7 @@ describe('<UserNotifications />', function () {
 
       const learnMore = screen.getByRole('link', { name: /learn more/i })
       expect(learnMore.getAttribute('href')).to.equal(
-        '/learn/how-to/Institutional_Email_Reconfirmation'
+        'https://docs.overleaf.com/accounts-and-security/email-address-and-login-options/logging-in-with-institutional-sso/institutional-email-reconfirmation'
       )
       const closeBtn = screen.getByRole('button', { name: /close/i })
       fireEvent.click(closeBtn)
@@ -489,7 +489,7 @@ describe('<UserNotifications />', function () {
 
       const learnMore = screen.getByRole('link', { name: /learn more/i })
       expect(learnMore.getAttribute('href')).to.equal(
-        '/learn/how-to/Institutional_Login'
+        'https://docs.overleaf.com/accounts-and-security/email-address-and-login-options/logging-in-with-institutional-sso'
       )
 
       const action = screen.getByRole('link', { name: /link account/i })
@@ -594,7 +594,7 @@ describe('<UserNotifications />', function () {
 
       const action = screen.getByRole('link', { name: /find out more/i })
       expect(action.getAttribute('href')).to.equal(
-        '/learn/how-to/Institutional_Login'
+        'https://docs.overleaf.com/accounts-and-security/email-address-and-login-options/logging-in-with-institutional-sso'
       )
 
       const closeBtn = screen.getByRole('button', { name: /close/i })
@@ -899,7 +899,7 @@ describe('<UserNotifications />', function () {
       )
       const learnMore = screen.getByRole('link', { name: /learn more/i })
       expect(learnMore.getAttribute('href')).to.equal(
-        '/learn/how-to/Institutional_Email_Reconfirmation'
+        'https://docs.overleaf.com/accounts-and-security/email-address-and-login-options/logging-in-with-institutional-sso/institutional-email-reconfirmation'
       )
 
       const sendReconfirmationMock = fetchMock.post(

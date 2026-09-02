@@ -41,6 +41,13 @@ const convertToPng = function (pdfPath, pngPath) {
   })
 }
 
+// ImageMagick reports the mean absolute error as "<absolute> (<normalised>)".
+// Identical images do not always yield an exact zero: aarch64 builds leave
+// floating point residue behind, so comparing an image against a byte-identical
+// copy of itself measures around 2e-20. A single differing pixel measures around
+// 7e-07, so anything below this threshold is the same image.
+const MAX_NORMALISED_MAE = 1e-12
+
 const compare = function (originalPath, generatedPath) {
   return new Promise((resolve, reject) => {
     const diffFile = `${fixturePath(generatedPath)}-diff.png`
@@ -52,7 +59,12 @@ const compare = function (originalPath, generatedPath) {
     let stderr = ''
     proc.stderr.on('data', chunk => (stderr += chunk))
     proc.on('exit', () => {
-      if (stderr.trim() === '0 (0)') {
+      // take the parenthesised value: "1.55242e-15 (2.36884e-20)" -> "2.36884e-20".
+      // a failed comparison (mismatched dimensions, missing file) does not match
+      // the metric format, leaving NaN, which fails the threshold check below
+      const match = stderr.trim().match(/\((?<normalised>[^)]+)\)$/)
+      const normalisedMae = match ? parseFloat(match.groups.normalised) : NaN
+      if (normalisedMae <= MAX_NORMALISED_MAE) {
         // remove output diff if test matches expected image
         fs.unlink(diffFile, err => {
           if (err) {

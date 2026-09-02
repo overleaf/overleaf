@@ -9,6 +9,7 @@ import {
 import EmailsSection from '../../../../../../frontend/js/features/settings/components/emails-section'
 import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
+import { cloneDeep } from 'lodash'
 import {
   confirmedUserData,
   fakeUsersData,
@@ -111,6 +112,46 @@ describe('<EmailsSection />', function () {
     await screen.findByRole('button', { name: 'Send confirmation code' })
   })
 
+  describe('SAML emails', function () {
+    beforeEach(function () {
+      Object.assign(getMeta('ol-ExposedSettings'), {
+        hasSamlFeature: true,
+      })
+      fetchMock.removeRoutes().clearHistory()
+    })
+
+    it('hides resend link when an unconfirmed affiliated email must be confirmed via Commons SAML', async function () {
+      const commonsSamlEmail = cloneDeep(professionalUserData)
+      delete commonsSamlEmail.confirmedAt
+      commonsSamlEmail.affiliation.institution.ssoEnabled = true
+
+      fetchMock.get('/user/emails?ensureAffiliation=true', [commonsSamlEmail])
+      renderEmailsSection()
+
+      await screen.findByText(/unconfirmed/i)
+      expect(screen.queryByRole('button', { name: 'Send confirmation code' }))
+        .to.be.null
+    })
+
+    it('hides resend link when an unconfirmed affiliated email must be confirmed via managed group SAML', async function () {
+      const managedGroupEmail = cloneDeep(professionalUserData)
+      delete managedGroupEmail.confirmedAt
+      managedGroupEmail.affiliation.domainCapturedByGroup = true
+      managedGroupEmail.affiliation.group = {
+        _id: 'group123',
+        domainCaptureEnabled: true,
+        managedUsersEnabled: true,
+      }
+
+      fetchMock.get('/user/emails?ensureAffiliation=true', [managedGroupEmail])
+      renderEmailsSection()
+
+      await screen.findByText(/unconfirmed/i)
+      expect(screen.queryByRole('button', { name: 'Send confirmation code' }))
+        .to.be.null
+    })
+  })
+
   it('renders commons label', async function () {
     fetchMock.get('/user/emails?ensureAffiliation=true', [professionalUserData])
     renderEmailsSection()
@@ -118,7 +159,27 @@ describe('<EmailsSection />', function () {
     const node = await screen.findByText(professionalUserData.email, {
       exact: false,
     })
-    expect(within(node).getByText(/commons/i)).to.exist
+    expect(within(node).getByText('Commons')).to.exist
+  })
+
+  it('renders commons AI label when institution has writefull commons', async function () {
+    const commonsAIUserData = {
+      ...professionalUserData,
+      affiliation: {
+        ...professionalUserData.affiliation,
+        institution: {
+          ...professionalUserData.affiliation.institution,
+          writefullCommonsAccount: true,
+        },
+      },
+    }
+    fetchMock.get('/user/emails?ensureAffiliation=true', [commonsAIUserData])
+    renderEmailsSection()
+
+    const node = await screen.findByText(commonsAIUserData.email, {
+      exact: false,
+    })
+    expect(within(node).getByText('Commons AI')).to.exist
   })
 
   it('shows loader when resending email', async function () {

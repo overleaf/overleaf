@@ -1,0 +1,25 @@
+diff --git a/lib/strategy.js b/lib/strategy.js
+index e54e92a86c8e3d40338ed8c6e57e8729393d85a3..cad017ef2027ad676782515a9803835138efa6b3 100644
+--- a/lib/strategy.js
++++ b/lib/strategy.js
+@@ -66,10 +66,18 @@ util.inherits(Strategy, passport.Strategy);
+  * @param {Object} req
+  * @api protected
+  */
++var LOCKDOWN_INSTALLED = Symbol.for('overleaf.lockdown.installed');
++var LOCKDOWN_RAW_BODY = Symbol.for('overleaf.lockdown.rawBody');
++var LOCKDOWN_RAW_QUERY = Symbol.for('overleaf.lockdown.rawQuery');
++
+ Strategy.prototype.authenticate = function(req, options) {
+   options = options || {};
+-  var username = lookup(req.body, this._usernameField) || lookup(req.query, this._usernameField);
+-  var password = lookup(req.body, this._passwordField) || lookup(req.query, this._passwordField);
++  // with the Overleaf request-input lockdown installed, read the raw
++  // symbol-keyed fields; the public req.body/req.query accessors warn/throw
++  var body = req[LOCKDOWN_INSTALLED] ? req[LOCKDOWN_RAW_BODY] : req.body;
++  var query = req[LOCKDOWN_INSTALLED] ? req[LOCKDOWN_RAW_QUERY] : req.query;
++  var username = lookup(body, this._usernameField) || lookup(query, this._usernameField);
++  var password = lookup(body, this._passwordField) || lookup(query, this._passwordField);
+   
+   if (!username || !password) {
+     return this.fail({ message: options.badRequestMessage || 'Missing credentials' }, 400);

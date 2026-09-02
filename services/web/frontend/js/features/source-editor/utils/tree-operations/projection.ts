@@ -77,7 +77,7 @@ export type EnterNodeFn<T> = (
   node: SyntaxNodeRef,
   items: T[],
   nodeIntersectsChange: NodeIntersectsChangeFn
-) => any
+) => boolean | void
 
 /**
  * Calculates an updated projection of an editor state. Passing a previous ProjectionResult

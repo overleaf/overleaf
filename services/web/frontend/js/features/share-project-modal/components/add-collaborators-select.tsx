@@ -8,7 +8,8 @@ import { PermissionsLevel } from '@/features/ide-react/types/permissions'
 import { useProjectContext } from '@/shared/context/project-context'
 import {
   resendInvite,
-  sendInvite,
+  sendInviteParams,
+  useSendInvite,
 } from '@/features/share-project-modal/utils/api'
 import { ContactItem } from '@/features/share-project-modal/components/select-collaborators'
 import { useShareProjectContext } from '@/features/share-project-modal/components/share-project-modal'
@@ -47,6 +48,7 @@ function AddCollaboratorsSelect({
   const { setInFlight, setError } = useShareProjectContext()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { projectId, project, updateProject } = useProjectContext()
+  const sendInviteHook = useSendInvite()
   const { members, invites } = project || {}
 
   const privilegeOptions = useMemo(() => {
@@ -130,7 +132,9 @@ function AddCollaboratorsSelect({
         if (invite) {
           data = await resendInvite(projectId, invite)
         } else {
-          data = await sendInvite(projectId, email, privileges)
+          data = await sendInviteHook.run(
+            ...sendInviteParams(projectId, email, privileges)
+          )
         }
 
         const role = data?.invite?.privileges
@@ -245,6 +249,7 @@ function AddCollaboratorsSelect({
     projectId,
     reset,
     selectedItems,
+    sendInviteHook,
     setError,
     setInFlight,
     updateProject,
@@ -299,6 +304,7 @@ function AddCollaboratorsSelect({
       >
         {t('invite')}
       </ClickableElementEnhancer>
+      {sendInviteHook.renderRecaptcha()}
     </>
   )
 }

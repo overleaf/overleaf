@@ -245,6 +245,30 @@ const commandTooltipTheme = EditorView.baseTheme({
   '.ol-cm-command-tooltip-form': {
     padding: '0 8px',
   },
+  '&dark .ol-cm-command-tooltip-form .form-label': {
+    color: 'var(--content-secondary-dark)',
+  },
+  // Keep in sync with services/web/frontend/stylesheets/components/form.scss
+  // The overrides are needed because we theme the controls based on editor
+  // theme, not overall theme.
+  '&light .ol-cm-command-tooltip-form .form-control, &light .ol-cm-command-tooltip-form .form-control-wrapper':
+    {
+      '--input-field-color': 'var(--content-primary)',
+      '--input-field-bg': 'var(--bg-light-primary)',
+      '--input-field-border-color': 'var(--border-primary)',
+      '--input-placeholder-content': 'var(--content-placeholder)',
+      '--input-border-hover': 'var(--border-hover)',
+      '--input-field-content-disabled': 'var(--content-disabled)',
+    },
+  '&dark .ol-cm-command-tooltip-form .form-control, &dark .ol-cm-command-tooltip-form .form-control-wrapper':
+    {
+      '--input-field-color': 'var(--content-primary-dark)',
+      '--input-field-bg': 'var(--bg-dark-primary)',
+      '--input-field-border-color': 'var(--border-primary-dark)',
+      '--input-placeholder-content': 'var(--content-placeholder-dark)',
+      '--input-border-hover': 'var(--border-hover-dark)',
+      '--input-field-content-disabled': 'var(--content-disabled-dark)',
+    },
 })
 
 export const resolveCommandNode = (state: EditorState) => {

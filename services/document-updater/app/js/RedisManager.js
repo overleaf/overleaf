@@ -16,6 +16,7 @@ const rclient = RedisWrapper.createClient(Settings.redis.documentupdater)
 // hold us up, and need to bail out quickly if there is a problem.
 const MAX_REDIS_REQUEST_LENGTH = 5000 // 5 seconds
 const PROJECT_BLOCK_TTL_SECS = 30
+const ONE_DAY_SECS = 24 * 60 * 60
 
 // Make times easy to read
 const minutes = 60 // seconds for Redis expire
@@ -575,6 +576,8 @@ const RedisManager = {
     await rclient.set(
       keys.projectNotificationTimestamp({ project_id: projectId }),
       timestamp,
+      'EX',
+      7 * ONE_DAY_SECS,
       'NX'
     )
   },

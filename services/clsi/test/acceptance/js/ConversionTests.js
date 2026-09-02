@@ -86,6 +86,59 @@ describe('Conversions', function () {
     })
   })
 
+  describe('markdown conversion', function () {
+    before(async function () {
+      await ClsiApp.ensureRunning()
+    })
+
+    it('should convert file to LaTeX', async function () {
+      const sourcePath = Path.join(
+        import.meta.dirname,
+        '../fixtures/conversion-source.md'
+      )
+      const outputStream = fs.createWriteStream(
+        '/tmp/clsi_acceptance_tests_' + crypto.randomUUID() + '.zip'
+      )
+      const { stream } = await Client.convertDocument(sourcePath, 'markdown')
+      await pipeline(stream, outputStream)
+
+      await new Promise((resolve, reject) => {
+        yauzl.open(outputStream.path, { lazyEntries: true }, (err, zipfile) => {
+          if (err) {
+            return reject(err)
+          }
+          zipfile.on('error', reject)
+          zipfile.on('end', resolve)
+          zipfile.readEntry()
+          zipfile.on('entry', entry => {
+            if (entry.fileName === 'main.tex') {
+              zipfile.openReadStream(entry, (err, readStream) => {
+                if (err) {
+                  return reject(err)
+                }
+                let data = ''
+                readStream.on('data', chunk => {
+                  data += chunk.toString()
+                })
+                readStream.on('end', () => {
+                  try {
+                    expect(data).to.include('\\begin{document}')
+                    expect(data).to.include('Demo document')
+                    zipfile.readEntry()
+                  } catch (err) {
+                    reject(err)
+                  }
+                })
+              })
+            } else {
+              reject(new Error('Unexpected file in zip: ' + entry.fileName))
+            }
+          })
+        })
+      })
+    })
+  })
+
   describe('project-to-document conversion (responseFormat=json)', function () {
     before(async function () {
       await ClsiApp.ensureRunning()

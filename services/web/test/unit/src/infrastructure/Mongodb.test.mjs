@@ -1,8 +1,25 @@
 import mongodb from 'mongodb-legacy'
-import { expect } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 
 const { ObjectId } = mongodb
+
+const MODULE_PATH = '../../../../app/src/infrastructure/mongodb.mjs'
+const MAIN_URL = 'mongodb://main'
+const AUX_URL = 'mongodb://aux'
+
+function makeFakeCollection() {
+  return {
+    find: sinon.stub(),
+    findOne: sinon.stub(),
+    aggregate: sinon.stub(),
+    insertMany: sinon.stub().resolves({ ok: true }),
+    bulkWrite: sinon.stub().resolves({ ok: true }),
+    updateOne: sinon.stub().resolves({ ok: true }),
+    findOneAndUpdate: sinon.stub().resolves({ ok: true }),
+    findOneAndDelete: sinon.stub().resolves({ ok: true }),
+  }
+}
 
 describe('Mongo ObjectId comparison', function () {
   const ObjectId1 = new ObjectId('111111111111111111111111')
@@ -149,6 +166,120 @@ describe('Mongo ObjectId comparison', function () {
           sinon.assert.match(repr1, ObjectId1)
         }).to.throw()
       })
+    })
+  })
+})
+
+describe('auxiliary cluster support', function () {
+  let collectionsByUrl, clients
+
+  beforeEach(function () {
+    collectionsByUrl = {
+      [MAIN_URL]: new Map(),
+      [AUX_URL]: new Map(),
+    }
+    clients = []
+
+    class FakeMongoClient {
+      constructor(url, options) {
+        this.url = url
+        this.options = options
+        this.connect = sinon.stub().resolves(this)
+        this.close = sinon.stub().resolves()
+        clients.push(this)
+      }
+
+      on() {}
+
+      db() {
+        const store = collectionsByUrl[this.url]
+        return {
+          collection(name) {
+            if (!store.has(name)) {
+              store.set(name, makeFakeCollection())
+            }
+            return store.get(name)
+          },
+        }
+      }
+    }
+
+    vi.doMock('mongodb-legacy', () => ({
+      default: { ...mongodb, MongoClient: FakeMongoClient },
+    }))
+
+    vi.doMock('../../../../app/src/infrastructure/Mongoose.mjs', () => ({
+      default: { mongo: { ObjectId } },
+    }))
+  })
+
+  async function loadModule(auxUrl) {
+    vi.doMock('@overleaf/settings', () => ({
+      default: {
+        mongo: {
+          url: MAIN_URL,
+          auxUrl,
+          options: {},
+          hasSecondaries: false,
+        },
+      },
+    }))
+    return import(MODULE_PATH)
+  }
+
+  describe('when no auxiliary cluster is configured', function () {
+    it('only creates a client for the main cluster', async function () {
+      await loadModule(undefined)
+      expect(clients).to.have.lengthOf(1)
+      expect(clients[0].url).to.equal(MAIN_URL)
+    })
+
+    it('exposes the plain main-cluster collection, unwrapped', async function () {
+      const { db } = await loadModule(undefined)
+      const mainCollection = collectionsByUrl[MAIN_URL].get('libraryReferences')
+      expect(db.libraryReferences).to.equal(mainCollection)
+    })
+
+    it('waits for the main cluster connection only', async function () {
+      const { waitForDb } = await loadModule(undefined)
+      await expect(waitForDb()).to.eventually.be.fulfilled
+      expect(clients[0].connect).to.have.been.called
+    })
+  })
+
+  describe('when an auxiliary cluster is configured', function () {
+    it('creates a client for both clusters', async function () {
+      await loadModule(AUX_URL)
+      expect(clients).to.have.lengthOf(2)
+      expect(clients.map(c => c.url)).to.include.members([MAIN_URL, AUX_URL])
+    })
+
+    it('exposes the plain auxiliary-cluster collection, unwrapped', async function () {
+      const { db } = await loadModule(AUX_URL)
+      const auxCollection = collectionsByUrl[AUX_URL].get('libraryReferences')
+      expect(db.libraryReferences).to.equal(auxCollection)
+    })
+
+    it('only reads and writes to the auxiliary collection', async function () {
+      const { db } = await loadModule(AUX_URL)
+      await db.libraryReferences.find({ userId: 'abc' })
+      await db.libraryReferences.insertMany([{ _id: 1 }], { ordered: false })
+
+      const auxCollection = collectionsByUrl[AUX_URL].get('libraryReferences')
+      expect(auxCollection.find).to.have.been.calledWith({
+        userId: 'abc',
+      })
+      expect(auxCollection.insertMany).to.have.been.calledWith([{ _id: 1 }], {
+        ordered: false,
+      })
+      expect(collectionsByUrl[MAIN_URL].has('libraryReferences')).to.be.false
+    })
+
+    it('waits for both the main and auxiliary connections', async function () {
+      const { waitForDb } = await loadModule(AUX_URL)
+      await expect(waitForDb()).to.eventually.be.fulfilled
+      expect(clients[0].connect).to.have.been.called
+      expect(clients[1].connect).to.have.been.called
     })
   })
 })

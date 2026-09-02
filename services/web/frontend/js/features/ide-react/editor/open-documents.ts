@@ -1,6 +1,9 @@
 // Migrated from static methods of Document in Document.js
 
-import { DocumentContainer } from '@/features/ide-react/editor/document-container'
+import {
+  DocumentContainer,
+  getShareJsOpSize,
+} from '@/features/ide-react/editor/document-container'
 import { debugConsole } from '@/utils/debugging'
 import { Socket } from '@/features/ide-react/connection/types/socket'
 import { IdeEventEmitter } from '@/features/ide-react/create-ide-event-emitter'
@@ -45,16 +48,35 @@ export class OpenDocuments {
     const docs = this.unsavedDocs()
     let pendingOpsLength = 0
     let inflightOpsLength = 0
+    let pendingChars = 0
+    let inflightChars = 0
     for (const doc of docs) {
       const pendingOp = doc.getPendingOp()
       const inFlightOp = doc.getInflightOp()
       pendingOpsLength += pendingOp?.length || 0
       inflightOpsLength += inFlightOp?.length || 0
+      pendingChars += pendingOp ? getShareJsOpSize(pendingOp) : 0
+      inflightChars += inFlightOp ? getShareJsOpSize(inFlightOp) : 0
     }
     return {
       pendingOpsLength,
       inflightOpsLength,
+      pendingChars,
+      inflightChars,
     }
+  }
+
+  // performance.now() timeline, matching the unsaved-docs alert
+  getOldestUnsavedOpCreatedAt(): number | null {
+    let oldest: number | null = null
+    for (const doc of this.unsavedDocs()) {
+      const createdAt =
+        doc.getInflightOpCreatedAt() ?? doc.getPendingOpCreatedAt()
+      if (createdAt != null && (oldest === null || createdAt < oldest)) {
+        oldest = createdAt
+      }
+    }
+    return oldest
   }
 
   private createDoc(docId: string) {

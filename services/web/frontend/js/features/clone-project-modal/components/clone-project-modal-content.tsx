@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/no-autofocus */
 import { FormEvent, useCallback, useMemo, useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { postJSON } from '../../../infrastructure/fetch-json'
+import { Trans, useTranslation } from 'react-i18next'
+import { postJSON, FetchError } from '@/infrastructure/fetch-json.ts'
 import { CloneProjectTag } from './clone-project-tag'
 import {
   OLModalBody,
@@ -16,6 +16,8 @@ import OLFormControl from '@/shared/components/ol/ol-form-control'
 import OLFormLabel from '@/shared/components/ol/ol-form-label'
 import OLButton from '@/shared/components/ol/ol-button'
 import { Tag } from '../../../../../app/src/Features/Tags/types'
+import getMeta from '@/utils/meta.ts'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export default function CloneProjectModalContent({
   handleHide,
@@ -35,8 +37,10 @@ export default function CloneProjectModalContent({
   projectTags: Tag[]
 }) {
   const { t } = useTranslation()
+  const { maxUploadSize } = getMeta('ol-ExposedSettings')
+  const themed = useFeatureFlag('themed-modals')
 
-  const [error, setError] = useState<string | boolean>()
+  const [error, setError] = useState<FetchError | null>(null)
   const [clonedProjectName, setClonedProjectName] = useState(
     `${projectName} (Copy)`
   )
@@ -57,7 +61,7 @@ export default function CloneProjectModalContent({
       return
     }
 
-    setError(false)
+    setError(null)
     setInFlight(true)
 
     // clone the project
@@ -71,12 +75,8 @@ export default function CloneProjectModalContent({
         // open the cloned project
         handleAfterCloned(data, clonedProjectTags)
       })
-      .catch(({ response, data }) => {
-        if (response?.status === 400) {
-          setError(data.message)
-        } else {
-          setError(true)
-        }
+      .catch(err => {
+        setError(err)
       })
       .finally(() => {
         setInFlight(false)
@@ -118,6 +118,7 @@ export default function CloneProjectModalContent({
                     key={tag._id}
                     tag={tag}
                     removeTag={removeTag}
+                    themed={themed}
                   />
                 ))}
               </div>
@@ -128,9 +129,25 @@ export default function CloneProjectModalContent({
         {error && (
           <Notification
             content={
-              typeof error === 'string' && error.length
-                ? error
-                : t('generic_something_went_wrong')
+              error.getErrorMessageKey() === 'file_too_large_to_copy' ? (
+                <Trans
+                  components={[<code key="code-for-path" />]}
+                  i18nKey="file_too_large_to_copy"
+                  values={{
+                    size: (error.data.message.info.size / 1024 / 1024).toFixed(
+                      1
+                    ),
+                    limit: Math.floor(maxUploadSize / 1024 / 1024),
+                    path: error.data.message.info.path,
+                  }}
+                  shouldUnescape
+                  tOptions={{ interpolation: { escapeValue: true } }}
+                ></Trans>
+              ) : error.response?.status === 400 ? (
+                error.data.message
+              ) : (
+                t('generic_something_went_wrong')
+              )
             }
             type="error"
           />

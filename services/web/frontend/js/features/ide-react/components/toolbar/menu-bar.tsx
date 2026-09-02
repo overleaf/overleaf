@@ -1,8 +1,8 @@
 import {
-  DropdownDivider,
-  DropdownHeader,
-  DropdownItem,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdownDivider,
+  OLDropdownHeader,
+  OLDropdownItem,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import { MenuBar } from '@/shared/components/menu-bar/menu-bar'
 import { MenuBarDropdown } from '@/shared/components/menu-bar/menu-bar-dropdown'
 import { MenuBarOption } from '@/shared/components/menu-bar/menu-bar-option'
@@ -17,15 +17,15 @@ import CommandDropdown, {
   MenuStructure,
 } from './command-dropdown'
 import { useRailContext } from '../../context/rail-context'
+import useIsNetworkStalled from '@/features/ide-react/hooks/use-is-network-stalled'
 import WordCountModal from '@/features/word-count-modal/components/word-count-modal'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
-import { useProjectSettingsContext } from '@/features/editor-left-menu/context/project-settings-context'
+import { useProjectSettingsContext } from '@/features/ide-settings/context/project-settings-context'
 import getMeta from '@/utils/meta'
 import EditorCloneProjectModalWrapper from '@/features/clone-project-modal/components/editor-clone-project-modal-wrapper'
 import useOpenProject from '@/shared/hooks/use-open-project'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 import ReviewModeOptions from './review-mode-options'
 
 const menubarExtraComponents = importOverleafModules(
@@ -44,6 +44,7 @@ export const ToolbarMenuBar = () => {
   const { setView, view } = useLayoutContext()
   const { pdfUrl } = useCompileContext()
   const wordCountEnabled = pdfUrl || isSplitTestEnabled('word-count-client')
+  const isDisabledDueToNetworkStall = useIsNetworkStalled()
   const [showWordCountModal, setShowWordCountModal] = useState(false)
   const [showCloneProjectModal, setShowCloneProjectModal] = useState(false)
   const openProject = useOpenProject()
@@ -52,13 +53,12 @@ export const ToolbarMenuBar = () => {
   const showSupport = getMeta('ol-showSupport')
   const showDocumentation = getMeta('ol-wikiEnabled')
 
-  const hasEditorTabs = useFeatureFlag('editor-tabs')
-
   useCommandProvider(
     () => [
       {
         type: 'command',
         label: t('show_version_history'),
+        disabled: isDisabledDueToNetworkStall,
         handler: () => {
           setView(view === 'history' ? 'editor' : 'history')
         },
@@ -76,14 +76,14 @@ export const ToolbarMenuBar = () => {
       {
         type: 'command',
         label: t('make_a_copy'),
-        disabled: anonymous,
+        disabled: anonymous || isDisabledDueToNetworkStall,
         handler: () => {
           setShowCloneProjectModal(true)
         },
         id: 'copy_project',
       },
     ],
-    [t, setView, view, wordCountEnabled, anonymous]
+    [t, setView, view, wordCountEnabled, anonymous, isDisabledDueToNetworkStall]
   )
   const fileMenuStructure: MenuStructure = useMemo(
     () => [
@@ -221,6 +221,14 @@ export const ToolbarMenuBar = () => {
     [t]
   )
 
+  const commandPaletteMenuSectionStructure: MenuSectionStructure = useMemo(
+    () => ({
+      id: 'command-palette-group',
+      children: ['command-palette'],
+    }),
+    []
+  )
+
   const {
     mathPreview,
     setMathPreview,
@@ -270,33 +278,35 @@ export const ToolbarMenuBar = () => {
         >
           <ChangeLayoutOptions />
           <ReviewModeOptions />
-          <DropdownDivider />
-          <DropdownHeader>{t('editor_settings')}</DropdownHeader>
+          <OLDropdownDivider />
+          <OLDropdownHeader>{t('editor_settings')}</OLDropdownHeader>
           <MenuBarOption
             eventKey="show_breadcrumbs"
             title={t('show_breadcrumbs')}
             leadingIcon={
-              breadcrumbs ? 'check' : <DropdownItem.EmptyLeadingIcon />
+              breadcrumbs ? 'check' : <OLDropdownItem.EmptyLeadingIcon />
             }
             onClick={toggleBreadcrumbs}
           />
-          {hasEditorTabs && (
-            <MenuBarOption
-              eventKey="show_editor_tabs"
-              title={t('show_editor_tabs')}
-              leadingIcon={
-                editorTabs ? 'check' : <DropdownItem.EmptyLeadingIcon />
-              }
-              onClick={toggleEditorTabs}
-            />
-          )}
+          <MenuBarOption
+            eventKey="show_editor_tabs"
+            title={t('show_editor_tabs')}
+            leadingIcon={
+              editorTabs ? 'check' : <OLDropdownItem.EmptyLeadingIcon />
+            }
+            onClick={toggleEditorTabs}
+          />
           <MenuBarOption
             eventKey="show_equation_preview"
             title={t('show_equation_preview')}
             leadingIcon={
-              mathPreview ? 'check' : <DropdownItem.EmptyLeadingIcon />
+              mathPreview ? 'check' : <OLDropdownItem.EmptyLeadingIcon />
             }
             onClick={toggleMathPreview}
+          />
+          <CommandSection
+            section={commandPaletteMenuSectionStructure}
+            includeDivider
           />
           <CommandSection
             section={pdfControlsMenuSectionStructure}
@@ -329,7 +339,7 @@ export const ToolbarMenuBar = () => {
           )}
           {showSupport && (
             <>
-              <DropdownDivider />
+              <OLDropdownDivider />
               <MenuBarOption
                 eventKey="contact_us"
                 title={t('contact_us')}

@@ -2,13 +2,46 @@
   --bs-heading-color: var(--content-primary);
 }
 
-.modal {
-  // Until we add a dark modal version, all core components in modals should use light theme
-  @include light-dropdown-menu;
-  @include form-check-light;
-  @include light-notification;
-  @include light-input;
-  @include light-buttons;
+@include theme('default') {
+  .modal:not(.modal-themed) {
+    // Until we add a dark modal version, all core components in modals should use light theme
+    @include light-themed-variables;
+    @include light-dropdown-menu;
+    @include light-notification;
+    @include light-select;
+    @include form-check-light;
+    @include form-select-light;
+
+    .form-control,
+    .form-control-wrapper {
+      @include light-input;
+    }
+
+    .btn {
+      @include light-buttons;
+    }
+  }
+
+  .modal-themed {
+    --bs-modal-color: var(--content-primary-dark);
+    --bs-modal-bg: var(--bg-dark-primary);
+    --bs-modal-border-color: var(--border-divider-dark);
+    --bs-modal-box-shadow: 0 0.5rem 1rem rgb(0 0 0 / 40%);
+    --bs-modal-header-border-color: var(--border-divider-dark);
+    --bs-modal-footer-bg: var(--bg-dark-primary);
+    --bs-modal-footer-border-color: var(--border-divider-dark);
+    --bs-heading-color: var(--content-primary-dark);
+
+    color-scheme: dark;
+
+    .modal-header .btn-close {
+      --bs-btn-close-bg: url('data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27 fill=%27%23fff%27%3e%3cpath d=%27M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414%27/%3e%3c/svg%3e');
+    }
+  }
+
+  .modal-backdrop-themed {
+    background-color: var(--neutral-70);
+  }
 }
 
 @include media-breakpoint-up(sm) {
