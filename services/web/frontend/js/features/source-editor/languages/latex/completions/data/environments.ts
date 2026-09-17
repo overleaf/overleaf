@@ -58,6 +58,7 @@ export const environments = new Map([
   ],
   ['multline', snippet('multline')],
   ['multline*', snippet('multline*')],
+  ['proof', snippet('proof')],
   ['quote', snippet('quote')],
   ['split', snippet('split')],
   [
