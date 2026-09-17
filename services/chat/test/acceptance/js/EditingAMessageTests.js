@@ -16,6 +16,7 @@ describe('Editing a message', async function () {
     const content = 'thread message'
     const newContent = 'updated thread message'
     let messageId
+    let originalTimestamp
     beforeEach(async function () {
       projectId = new ObjectId().toString()
       userId = new ObjectId().toString()
@@ -31,6 +32,7 @@ describe('Editing a message', async function () {
       expect(message.id).to.exist
       expect(message.content).to.equal(content)
       messageId = message.id
+      originalTimestamp = message.timestamp
     })
 
     describe('with a malformed messageId', function () {
@@ -115,6 +117,10 @@ describe('Editing a message', async function () {
         expect(response.statusCode).to.equal(200)
         expect(threads[threadId].messages.length).to.equal(1)
         expect(threads[threadId].messages[0].content).to.equal(newContent)
+        expect(threads[threadId].messages[0].edited_at).to.exist
+        expect(threads[threadId].messages[0].timestamp).to.equal(
+          originalTimestamp
+        )
       })
     })
 
@@ -136,6 +142,10 @@ describe('Editing a message', async function () {
         expect(response.statusCode).to.equal(200)
         expect(threads[threadId].messages.length).to.equal(1)
         expect(threads[threadId].messages[0].content).to.equal(newContent)
+        expect(threads[threadId].messages[0].edited_at).to.exist
+        expect(threads[threadId].messages[0].timestamp).to.equal(
+          originalTimestamp
+        )
       })
     })
 
