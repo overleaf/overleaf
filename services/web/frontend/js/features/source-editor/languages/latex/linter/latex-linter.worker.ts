@@ -1107,12 +1107,24 @@ const InterpretTokens = function (
         seq === 'intertext' ||
         seq === 'shortintertext' ||
         seq === 'textnormal' ||
-        seq === 'tag' ||
         seq === 'reflectbox' ||
         seq === 'textrm'
       ) {
         // next group will be in text mode regardless
         nextGroupMathMode = false
+      } else if (seq === 'tag') {
+        // next group will be in text mode regardless
+        nextGroupMathMode = false
+        // \tag* (unnumbered tag) - skip over the '*' so it doesn't reset
+        // nextGroupMathMode before the argument group is reached
+        const nextToken = Tokens[i + 1]
+        if (
+          nextToken &&
+          nextToken[1] === 'Text' &&
+          text.substring(nextToken[2], nextToken[3]) === '*'
+        ) {
+          i = i + 1
+        }
       } else if (seq === 'tikz') {
         // try to read any optional params [BAR]...., advance if found
         const newPos = readOptionalGeneric(TokeniseResult, i)

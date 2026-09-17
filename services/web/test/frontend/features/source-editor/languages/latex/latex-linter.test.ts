@@ -350,6 +350,18 @@ describe('LatexLinter', function () {
     assert.equal(errors.length, 0)
   })
 
+  it('should accept math tag* commands', function () {
+    const { errors } = Parse(
+      '\\begin{align}\n\\pi=3 \\tag*{\\(\\dagger\\)}\n\\end{align}\n'
+    )
+    assert.equal(errors.length, 0)
+  })
+
+  it('should accept math tag* commands with $ math mode', function () {
+    const { errors } = Parse('$\\tag*{$abc$}$\n')
+    assert.equal(errors.length, 0)
+  })
+
   it('should accept math \\def commands', function () {
     const { errors } = Parse(
       '\\def\\peb[#1]{{\\left\\lfloor #1\\right\\rfloor}}'
