@@ -1,0 +1,13 @@
+diff --git a/services/real-time/app/js/Router.js b/services/real-time/app/js/Router.js
+index e683c0d261ba..7d68a6911a50 100644
+--- a/services/real-time/app/js/Router.js
++++ b/services/real-time/app/js/Router.js
+@@ -33,7 +33,7 @@ const applyOtUpdateSchema = z.object({
+     lastV: z.number().optional(),
+     meta: z
+       .strictObject({
+-        tc: z.string(),
++        tc: z.string().optional(),
+       })
+       .optional(),
+     op: z

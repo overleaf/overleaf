@@ -89,15 +89,18 @@ services:
       - history-v1-buckets:/buckets
 
   mongo:
-    image: mongo:8
+    image: mongo:8.3
     command: --replSet overleaf
     ports:
       - "127.0.0.1:27017:27017" # for debugging
+    environment:
+      MONGO_INITDB_DATABASE: sharelatex
+      # mongod >= 8.0 (Ubuntu-based) requires this on hosts advertising the
+      # x86 SHSTK (x86 Shavian) CPU feature, e.g. newer EPYC.
+      GLIBC_TUNABLES: "glibc.cpu.hwcaps=-SHSTK"
     volumes:
       - mongo-data:/data/db
       - ../bin/shared/mongodb-init-replica-set.js:/docker-entrypoint-initdb.d/mongodb-init-replica-set.js
-    environment:
-      MONGO_INITDB_DATABASE: sharelatex
     extra_hosts:
       # Required when using the automatic database setup for initializing the
       # replica set. This override is not needed when running the setup after
@@ -126,7 +129,7 @@ services:
       - dev.env
 
   redis:
-    image: redis:7
+    image: redis:8.6-alpine
     ports:
       - "127.0.0.1:6379:6379" # for debugging
     volumes:
@@ -168,7 +171,7 @@ services:
       dockerfile: services/web/Dockerfile
       target: webpack
     command:
-      ["npx", "webpack", "serve", "--config", "webpack.config.dev-env.js"]
+      ["yarn", "exec", "webpack", "serve", "--config", "webpack.config.dev-env.js"]
     ports:
       - "127.0.0.1:80:3808"
     volumes:

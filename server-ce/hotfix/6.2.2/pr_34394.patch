@@ -1,0 +1,106 @@
+diff --git a/services/web/app/src/Features/Collaborators/CollaboratorsInviteHelper.mjs b/services/web/app/src/Features/Collaborators/CollaboratorsInviteHelper.mjs
+index 8a772a17412b..4b231e0614cc 100644
+--- a/services/web/app/src/Features/Collaborators/CollaboratorsInviteHelper.mjs
++++ b/services/web/app/src/Features/Collaborators/CollaboratorsInviteHelper.mjs
+@@ -43,7 +43,6 @@ async function encryptToken(token) {
+   if (!accessTokenEncryptor) {
+     throw new Error('Token encryption not configured, could not encrypt token')
+   }
+-  logger.debug({ settings: Settings.projectInviteEncryptorOptions })
+   return accessTokenEncryptor.promises.encryptJson(token)
+ }
+ 
+@@ -51,7 +50,6 @@ async function decryptToken(encryptedToken) {
+   if (!accessTokenEncryptor) {
+     throw new Error('Token encryption not configured, could not encrypt token')
+   }
+-  logger.debug({ settings: Settings.projectInviteEncryptorOptions })
+   return accessTokenEncryptor.promises.decryptToJson(encryptedToken)
+ }
+ 
+diff --git a/services/web/app/src/Features/Project/ProjectController.mjs b/services/web/app/src/Features/Project/ProjectController.mjs
+index bce4a5699aea..6ace94a5a687 100644
+--- a/services/web/app/src/Features/Project/ProjectController.mjs
++++ b/services/web/app/src/Features/Project/ProjectController.mjs
+@@ -495,6 +495,7 @@ const _ProjectController = {
+       'editor-upgrade-button-relocation',
+       'markdown-visual',
+       'ai-disabled-collaborators',
++      'group-link-sharing',
+     ].filter(Boolean)
+ 
+     const getUserValues = async userId =>
+diff --git a/services/web/frontend/js/features/share-project-modal/components/project-access.tsx b/services/web/frontend/js/features/share-project-modal/components/project-access.tsx
+index 512b8f080a6d..847663bbf679 100644
+--- a/services/web/frontend/js/features/share-project-modal/components/project-access.tsx
++++ b/services/web/frontend/js/features/share-project-modal/components/project-access.tsx
+@@ -29,6 +29,7 @@ import {
+ } from '@/features/share-project-modal/components/share-project-modal'
+ import { ExcludeStrict } from '@ol-types/utils'
+ import getMeta from '@/utils/meta'
++import { useFeatureFlag } from '@/shared/context/split-test-context'
+ 
+ type ProjectAccessProps = {
+   setIsInvitedPeopleScreen: React.Dispatch<React.SetStateAction<boolean>>
+@@ -50,6 +51,7 @@ function ProjectAccess({
+   )
+   const { isProjectOwner } = useEditorContext()
+   const { activeGroupSubscriptions } = getMeta('ol-user')
++  const groupSharingEnabled = useFeatureFlag('group-link-sharing')
+ 
+   const {
+     monitorRequest,
+@@ -235,7 +237,8 @@ function ProjectAccess({
+                     {t('only_invited_people')}
+                   </DropdownItem>
+                 </DropdownListItem>
+-                {activeGroupSubscriptions &&
++                {groupSharingEnabled &&
++                  activeGroupSubscriptions &&
+                   activeGroupSubscriptions.map(subscription => (
+                     <DropdownListItem
+                       className="d-flex align-items-center"
+diff --git a/services/web/frontend/js/features/share-project-modal/components/share-project-modal.tsx b/services/web/frontend/js/features/share-project-modal/components/share-project-modal.tsx
+index 4ce9b78d46c2..9e397a1bb31d 100644
+--- a/services/web/frontend/js/features/share-project-modal/components/share-project-modal.tsx
++++ b/services/web/frontend/js/features/share-project-modal/components/share-project-modal.tsx
+@@ -7,7 +7,10 @@ import React, {
+ } from 'react'
+ import ShareProjectModalContent from './share-project-modal-content'
+ import { useProjectContext } from '@/shared/context/project-context'
+-import { useSplitTestContext } from '@/shared/context/split-test-context'
++import {
++  useFeatureFlag,
++  useSplitTestContext,
++} from '@/shared/context/split-test-context'
+ import { sendMB } from '@/infrastructure/event-tracking'
+ import { useEditorContext } from '@/shared/context/editor-context'
+ import customLocalStorage from '@/infrastructure/local-storage'
+@@ -93,6 +96,7 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
+   const { publicAccessLevel } = project || {}
+ 
+   const { splitTestVariants } = useSplitTestContext()
++  const isSharingUpdatesEnabled = useFeatureFlag('sharing-updates')
+ 
+   // show the new share modal if project owner
+   // is over collaborator limit or has pending editors (once every 24 hours)
+@@ -147,6 +151,10 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
+   }, [show])
+ 
+   const handleShow = useCallback(async () => {
++    if (!isSharingUpdatesEnabled || !isProjectOwner) {
++      return
++    }
++
+     if (publicAccessLevel === 'tokenBased') {
+       setSharingLinkData(null)
+       setProjectAccess('legacyLinkSharing')
+@@ -179,7 +187,7 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
+           'generic_something_went_wrong'
+       )
+     }
+-  }, [publicAccessLevel, projectId])
++  }, [publicAccessLevel, projectId, isSharingUpdatesEnabled, isProjectOwner])
+ 
+   // close the modal if not in flight
+   const cancel = useCallback(() => {

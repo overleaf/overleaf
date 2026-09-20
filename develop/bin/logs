@@ -1,9 +1,17 @@
 #!/usr/bin/env bash
+# Tail docker logs for a service (or all services) pretty-printed as JSON.
+# Uses ggrep + bunyan when installed, else falls back to plain grep + raw JSON.
 
-docker compose logs --follow --tail 10 --no-color "$@" \
-  | ggrep --line-buffered --invert-match "global.gc" \
-  | ggrep --line-buffered --invert-match "health.check" \
-  | ggrep --line-buffered --invert-match "slow event loop" \
-  | ggrep --line-buffered --invert-match "process.memoryUsage" \
-  | ggrep --line-buffered --only-matching "[{].*" \
-  | bunyan --output short
+# shellcheck disable=SC2050
+docker compose logs --follow --tail 50 --no-color "$@" \
+  | { if command -v ggrep >/dev/null 2>&1; then
+        ggrep --line-buffered --invert-match "global.gc" \
+        | ggrep --line-buffered --invert-match "health.check" \
+        | ggrep --line-buffered --invert-match "slow event loop" \
+        | ggrep --line-buffered --invert-match "process.memoryUsage" \
+        | ggrep --line-buffered --only-matching "[{].*"
+      else
+        grep --line-buffered -vE "\"(global.gc|health.check|slow event loop|process.memoryUsage)\"" \
+        | grep --line-buffered -E "^[{]"
+      fi } \
+  | { if command -v bunyan >/dev/null 2>&1; then bunyan --output short; else cat; fi }

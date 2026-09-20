@@ -1,8 +1,18 @@
+# Development mode overlay.
+#
+# NODE_OPTIONS has to repeat the PnP loader that the 6.3.0 images set via
+# Dockerfile ENV, because any compose `environment:` entry fully overrides the
+# image env (compose merges per-variable, not per-list). Without the loader
+# Node cannot resolve workspace/PnP modules and every service crashes on
+# startup.
+#
+# `web` additionally needs its modules/public mounted into the container so
+# the locally mounted frontend can be served by webpack.dev-env.
 services:
   clsi:
     command: ["node", "--watch", "app.js"]
     environment:
-      - NODE_OPTIONS=--inspect=0.0.0.0:9229
+      - NODE_OPTIONS=--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --inspect=0.0.0.0:9229
     ports:
       - "127.0.0.1:9230:9229"
     volumes:
@@ -13,7 +23,7 @@ services:
   chat:
     command: ["node", "--watch", "app.js"]
     environment:
-      - NODE_OPTIONS=--inspect=0.0.0.0:9229
+      - NODE_OPTIONS=--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --inspect=0.0.0.0:9229
     ports:
       - "127.0.0.1:9231:9229"
     volumes:
@@ -24,7 +34,7 @@ services:
   docstore:
     command: ["node", "--watch", "app.js"]
     environment:
-      - NODE_OPTIONS=--inspect=0.0.0.0:9229
+      - NODE_OPTIONS=--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --inspect=0.0.0.0:9229
     ports:
       - "127.0.0.1:9233:9229"
     volumes:
@@ -35,7 +45,7 @@ services:
   document-updater:
     command: ["node", "--watch", "app.js"]
     environment:
-      - NODE_OPTIONS=--inspect=0.0.0.0:9229
+      - NODE_OPTIONS=--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --inspect=0.0.0.0:9229
     ports:
       - "127.0.0.1:9234:9229"
     volumes:
@@ -46,7 +56,7 @@ services:
   filestore:
     command: ["node", "--watch", "app.js"]
     environment:
-      - NODE_OPTIONS=--inspect=0.0.0.0:9229
+      - NODE_OPTIONS=--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --inspect=0.0.0.0:9229
     ports:
       - "127.0.0.1:9235:9229"
     volumes:
@@ -57,7 +67,7 @@ services:
   history-v1:
     command: ["node", "--watch", "app.js"]
     environment:
-      - NODE_OPTIONS=--inspect=0.0.0.0:9229
+      - NODE_OPTIONS=--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --inspect=0.0.0.0:9229
     ports:
       - "127.0.0.1:9239:9229"
     volumes:
@@ -71,7 +81,7 @@ services:
   notifications:
     command: ["node", "--watch", "app.ts"]
     environment:
-      - NODE_OPTIONS=--inspect=0.0.0.0:9229
+      - NODE_OPTIONS=--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --inspect=0.0.0.0:9229
     ports:
       - "127.0.0.1:9236:9229"
     volumes:
@@ -82,7 +92,7 @@ services:
   project-history:
     command: ["node", "--watch", "app.js"]
     environment:
-      - NODE_OPTIONS=--inspect=0.0.0.0:9229
+      - NODE_OPTIONS=--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --inspect=0.0.0.0:9229
     ports:
       - "127.0.0.1:9240:9229"
     volumes:
@@ -93,7 +103,7 @@ services:
   real-time:
     command: ["node", "--watch", "app.js"]
     environment:
-      - NODE_OPTIONS=--inspect=0.0.0.0:9229
+      - NODE_OPTIONS=--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --inspect=0.0.0.0:9229
     ports:
       - "127.0.0.1:9237:9229"
     volumes:
@@ -104,7 +114,7 @@ services:
   web:
     command: ["node", "--watch", "app.mjs", "--watch-locales"]
     environment:
-      - NODE_OPTIONS=--inspect=0.0.0.0:9229
+      - NODE_OPTIONS=--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --inspect=0.0.0.0:9229
     ports:
       - "127.0.0.1:9229:9229"
     volumes:
@@ -114,6 +124,7 @@ services:
       - ../services/web/locales:/overleaf/services/web/locales
       - ../services/web/modules:/overleaf/services/web/modules
       - ../services/web/public:/overleaf/services/web/public
+      - ../services/web/package.json:/overleaf/services/web/package.json
 
   webpack:
     volumes:
@@ -126,3 +137,4 @@ services:
       - ../services/web/transform:/overleaf/services/web/transform
       - ../services/web/types:/overleaf/services/web/types
       - ../services/web/webpack-plugins:/overleaf/services/web/webpack-plugins
+      - ../services/web/package.json:/overleaf/services/web/package.json
