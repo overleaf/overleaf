@@ -4,10 +4,11 @@ import {
   fireEvent,
 } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
+import sinon from 'sinon'
 
 import { renderWithEditorContext } from '../../../helpers/render-with-context'
 import FileView from '../../../../../frontend/js/features/file-view/components/file-view'
-import { imageFile, textFile } from '../util/files'
+import { imageFile, svgFile, textFile } from '../util/files'
 
 describe('<FileView/>', function () {
   beforeEach(function () {
@@ -63,6 +64,24 @@ describe('<FileView/>', function () {
       await screen.findByText('Sorry, no preview is available', {
         exact: false,
       })
+    })
+  })
+
+  describe('for an svg file', function () {
+    beforeEach(function () {
+      window.URL.createObjectURL = sinon.stub().returns('blob:fake-svg-url')
+      window.URL.revokeObjectURL = sinon.stub()
+    })
+
+    it('renders the svg as an image', async function () {
+      fetchMock.get(
+        'express:/project/:project_id/blob/:hash',
+        '<svg xmlns="http://www.w3.org/2000/svg"></svg>'
+      )
+
+      renderWithEditorContext(<FileView file={svgFile} />)
+
+      await screen.findByRole('img')
     })
   })
 })
