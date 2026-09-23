@@ -45,6 +45,8 @@ const KNOWN_LATEXMK_RULES = new Set([
 ])
 
 const LATEX_PASSES_RULES = new Set(['latex', 'lualatex', 'xelatex', 'pdflatex'])
+const TEXCOUNT_OPTIONS_FILE = '.overleaf-texcount-options'
+const TEXCOUNT_OPTIONS = '%preambleinclude \\newcolumntype [ignore,xxx]\n'
 
 function getCompileName(projectId, userId) {
   if (userId != null) {
@@ -710,7 +712,8 @@ async function _syncResourcesForWordcount(
 async function wordcount(projectId, userId, filename, image, request) {
   logger.debug({ projectId, userId, filename, image }, 'running wordcount')
   const filePath = `$COMPILE_DIR/${filename}`
-  const command = ['texcount', '-nocol', '-inc', filePath]
+  const optionsPath = `$COMPILE_DIR/${TEXCOUNT_OPTIONS_FILE}`
+  const command = ['texcount', '-nocol', '-inc', `-opt=${optionsPath}`, filePath]
   const compileDir = getCompileDir(projectId, userId)
   const timeout = 60 * 1000
   const compileName = getCompileName(projectId, userId)
@@ -726,6 +729,18 @@ async function wordcount(projectId, userId, filename, image, request) {
       (await fsPromises.mkdir(compileDir, { recursive: true })) === compileDir
   } catch (err) {
     throw OError.tag(err, 'error ensuring dir for wordcount', {
+      projectId,
+      userId,
+      filename,
+    })
+  }
+  try {
+    await fsPromises.writeFile(
+      Path.join(compileDir, TEXCOUNT_OPTIONS_FILE),
+      TEXCOUNT_OPTIONS
+    )
+  } catch (err) {
+    throw OError.tag(err, 'error writing texcount options for wordcount', {
       projectId,
       userId,
       filename,
