@@ -61,9 +61,13 @@ RUN mkdir -p /var/lib/mongodb /var/lib/redis /var/lib/texlive/texmf-local \
 # needs to be updated"). Either failure makes auto-install silently fall back to
 # writing empty stub .sty files, so documents compile without the real package.
 # A frozen snapshot avoids both and keeps builds reproducible.
-# Verified against this image's tlmgr r78616 (2026-04-06).
+# The snapshot must also not be OLDER than the image's own TeX Live, or tlmgr
+# refuses it ("Remote database ... seems to be older than the local
+# installation"), so bump this date whenever the base image refreshes TeX Live.
+# Verified against sharelatex/sharelatex 6.3.0 (texlive.infra r79982,
+# texlive-scripts r80106, tlpdb dated 2026-08-27).
 ARG TLNET_YEAR=2026
-ARG TLNET_REPO=https://www.texlive.info/tlnet-archive/2026/06/15/tlnet
+ARG TLNET_REPO=https://www.texlive.info/tlnet-archive/2026/08/27/tlnet
 
 RUN set -eu; \
     TLDIR="$(ls -1d /usr/local/texlive/[0-9][0-9][0-9][0-9] | sort -r | head -1)"; \
