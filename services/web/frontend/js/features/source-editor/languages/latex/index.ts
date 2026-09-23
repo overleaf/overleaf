@@ -1,5 +1,6 @@
 import { latexIndentService } from './latex-indent-service'
 import { shortcuts } from './shortcuts'
+import { listItemContinuation } from './list-continuation'
 import { linting } from './linting'
 import { LanguageSupport } from '@codemirror/language'
 import { CompletionSource } from '@codemirror/autocomplete'
@@ -34,6 +35,7 @@ const completionSources: CompletionSource[] = [
 export const latex = () => {
   return new LanguageSupport(LaTeXLanguage, [
     shortcuts(),
+    listItemContinuation(),
     documentOutline,
     documentCommands,
     documentEnvironments,
