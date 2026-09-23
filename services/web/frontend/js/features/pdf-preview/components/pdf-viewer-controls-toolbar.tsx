@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import PdfPageNumberControl from './pdf-page-number-control'
 import PdfZoomButtons from './pdf-zoom-buttons'
 import PdfZoomDropdown from './pdf-zoom-dropdown'
+import PdfRotationButtons from './pdf-rotation-buttons'
 import { useResizeObserver } from '@/shared/hooks/use-resize-observer'
 import PdfViewerControlsMenuButton from './pdf-viewer-controls-menu-button'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
@@ -19,6 +20,8 @@ type PdfViewerControlsToolbarProps = {
   page: number
   totalPages: number
   pdfContainer?: HTMLDivElement
+  rotation: number
+  setRotation: (rotation: number) => void
 }
 
 function PdfViewerControlsToolbar({
@@ -29,6 +32,8 @@ function PdfViewerControlsToolbar({
   page,
   totalPages,
   pdfContainer,
+  rotation,
+  setRotation,
 }: PdfViewerControlsToolbarProps) {
   const { t } = useTranslation()
   const { showLogs } = useCompileContext()
@@ -106,6 +111,8 @@ function PdfViewerControlsToolbar({
         page={page}
         totalPages={totalPages}
         pdfContainer={pdfContainer}
+        rotation={rotation}
+        setRotation={setRotation}
       />
     </div>,
 
@@ -122,6 +129,8 @@ type InnerControlsProps = {
   totalPages: number
   // eslint-disable-next-line react/no-unused-prop-types
   pdfContainer?: HTMLDivElement
+  rotation: number
+  setRotation: (rotation: number) => void
 }
 
 function PdfViewerControlsToolbarFull({
@@ -131,6 +140,8 @@ function PdfViewerControlsToolbarFull({
   setPage,
   page,
   totalPages,
+  rotation,
+  setRotation,
 }: InnerControlsProps) {
   return (
     <>
@@ -148,6 +159,7 @@ function PdfViewerControlsToolbarFull({
           setZoom={setZoom}
         />
       </div>
+      <PdfRotationButtons rotation={rotation} setRotation={setRotation} />
     </>
   )
 }
@@ -160,6 +172,8 @@ function PdfViewerControlsToolbarSmall({
   page,
   totalPages,
   pdfContainer,
+  rotation,
+  setRotation,
 }: InnerControlsProps) {
   return (
     <div className="pdfjs-viewer-controls-small">
@@ -169,12 +183,15 @@ function PdfViewerControlsToolbarSmall({
         rawScale={rawScale}
         setZoom={setZoom}
       />
+      <PdfRotationButtons rotation={rotation} setRotation={setRotation} />
       <PdfViewerControlsMenuButton
         setZoom={setZoom}
         setPage={setPage}
         page={page}
         totalPages={totalPages}
         pdfContainer={pdfContainer}
+        rotation={rotation}
+        setRotation={setRotation}
       />
     </div>
   )
