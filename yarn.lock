@@ -30584,7 +30584,7 @@ __metadata:
 
 "send@patch:send@npm%3A0.19.0#~/.yarn/patches/send-npm-0.19.0.patch":
   version: 0.19.0
-  resolution: "send@patch:send@npm%3A0.19.0#~/.yarn/patches/send-npm-0.19.0.patch::version=0.19.0&hash=67a07b"
+  resolution: "send@patch:send@npm%3A0.19.0#~/.yarn/patches/send-npm-0.19.0.patch::version=0.19.0&hash=42db1a"
   dependencies:
     debug: "npm:2.6.9"
     depd: "npm:2.0.0"
@@ -30599,7 +30599,7 @@ __metadata:
     on-finished: "npm:2.4.1"
     range-parser: "npm:~1.2.1"
     statuses: "npm:2.0.1"
-  checksum: 10c0/64ccd69657faa96831e80f4eaf63696bd026ee498e52454216cb5eef31a7cccf5c98f77036d57d0f03e85d51c4064c83148a65365b5068d0a2f0ee667c430143
+  checksum: 10c0/40ff6529dad0959e5622e87a3a4bd15dbcc779675fc958483e35a5503737d181d2b7e694dd3d19111fbe3b64d2134484989801be3a9146e7b959492b0396340f
   languageName: node
   linkType: hard
 
