@@ -1,35 +1,37 @@
-const fsPromises = require('node:fs/promises')
-const os = require('node:os')
-const Path = require('node:path')
-const { callbackify, promisify } = require('node:util')
-const { execFile } = require('node:child_process')
-
-const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
-const OError = require('@overleaf/o-error')
-
-const ResourceWriter = require('./ResourceWriter')
-const LatexRunner = require('./LatexRunner')
-const OutputFileFinder = require('./OutputFileFinder')
-const OutputCacheManager = require('./OutputCacheManager')
-const ClsiMetrics = require('./Metrics')
-const DraftModeManager = require('./DraftModeManager')
-const TikzManager = require('./TikzManager')
-const LockManager = require('./LockManager')
-const Errors = require('./Errors')
-const CommandRunner = require('./CommandRunner')
-const ContentCacheMetrics = require('./ContentCacheMetrics')
-const SynctexOutputParser = require('./SynctexOutputParser')
-const CLSICacheHandler = require('./CLSICacheHandler')
-const StatsManager = require('./StatsManager')
-const SafeReader = require('./SafeReader')
-const LatexMetrics = require('./LatexMetrics')
-const { callbackifyMultiResult } = require('@overleaf/promise-utils')
+import fsPromises from 'node:fs/promises'
+import os from 'node:os'
+import Path from 'node:path'
+import { callbackify, promisify } from 'node:util'
+import { execFile } from 'node:child_process'
+import Settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
+import Metrics from '@overleaf/metrics'
+import OError from '@overleaf/o-error'
+import ResourceWriter from './ResourceWriter.js'
+import LatexRunner from './LatexRunner.js'
+import OutputFileFinder from './OutputFileFinder.js'
+import OutputCacheManager from './OutputCacheManager.js'
+import ClsiMetrics from './Metrics.js'
+import DraftModeManager from './DraftModeManager.js'
+import TikzManager from './TikzManager.js'
+import LockManager from './LockManager.js'
+import Errors from './Errors.js'
+import CommandRunner from './CommandRunner.js'
+import ContentCacheMetrics from './ContentCacheMetrics.js'
+import SynctexOutputParser from './SynctexOutputParser.js'
+import CLSICacheHandler from './CLSICacheHandler.js'
+import StatsManager from './StatsManager.js'
+import SafeReader from './SafeReader.js'
+import LatexMetrics from './LatexMetrics.js'
+import { callbackifyMultiResult } from '@overleaf/promise-utils'
+import * as HistoryResourceWriter from './HistoryResourceWriter.js'
+import Png2Pdf from './Png2Pdf.js'
 
 const { downloadLatestCompileCache, downloadOutputDotSynctexFromCompileCache } =
   CLSICacheHandler
 const { emitPdfStats } = ContentCacheMetrics
 const { enableLatexMkMetrics, addLatexFdbMetrics } = LatexMetrics
+const { shouldSkipMetrics } = ClsiMetrics
 
 const KNOWN_LATEXMK_RULES = new Set([
   'biber',
@@ -640,13 +642,44 @@ async function doCompile(request, stats, timings) {
     'syncing resources to disk'
   )
 
-  let resourceList
+  let resourceList, baseHistoryVersion
   try {
-    // NOTE: resourceList is insecure, it should only be used to exclude files from the output list
-    resourceList = await ResourceWriter.promises.syncResourcesToDisk(
-      request,
-      compileDir
-    )
+    if (request.isCompileFromHistory) {
+      ;({ resourceList, baseHistoryVersion } =
+        await HistoryResourceWriter.syncResourcesToDisk(
+          projectId,
+          userId,
+          request,
+          compileDir,
+          timings,
+          stats
+        ))
+    } else {
+      // NOTE: resourceList is insecure, it should only be used to exclude files from the output list
+      resourceList = await ResourceWriter.promises.syncResourcesToDisk(
+        request,
+        compileDir
+      )
+
+      // apply a series of file modifications/creations for draft mode and tikz
+      if (request.draft) {
+        await DraftModeManager.promises.injectDraftMode(
+          Path.join(compileDir, request.rootResourcePath)
+        )
+      }
+
+      const needsMainFile = await TikzManager.promises.checkMainFile(
+        compileDir,
+        request.rootResourcePath,
+        resourceList
+      )
+      if (needsMainFile) {
+        await TikzManager.promises.injectOutputFile(
+          compileDir,
+          request.rootResourcePath
+        )
+      }
+    }
   } catch (error) {
     if (error instanceof Errors.FilesOutOfSyncError) {
       OError.tag(error, 'files out of sync, please retry', {
@@ -919,7 +952,7 @@ async function doCompile(request, stats, timings) {
       )
     }
 
-    if (!_shouldSkipMetrics(request)) {
+    if (!shouldSkipMetrics(request)) {
       const status = error.timedout
         ? 'timeout'
         : error.terminated
@@ -974,7 +1007,7 @@ async function doCompile(request, stats, timings) {
   const status = stats['latexmk-errors'] ? 'error' : 'success'
   _emitMetrics(request, status, stats, timings)
 
-  if (stats['pdf-size']) {
+  if (stats['pdf-size'] && !shouldSkipMetrics(request)) {
     emitPdfStats(stats, timings, request)
   }
 
@@ -1014,8 +1047,7 @@ async function doCompile(request, stats, timings) {
       'sampled performance log'
     )
   }
-
-  return { outputFiles, buildId }
+  return { outputFiles, buildId, baseHistoryVersion }
 }
 
 async function _saveOutputFiles({
@@ -1060,7 +1092,17 @@ async function _readFdbFile(compileDir) {
 
 async function stopCompile(projectId, userId) {
   const compileName = getCompileName(projectId, userId)
+  const lock = LockManager.getExistingLock(getCompileDir(projectId, userId))
+  let lockReleased
+  if (lock) {
+    lockReleased = lock.waitForRelease()
+  } else {
+    if (!LatexRunner.isRunning(compileName)) return
+    logger.warn({ projectId, userId }, 'found running compile without lock')
+    lockReleased = Promise.resolve()
+  }
   await LatexRunner.promises.killLatex(compileName)
+  await lockReleased
 }
 
 async function clearProject(projectId, userId) {
@@ -1515,12 +1557,14 @@ function _getImageVariantSettings(request) {
   return { imageName, env: {} }
 }
 
-function _shouldSkipMetrics(request) {
-  return ['clsi-perf', 'health-check'].includes(request.metricsOpts.path)
-}
-
 function _emitMetrics(request, status, stats, timings) {
-  if (_shouldSkipMetrics(request)) {
+  if (request.metricsOpts.path === 'clsi-perf') {
+    ClsiMetrics.e2eCompileDurationClsiPerfSeconds.set(
+      { variant: request.metricsOpts.method },
+      timings.compileE2E / 1000
+    )
+  }
+  if (shouldSkipMetrics(request)) {
     return
   }
 
@@ -1584,6 +1628,8 @@ function _emitMetrics(request, status, stats, timings) {
     draft: request.draft ? 'true' : 'false',
     stop_on_first_error: request.stopOnFirstError ? 'true' : 'false',
     passes,
+    type: request.syncType,
+    png2pdf: request.png2pdf ? 'true' : 'false',
   })
 
   if (timings.sync != null) {
@@ -1621,11 +1667,18 @@ function _emitMetrics(request, status, stats, timings) {
   }
 
   if (timings.compileE2E != null) {
-    ClsiMetrics.e2eCompileDurationSeconds.observe(timings.compileE2E / 1000)
+    ClsiMetrics.e2eCompileDurationSeconds.observe(
+      {
+        compileFromHistory: request.isCompileFromHistory,
+        compile: request.metricsOpts.compile,
+        group: request.compileGroup,
+      },
+      timings.compileE2E / 1000
+    )
   }
 }
 
-module.exports = {
+export default {
   doCompileWithLock: callbackify(doCompileWithLock),
   stopCompile: callbackify(stopCompile),
   clearProject: callbackify(clearProject),
