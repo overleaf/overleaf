@@ -96,7 +96,7 @@ async function exportUserProjectsToZip(userId, output) {
     `Exporting ${allIds.length} projects for user ${userId} to ${output}`
   )
 
-  const zipStream = await createZipStreamForMultipleProjectsAsync(allIds)
+  const zipStream = await createZipStreamForMultipleProjectsAsync(allIds, false, null)
 
   zipStream.on('progress', progress => {
     updateProgress(progress.entries.total, allIds.length)
@@ -132,7 +132,7 @@ async function exportSingleProject(projectId, output) {
   console.log('Flushing project to MongoDB...')
   await DocumentUpdaterHandler.promises.flushProjectToMongoAndDelete(projectId)
   console.log(`Exporting project ${projectId} to ${output}`)
-  const zipStream = await createZipStreamForProjectAsync(projectId)
+  const zipStream = await createZipStreamForProjectAsync(projectId, false, null)
   await writeStreamToFileAtomically(zipStream, output)
   console.log('Exported project to', output)
 }
