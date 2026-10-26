@@ -192,6 +192,56 @@ describe('FileTree Context Menu Flow', function () {
     cy.findByRole('menu').should('not.exist')
   })
 
+  it('copies entity path to clipboard when clicking "Copy path"', function () {
+    const rootFolder = [
+      {
+        _id: 'root-folder-id',
+        name: 'rootFolder',
+        docs: [{ _id: 'main-doc', name: 'main.tex' }],
+        folders: [
+          {
+            _id: 'sub-folder-id',
+            name: 'images',
+            docs: [],
+            folders: [],
+            fileRefs: [{ _id: 'img-file', name: 'figure.png', hash: '123' }],
+          },
+        ],
+        fileRefs: [],
+      },
+    ]
+
+    cy.window().then(win => {
+      cy.stub(win.navigator.clipboard, 'writeText').as('writeText')
+    })
+
+    cy.mount(
+      <EditorProviders
+        rootFolder={rootFolder as any}
+        projectId="123abc"
+        rootDocId="main-doc"
+      >
+        <FileTreeRoot
+          refProviders={{}}
+          setRefProviderEnabled={cy.stub()}
+          setStartedFreeTrial={cy.stub()}
+          onSelect={cy.stub()}
+          onInit={cy.stub()}
+          isConnected
+        />
+      </EditorProviders>
+    )
+
+    cy.findByRole('treeitem', { name: 'images' }).click()
+    cy.findByRole('treeitem', { name: 'figure.png' }).trigger('contextmenu')
+    cy.findByRole('menu').findByRole('menuitem', { name: 'Copy path' }).click()
+
+    cy.get('@writeText').should(
+      'have.been.calledOnceWithExactly',
+      'images/figure.png'
+    )
+  })
+
   it('shows "set main document" item when appropriate', function () {
     const rootFolder = [
       {

@@ -24,6 +24,7 @@ function FileTreeItemMenuItems() {
     startUploadingDocOrFile,
     downloadPath,
     selectedFileName,
+    selectedEntityPath,
     canSetRootDocId,
     setRootDocId,
   } = useFileTreeActionable()
@@ -48,6 +49,12 @@ function FileTreeItemMenuItems() {
     startUploadingDocOrFile()
   }, [startUploadingDocOrFile])
 
+  const copyPath = useCallback(() => {
+    if (selectedEntityPath) {
+      navigator.clipboard?.writeText(selectedEntityPath)
+    }
+  }, [selectedEntityPath])
+
   const isDisabledDueToNetworkStall = useIsNetworkStalled()
 
   return (
@@ -71,6 +78,16 @@ function FileTreeItemMenuItems() {
             disabled={isDisabledDueToNetworkStall}
           >
             {t('download')}
+          </OLDropdownItem>
+        </li>
+      ) : null}
+      {selectedEntityPath ? (
+        <li role="none">
+          <OLDropdownItem
+            onClick={copyPath}
+            disabled={isDisabledDueToNetworkStall}
+          >
+            {t('copy_path')}
           </OLDropdownItem>
         </li>
       ) : null}

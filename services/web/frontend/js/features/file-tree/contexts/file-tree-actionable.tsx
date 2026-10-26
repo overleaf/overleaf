@@ -23,6 +23,7 @@ import {
 } from '../util/sync-mutation'
 import { findInTree, findInTreeOrThrow } from '../util/find-in-tree'
 import { isNameUniqueInFolder } from '../util/is-name-unique-in-folder'
+import { pathInFolder } from '../util/path'
 import { isBlockedFilename, isCleanFilename } from '../util/safe-path'
 
 import { useProjectContext } from '../../../shared/context/project-context'
@@ -68,6 +69,7 @@ const FileTreeActionableContext = createContext<
       canCreate: boolean
       parentFolderId: string
       selectedFileName: string | null | undefined
+      selectedEntityPath: string | null
       isDuplicate: (parentFolderId: string, name: string) => boolean
       startRenaming: any
       finishRenaming: any
@@ -406,6 +408,14 @@ export const FileTreeActionableProvider: FC<React.PropsWithChildren> = ({
     )
   }, [fileTreeData, selectedEntityIds, isRootFolderSelected])
 
+  const selectedEntityPath = useMemo(() => {
+    if (selectedEntityIds.size === 1) {
+      const [selectedEntityId] = selectedEntityIds
+      return pathInFolder(fileTreeData, selectedEntityId)
+    }
+    return null
+  }, [fileTreeData, selectedEntityIds])
+
   // return the name of the selected file or doc if there is only one selected
   const selectedFileName = useMemo(() => {
     if (selectedEntityIds.size === 1) {
@@ -566,6 +576,7 @@ export const FileTreeActionableProvider: FC<React.PropsWithChildren> = ({
       ...state,
       parentFolderId,
       selectedFileName,
+      selectedEntityPath,
       isDuplicate,
       startRenaming,
       finishRenaming,
@@ -600,6 +611,7 @@ export const FileTreeActionableProvider: FC<React.PropsWithChildren> = ({
       isRootFolderSelected,
       parentFolderId,
       selectedFileName,
+      selectedEntityPath,
       selectedEntityIds.size,
       startCreatingDocOrFile,
       startCreatingFile,
