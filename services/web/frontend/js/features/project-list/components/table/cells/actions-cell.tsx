@@ -8,6 +8,10 @@ import { DownloadProjectButtonTooltip } from './action-buttons/download-project-
 import { LeaveProjectButtonTooltip } from './action-buttons/leave-project-button'
 import { DeleteProjectButtonTooltip } from './action-buttons/delete-project-button'
 import { CompileAndDownloadProjectPDFButtonTooltip } from './action-buttons/compile-and-download-project-pdf-button'
+import {
+  CustomizeFolderButtonTooltip,
+  SyncProjectButtonTooltip,
+} from '../../local-folder/project-folder-actions'
 
 type ActionsCellProps = {
   project: Project
@@ -16,6 +20,8 @@ type ActionsCellProps = {
 export default function ActionsCell({ project }: ActionsCellProps) {
   return (
     <>
+      <CustomizeFolderButtonTooltip project={project} />
+      <SyncProjectButtonTooltip project={project} />
       <CopyProjectButtonTooltip project={project} />
       <DownloadProjectButtonTooltip project={project} />
       <CompileAndDownloadProjectPDFButtonTooltip project={project} />

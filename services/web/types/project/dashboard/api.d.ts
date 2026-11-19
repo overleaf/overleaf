@@ -41,6 +41,28 @@ export type ProjectAccessLevel =
   | 'readAndWrite'
   | 'review'
 
+export type ProjectLocalFolderInfo = {
+  customPath: string | null
+  effectivePath: string
+  isCustom: boolean
+  syncEnabled: boolean
+  lastSyncedAt: string | null
+  lastSyncedPath: string | null
+  status: 'synced' | 'error' | 'disabled' | 'not_synced'
+  error: string | null
+  fileCount: number | null
+  hasPdf: boolean
+}
+
+export type LocalSyncSettings = {
+  baseDir: string
+  defaultBaseDir: string
+  allowedRoot: string
+  serviceHealthy: boolean
+  presets: string[]
+  daemonUid?: number | null
+}
+
 export type ProjectApi = {
   id: string
   name: string
@@ -51,6 +73,7 @@ export type ProjectApi = {
   trashed: boolean
   accessLevel: ProjectAccessLevel
   source: Source
+  localFolder?: ProjectLocalFolderInfo
 }
 
 export type Project = MergeAndOverride<

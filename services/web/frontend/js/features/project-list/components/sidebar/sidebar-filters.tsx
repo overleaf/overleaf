@@ -6,7 +6,7 @@ import {
 } from '../../context/project-list-context'
 import TagsList from './tags-list'
 import ProjectsFilterMenu from '../projects-filter-menu'
-import { Folder } from '@phosphor-icons/react'
+import { Folder, FolderOpen } from '@phosphor-icons/react'
 import { ActivePage } from '../../util/navigation-state'
 
 type SidebarFilterProps = {
@@ -50,6 +50,7 @@ export default function SidebarFilters({
   activePage: ActivePage
 }) {
   const { t } = useTranslation()
+  const { openBaseFolderModal } = useProjectListContext()
   return (
     <ul className="list-unstyled project-list-filters">
       <SidebarFilter
@@ -73,6 +74,19 @@ export default function SidebarFilters({
         filter="archived"
         text={t('archived_projects')}
       />
+      <li>
+        <button
+          className="sidebar-filter-button sidebar-filter-button-with-icon"
+          type="button"
+          onClick={openBaseFolderModal}
+          data-testid="sidebar-folder-location-btn"
+        >
+          <span className="icon">
+            <FolderOpen size={20} />
+          </span>
+          Folder Location
+        </button>
+      </li>
       <li aria-hidden="true">
         <hr />
       </li>

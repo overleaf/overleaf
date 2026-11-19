@@ -1,0 +1,17 @@
+#!/bin/bash
+set -e
+
+source /etc/overleaf/env.sh
+
+mkdir -p /run/overleaf-local-sync
+chown ubuntu:www-data /run/overleaf-local-sync
+chmod 2750 /run/overleaf-local-sync
+rm -f /run/overleaf-local-sync/sync.sock
+
+mkdir -p /tmp/overleaf-local-sync-stage
+chown www-data:ubuntu /tmp/overleaf-local-sync-stage
+chmod 2750 /tmp/overleaf-local-sync-stage
+
+mkdir -p /var/log/overleaf
+SYNC_USER="${LOCAL_SYNC_USER:-ubuntu}"
+exec /sbin/setuser "$SYNC_USER" /usr/bin/node /overleaf/services/local-sync/app.mjs >> /var/log/overleaf/local-sync.log 2>&1

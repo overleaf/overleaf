@@ -4,6 +4,8 @@ import OLRow from '@/shared/components/ol/ol-row'
 import OLCol from '@/shared/components/ol/ol-col'
 import UserNotifications from '@/features/project-list/components/notifications/user-notifications'
 import WelcomeMessage from '@/features/project-list/components/welcome-message'
+import LocalFolderBanner from '@/features/project-list/components/local-folder/local-folder-banner'
+import BaseFolderSettingsModal from '@/features/project-list/components/local-folder/base-folder-settings-modal'
 
 export default function WelcomePageContent() {
   const { error } = useProjectListContext()
@@ -22,9 +24,11 @@ export default function WelcomePageContent() {
               <UserNotifications />
             </OLCol>
           </OLRow>
+          <LocalFolderBanner />
           <WelcomeMessage />
         </OLCol>
       </OLRow>
+      <BaseFolderSettingsModal />
     </div>
   )
 }

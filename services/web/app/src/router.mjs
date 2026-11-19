@@ -4,6 +4,7 @@ import Features from './infrastructure/Features.mjs'
 import ProjectController from './Features/Project/ProjectController.mjs'
 import ProjectApiController from './Features/Project/ProjectApiController.mjs'
 import ProjectListController from './Features/Project/ProjectListController.mjs'
+import LocalProjectSyncController from './Features/Project/LocalProjectSyncController.mjs'
 import SpellingController from './Features/Spelling/SpellingController.mjs'
 import EditorRouter from './Features/Editor/EditorRouter.mjs'
 import Settings from '@overleaf/settings'
@@ -572,6 +573,43 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     AuthenticationController.requireLogin(),
     RateLimiterMiddleware.rateLimit(rateLimiters.getProjects),
     ProjectListController.getProjectsJson
+  )
+  webRouter.get(
+    '/api/local-sync/settings',
+    AuthenticationController.requireLogin(),
+    LocalProjectSyncController.getSettings
+  )
+  webRouter.post(
+    '/api/local-sync/settings',
+    AuthenticationController.requireLogin(),
+    LocalProjectSyncController.updateSettings
+  )
+  webRouter.post(
+    '/api/local-sync/sync-all',
+    AuthenticationController.requireLogin(),
+    LocalProjectSyncController.syncAll
+  )
+  webRouter.get(
+    '/api/local-sync/browse',
+    AuthenticationController.requireLogin(),
+    LocalProjectSyncController.browse
+  )
+  webRouter.post(
+    '/api/local-sync/mkdir',
+    AuthenticationController.requireLogin(),
+    LocalProjectSyncController.createDirectory
+  )
+  webRouter.post(
+    '/project/:Project_id/local-folder',
+    AuthenticationController.requireLogin(),
+    AuthorizationMiddleware.ensureUserCanAdminProject,
+    LocalProjectSyncController.updateProjectFolder
+  )
+  webRouter.post(
+    '/project/:Project_id/local-sync',
+    AuthenticationController.requireLogin(),
+    AuthorizationMiddleware.ensureUserCanReadProject,
+    LocalProjectSyncController.syncProject
   )
 
   for (const route of [

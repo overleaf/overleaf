@@ -16,6 +16,10 @@ import DeleteProjectButton from '../table/cells/action-buttons/delete-project-bu
 import { Project } from '../../../../../../types/project/dashboard/api'
 import CompileAndDownloadProjectPDFButton from '../table/cells/action-buttons/compile-and-download-project-pdf-button'
 import RenameProjectButton from '../table/cells/action-buttons/rename-project-button'
+import {
+  CustomizeFolderButton,
+  SyncProjectButton,
+} from '../local-folder/project-folder-actions'
 import MaterialIcon from '@/shared/components/material-icon'
 import OLSpinner from '@/shared/components/ol/ol-spinner'
 
@@ -35,6 +39,44 @@ function ActionsDropdown({ project }: ActionDropdownProps) {
         <MaterialIcon type="more_vert" accessibilityLabel={t('actions')} />
       </OLDropdownToggle>
       <OLDropdownMenu flip={false}>
+        <CustomizeFolderButton project={project}>
+          {(text, handleOpenModal) => (
+            <li role="none">
+              <OLDropdownItem
+                as="button"
+                tabIndex={-1}
+                onClick={handleOpenModal}
+                leadingIcon="folder_open"
+              >
+                {text}
+              </OLDropdownItem>
+            </li>
+          )}
+        </CustomizeFolderButton>
+        <SyncProjectButton project={project}>
+          {(text, isSyncing, handleSync) => (
+            <li role="none">
+              <OLDropdownItem
+                as="button"
+                tabIndex={-1}
+                disabled={isSyncing}
+                onClick={handleSync}
+                leadingIcon={
+                  isSyncing ? (
+                    <OLSpinner
+                      size="sm"
+                      className="dropdown-item-leading-icon spinner"
+                    />
+                  ) : (
+                    'sync'
+                  )
+                }
+              >
+                {text}
+              </OLDropdownItem>
+            </li>
+          )}
+        </SyncProjectButton>
         <RenameProjectButton project={project}>
           {(text, handleOpenModal) => (
             <li role="none">

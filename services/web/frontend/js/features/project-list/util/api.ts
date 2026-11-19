@@ -1,9 +1,15 @@
 import { Tag } from '../../../../../app/src/Features/Tags/types'
 import {
   GetProjectsResponseBody,
+  LocalSyncSettings,
+  ProjectLocalFolderInfo,
   Sort,
 } from '../../../../../types/project/dashboard/api'
-import { deleteJSON, postJSON } from '../../../infrastructure/fetch-json'
+import {
+  deleteJSON,
+  getJSON,
+  postJSON,
+} from '../../../infrastructure/fetch-json'
 
 export function getProjects(sortBy: Sort): Promise<GetProjectsResponseBody> {
   return postJSON('/api/project', { body: { sort: sortBy } })
@@ -79,4 +85,76 @@ export function unarchiveProject(projectId: string) {
 
 export function untrashProject(projectId: string) {
   return deleteJSON(`/project/${projectId}/trash`)
+}
+
+export type BrowseDirectoriesResponse = {
+  ok: boolean
+  currentPath: string
+  parentPath: string | null
+  allowedRoot: string
+  defaultBaseDir: string
+  directories: Array<{ name: string; path: string }>
+}
+
+export function getLocalSyncSettings(): Promise<LocalSyncSettings> {
+  return getJSON('/api/local-sync/settings')
+}
+
+export function updateLocalSyncBaseDir(body: {
+  baseDir: string
+  syncAll?: boolean
+  cleanOld?: boolean
+}): Promise<{
+  settings: LocalSyncSettings
+  previousBaseDir: string
+  syncedCount: number
+  failedCount: number
+}> {
+  return postJSON('/api/local-sync/settings', { body })
+}
+
+export function syncAllLocalProjects(): Promise<{
+  ok: boolean
+  total: number
+  syncedCount: number
+  failedCount: number
+}> {
+  return postJSON('/api/local-sync/sync-all')
+}
+
+export function browseLocalDirectories(
+  dirPath?: string
+): Promise<BrowseDirectoriesResponse> {
+  const q = dirPath ? `?path=${encodeURIComponent(dirPath)}` : ''
+  return getJSON(`/api/local-sync/browse${q}`)
+}
+
+export function createLocalDirectory(
+  dirPath: string
+): Promise<{ ok: boolean; normalizedPath: string }> {
+  return postJSON('/api/local-sync/mkdir', { body: { path: dirPath } })
+}
+
+export function updateProjectLocalFolder(
+  projectId: string,
+  body: {
+    customFolderPath: string | null
+    syncEnabled?: boolean
+    syncNow?: boolean
+    cleanOld?: boolean
+  }
+): Promise<{
+  ok: boolean
+  localFolder: ProjectLocalFolderInfo
+  syncResult?: { syncedFilesCount?: number } | null
+}> {
+  return postJSON(`/project/${projectId}/local-folder`, { body })
+}
+
+export function syncProjectToLocalFolder(projectId: string): Promise<{
+  ok: boolean
+  localFolder: ProjectLocalFolderInfo
+  syncResult?: { syncedFilesCount?: number }
+}> {
+  return postJSON(`/project/${projectId}/local-sync`)
 }

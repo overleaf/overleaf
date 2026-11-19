@@ -22,12 +22,13 @@ import { Tag } from '../../../../../app/src/Features/Tags/types'
 import {
   ClonedProject,
   GetProjectsResponseBody,
+  LocalSyncSettings,
   Project,
   Sort,
 } from '../../../../../types/project/dashboard/api'
 import getMeta from '../../../utils/meta'
 import useAsync from '../../../shared/hooks/use-async'
-import { getProjects } from '../util/api'
+import { getLocalSyncSettings, getProjects } from '../util/api'
 import sortProjects from '../util/sort-projects'
 import {
   getInitialNavigationState,
@@ -113,6 +114,17 @@ export type ProjectListContextValue = {
   loadMoreProjects: () => void
   hasLeavableProjectsSelected: boolean
   hasDeletableProjectsSelected: boolean
+  localSyncSettings: LocalSyncSettings | null
+  setLocalSyncSettings: React.Dispatch<
+    React.SetStateAction<LocalSyncSettings | null>
+  >
+  showBaseFolderModal: boolean
+  openBaseFolderModal: () => void
+  closeBaseFolderModal: () => void
+  activeProjectForFolderModal: Project | null
+  openProjectFolderModal: (project: Project) => void
+  closeProjectFolderModal: () => void
+  refreshProjectsList: () => Promise<void>
 }
 
 export const ProjectListContext = createContext<
@@ -177,6 +189,43 @@ export function ProjectListProvider({
   )
 
   const [searchText, setSearchText] = useState('')
+  const [localSyncSettings, setLocalSyncSettings] =
+    useState<LocalSyncSettings | null>(null)
+  const [showBaseFolderModal, setShowBaseFolderModal] = useState(false)
+  const [activeProjectForFolderModal, setActiveProjectForFolderModal] =
+    useState<Project | null>(null)
+
+  useEffect(() => {
+    getLocalSyncSettings()
+      .then(setLocalSyncSettings)
+      .catch(debugConsole.error)
+  }, [])
+
+  const openBaseFolderModal = useCallback(() => {
+    setShowBaseFolderModal(true)
+  }, [])
+
+  const closeBaseFolderModal = useCallback(() => {
+    setShowBaseFolderModal(false)
+  }, [])
+
+  const openProjectFolderModal = useCallback((project: Project) => {
+    setActiveProjectForFolderModal(project)
+  }, [])
+
+  const closeProjectFolderModal = useCallback(() => {
+    setActiveProjectForFolderModal(null)
+  }, [])
+
+  const refreshProjectsList = useCallback(async () => {
+    try {
+      const data = await getProjects(sort)
+      setLoadedProjects(data.projects)
+      setTotalProjectsCount(data.totalSize)
+    } catch (err) {
+      debugConsole.error(err)
+    }
+  }, [sort])
 
   const {
     isLoading: loading,
@@ -574,6 +623,15 @@ export function ProjectListProvider({
       projectsPerTag,
       currentFilterProjectsCount,
       visibleProjects,
+      localSyncSettings,
+      setLocalSyncSettings,
+      showBaseFolderModal,
+      openBaseFolderModal,
+      closeBaseFolderModal,
+      activeProjectForFolderModal,
+      openProjectFolderModal,
+      closeProjectFolderModal,
+      refreshProjectsList,
     }),
     [
       addTag,
@@ -614,6 +672,14 @@ export function ProjectListProvider({
       projectsPerTag,
       currentFilterProjectsCount,
       visibleProjects,
+      localSyncSettings,
+      showBaseFolderModal,
+      openBaseFolderModal,
+      closeBaseFolderModal,
+      activeProjectForFolderModal,
+      openProjectFolderModal,
+      closeProjectFolderModal,
+      refreshProjectsList,
     ]
   )
 

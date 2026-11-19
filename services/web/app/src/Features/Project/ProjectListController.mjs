@@ -33,6 +33,7 @@ import PermissionsManager from '../Authorization/PermissionsManager.mjs'
 import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
 import { OnboardingDataCollection } from '../../models/OnboardingDataCollection.mjs'
 import UserSettingsHelper from './UserSettingsHelper.mjs'
+import LocalProjectSyncManager from './LocalProjectSyncManager.mjs'
 import { parseReq, z, zz } from '../../infrastructure/Validation.mjs'
 
 const getProjectsJsonSchema = z.object({
@@ -742,7 +743,7 @@ async function _getProjects(
   const results = await Promise.all([
     ProjectGetter.promises.findAllUsersProjects(
       userId,
-      'name lastUpdated lastUpdatedBy publicAccesLevel archived trashed owner_ref tokens'
+      'name lastUpdated lastUpdatedBy publicAccesLevel archived trashed owner_ref tokens localFolderPath localFolderSyncEnabled localFolderLastSyncedAt localFolderLastSyncStatus localFolderLastSyncError localFolderLastSyncedPath localFolderFileCount localFolderHasPdf'
     ),
     TagsHandler.promises.getAllTags(userId),
   ])
@@ -757,6 +758,31 @@ async function _getProjects(
   const pagedProjects = _sortAndPaginate(filteredProjects, sort, page)
 
   const projects = await _injectProjectUsers(pagedProjects)
+
+  const allRawProjects = [
+    ...(allProjects.owned || []),
+    ...(allProjects.readAndWrite || []),
+    ...(allProjects.review || []),
+    ...(allProjects.readOnly || []),
+    ...(allProjects.tokenReadAndWrite || []),
+    ...(allProjects.tokenReadOnly || []),
+  ]
+  const seenRawIds = new Set()
+  const uniqueRawProjects = []
+  for (const rawProj of allRawProjects) {
+    const idStr = rawProj._id.toString()
+    if (!seenRawIds.has(idStr)) {
+      seenRawIds.add(idStr)
+      uniqueRawProjects.push(rawProj)
+    }
+  }
+  const localFolderMap = await LocalProjectSyncManager.buildProjectFolderInfoMap(
+    userId,
+    uniqueRawProjects
+  )
+  for (const proj of projects) {
+    proj.localFolder = localFolderMap.get(proj.id)
+  }
 
   return {
     totalSize: filteredProjects.length,

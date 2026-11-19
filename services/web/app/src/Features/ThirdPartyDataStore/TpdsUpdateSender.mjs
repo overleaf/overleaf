@@ -8,6 +8,7 @@ import { fetchNothing } from '@overleaf/fetch-utils'
 import settings from '@overleaf/settings'
 import CollaboratorsGetterModule from '../Collaborators/CollaboratorsGetter.mjs'
 import UserGetterModule from '../User/UserGetter.mjs'
+import LocalProjectSyncManager from '../Project/LocalProjectSyncManager.mjs'
 
 const { promises: UserGetter } = UserGetterModule
 const { promises: CollaboratorsGetter } = CollaboratorsGetterModule
@@ -19,6 +20,7 @@ const tpdsUrl = _.get(settings, ['apis', 'thirdPartyDataStore', 'url'])
 async function addDoc(params) {
   metrics.inc('tpds.add-doc')
   const { projectId, path, docId, projectName, rev, folderId } = params
+  LocalProjectSyncManager.scheduleSync(projectId)
 
   const streamOrigin =
     settings.apis.docstore.pubUrl +
@@ -84,6 +86,7 @@ async function addFile(params) {
     rev,
     folderId,
   } = params
+  LocalProjectSyncManager.scheduleSync(projectId)
   await addEntity({
     projectId,
     path,
@@ -126,6 +129,7 @@ async function deleteEntity(params) {
     entityType,
     subtreeEntityIds,
   } = params
+  LocalProjectSyncManager.scheduleSync(projectId)
 
   const projectUserIds = await getProjectUsersIds(projectId)
 
@@ -150,6 +154,7 @@ async function deleteEntity(params) {
 }
 
 async function createProject(params) {
+  LocalProjectSyncManager.scheduleSync(params?.projectId)
   if (!tpdsUrl) return // Overleaf Community Edition/Server Pro
 
   const { projectId, projectName, userId } = params
@@ -212,6 +217,9 @@ async function getProjectUsersIds(projectId) {
 async function moveEntity(params) {
   metrics.inc('tpds.move-entity')
   const { projectId, rev, entityId, entityType, folderId } = params
+  LocalProjectSyncManager.scheduleSync(projectId, {
+    cleanOld: Boolean(params.newProjectName),
+  })
 
   const projectUserIds = await getProjectUsersIds(projectId)
   const { endPath, startPath } = buildMovePaths(params)

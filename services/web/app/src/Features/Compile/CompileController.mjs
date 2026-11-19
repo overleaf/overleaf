@@ -21,6 +21,7 @@ import Features from '../../infrastructure/Features.mjs'
 import ClsiCacheController from './ClsiCacheController.mjs'
 import { prepareZipAttachment } from '../../infrastructure/Response.mjs'
 import ClsiCacheHandler from './ClsiCacheHandler.mjs'
+import LocalProjectSyncManager from '../Project/LocalProjectSyncManager.mjs'
 import {
   getFilePath,
   getOutputFileURL,
@@ -489,6 +490,11 @@ const _CompileController = {
       })
 
     Metrics.inc('compile-status', 1, { status })
+    if (status === 'success') {
+      LocalProjectSyncManager.scheduleSync(projectId, {
+        compiledPdf: { buildId, userId },
+      })
+    }
     if (pdfDownloadDomain && outputUrlPrefix) {
       pdfDownloadDomain += outputUrlPrefix
     }

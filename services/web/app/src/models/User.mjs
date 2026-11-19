@@ -249,6 +249,7 @@ export const UserSchema = new Schema(
       us: { type: String },
       uk: { type: String },
     },
+    localSyncBaseDir: { type: String },
   },
   { minimize: false }
 )

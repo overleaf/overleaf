@@ -217,6 +217,7 @@
     "services/idp",
     "services/latexqc",
     "services/linked-url-proxy",
+    "services/local-sync",
     "services/notifications",
     "services/project-history",
     "services/real-time",
@@ -227,9 +228,9 @@
     "services/web/scripts/plan-prices",
     "services/web/scripts/ukamf",
     "tools/dependency-management",
+    "tools/migrations",
     "tools/npm-overrides-helper",
-    "tools/saas-e2e",
-    "tools/migrations"
+    "tools/saas-e2e"
   ],
   "dependenciesMeta": {
     "@babel/helper-string-parser@7.27.1": {

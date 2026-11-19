@@ -1,0 +1,20 @@
+{
+  "name": "@overleaf/local-sync",
+  "version": "1.0.0",
+  "description": "COSL Local Folder Synchronization Service for Overleaf Community Edition",
+  "private": true,
+  "type": "module",
+  "main": "app.mjs",
+  "scripts": {
+    "start": "node app.mjs",
+    "test": "node test/test-local-sync.mjs"
+  },
+  "keywords": [
+    "overleaf",
+    "local-sync",
+    "cosl",
+    "codemolabs"
+  ],
+  "author": "Codemo Open Source Labs (COSL)",
+  "license": "AGPL-3.0"
+}

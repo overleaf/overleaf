@@ -1,5 +1,6 @@
 import { memo } from 'react'
 import InlineTags from './cells/inline-tags'
+import ProjectFolderBadge from '../local-folder/project-folder-badge'
 import OwnerCell from './cells/owner-cell'
 import LastUpdatedCell from './cells/last-updated-cell'
 import ActionsCell from './cells/actions-cell'
@@ -26,6 +27,7 @@ function ProjectListTableRow({ project, selected }: ProjectListTableRowProps) {
           {project.name}
         </a>{' '}
         <InlineTags className="d-none d-md-inline" projectId={project.id} />
+        <ProjectFolderBadge project={project} />
       </td>
       <td className="dash-cell-date-owner pb-0 d-md-none">
         <LastUpdatedCell project={project} />

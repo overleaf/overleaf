@@ -116,6 +116,14 @@ export const ProjectSchema = new Schema(
     ],
     deferredTpdsFlushCounter: { type: Number },
     referenceFormat: { type: String },
+    localFolderPath: { type: String },
+    localFolderSyncEnabled: { type: Boolean, default: true },
+    localFolderLastSyncedAt: { type: Date },
+    localFolderLastSyncStatus: { type: String },
+    localFolderLastSyncError: { type: String },
+    localFolderLastSyncedPath: { type: String },
+    localFolderFileCount: { type: Number },
+    localFolderHasPdf: { type: Boolean, default: false },
   },
   { minimize: false }
 )
