@@ -4,7 +4,7 @@
 # Host folder examples:
 #   Linux:            OVERLEAF_PROJECTS_HOST_DIR=$HOME/OverleafProjects
 #   macOS:            OVERLEAF_PROJECTS_HOST_DIR=$HOME/OverleafProjects
-#   Windows (WSL2):   OVERLEAF_PROJECTS_HOST_DIR=C:/Users/<YourUser>/OverleafProjects
+#   Windows (WSL2):   OVERLEAF_PROJECTS_HOST_DIR=C:/Users/user/OverleafProjects
 #
 # Inside the container all project files live under /projects, avoiding OS-specific
 # home paths while remaining directly editable on your host machine.

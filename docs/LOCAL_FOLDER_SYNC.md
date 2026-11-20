@@ -28,7 +28,7 @@ Standard Overleaf Community Edition stores all project source documents, uploade
 +-----------------------------------------------------------------------------------+
 | Host Workstation                                                                  |
 |                                                                                   |
-|  /home/<your-user>/OverleafProjects/                                              |
+|  /home/user/OverleafProjects/                                                     |
 |  ├── Project Alpha/                                                               |
 |  │   ├── main.tex                                                                 |
 |  │   ├── references.bib                                                           |
@@ -36,10 +36,10 @@ Standard Overleaf Community Edition stores all project source documents, uploade
 |  │   ├── output.pdf                    <-- Compiled PDF automatically saved       |
 |  │   └── .overleaf-sync.json           <-- Manifest tracking Overleaf files       |
 |  │                                                                                |
-|  └── Project Beta (Custom Path: /home/<your-user>/Documents/Thesis)               |
+|  └── Project Beta (Custom Path: /home/user/Documents/Thesis)                      |
 +-----------------------------------------------------------------------------------+
           ^
-          | (Mounted Bind: /home/<your-user>:/home/<your-user>:rw)
+          | (Mounted Bind: /home/user:/home/user:rw)
           v
 +-----------------------------------------------------------------------------------+
 | Docker Container: sharelatex (codemolabs/overleaf:latest)                         |
@@ -61,7 +61,7 @@ Standard Overleaf Community Edition stores all project source documents, uploade
 ## Security Model & Sandboxing
 
 1. **Path Boundary Confinement**:
-   The synchronizer enforces a strict root boundary configured via `LOCAL_SYNC_ALLOWED_ROOT` (for example `/home/<your-user>` or `/projects`). System-critical folders (`/etc`, `/boot`, `/usr`, `/bin`, `/var`, `/sys`, `/proc`, `/dev`, `/run`, `/root`, `~/.ssh`, `~/.gnupg`, `~/overleaf-toolkit`) are hard-blocked from being targeted as sync destinations.
+   The synchronizer enforces a strict root boundary configured via `LOCAL_SYNC_ALLOWED_ROOT` (for example `/home/user` or `/projects`). System-critical folders (`/etc`, `/boot`, `/usr`, `/bin`, `/var`, `/sys`, `/proc`, `/dev`, `/run`, `/root`, `~/.ssh`, `~/.gnupg`, `~/overleaf-toolkit`) are hard-blocked from being targeted as sync destinations.
 2. **Symlink Traversal Prevention**:
    All paths are inspected with `fs.realpathSync`. Symlinks attempting to escape the user jail or target restricted paths are rejected with HTTP 403 Forbidden.
 3. **Collision Avoidance**:

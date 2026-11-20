@@ -154,9 +154,15 @@ docker exec sharelatex bash -c "bash /tmp/tune-sharelatex-memory.sh && rm -f /tm
 Linux and macOS:
 
 ```bash
+# From the repository scripts directory
 ./scripts/overleaf-ctl.sh pause
 ./scripts/overleaf-ctl.sh resume
 ./scripts/overleaf-ctl.sh status
+
+# Or when installed in Overleaf Toolkit
+/home/user/overleaf-toolkit/bin/pause
+/home/user/overleaf-toolkit/bin/resume
+/home/user/overleaf-toolkit/bin/overleaf-ctl.sh status
 ```
 
 Windows (Command Prompt or PowerShell):
