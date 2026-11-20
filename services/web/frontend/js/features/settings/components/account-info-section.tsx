@@ -7,6 +7,7 @@ import {
 import getMeta from '../../../utils/meta'
 import useAsync from '../../../shared/hooks/use-async'
 import { useUserContext } from '../../../shared/context/user-context'
+import roles from '../data/roles'
 import OLButton from '@/shared/components/ol/ol-button'
 import Notification from '@/shared/components/notification'
 import OLFormGroup from '@/shared/components/ol/ol-form-group'
@@ -24,12 +25,17 @@ function AccountInfoSection() {
   const {
     first_name: initialFirstName,
     last_name: initialLastName,
+    role: initialRole,
+    institution: initialInstitution,
     email: initialEmail,
+    isAdmin,
   } = useUserContext()
 
   const [email, setEmail] = useState(initialEmail)
-  const [firstName, setFirstName] = useState(initialFirstName)
-  const [lastName, setLastName] = useState(initialLastName)
+  const [firstName, setFirstName] = useState(initialFirstName || '')
+  const [lastName, setLastName] = useState(initialLastName || '')
+  const [role, setRole] = useState(initialRole || '')
+  const [institution, setInstitution] = useState(initialInstitution || '')
   const { isLoading, isSuccess, isError, error, runAsync } = useAsync()
   const [isFormValid, setIsFormValid] = useState(true)
 
@@ -48,9 +54,22 @@ function AccountInfoSection() {
     setLastName(event.target.value)
   }
 
+  const handleRoleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRole(event.target.value)
+  }
+
+  const handleInstitutionChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setInstitution(event.target.value)
+  }
+
   const canUpdateEmail =
     !hasAffiliationsFeature && !isExternalAuthenticationSystemUsed
   const canUpdateNames = shouldAllowEditingDetails
+  const displayName = [firstName.trim(), lastName.trim()]
+    .filter(Boolean)
+    .join(' ')
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -63,6 +82,8 @@ function AccountInfoSection() {
           email: canUpdateEmail ? email : undefined,
           first_name: canUpdateNames ? firstName : undefined,
           last_name: canUpdateNames ? lastName : undefined,
+          role: canUpdateNames ? role : undefined,
+          institution: canUpdateNames ? institution : undefined,
         },
       })
     ).catch(() => {})
@@ -71,6 +92,14 @@ function AccountInfoSection() {
   return (
     <>
       <h3 id="update-account-info">{t('update_account_info')}</h3>
+      <div className="ol-account-profile-summary">
+        <span className="ol-account-profile-name" translate="no">
+          {displayName || email}
+        </span>
+        {isAdmin ? (
+          <span className="ol-account-role-badge">Administrator</span>
+        ) : null}
+      </div>
       <form id="account-info-form" onSubmit={handleSubmit}>
         {hasAffiliationsFeature ? null : (
           <ReadOrWriteFormGroup
@@ -100,6 +129,34 @@ function AccountInfoSection() {
           maxLength={255}
           value={lastName}
           handleChange={handleLastNameChange}
+          canEdit={canUpdateNames}
+          required={false}
+        />
+        <ReadOrWriteFormGroup
+          id="role-input"
+          type="text"
+          label="Profession / Role (optional)"
+          maxLength={120}
+          value={role}
+          placeholder="e.g. Researcher, Student, Engineer"
+          list="account-role-suggestions"
+          handleChange={handleRoleChange}
+          canEdit={canUpdateNames}
+          required={false}
+        />
+        <datalist id="account-role-suggestions">
+          {roles.map(r => (
+            <option key={r} value={r} />
+          ))}
+        </datalist>
+        <ReadOrWriteFormGroup
+          id="institution-input"
+          type="text"
+          label="Organization / Institution (optional)"
+          maxLength={160}
+          value={institution}
+          placeholder="e.g. University, Lab, or Company"
+          handleChange={handleInstitutionChange}
           canEdit={canUpdateNames}
           required={false}
         />
@@ -152,6 +209,8 @@ type ReadOrWriteFormGroupProps = {
   canEdit: boolean
   maxLength?: number
   required: boolean
+  placeholder?: string
+  list?: string
 }
 
 function ReadOrWriteFormGroup({
@@ -163,6 +222,8 @@ function ReadOrWriteFormGroup({
   canEdit,
   maxLength,
   required,
+  placeholder,
+  list,
 }: ReadOrWriteFormGroupProps) {
   const [validationMessage, setValidationMessage] = useState('')
 
@@ -194,6 +255,8 @@ function ReadOrWriteFormGroup({
         required={required}
         value={value}
         maxLength={maxLength}
+        placeholder={placeholder}
+        list={list}
         data-ol-dirty={!!validationMessage}
         onChange={handleChangeAndValidity}
         onInvalid={handleInvalid}

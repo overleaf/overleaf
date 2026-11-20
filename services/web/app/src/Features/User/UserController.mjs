@@ -385,8 +385,8 @@ const updateUserSettingsSchema = z.object({
   body: z.strictObject({
     first_name: z.string().max(255).nullish(),
     last_name: z.string().max(255).nullish(),
-    role: z.string().optional(),
-    institution: z.string().optional(),
+    role: z.string().max(120).optional(),
+    institution: z.string().max(160).optional(),
     email: z.string().optional(),
     mode: z.string().optional(),
     editorTheme: z.string().optional(),

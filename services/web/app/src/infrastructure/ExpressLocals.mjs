@@ -13,6 +13,7 @@ import PackageVersions from './PackageVersions.js'
 import Modules from './Modules.mjs'
 import Errors from '../Features/Errors/Errors.js'
 import AdminAuthorizationHelper from '../Features/Helpers/AdminAuthorizationHelper.mjs'
+import WorkspaceBrandingService from '../Features/ServerAdmin/WorkspaceBrandingService.mjs'
 import { addOptionalCleanupHandlerAfterDrainingConnections } from './GracefulShutdown.mjs'
 import { sanitizeSessionUserForFrontEnd } from './FrontEndUser.mjs'
 import { expressify } from '@overleaf/promise-utils'
@@ -97,8 +98,13 @@ export default async function (webRouter, privateApiRouter, publicApiRouter) {
     })
   }
 
+  WorkspaceBrandingService.initialize().catch(err => {
+    logger.warn({ err }, 'failed to initialize workspace branding cache')
+  })
+
   webRouter.use(function (req, res, next) {
     res.locals.session = req.session
+    res.locals.workspaceBranding = WorkspaceBrandingService.getCachedSummary()
     next()
   })
 
@@ -424,6 +430,7 @@ export default async function (webRouter, privateApiRouter, publicApiRouter) {
       cioSiteId: Settings.analytics?.cio?.siteId,
       linkedInInsightsPartnerId: Settings.analytics?.linkedIn?.partnerId,
       enablePandocConversions: Settings.enablePandocConversions,
+      hasPackageHubFeature: Features.hasFeature('package-hub'),
       mixpanelLabsToken:
         Settings.labs?.enable && Settings.analytics?.mixpanel?.labsToken,
     }

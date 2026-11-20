@@ -34,6 +34,7 @@ import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
 import { OnboardingDataCollection } from '../../models/OnboardingDataCollection.mjs'
 import UserSettingsHelper from './UserSettingsHelper.mjs'
 import LocalProjectSyncManager from './LocalProjectSyncManager.mjs'
+import ProjectAccessPolicyService from '../Authorization/ProjectAccessPolicyService.mjs'
 import { parseReq, z, zz } from '../../infrastructure/Validation.mjs'
 
 const getProjectsJsonSchema = z.object({
@@ -740,14 +741,39 @@ async function _getProjects(
   page = { size: 20 }
 ) {
   /** @type {[AllUsersProjects, MongoTag[]]} */
+  const projectListFields =
+    'name lastUpdated lastUpdatedBy publicAccesLevel archived trashed owner_ref tokens collaberator_refs reviewer_refs readOnly_refs copyDisabled_refs enterpriseAccess localFolderPath localFolderSyncEnabled localFolderLastSyncedAt localFolderLastSyncStatus localFolderLastSyncError localFolderLastSyncedPath localFolderFileCount localFolderHasPdf'
   const results = await Promise.all([
-    ProjectGetter.promises.findAllUsersProjects(
-      userId,
-      'name lastUpdated lastUpdatedBy publicAccesLevel archived trashed owner_ref tokens localFolderPath localFolderSyncEnabled localFolderLastSyncedAt localFolderLastSyncStatus localFolderLastSyncError localFolderLastSyncedPath localFolderFileCount localFolderHasPdf'
-    ),
+    ProjectGetter.promises.findAllUsersProjects(userId, projectListFields),
     TagsHandler.promises.getAllTags(userId),
+    ProjectAccessPolicyService.findEnterpriseSharedProjectsForUser(
+      userId,
+      projectListFields
+    ),
   ])
-  const [allProjects, tags] = results
+  const [allProjects, tags, enterpriseShared] = results
+  const existingProjectIds = new Set(
+    [
+      ...(allProjects.owned || []),
+      ...(allProjects.readAndWrite || []),
+      ...(allProjects.review || []),
+      ...(allProjects.readOnly || []),
+      ...(allProjects.tokenReadAndWrite || []),
+      ...(allProjects.tokenReadOnly || []),
+    ].map(p => String(p._id))
+  )
+  for (const p of enterpriseShared.readAndWrite || []) {
+    if (!existingProjectIds.has(String(p._id))) {
+      existingProjectIds.add(String(p._id))
+      allProjects.readAndWrite = [...(allProjects.readAndWrite || []), p]
+    }
+  }
+  for (const p of enterpriseShared.readOnly || []) {
+    if (!existingProjectIds.has(String(p._id))) {
+      existingProjectIds.add(String(p._id))
+      allProjects.readOnly = [...(allProjects.readOnly || []), p]
+    }
+  }
   const formattedProjects = _formatProjects(allProjects, userId)
   const filteredProjects = _applyFilters(
     formattedProjects,
@@ -776,12 +802,22 @@ async function _getProjects(
       uniqueRawProjects.push(rawProj)
     }
   }
-  const localFolderMap = await LocalProjectSyncManager.buildProjectFolderInfoMap(
-    userId,
-    uniqueRawProjects
-  )
+  const [localFolderMap, sharingInfoMap] = await Promise.all([
+    LocalProjectSyncManager.buildProjectFolderInfoMap(
+      userId,
+      uniqueRawProjects
+    ),
+    Promise.resolve(
+      ProjectAccessPolicyService.buildProjectSharingInfoMap(
+        userId,
+        uniqueRawProjects,
+        enterpriseShared.policyInfoById
+      )
+    ),
+  ])
   for (const proj of projects) {
     proj.localFolder = localFolderMap.get(proj.id)
+    proj.sharingInfo = sharingInfoMap.get(proj.id)
   }
 
   return {

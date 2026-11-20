@@ -1,6 +1,7 @@
 footer.site-footer
 	- var showLanguagePicker = Object.keys(settings.i18n.subdomainLang).length > 1
 	- var hasCustomLeftNav = nav.left_footer && nav.left_footer.length > 0
+	- var filteredRightFooter = (nav.right_footer || []).filter(item => !/\bfork\b/i.test((item && item.text) || ''))
 	.site-footer-content.hidden-print
 		.row
 			ul.site-footer-items.col-lg-9
@@ -30,14 +31,9 @@ footer.site-footer
 							| !{item.text}
 
 			ul.site-footer-items.col-lg-3.text-end
-				each item in nav.right_footer
+				each item in filteredRightFooter
 					li
 						if item.url
 							a(href=item.url class=item.class aria-label=item.label) !{item.text}
 						else
 							| !{item.text}
-		if settings.env === 'server-ce'
-			.row
-				.col-12
-					p.copyright-notice
-						| Overleaf Community Edition™ is a free unsupported software that may contain vulnerabilities and used at your own risk. Use of Overleaf Community Edition™ here is not operated, supported or endorsed by Overleaf®. It has been provided "AS IS" with all liability disclaimed (to the fullest extent lawful) and all rights reserved.

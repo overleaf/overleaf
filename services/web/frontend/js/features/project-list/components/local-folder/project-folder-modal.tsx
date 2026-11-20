@@ -13,24 +13,21 @@ import OLFormLabel from '@/shared/components/ol/ol-form-label'
 import OLFormControl from '@/shared/components/ol/ol-form-control'
 import OLFormCheckbox from '@/shared/components/ol/ol-form-checkbox'
 import Notification from '@/shared/components/notification'
-import MaterialIcon from '@/shared/components/material-icon'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
+import { ProjectLocalFolderInfo } from '../../../../../../../types/project/dashboard/api'
 import { useProjectListContext } from '../../context/project-list-context'
-import { updateProjectLocalFolder } from '../../util/api'
+import {
+  syncProjectToLocalFolder,
+  updateProjectLocalFolder,
+} from '../../util/api'
 import { getUserFacingMessage } from '../../../../infrastructure/fetch-json'
 import DirectoryBrowser from './directory-browser'
-
-function sanitizePreviewName(name: string, id: string) {
-  const cleaned = (name || '')
-    .replace(/[\0-\x1f\x7f]/g, '')
-    .replace(/[/\\:*?"<>|]/g, '_')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .replace(/^\.+/, '')
-    .replace(/\.+$/, '')
-    .trim()
-  return cleaned.slice(0, 120).trim() || `project_${id.slice(-6)}`
-}
+import {
+  DEFAULT_LOCAL_ALLOWED_ROOT,
+  DEFAULT_LOCAL_BASE_DIR,
+  formatLocalDisplayPath,
+  sanitizePreviewName,
+} from './path-display'
 
 function ProjectFolderModal() {
   const {
@@ -47,11 +44,20 @@ function ProjectFolderModal() {
   const [cleanOld, setCleanOld] = useState(false)
   const [showBrowser, setShowBrowser] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [isSyncingNow, setIsSyncingNow] = useState(false)
+  const [copiedPath, setCopiedPath] = useState(false)
+  const [liveLocalFolder, setLiveLocalFolder] = useState<
+    ProjectLocalFolderInfo | undefined
+  >(project?.localFolder)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [syncMessage, setSyncMessage] = useState<string | null>(null)
 
+  const allowedRoot =
+    localSyncSettings?.allowedRoot || DEFAULT_LOCAL_ALLOWED_ROOT
   const baseDir =
-    localSyncSettings?.baseDir || '/home/uzairserver/OverleafProjects'
+    localSyncSettings?.baseDir ||
+    localSyncSettings?.defaultBaseDir ||
+    DEFAULT_LOCAL_BASE_DIR
 
   const defaultPreviewPath = useMemo(() => {
     if (!project) return ''
@@ -61,14 +67,16 @@ function ProjectFolderModal() {
   useEffect(() => {
     if (project) {
       const lf = project.localFolder
+      setLiveLocalFolder(lf)
       const isCustom = Boolean(lf?.customPath)
       setMode(isCustom ? 'custom' : 'default')
       setCustomPath(lf?.customPath || defaultPreviewPath)
       setSyncEnabled(lf ? lf.syncEnabled !== false : true)
       setCleanOld(false)
       setShowBrowser(false)
-      setErrorMessage(null)
-      setSuccessMessage(null)
+      setCopiedPath(false)
+      setErrorMessage(lf?.error || null)
+      setSyncMessage(null)
     }
   }, [project, defaultPreviewPath])
 
@@ -76,14 +84,56 @@ function ProjectFolderModal() {
     mode === 'custom' ? customPath.trim() : defaultPreviewPath
 
   const previousSyncedPath =
-    project?.localFolder?.lastSyncedPath ||
-    project?.localFolder?.effectivePath ||
-    null
+    liveLocalFolder?.lastSyncedPath || liveLocalFolder?.effectivePath || null
 
   const pathWillChange =
     Boolean(previousSyncedPath) &&
     Boolean(targetPreviewPath) &&
     targetPreviewPath !== previousSyncedPath
+
+  const currentEffectivePath =
+    liveLocalFolder?.effectivePath || defaultPreviewPath
+
+  const handleCopyCurrentPath = useCallback(() => {
+    const pathToCopy = currentEffectivePath
+    if (!pathToCopy) return
+    navigator.clipboard
+      ?.writeText(pathToCopy)
+      .then(() => {
+        setCopiedPath(true)
+        setTimeout(() => setCopiedPath(false), 1600)
+      })
+      .catch(() => {})
+  }, [currentEffectivePath])
+
+  const handleSyncNow = useCallback(async () => {
+    if (!project || isSyncingNow || isSaving) return
+    setIsSyncingNow(true)
+    setErrorMessage(null)
+    setSyncMessage(null)
+    try {
+      const res = await syncProjectToLocalFolder(project.id)
+      if (res.localFolder) {
+        setLiveLocalFolder(res.localFolder)
+        updateProjectViewData({
+          ...project,
+          localFolder: res.localFolder,
+        })
+      }
+      setSyncMessage('Folder updated.')
+    } catch (err: any) {
+      if (err?.data?.localFolder) {
+        setLiveLocalFolder(err.data.localFolder)
+        updateProjectViewData({
+          ...project,
+          localFolder: err.data.localFolder,
+        })
+      }
+      setErrorMessage(String(getUserFacingMessage(err)))
+    } finally {
+      setIsSyncingNow(false)
+    }
+  }, [isSaving, isSyncingNow, project, updateProjectViewData])
 
   const handleSubmit = useCallback(
     async (event: FormEvent) => {
@@ -96,7 +146,7 @@ function ProjectFolderModal() {
 
       setIsSaving(true)
       setErrorMessage(null)
-      setSuccessMessage(null)
+      setSyncMessage(null)
       try {
         const res = await updateProjectLocalFolder(project.id, {
           customFolderPath: mode === 'custom' ? customPath.trim() : null,
@@ -105,20 +155,13 @@ function ProjectFolderModal() {
           cleanOld: pathWillChange && cleanOld,
         })
         if (res.localFolder) {
+          setLiveLocalFolder(res.localFolder)
           updateProjectViewData({
             ...project,
             localFolder: res.localFolder,
           })
         }
-        const syncedFiles = res.syncResult?.syncedFilesCount
-        setSuccessMessage(
-          syncEnabled
-            ? `Saved & synced${typeof syncedFiles === 'number' ? ` (${syncedFiles} file${syncedFiles === 1 ? '' : 's'})` : ''} to ${res.localFolder?.effectivePath || targetPreviewPath}.`
-            : 'Saved folder settings (auto-sync paused for this project).'
-        )
-        setTimeout(() => {
-          closeProjectFolderModal()
-        }, 850)
+        closeProjectFolderModal()
       } catch (err) {
         setErrorMessage(String(getUserFacingMessage(err)))
       } finally {
@@ -133,14 +176,11 @@ function ProjectFolderModal() {
       pathWillChange,
       project,
       syncEnabled,
-      targetPreviewPath,
       updateProjectViewData,
     ]
   )
 
   if (!project) return null
-
-  const lf = project.localFolder
 
   return (
     <OLModal
@@ -150,76 +190,71 @@ function ProjectFolderModal() {
       id="project-folder-location-modal"
       backdrop="static"
       themed={themed}
-      size="lg"
       className="project-list-modal ol-local-folder-modal"
     >
       <OLModalHeader closeButton>
-        <OLModalTitle>
-          <span className="ol-local-modal-title-row">
-            <MaterialIcon type="folder_open" />
-            <span>Project Folder Location</span>
-          </span>
-        </OLModalTitle>
+        <OLModalTitle>Folder location</OLModalTitle>
       </OLModalHeader>
       <OLModalBody>
-        <div className="ol-local-project-summary mb-3">
-          <div className="ol-local-project-summary-name" translate="no">
-            {project.name}
-          </div>
-          {lf && (
-            <div className="ol-local-project-summary-meta">
-              <span
-                className={`ol-local-status-pill ol-local-status-${lf.status}`}
-              >
-                {lf.status === 'synced'
-                  ? 'Synced'
-                  : lf.status === 'error'
-                    ? 'Sync Error'
-                    : lf.status === 'disabled'
-                      ? 'Paused'
-                      : 'Not synced yet'}
-              </span>
-              {lf.lastSyncedAt && (
-                <span>
-                  Last synced: {new Date(lf.lastSyncedAt).toLocaleString()}
-                </span>
-              )}
-              {typeof lf.fileCount === 'number' && (
-                <span>
-                  {lf.fileCount} file{lf.fileCount === 1 ? '' : 's'}
-                  {lf.hasPdf ? ' (incl. PDF)' : ''}
-                </span>
-              )}
-            </div>
-          )}
-          {lf?.error && (
-            <div className="ol-local-inline-err mt-2">{lf.error}</div>
-          )}
-        </div>
-
         {errorMessage && (
           <div className="notification-list mb-3">
             <Notification type="error" content={errorMessage} />
           </div>
         )}
 
-        {successMessage && (
-          <div className="ol-local-success-alert mb-3" role="status">
-            <MaterialIcon type="check_circle" />
-            <span>{successMessage}</span>
+        {syncMessage && (
+          <div className="notification-list mb-3">
+            <Notification type="success" content={syncMessage} />
           </div>
         )}
 
         <OLForm id="project-folder-form" onSubmit={handleSubmit}>
           <OLFormGroup className="mb-3">
-            <OLFormLabel>Folder Mode</OLFormLabel>
+            <OLFormLabel>Current location for {project.name}</OLFormLabel>
+            <div className="ol-local-current-path-row">
+              <code
+                className="ol-local-folder-path-code"
+                title={currentEffectivePath}
+                translate="no"
+              >
+                {formatLocalDisplayPath(currentEffectivePath, allowedRoot)}
+              </code>
+              <div className="ol-local-current-path-actions">
+                <OLButton
+                  variant="ghost"
+                  size="sm"
+                  type="button"
+                  onClick={handleCopyCurrentPath}
+                >
+                  {copiedPath ? 'Copied' : 'Copy'}
+                </OLButton>
+                <OLButton
+                  variant="secondary"
+                  size="sm"
+                  type="button"
+                  isLoading={isSyncingNow}
+                  loadingLabel="Syncing..."
+                  disabled={isSaving}
+                  onClick={handleSyncNow}
+                >
+                  Sync
+                </OLButton>
+              </div>
+            </div>
+          </OLFormGroup>
+
+          <OLFormGroup className="mb-3">
+            <OLFormLabel>Save project in</OLFormLabel>
             <div className="ol-local-radio-group">
               <OLFormCheckbox
                 type="radio"
                 id="project-folder-mode-default"
                 name="projectFolderMode"
-                label="Use default projects folder"
-                description={defaultPreviewPath}
+                label="Default folder"
+                description={formatLocalDisplayPath(
+                  defaultPreviewPath,
+                  allowedRoot
+                )}
                 checked={mode === 'default'}
                 onChange={() => {
                   setMode('default')
@@ -231,8 +266,8 @@ function ProjectFolderModal() {
                 type="radio"
                 id="project-folder-mode-custom"
                 name="projectFolderMode"
-                label="Use a custom folder location for this project"
-                description="Choose any dedicated folder under your home directory"
+                label="Custom folder"
+                description="Choose a dedicated folder for this project"
                 checked={mode === 'custom'}
                 onChange={() => setMode('custom')}
                 disabled={isSaving}
@@ -242,7 +277,7 @@ function ProjectFolderModal() {
 
           {mode === 'custom' && (
             <OLFormGroup controlId="project-custom-folder-input" className="mb-3">
-              <OLFormLabel>Custom Folder Path</OLFormLabel>
+              <OLFormLabel>Custom folder path</OLFormLabel>
               <div className="ol-local-path-input-row">
                 <OLFormControl
                   type="text"
@@ -250,7 +285,7 @@ function ProjectFolderModal() {
                   className="ol-local-mono-input"
                   value={customPath}
                   onChange={e => setCustomPath(e.target.value)}
-                  placeholder="/home/uzairserver/Documents/MyPaper"
+                  placeholder={`${allowedRoot.replace(/\/+$/, '')}/MyPaper`}
                   disabled={isSaving}
                 />
                 <OLButton
@@ -259,16 +294,11 @@ function ProjectFolderModal() {
                   onClick={() => setShowBrowser(v => !v)}
                   disabled={isSaving}
                 >
-                  <MaterialIcon type="folder_open" />
-                  <span>{showBrowser ? 'Hide Browser' : 'Browse'}</span>
+                  {showBrowser ? 'Hide' : 'Browse'}
                 </OLButton>
               </div>
               <div className="ol-local-field-help">
-                Enter an absolute path under{' '}
-                <code>
-                  {localSyncSettings?.allowedRoot || '/home/uzairserver'}
-                </code>{' '}
-                (or <code>~/...</code>). Non-existent subfolders are created
+                Inside <code>{allowedRoot}</code>. Missing subfolders are created
                 automatically.
               </div>
               {showBrowser && (
@@ -283,30 +313,24 @@ function ProjectFolderModal() {
             </OLFormGroup>
           )}
 
-          <div className="ol-local-options-box">
-            <OLFormCheckbox
-              id="project-folder-sync-enabled"
-              label="Automatically keep this project's files (.tex, .bib, assets, compiled PDF) synced to this folder"
-              checked={syncEnabled}
-              onChange={e => setSyncEnabled(e.target.checked)}
-              disabled={isSaving}
-            />
-            {pathWillChange && syncEnabled && (
-              <div className="mt-2">
-                <OLFormCheckbox
-                  id="project-folder-clean-old"
-                  label="Remove Overleaf-synced files from the previous folder after verifying the new folder"
-                  checked={cleanOld}
-                  onChange={e => setCleanOld(e.target.checked)}
-                  disabled={isSaving}
-                />
-                <div className="ol-local-field-help ms-4">
-                  Previous folder: <code>{previousSyncedPath}</code>. Only
-                  Overleaf-tracked files are cleaned up.
-                </div>
-              </div>
-            )}
-          </div>
+          <OLFormCheckbox
+            id="project-folder-sync-enabled"
+            label="Keep local files updated automatically"
+            checked={syncEnabled}
+            onChange={e => setSyncEnabled(e.target.checked)}
+            disabled={isSaving}
+          />
+          {pathWillChange && syncEnabled && (
+            <div className="mt-2">
+              <OLFormCheckbox
+                id="project-folder-clean-old"
+                label="Remove Overleaf-managed copies from the previous folder"
+                checked={cleanOld}
+                onChange={e => setCleanOld(e.target.checked)}
+                disabled={isSaving}
+              />
+            </div>
+          )}
         </OLForm>
       </OLModalBody>
       <OLModalFooter>
@@ -321,13 +345,11 @@ function ProjectFolderModal() {
           variant="primary"
           type="submit"
           form="project-folder-form"
+          isLoading={isSaving}
+          loadingLabel="Saving..."
           disabled={isSaving || (mode === 'custom' && !customPath.trim())}
         >
-          {isSaving
-            ? 'Saving & Syncing...'
-            : syncEnabled
-              ? 'Save & Sync Now'
-              : 'Save Settings'}
+          Save
         </OLButton>
       </OLModalFooter>
     </OLModal>

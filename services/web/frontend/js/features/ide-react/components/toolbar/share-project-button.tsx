@@ -12,13 +12,14 @@ import useIsNetworkStalled from '@/features/ide-react/hooks/use-is-network-stall
 export default function ShareProjectButton() {
   const { t } = useTranslation()
   const { sendEventOnce } = useEditorAnalytics()
-  const { isProjectOwner } = useEditorContext()
+  const { isProjectOwner, canAdminProject } = useEditorContext()
+  const canManageSharing = isProjectOwner || Boolean(canAdminProject)
   const { project } = useProjectContext()
   const isDisabledDueToNetworkStall = useIsNetworkStalled()
 
   const [showShareModal, setShowShareModal] = useState(false)
 
-  const accessRequestCount = isProjectOwner
+  const accessRequestCount = canManageSharing
     ? (project?.editAccessRequests?.length ?? 0)
     : 0
 

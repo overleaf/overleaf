@@ -25,7 +25,17 @@ function ErrorMessage({ error }: Pick<ShareProjectContextValue, 'error'>) {
     case 'invite_resend_limit_hit':
       return <>{t('invite_resend_limit_hit')}</>
 
+    case 'user_suspended':
+      return <>Cannot share projects with a suspended user account.</>
+
     default:
+      if (
+        error &&
+        error !== 'generic_something_went_wrong' &&
+        error.includes(' ')
+      ) {
+        return <>{error}</>
+      }
       return <>{t('generic_something_went_wrong')}</>
   }
 }

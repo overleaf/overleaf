@@ -2,6 +2,7 @@ import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import getMeta from '@/utils/meta'
 import { resources } from '@/i18n-resources/writefull'
+import { packageHubTranslations } from '@/i18n-resources/package-hub'
 
 const LANG = getMeta('ol-i18n').currentLangCode
 
@@ -62,6 +63,13 @@ const localesPromise = import(
     LANG,
     'writefull',
     LANG === 'es' ? resources.es.writefull : resources.en.writefull
+  )
+  i18n.addResourceBundle(
+    LANG,
+    'translation',
+    packageHubTranslations,
+    true,
+    true
   )
 })
 

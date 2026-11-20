@@ -32,13 +32,14 @@ export default function LinkSharing() {
   const isSharingUpdatesEnabled = useFeatureFlag('sharing-updates')
   const [inflight, setInflight] = useState(false)
   const [showLinks, setShowLinks] = useState(true)
-  const linkSharingEnabled =
-    getMeta('ol-capabilities')?.includes('link-sharing')
-
   const { monitorRequest, projectAccess } = useShareProjectContext()
 
-  const { projectId, project } = useProjectContext()
+  const { projectId, project, updateProject } = useProjectContext()
   const { publicAccessLevel } = project || {}
+  const linkSharingEnabled =
+    getMeta('ol-capabilities')?.includes('link-sharing') ??
+    project?.linkSharingEnabled ??
+    false
 
   // set the access level of a project
   const setAccessLevel = useCallback(
@@ -51,15 +52,13 @@ export default function LinkSharing() {
         setPublicAccessLevel(projectId, newPublicAccessLevel)
       )
         .then(() => {
-          // NOTE: not calling `updateProject` here as it receives data via
-          // project:publicAccessLevel:changed over the websocket connection
-          // TODO: eventTracking.sendMB('project-make-token-based') when newPublicAccessLevel is 'tokenBased'
+          updateProject({ publicAccessLevel: newPublicAccessLevel as any })
         })
         .finally(() => {
           setInflight(false)
         })
     },
-    [monitorRequest, projectId]
+    [monitorRequest, projectId, updateProject]
   )
 
   if (!linkSharingEnabled) {
@@ -295,7 +294,7 @@ function AccessToken({
 
   let origin = window.location.origin
   if (isAdmin) {
-    origin = getMeta('ol-ExposedSettings').siteUrl
+    origin = getMeta('ol-ExposedSettings')?.siteUrl || window.location.origin
   }
   const link = `${origin}${path}${token}${
     tokenHashPrefix ? `#${tokenHashPrefix}` : ''

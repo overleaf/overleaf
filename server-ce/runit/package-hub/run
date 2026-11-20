@@ -1,0 +1,18 @@
+#!/bin/bash
+set -e
+
+source /etc/overleaf/env.sh
+
+mkdir -p /run/overleaf-package-hub
+chmod 0755 /run/overleaf-package-hub
+rm -f /run/overleaf-package-hub/hub.sock
+
+mkdir -p /var/lib/overleaf/package-hub/state \
+         /var/lib/overleaf/package-hub/tlnet \
+         /var/lib/overleaf/package-hub/snapshots \
+         /var/lib/overleaf/tmp/uploads
+chown www-data:www-data /var/lib/overleaf/tmp/uploads
+chmod 0755 /var/lib/overleaf/tmp/uploads
+
+mkdir -p /var/log/overleaf
+exec /usr/bin/node --max-old-space-size=96 --max-semi-space-size=2 /overleaf/services/package-hub/app.mjs >> /var/log/overleaf/package-hub.log 2>&1

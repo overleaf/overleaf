@@ -19,6 +19,7 @@ import {
   getSharingLink,
   SharingLinkData,
 } from '@/features/share-project-modal/utils/api'
+import '../share-enterprise.scss'
 
 export type ProjectAccessType =
   | 'legacyLinkSharing'
@@ -92,7 +93,8 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
   >()
 
   const { project, projectId } = useProjectContext()
-  const { isProjectOwner } = useEditorContext()
+  const { isProjectOwner, canAdminProject } = useEditorContext()
+  const canManageSharing = isProjectOwner || Boolean(canAdminProject)
   const { publicAccessLevel } = project || {}
 
   const { splitTestVariants } = useSplitTestContext()
@@ -152,7 +154,7 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
   }, [show])
 
   const handleShow = useCallback(async () => {
-    if (!isSharingUpdatesEnabled || !isProjectOwner) {
+    if (!isSharingUpdatesEnabled || !canManageSharing) {
       return
     }
 
@@ -206,7 +208,7 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
     projectId,
     isSharingUpdatesEnabled,
     isNewLinkEnabled,
-    isProjectOwner,
+    canManageSharing,
   ])
 
   // close the modal if not in flight

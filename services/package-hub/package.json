@@ -1,0 +1,13 @@
+{
+  "name": "@overleaf/package-hub",
+  "version": "1.0.0",
+  "description": "COSL Overleaf Package Hub service for managing TeX Live, CTAN, custom, and community LaTeX packages",
+  "private": true,
+  "type": "module",
+  "license": "AGPL-3.0-only",
+  "main": "app.mjs",
+  "scripts": {
+    "start": "node app.mjs",
+    "test": "node test/test-package-hub.mjs"
+  }
+}

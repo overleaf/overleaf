@@ -28,7 +28,7 @@ Standard Overleaf Community Edition stores all project source documents, uploade
 +-----------------------------------------------------------------------------------+
 | Host Workstation                                                                  |
 |                                                                                   |
-|  /home/uzairserver/OverleafProjects/                                              |
+|  /home/<your-user>/OverleafProjects/                                              |
 |  ├── Project Alpha/                                                               |
 |  │   ├── main.tex                                                                 |
 |  │   ├── references.bib                                                           |
@@ -36,10 +36,10 @@ Standard Overleaf Community Edition stores all project source documents, uploade
 |  │   ├── output.pdf                    <-- Compiled PDF automatically saved       |
 |  │   └── .overleaf-sync.json           <-- Manifest tracking Overleaf files       |
 |  │                                                                                |
-|  └── Project Beta (Custom Path: /home/uzairserver/Documents/Thesis)               |
+|  └── Project Beta (Custom Path: /home/<your-user>/Documents/Thesis)               |
 +-----------------------------------------------------------------------------------+
           ^
-          | (Mounted Bind: /home/uzairserver:/home/uzairserver:rw)
+          | (Mounted Bind: /home/<your-user>:/home/<your-user>:rw)
           v
 +-----------------------------------------------------------------------------------+
 | Docker Container: sharelatex (codemolabs/overleaf:latest)                         |
@@ -61,7 +61,7 @@ Standard Overleaf Community Edition stores all project source documents, uploade
 ## Security Model & Sandboxing
 
 1. **Path Boundary Confinement**:
-   The synchronizer enforces a strict root boundary (by default the user's home directory `/home/uzairserver`). System-critical folders (`/etc`, `/boot`, `/usr`, `/bin`, `/var`, `/sys`, `/proc`, `/dev`, `/run`, `/root`, `~/.ssh`, `~/.gnupg`, `~/overleaf-toolkit`) are hard-blocked from being targeted as sync destinations.
+   The synchronizer enforces a strict root boundary configured via `LOCAL_SYNC_ALLOWED_ROOT` (for example `/home/<your-user>` or `/projects`). System-critical folders (`/etc`, `/boot`, `/usr`, `/bin`, `/var`, `/sys`, `/proc`, `/dev`, `/run`, `/root`, `~/.ssh`, `~/.gnupg`, `~/overleaf-toolkit`) are hard-blocked from being targeted as sync destinations.
 2. **Symlink Traversal Prevention**:
    All paths are inspected with `fs.realpathSync`. Symlinks attempting to escape the user jail or target restricted paths are rejected with HTTP 403 Forbidden.
 3. **Collision Avoidance**:
@@ -74,9 +74,8 @@ Standard Overleaf Community Edition stores all project source documents, uploade
 ## UI Components & Workflow
 
 ### 1. Project List Dashboard
-- **Location Banner**: Displays the active default base folder with a quick-copy button and a "Sync All" button to instantly mirror all projects to the host disk.
-- **Sidebar Integration**: Added a "Folder Location" configuration entry in the left navigation sidebar.
-- **Project Folder Badges**: Every project card/row displays a badge indicating its local synchronization target folder and status.
+- **Sidebar Folder Location Control**: Exposes "Folder Location" in the lower left sidebar navigation and navigation dropdown to open the base folder configuration and manual sync controls without adding clutter to the main workspace header.
+- **Project Folder Badges**: Project rows with custom folders, paused sync, or sync errors render compact status badges next to their tags.
 - **Action Menu**: Each project's three-dot actions menu includes "Set Local Folder...", allowing instant configuration of custom folder paths or toggling auto-sync.
 
 ### 2. Interactive Directory Browser Modal

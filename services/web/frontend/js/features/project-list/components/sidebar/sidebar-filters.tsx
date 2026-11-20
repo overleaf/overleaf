@@ -6,7 +6,7 @@ import {
 } from '../../context/project-list-context'
 import TagsList from './tags-list'
 import ProjectsFilterMenu from '../projects-filter-menu'
-import { Folder, FolderOpen } from '@phosphor-icons/react'
+import { Archive, Files, User, Users } from '@phosphor-icons/react'
 import { ActivePage } from '../../util/navigation-state'
 
 type SidebarFilterProps = {
@@ -50,43 +50,35 @@ export default function SidebarFilters({
   activePage: ActivePage
 }) {
   const { t } = useTranslation()
-  const { openBaseFolderModal } = useProjectListContext()
   return (
-    <ul className="list-unstyled project-list-filters">
+    <ul className="list-unstyled project-list-filters project-list-filters-compact-tags">
       <SidebarFilter
         activePage={activePage}
         filter="all"
-        text={t('projects')}
-        icon={<Folder size={20} />}
+        text={t('all_projects')}
+        icon={<Files size={20} />}
       />
+      <li aria-hidden="true">
+        <hr />
+      </li>
       <SidebarFilter
         activePage={activePage}
         filter="owned"
         text={t('your_projects')}
+        icon={<User size={20} />}
       />
       <SidebarFilter
         activePage={activePage}
         filter="shared"
         text={t('shared_with_you')}
+        icon={<Users size={20} />}
       />
       <SidebarFilter
         activePage={activePage}
         filter="archived"
-        text={t('archived_projects')}
+        text={t('archive')}
+        icon={<Archive size={20} />}
       />
-      <li>
-        <button
-          className="sidebar-filter-button sidebar-filter-button-with-icon"
-          type="button"
-          onClick={openBaseFolderModal}
-          data-testid="sidebar-folder-location-btn"
-        >
-          <span className="icon">
-            <FolderOpen size={20} />
-          </span>
-          Folder Location
-        </button>
-      </li>
       <li aria-hidden="true">
         <hr />
       </li>

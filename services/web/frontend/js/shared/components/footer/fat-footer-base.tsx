@@ -32,9 +32,7 @@ function FatFooterBase() {
           <FooterBaseLink href="/legal">
             {t('privacy_and_terms')}
           </FooterBaseLink>
-          <FooterBaseLink href="https://www.digital-science.com/security-certifications/">
-            {t('compliance')}
-          </FooterBaseLink>
+
         </div>
         <div className="fat-footer-base-item fat-footer-base-language">
           <LanguagePicker showHeader={false} />

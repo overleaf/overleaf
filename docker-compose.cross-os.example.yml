@@ -1,0 +1,45 @@
+# Cross-OS Docker Compose Override Example for COSL Overleaf
+# Place in overleaf-toolkit/config/docker-compose.override.yml (or pass with -f).
+#
+# Host folder examples:
+#   Linux:            OVERLEAF_PROJECTS_HOST_DIR=$HOME/OverleafProjects
+#   macOS:            OVERLEAF_PROJECTS_HOST_DIR=$HOME/OverleafProjects
+#   Windows (WSL2):   OVERLEAF_PROJECTS_HOST_DIR=C:/Users/<YourUser>/OverleafProjects
+#
+# Inside the container all project files live under /projects, avoiding OS-specific
+# home paths while remaining directly editable on your host machine.
+
+services:
+  sharelatex:
+    mem_limit: 1184m
+    memswap_limit: 1792m
+    volumes:
+      - ${OVERLEAF_PROJECTS_HOST_DIR:-./data/projects}:/projects:rw
+      - ${OVERLEAF_TEXMF_LOCAL_DIR:-./data/texlive-local}:/usr/local/texlive/texmf-local:rw
+    environment:
+      LOCAL_SYNC_ALLOWED_ROOT: "/projects"
+      LOCAL_SYNC_DEFAULT_BASE_DIR: "/projects/OverleafProjects"
+      OVERLEAF_ENABLE_PACKAGE_HUB: "true"
+
+      # Optional: Automatically create the first administrator account on fresh startup
+      # when zero admin accounts exist yet (leave commented to use /launchpad UI setup):
+      # OVERLEAF_ADMIN_EMAIL: "admin@localhost"
+      # OVERLEAF_ADMIN_PASSWORD: "change-me-to-a-strong-password"
+      # OVERLEAF_ADMIN_NAME: "Workspace Administrator"
+      # OVERLEAF_ADMIN_ROLE: "Researcher"
+      # OVERLEAF_ADMIN_INSTITUTION: "My Organization"
+
+  mongo:
+    mem_limit: 288m
+    memswap_limit: 512m
+    command: ["--replSet", "overleaf", "--wiredTigerCacheSizeGB", "0.25"]
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/27017'"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    mem_limit: 64m
+    memswap_limit: 96m
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "48mb", "--maxmemory-policy", "noeviction"]

@@ -25,7 +25,21 @@ import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import classnames from 'classnames'
 
-type PermissionsOption = PermissionsLevel | 'removeAccess' | 'downgraded'
+type PermissionsOption =
+  | 'owner'
+  | 'readAndWrite'
+  | 'review'
+  | 'readOnlyCopy'
+  | 'readOnlyNoCopy'
+  | 'removeAccess'
+  | 'downgraded'
+
+function memberToOption(member: ProjectMember): PermissionsOption {
+  if (member.privileges === 'readOnly') {
+    return member.allowCopy === false ? 'readOnlyNoCopy' : 'readOnlyCopy'
+  }
+  return member.privileges
+}
 
 type EditMemberProps = {
   member: ProjectMember
@@ -38,6 +52,7 @@ type EditMemberProps = {
 type Privilege = {
   key: PermissionsOption
   label: string
+  subtitle?: string
 }
 
 export default function EditMember({
@@ -48,8 +63,8 @@ export default function EditMember({
   isReviewerOnFreeProject,
 }: EditMemberProps) {
   const isSharingUpdatesEnabled = useFeatureFlag('sharing-updates')
-  const [privileges, setPrivileges] = useState<PermissionsOption>(
-    member.privileges
+  const [privileges, setPrivileges] = useState<PermissionsOption>(() =>
+    memberToOption(member)
   )
   const [confirmingOwnershipTransfer, setConfirmingOwnershipTransfer] =
     useState(false)
@@ -58,8 +73,8 @@ export default function EditMember({
 
   // update the local state if the member's privileges change externally
   useEffect(() => {
-    setPrivileges(member.privileges)
-  }, [member.privileges])
+    setPrivileges(memberToOption(member))
+  }, [member.privileges, member.allowCopy])
 
   const { monitorRequest, setSuccessActionMessage } = useShareProjectContext()
   const { projectId, project, updateProject, features } = useProjectContext()
@@ -114,11 +129,18 @@ export default function EditMember({
     } else if (
       newPrivileges === 'readAndWrite' ||
       newPrivileges === 'review' ||
-      newPrivileges === 'readOnly'
+      newPrivileges === 'readOnlyCopy' ||
+      newPrivileges === 'readOnlyNoCopy'
     ) {
+      const targetPrivilegeLevel: PermissionsLevel =
+        newPrivileges === 'readOnlyCopy' || newPrivileges === 'readOnlyNoCopy'
+          ? 'readOnly'
+          : newPrivileges
+      const targetAllowCopy = newPrivileges !== 'readOnlyNoCopy'
       monitorRequest(() =>
         updateMember(projectId, member, {
-          privilegeLevel: newPrivileges,
+          privilegeLevel: targetPrivilegeLevel,
+          allowCopy: targetAllowCopy,
         })
       ).then(() => {
         updateProject({
@@ -126,7 +148,11 @@ export default function EditMember({
             members?.map(
               (item): ProjectMember =>
                 item._id === member._id
-                  ? { ...item, privileges: newPrivileges }
+                  ? {
+                    ...item,
+                    privileges: targetPrivilegeLevel,
+                    allowCopy: targetAllowCopy,
+                  }
                   : item
             ) || [],
         })
@@ -141,14 +167,14 @@ export default function EditMember({
         member={member}
         cancel={() => {
           setConfirmingOwnershipTransfer(false)
-          setPrivileges(member.privileges)
+          setPrivileges(memberToOption(member))
         }}
       />
     )
   }
 
   const confirmRemoval =
-    privileges !== member.privileges && privilegeChangePending
+    privileges !== memberToOption(member) && privilegeChangePending
 
   const getDropdownLabel = () => {
     if (hasBeenDowngraded) {
@@ -161,8 +187,10 @@ export default function EditMember({
         return t('editor')
       case 'review':
         return t('reviewer')
-      case 'readOnly':
-        return t('viewer')
+      case 'readOnlyCopy':
+        return 'Viewer (can copy)'
+      case 'readOnlyNoCopy':
+        return 'Viewer (no copy)'
       case 'removeAccess':
         return t('remove_access')
       case 'downgraded':
@@ -303,12 +331,25 @@ export default function EditMember({
             )}
             <DropdownMenuItem
               as="button"
-              eventKey="readOnly"
+              eventKey="readOnlyCopy"
               leadingIcon={<MaterialIcon type="visibility" unfilled />}
-              active={privileges === 'readOnly'}
-              trailingIcon={privileges === 'readOnly' ? 'check' : undefined}
+              active={privileges === 'readOnlyCopy'}
+              trailingIcon={privileges === 'readOnlyCopy' ? 'check' : undefined}
+              description="View & use as a copy"
             >
-              {t('viewer')}
+              Viewer (can copy)
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              as="button"
+              eventKey="readOnlyNoCopy"
+              leadingIcon={<MaterialIcon type="visibility_off" unfilled />}
+              active={privileges === 'readOnlyNoCopy'}
+              trailingIcon={
+                privileges === 'readOnlyNoCopy' ? 'check' : undefined
+              }
+              description="View only, copying disabled"
+            >
+              Viewer (no copy)
             </DropdownMenuItem>
             <DropdownMenuItem
               as="button"
@@ -332,7 +373,7 @@ export default function EditMember({
             }}
           >
             <ChangePrivilegesActions
-              handleReset={() => setPrivileges(member.privileges)}
+              handleReset={() => setPrivileges(memberToOption(member))}
             />
           </form>
         )}
@@ -354,15 +395,15 @@ export default function EditMember({
             <MaterialIcon
               type={
                 shouldWarnMember() ||
-                member.pendingEditor ||
-                member.pendingReviewer
+                  member.pendingEditor ||
+                  member.pendingReviewer
                   ? 'warning'
                   : 'person'
               }
               className={
                 shouldWarnMember() ||
-                member.pendingEditor ||
-                member.pendingReviewer
+                  member.pendingEditor ||
+                  member.pendingReviewer
                   ? 'project-member-warning'
                   : undefined
               }
@@ -423,7 +464,7 @@ export default function EditMember({
 
           {confirmRemoval && (
             <ChangePrivilegesActions
-              handleReset={() => setPrivileges(member.privileges)}
+              handleReset={() => setPrivileges(memberToOption(member))}
             />
           )}
         </OLCol>
@@ -448,33 +489,42 @@ function SelectPrivilege({
   const { t } = useTranslation()
   const { features } = useProjectContext()
 
-  const privileges = useMemo(
-    (): Privilege[] =>
-      features.trackChangesVisible
-        ? [
-            { key: 'owner', label: t('make_owner') },
-            { key: 'readAndWrite', label: t('editor') },
-            { key: 'review', label: t('reviewer') },
-            { key: 'readOnly', label: t('viewer') },
-            { key: 'removeAccess', label: t('remove_access') },
-          ]
-        : [
-            { key: 'owner', label: t('make_owner') },
-            { key: 'readAndWrite', label: t('editor') },
-            { key: 'readOnly', label: t('viewer') },
-            { key: 'removeAccess', label: t('remove_access') },
-          ],
-    [features.trackChangesVisible, t]
-  )
+  const privileges = useMemo((): Privilege[] => {
+    const options: Privilege[] = [
+      { key: 'owner', label: t('make_owner') },
+      {
+        key: 'readAndWrite',
+        label: t('editor'),
+        subtitle: 'Modify original',
+      },
+    ]
+    if (features.trackChangesVisible) {
+      options.push({ key: 'review', label: t('reviewer') })
+    }
+    options.push(
+      {
+        key: 'readOnlyCopy',
+        label: 'Viewer (can copy)',
+        subtitle: 'View & use as a copy',
+      },
+      {
+        key: 'readOnlyNoCopy',
+        label: 'Viewer (no copy)',
+        subtitle: 'View only, copying disabled',
+      },
+      { key: 'removeAccess', label: t('remove_access') }
+    )
+    return options
+  }, [features.trackChangesVisible, t])
 
   const downgradedPseudoPrivilege: Privilege = {
     key: 'downgraded',
     label: t('select_access_level'),
   }
 
-  function getPrivilegeSubtitle(privilege: PermissionsOption) {
-    if (!['readAndWrite', 'review'].includes(privilege)) {
-      return ''
+  function getPrivilegeSubtitle(item: Privilege) {
+    if (!['readAndWrite', 'review'].includes(item.key)) {
+      return item.subtitle || ''
     }
 
     if (
@@ -485,7 +535,7 @@ function SelectPrivilege({
         count: features.collaborators,
       })
     } else {
-      return ''
+      return item.subtitle || ''
     }
   }
 
@@ -502,7 +552,7 @@ function SelectPrivilege({
       items={privileges}
       itemToKey={item => item.key}
       itemToString={item => (item ? item.label : '')}
-      itemToSubtitle={item => (item ? getPrivilegeSubtitle(item.key) : '')}
+      itemToSubtitle={item => (item ? getPrivilegeSubtitle(item) : '')}
       itemToDisabled={item => (item ? isPrivilegeDisabled(item.key) : false)}
       defaultItem={privileges.find(item => item.key === value)}
       selected={

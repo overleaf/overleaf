@@ -2,6 +2,7 @@ import Path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import UserGetter from '../../../../app/src/Features/User/UserGetter.mjs'
 import UserRegistrationHandler from '../../../../app/src/Features/User/UserRegistrationHandler.mjs'
+import AuthenticationManager from '../../../../app/src/Features/Authentication/AuthenticationManager.mjs'
 import ErrorController from '../../../../app/src/Features/Errors/ErrorController.mjs'
 import { expressify } from '@overleaf/promise-utils'
 import { z, parseReq } from '../../../../app/src/infrastructure/Validation.mjs'
@@ -11,18 +12,28 @@ const __dirname = Path.dirname(fileURLToPath(import.meta.url))
 const registerSchema = z.object({
   body: z.strictObject({
     email: z.string().optional(),
+    _csrf: z.string().optional(),
   }),
 })
 
-function registerNewUser(req, res, next) {
-  res.render(Path.resolve(__dirname, '../views/user/register'))
+function registerNewUser(req, res) {
+  res.render(Path.resolve(__dirname, '../views/user/register'), {
+    title: 'Register Users',
+    showThinFooter: true,
+  })
 }
 
-async function register(req, res, next) {
+async function register(req, res) {
   const { body } = parseReq(req, registerSchema, { logOnly: true })
-  const { email } = body
-  if (email == null || email === '') {
-    return res.sendStatus(422) // Unprocessable Entity
+  const email = typeof body.email === 'string' ? body.email.trim() : ''
+  if (!email) {
+    return res.status(422).json({ message: 'Email address is required' })
+  }
+  const invalidEmail = AuthenticationManager.validateEmail(email)
+  if (invalidEmail) {
+    return res
+      .status(400)
+      .json({ message: invalidEmail.message || 'Invalid email address' })
   }
   const { user, setNewPasswordUrl } =
     await UserRegistrationHandler.promises.registerNewUserAndSendActivationEmail(

@@ -18,7 +18,7 @@ function resyncAllProjectsInBackground() {
   waitForService filestore 3009
   waitForService history-v1 3100
   waitForService project-history 3054
-  waitForService web-api 4000
+  waitForService web-api 3000
 
   # Resync files that had their versions updated
   while read -r project_id; do

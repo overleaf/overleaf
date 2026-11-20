@@ -23,6 +23,7 @@ import ProjectGetter from '../Project/ProjectGetter.mjs'
 import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
 import Features from '../../infrastructure/Features.mjs'
 import UserGetter from '../User/UserGetter.mjs'
+import ProjectAccessPolicyService from '../Authorization/ProjectAccessPolicyService.mjs'
 
 const { hasAdminAccess } = AdminAuthorizationHelper
 const ObjectId = mongodb.ObjectId
@@ -155,6 +156,7 @@ const setCollaboratorInfoSchema = z.object({
       PrivilegeLevels.READ_AND_WRITE,
       PrivilegeLevels.REVIEW,
     ]),
+    allowCopy: z.boolean().optional(),
   }),
 })
 
@@ -171,6 +173,7 @@ const setCollaboratorInfoFallbackSchema = z.object({
       PrivilegeLevels.READ_AND_WRITE,
       PrivilegeLevels.REVIEW,
     ]),
+    allowCopy: z.boolean().optional(),
   }),
 })
 
@@ -208,6 +211,12 @@ async function setCollaboratorInfo(req, res, next) {
       privilegeLevel,
       {},
       auditInfo
+    )
+    await ProjectAccessPolicyService.syncCopyDisabledFlag(
+      projectId,
+      userId,
+      privilegeLevel,
+      body.allowCopy !== false
     )
     EditorRealTimeController.emitToRoom(
       projectId,
@@ -613,6 +622,12 @@ async function _notifyOwnerOfAccessRequest(
 
 async function _removeUserIdFromProject(projectId, userId) {
   await CollaboratorsHandler.promises.removeUserFromProject(projectId, userId)
+  await ProjectAccessPolicyService.syncCopyDisabledFlag(
+    projectId,
+    userId,
+    PrivilegeLevels.NONE,
+    true
+  )
   EditorRealTimeController.emitToRoom(
     projectId,
     'userRemovedFromProject',

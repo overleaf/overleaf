@@ -5,6 +5,7 @@ if [ "$DEBUG_NODE" == "true" ]; then
     echo "running debug - project-history"
     NODE_PARAMS="--inspect=0.0.0.0:30540"
 fi
+NODE_PARAMS="$NODE_PARAMS --max-old-space-size=96 --max-semi-space-size=2"
 
 source /etc/overleaf/env.sh
 export LISTEN_ADDRESS=127.0.0.1

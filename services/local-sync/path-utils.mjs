@@ -2,26 +2,28 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 export const ALLOWED_ROOT = path.resolve(
-  process.env.LOCAL_SYNC_ALLOWED_ROOT || '/home/uzairserver'
+  (process.env.LOCAL_SYNC_ALLOWED_ROOT || '').trim() ||
+    '/var/lib/overleaf/local-projects'
 )
 
 export const DEFAULT_BASE_DIR = path.resolve(
-  process.env.LOCAL_SYNC_DEFAULT_BASE_DIR ||
+  (process.env.LOCAL_SYNC_DEFAULT_BASE_DIR || '').trim() ||
     path.join(ALLOWED_ROOT, 'OverleafProjects')
 )
 
 export const SYNC_MANIFEST_FILENAME = '.overleaf-sync.json'
 
 const FORBIDDEN_TOP_LEVEL_NAMES = new Set(['overleaf-toolkit'])
+const WINDOWS_RESERVED_RE = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(\..*)?$/i
 
 /**
- * Expand leading `~` or `~/` to ALLOWED_ROOT.
+ * Expand leading `~` or `~/` to ALLOWED_ROOT (normalizing Windows separators).
  * @param {string} raw
  * @returns {string}
  */
 export function expandTilde(raw) {
   if (typeof raw !== 'string') return ''
-  const trimmed = raw.trim()
+  const trimmed = raw.trim().replace(/\\/g, '/')
   if (trimmed === '~') return ALLOWED_ROOT
   if (trimmed.startsWith('~/')) {
     return path.join(ALLOWED_ROOT, trimmed.slice(2))
@@ -33,11 +35,17 @@ export function expandTilde(raw) {
  * Check whether `candidate` is equal to `base` or inside `base`.
  * @param {string} base
  * @param {string} candidate
+ * @param {{ caseInsensitive?: boolean }} [options]
  * @returns {boolean}
  */
-export function isPathEqualOrInside(base, candidate) {
-  const normBase = path.resolve(base)
-  const normCandidate = path.resolve(candidate)
+export function isPathEqualOrInside(base, candidate, options = {}) {
+  const { caseInsensitive = false } = options
+  let normBase = path.resolve(base)
+  let normCandidate = path.resolve(candidate)
+  if (caseInsensitive) {
+    normBase = normBase.toLowerCase()
+    normCandidate = normCandidate.toLowerCase()
+  }
   if (normCandidate === normBase) return true
   const prefix = normBase.endsWith(path.sep) ? normBase : normBase + path.sep
   return normCandidate.startsWith(prefix)
@@ -48,11 +56,13 @@ export function isPathEqualOrInside(base, candidate) {
  * Used to avoid overlapping project sync folders.
  * @param {string} pathA
  * @param {string} pathB
+ * @param {{ caseInsensitive?: boolean }} [options]
  * @returns {boolean}
  */
-export function doPathsOverlap(pathA, pathB) {
+export function doPathsOverlap(pathA, pathB, options = {}) {
   return (
-    isPathEqualOrInside(pathA, pathB) || isPathEqualOrInside(pathB, pathA)
+    isPathEqualOrInside(pathA, pathB, options) ||
+    isPathEqualOrInside(pathB, pathA, options)
   )
 }
 
@@ -220,7 +230,14 @@ export function sanitizeProjectFolderName(projectName, projectId = '') {
     return `project_${shortId}`
   }
 
-  return cleaned.slice(0, 120).trim() || `project_${shortId}`
+  const sliced = cleaned.slice(0, 120).replace(/[\s.]+$/, '').trim()
+  if (!sliced) {
+    return `project_${shortId}`
+  }
+  if (WINDOWS_RESERVED_RE.test(sliced)) {
+    return `${sliced}_${shortId}`
+  }
+  return sliced
 }
 
 /**

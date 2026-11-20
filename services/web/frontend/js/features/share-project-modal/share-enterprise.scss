@@ -1,0 +1,111 @@
+// Overleaf-native token refinements for unified Enterprise & Copy permissions
+// inside ShareProjectModal (bundled in both pages/ide and pages/project-list).
+
+.modal-body-share.modal-link-share {
+  .project-member-select .select-wrapper {
+    max-width: 210px;
+  }
+
+  .add-collaborator-controls .select-wrapper {
+    max-width: 195px;
+  }
+
+  .enterprise-access-section {
+    padding: calc(var(--line-height-03) / 2) 0 var(--spacing-06);
+    border-bottom: 1px solid var(--neutral-30);
+    margin-bottom: var(--spacing-04);
+
+    .enterprise-access-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--spacing-03);
+      margin-bottom: var(--spacing-03);
+    }
+
+    .enterprise-access-title {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-02);
+      font-size: var(--font-size-02);
+      color: var(--content-primary, inherit);
+    }
+
+    .enterprise-access-controls {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) auto;
+      gap: var(--spacing-03);
+      align-items: center;
+
+      .select-wrapper {
+        min-width: 0;
+        width: 100%;
+      }
+    }
+
+    .enterprise-access-details {
+      margin-top: var(--spacing-04);
+      padding: var(--spacing-04);
+      background-color: var(--neutral-10);
+      border: 1px solid var(--neutral-30);
+      border-radius: var(--border-radius-md, 4px);
+    }
+
+    .enterprise-access-subtitle {
+      font-size: var(--font-size-01);
+      color: var(--neutral-70);
+      margin-top: var(--spacing-01);
+    }
+
+    .enterprise-access-facet-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-02) var(--spacing-05);
+      margin-bottom: var(--spacing-02);
+    }
+
+    .enterprise-access-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-02);
+      margin-top: var(--spacing-02);
+    }
+
+    .enterprise-access-user-results {
+      margin-top: var(--spacing-02);
+      border: 1px solid var(--neutral-30);
+      background-color: var(--white, #fff);
+      border-radius: var(--border-radius-sm, 4px);
+      max-height: 160px;
+      overflow-y: auto;
+      list-style: none;
+      padding: var(--spacing-01) 0;
+      margin-bottom: 0;
+    }
+  }
+
+  .enterprise-access-notice {
+    padding: var(--spacing-03) var(--spacing-04);
+    margin: var(--spacing-03) 0 var(--spacing-04);
+    background-color: var(--neutral-10);
+    border: 1px solid var(--neutral-30);
+    border-radius: var(--border-radius-md, 4px);
+    font-size: var(--font-size-02);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-03);
+    color: var(--neutral-80, inherit);
+
+    .enterprise-access-notice-meta {
+      font-size: var(--font-size-01);
+      color: var(--neutral-70);
+      margin-top: 2px;
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .modal-body-share.modal-link-share .enterprise-access-section .enterprise-access-controls {
+    grid-template-columns: 1fr;
+  }
+}

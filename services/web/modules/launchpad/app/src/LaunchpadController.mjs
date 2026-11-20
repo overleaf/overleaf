@@ -3,15 +3,18 @@ import { expressify } from '@overleaf/promise-utils'
 import Settings from '@overleaf/settings'
 import Path from 'node:path'
 import crypto from 'node:crypto'
+import { promisify } from 'node:util'
 import logger from '@overleaf/logger'
 import UserRegistrationHandler from '../../../../app/src/Features/User/UserRegistrationHandler.mjs'
 import EmailHandler from '../../../../app/src/Features/Email/EmailHandler.mjs'
 import UserGetter from '../../../../app/src/Features/User/UserGetter.mjs'
+import UserSessionsManager from '../../../../app/src/Features/User/UserSessionsManager.mjs'
 import { User } from '../../../../app/src/models/User.mjs'
 import AuthenticationManager from '../../../../app/src/Features/Authentication/AuthenticationManager.mjs'
 import AuthenticationController from '../../../../app/src/Features/Authentication/AuthenticationController.mjs'
 import SessionManager from '../../../../app/src/Features/Authentication/SessionManager.mjs'
 import AdminAuthorizationHelper from '../../../../app/src/Features/Helpers/AdminAuthorizationHelper.mjs'
+import { sanitizeControlCharacters } from '../../../../app/src/infrastructure/Sanitize.mjs'
 import { z, parseReq } from '../../../../app/src/infrastructure/Validation.mjs'
 
 const { hasAdminAccess } = AdminAuthorizationHelper
@@ -57,6 +60,10 @@ async function launchpadPage(req, res) {
       res.render(Path.resolve(import.meta.dirname, '../views/launchpad'), {
         adminUserExists,
         authMethod,
+        defaultAdminEmailHint: (
+          process.env.OVERLEAF_DEFAULT_ADMIN_EMAIL || ''
+        ).trim(),
+        showThinFooter: true,
       })
     } else {
       AuthenticationController.setRedirectInSession(req)
@@ -65,12 +72,27 @@ async function launchpadPage(req, res) {
   } else {
     const user = await UserGetter.promises.getUser(sessionUser._id, {
       isAdmin: 1,
+      email: 1,
+      first_name: 1,
+      last_name: 1,
+      role: 1,
+      institution: 1,
     })
     if (hasAdminAccess(user)) {
       res.render(Path.resolve(import.meta.dirname, '../views/launchpad'), {
         wsUrl: Settings.wsUrl,
         adminUserExists,
         authMethod,
+        setupComplete: req.query?.setup === 'complete',
+        currentAdmin: {
+          email: user.email || '',
+          first_name: user.first_name || '',
+          last_name: user.last_name || '',
+          role: user.role || '',
+          institution: user.institution || '',
+        },
+        hasPackageHubFeature: Boolean(Settings.enablePackageHub),
+        showThinFooter: true,
       })
     } else {
       res.redirect('/restricted')
@@ -195,19 +217,87 @@ function registerExternalAuthAdmin(authMethod) {
   })
 }
 
-const registerAdminSchema = z.object({
+export function splitFullName(rawFullName, rawFirstName, rawLastName) {
+  const cleanFirst =
+    typeof rawFirstName === 'string'
+      ? sanitizeControlCharacters(rawFirstName).trim().slice(0, 255)
+      : ''
+  const cleanLast =
+    typeof rawLastName === 'string'
+      ? sanitizeControlCharacters(rawLastName).trim().slice(0, 255)
+      : ''
+  if (cleanFirst || cleanLast) {
+    return { first_name: cleanFirst, last_name: cleanLast }
+  }
+  const cleanFull =
+    typeof rawFullName === 'string'
+      ? sanitizeControlCharacters(rawFullName).trim().slice(0, 255)
+      : ''
+  if (!cleanFull) {
+    return { first_name: '', last_name: '' }
+  }
+  const idx = cleanFull.search(/\s+/)
+  if (idx === -1) {
+    return { first_name: cleanFull, last_name: '' }
+  }
+  return {
+    first_name: cleanFull.slice(0, idx).slice(0, 255),
+    last_name: cleanFull.slice(idx).trim().slice(0, 255),
+  }
+}
+
+async function loginNewlyCreatedAdmin(req, user) {
+  const reqLogin = promisify((u, opts, cb) => req.login(u, opts, cb))
+  const saveSession = promisify(cb => req.session.save(cb))
+  await reqLogin(user, { keepSessionInfo: true })
+  delete req.session.__tmp
+  delete req.session.csrfSecret
+  req.session.analyticsId = user.analyticsId
+  await saveSession()
+  UserSessionsManager.trackSession(user, req.sessionID, () => {})
+}
+
+export const registerAdminSchema = z.object({
   body: z.strictObject({
-    email: z.string().optional(),
-    password: z.string().optional(),
+    email: z.string().trim().min(1).max(254).optional(),
+    password: z.string().min(1).max(256).optional(),
+    confirm_password: z.string().max(256).optional(),
+    full_name: z.string().max(255).optional(),
+    first_name: z.string().max(255).optional(),
+    last_name: z.string().max(255).optional(),
+    role: z.string().max(120).optional(),
+    institution: z.string().max(160).optional(),
+    _csrf: z.string().optional(),
   }),
 })
 
 async function registerAdmin(req, res) {
-  const { body } = parseReq(req, registerAdminSchema, { logOnly: true })
-  const { email, password } = body
+  let body
+  try {
+    ;({ body } = parseReq(req, registerAdminSchema))
+  } catch {
+    return res.status(400).json({
+      message: { type: 'error', text: 'Invalid account details supplied' },
+    })
+  }
+  const { email, password, confirm_password } = body
   if (!email || !password) {
     logger.debug({}, 'must supply both email and password, disallow')
-    return res.sendStatus(400)
+    return res.status(400).json({
+      message: {
+        type: 'error',
+        text: 'Please provide both an email address and password',
+      },
+    })
+  }
+  if (
+    confirm_password != null &&
+    confirm_password !== '' &&
+    confirm_password !== password
+  ) {
+    return res.status(400).json({
+      message: { type: 'error', text: 'Passwords do not match' },
+    })
   }
 
   logger.debug({ email }, 'attempted register first admin user')
@@ -237,7 +327,27 @@ async function registerAdmin(req, res) {
       .json({ message: { type: 'error', text: invalidPassword.message } })
   }
 
-  const userDetails = { email, password, analyticsId: crypto.randomUUID() }
+  const parsedName = splitFullName(
+    body.full_name,
+    body.first_name,
+    body.last_name
+  )
+  const role =
+    typeof body.role === 'string'
+      ? sanitizeControlCharacters(body.role).trim().slice(0, 120)
+      : ''
+  const institution =
+    typeof body.institution === 'string'
+      ? sanitizeControlCharacters(body.institution).trim().slice(0, 160)
+      : ''
+
+  const userDetails = {
+    email,
+    password,
+    ...(parsedName.first_name ? { first_name: parsedName.first_name } : {}),
+    ...(parsedName.last_name ? { last_name: parsedName.last_name } : {}),
+    analyticsId: crypto.randomUUID(),
+  }
 
   const user =
     await UserRegistrationHandler.promises.registerNewUser(userDetails)
@@ -255,7 +365,11 @@ async function registerAdmin(req, res) {
       {
         $set: {
           isAdmin: true,
-          emails: [{ email, reversedHostname }],
+          first_name: parsedName.first_name || user.first_name,
+          last_name: parsedName.last_name || '',
+          role,
+          institution,
+          emails: [{ email: user.email, reversedHostname }],
         },
       }
     ).exec()
@@ -266,8 +380,17 @@ async function registerAdmin(req, res) {
     throw err
   }
 
+  try {
+    const freshUser = await User.findById(user._id).exec()
+    if (freshUser && typeof req.login === 'function') {
+      await loginNewlyCreatedAdmin(req, freshUser)
+    }
+  } catch (err) {
+    logger.warn({ err, userId: user._id }, 'auto-login after admin setup failed')
+  }
+
   logger.debug({ email, userId: user._id }, 'created first admin account')
-  res.json({ redir: '/launchpad' })
+  res.json({ redir: '/launchpad?setup=complete' })
 }
 
 const LaunchpadController = {

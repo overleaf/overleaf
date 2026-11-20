@@ -1,0 +1,366 @@
+// Native Overleaf styling for First-Time Setup (/launchpad) & Sign In (/login)
+
+.ol-auth-main {
+  min-height: calc(100vh - 140px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.25rem 1rem 3rem;
+  background-color: var(--bg-light-secondary, #f4f5f7);
+}
+
+.ol-auth-shell {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.ol-auth-card {
+  width: 100%;
+  max-width: 432px;
+  background-color: var(--bg-light-primary, #ffffff);
+  border: 1px solid var(--border-primary, #d5dce0);
+  border-radius: var(--border-radius-medium, 8px);
+  padding: 2rem 2rem 1.875rem;
+  box-shadow: 0 1px 3px rgba(17, 24, 39, 0.06);
+  color: var(--content-primary, #1b222c);
+
+  &--wide {
+    max-width: 540px;
+  }
+
+  @media (max-width: 575.98px) {
+    padding: 1.5rem 1.25rem;
+  }
+}
+
+.ol-auth-brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+
+  img {
+    height: 30px;
+    width: auto;
+    display: block;
+  }
+}
+
+.ol-auth-env-label {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--content-secondary, #536171);
+  background-color: var(--bg-light-secondary, #f4f5f7);
+  border: 1px solid var(--border-primary, #d5dce0);
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+}
+
+.ol-auth-header {
+  margin-bottom: 1.5rem;
+
+  h1 {
+    margin: 0 0 0.45rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--content-primary, #1b222c);
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--content-secondary, #536171);
+  }
+}
+
+.ol-auth-form {
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  label,
+  .form-label {
+    display: block;
+    margin-bottom: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--content-primary, #1b222c);
+  }
+
+  .form-control {
+    min-height: 40px;
+    font-size: 0.9375rem;
+    border: 1px solid var(--border-primary, #c3cbd1);
+    border-radius: 4px;
+    background-color: var(--bg-light-primary, #ffffff);
+    color: var(--content-primary, #1b222c);
+
+    &:focus {
+      border-color: var(--green-50, #25763a);
+      box-shadow: 0 0 0 3px rgba(37, 118, 58, 0.18);
+      outline: none;
+    }
+  }
+}
+
+.ol-field-hint {
+  margin-top: 0.3rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--content-secondary, #536171);
+}
+
+.ol-password-wrapper {
+  position: relative;
+
+  .form-control {
+    padding-right: 42px;
+  }
+
+  .visibility-toggle {
+    position: absolute;
+    right: 2px;
+    top: 2px;
+    bottom: 2px;
+    width: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 0;
+    border-radius: 4px;
+    color: var(--content-secondary, #536171);
+    cursor: pointer;
+
+    &[hidden] {
+      display: none !important;
+    }
+
+    &:hover {
+      color: var(--content-primary, #1b222c);
+      background-color: var(--bg-light-secondary, #f4f5f7);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--green-50, #25763a);
+      outline-offset: -2px;
+    }
+
+    ph-eye,
+    ph-eye-slash {
+      width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+}
+
+.ol-auth-section {
+  margin-top: 1.25rem;
+  padding-top: 1.125rem;
+  border-top: 1px solid var(--border-primary, #e4e8ec);
+}
+
+.ol-auth-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.875rem;
+
+  h2 {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--content-primary, #1b222c);
+  }
+}
+
+.ol-optional-badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--content-secondary, #536171);
+  background-color: var(--bg-light-secondary, #f4f5f7);
+  border: 1px solid var(--border-primary, #d5dce0);
+  border-radius: 4px;
+  padding: 0.125rem 0.45rem;
+}
+
+.ol-auth-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.875rem;
+
+  @media (max-width: 575.98px) {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+.ol-auth-actions {
+  margin-top: 1.375rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ol-auth-submit {
+  width: 100%;
+  min-height: 42px;
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.ol-auth-secondary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  font-size: 0.875rem;
+
+  a {
+    color: var(--green-60, #1e5f2f);
+    font-weight: 500;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.ol-auth-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.75rem 0.875rem;
+  margin-bottom: 1.125rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  background-color: var(--green-00, #f0f9f1);
+  border: 1px solid #b8dec0;
+  color: #164823;
+
+  .material-symbols {
+    font-size: 18px;
+    line-height: 1.25;
+    flex-shrink: 0;
+  }
+
+  a {
+    font-weight: 600;
+    color: inherit;
+    text-decoration: underline;
+  }
+}
+
+.ol-auth-support-text {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-primary, #e4e8ec);
+  font-size: 0.875rem;
+  color: var(--content-secondary, #536171);
+  text-align: center;
+}
+
+.ol-setup-admin-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--content-secondary, #536171);
+
+  strong {
+    color: var(--content-primary, #1b222c);
+    font-weight: 600;
+  }
+}
+
+.ol-setup-status-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.875rem 1rem;
+  margin: 1rem 0 1.25rem;
+  border: 1px solid var(--border-primary, #d5dce0);
+  border-radius: 6px;
+  background-color: var(--bg-light-secondary, #f8f9fa);
+  font-size: 0.9375rem;
+}
+
+.ol-setup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+  margin-bottom: 1.25rem;
+}
+
+.ol-setup-details {
+  border-top: 1px solid var(--border-primary, #e4e8ec);
+  padding-top: 1rem;
+
+  > summary {
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--content-secondary, #536171);
+    user-select: none;
+
+    &:hover {
+      color: var(--content-primary, #1b222c);
+    }
+  }
+
+  &[open] > summary {
+    margin-bottom: 0.875rem;
+    color: var(--content-primary, #1b222c);
+  }
+}
+
+.ol-account-profile-summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-primary, #d5dce0);
+  background-color: var(--bg-light-secondary, #f8f9fa);
+  font-size: 0.875rem;
+}
+
+.ol-account-profile-name {
+  font-weight: 600;
+  color: var(--content-primary, #1b222c);
+}
+
+.ol-account-role-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  background-color: var(--green-00, #eaf5ec);
+  color: var(--green-60, #1e5f2f);
+  border: 1px solid #b8dec0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ol-auth-card *,
+  .ol-auth-form * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

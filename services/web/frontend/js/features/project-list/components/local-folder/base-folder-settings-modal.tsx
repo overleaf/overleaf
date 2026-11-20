@@ -13,12 +13,16 @@ import OLFormLabel from '@/shared/components/ol/ol-form-label'
 import OLFormControl from '@/shared/components/ol/ol-form-control'
 import OLFormCheckbox from '@/shared/components/ol/ol-form-checkbox'
 import Notification from '@/shared/components/notification'
-import MaterialIcon from '@/shared/components/material-icon'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useProjectListContext } from '../../context/project-list-context'
 import { updateLocalSyncBaseDir } from '../../util/api'
 import { getUserFacingMessage } from '../../../../infrastructure/fetch-json'
 import DirectoryBrowser from './directory-browser'
+import {
+  DEFAULT_LOCAL_ALLOWED_ROOT,
+  DEFAULT_LOCAL_BASE_DIR,
+  formatLocalDisplayPath,
+} from './path-display'
 
 function BaseFolderSettingsModal() {
   const {
@@ -36,20 +40,23 @@ function BaseFolderSettingsModal() {
   const [showBrowser, setShowBrowser] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+
+  const allowedRoot =
+    localSyncSettings?.allowedRoot || DEFAULT_LOCAL_ALLOWED_ROOT
+  const fallbackBaseDir =
+    localSyncSettings?.defaultBaseDir ||
+    `${allowedRoot.replace(/\/+$/, '')}/OverleafProjects` ||
+    DEFAULT_LOCAL_BASE_DIR
 
   useEffect(() => {
     if (showBaseFolderModal) {
-      setBaseDir(
-        localSyncSettings?.baseDir || '/home/uzairserver/OverleafProjects'
-      )
+      setBaseDir(localSyncSettings?.baseDir || fallbackBaseDir)
       setSyncAll(true)
       setCleanOld(false)
       setShowBrowser(false)
       setErrorMessage(null)
-      setSuccessMessage(null)
     }
-  }, [showBaseFolderModal, localSyncSettings?.baseDir])
+  }, [showBaseFolderModal, localSyncSettings?.baseDir, fallbackBaseDir])
 
   const pathChanged =
     Boolean(localSyncSettings?.baseDir) &&
@@ -63,7 +70,6 @@ function BaseFolderSettingsModal() {
 
       setIsSaving(true)
       setErrorMessage(null)
-      setSuccessMessage(null)
       try {
         const res = await updateLocalSyncBaseDir({
           baseDir: trimmed,
@@ -76,17 +82,10 @@ function BaseFolderSettingsModal() {
         await refreshProjectsList()
         if (res.failedCount > 0) {
           setErrorMessage(
-            `Saved folder location, but ${res.failedCount} project(s) failed to sync (${res.syncedCount} synced).`
+            `Saved folder location, but ${res.failedCount} project(s) failed to copy.`
           )
         } else {
-          setSuccessMessage(
-            syncAll
-              ? `Default folder updated to ${res.settings?.baseDir || trimmed} (${res.syncedCount} project${res.syncedCount === 1 ? '' : 's'} synced).`
-              : `Default folder updated to ${res.settings?.baseDir || trimmed}.`
-          )
-          setTimeout(() => {
-            closeBaseFolderModal()
-          }, 900)
+          closeBaseFolderModal()
         }
       } catch (err) {
         setErrorMessage(String(getUserFacingMessage(err)))
@@ -106,9 +105,8 @@ function BaseFolderSettingsModal() {
   )
 
   const presets = localSyncSettings?.presets || [
-    '/home/uzairserver/OverleafProjects',
-    '/home/uzairserver/Documents/Overleaf',
-    '/home/uzairserver/Desktop/Overleaf',
+    fallbackBaseDir,
+    `${allowedRoot.replace(/\/+$/, '')}/Papers`,
   ]
 
   return (
@@ -119,31 +117,17 @@ function BaseFolderSettingsModal() {
       id="base-folder-settings-modal"
       backdrop="static"
       themed={themed}
-      size="lg"
       className="project-list-modal ol-local-folder-modal"
     >
       <OLModalHeader closeButton>
-        <OLModalTitle>
-          <span className="ol-local-modal-title-row">
-            <MaterialIcon type="folder_open" />
-            <span>Projects Folder Location</span>
-          </span>
-        </OLModalTitle>
+        <OLModalTitle>Local folder location</OLModalTitle>
       </OLModalHeader>
       <OLModalBody>
-        <p className="ol-local-modal-intro">
-          Choose where Overleaf saves readable copies of your listed projects (
-          <code>.tex</code>, <code>.bib</code>, figures, and compiled{' '}
-          <code>.pdf</code> files). Projects without a custom override are
-          automatically saved in a subfolder here, while Overleaf&apos;s
-          internal database remains safely intact.
-        </p>
-
         {localSyncSettings && !localSyncSettings.serviceHealthy && (
           <div className="notification-list mb-3">
             <Notification
               type="error"
-              content="Local folder sync helper is currently unreachable. Restart Overleaf to restore syncing."
+              content="Local folder sync service is unavailable. Restart Overleaf to restore syncing."
             />
           </div>
         )}
@@ -154,16 +138,9 @@ function BaseFolderSettingsModal() {
           </div>
         )}
 
-        {successMessage && (
-          <div className="ol-local-success-alert mb-3" role="status">
-            <MaterialIcon type="check_circle" />
-            <span>{successMessage}</span>
-          </div>
-        )}
-
         <OLForm id="base-folder-settings-form" onSubmit={handleSubmit}>
           <OLFormGroup controlId="base-folder-path-input" className="mb-3">
-            <OLFormLabel>Default Projects Base Folder</OLFormLabel>
+            <OLFormLabel>Default folder for projects</OLFormLabel>
             <div className="ol-local-path-input-row">
               <OLFormControl
                 type="text"
@@ -171,7 +148,7 @@ function BaseFolderSettingsModal() {
                 className="ol-local-mono-input"
                 value={baseDir}
                 onChange={e => setBaseDir(e.target.value)}
-                placeholder="/home/uzairserver/OverleafProjects"
+                placeholder={fallbackBaseDir}
                 disabled={isSaving}
               />
               <OLButton
@@ -180,22 +157,18 @@ function BaseFolderSettingsModal() {
                 onClick={() => setShowBrowser(v => !v)}
                 disabled={isSaving}
               >
-                <MaterialIcon type="folder_open" />
-                <span>{showBrowser ? 'Hide Browser' : 'Browse'}</span>
+                {showBrowser ? 'Hide' : 'Browse'}
               </OLButton>
             </div>
             <div className="ol-local-field-help">
-              Must be a subfolder under{' '}
-              <code>
-                {localSyncSettings?.allowedRoot || '/home/uzairserver'}
-              </code>{' '}
-              (you can also use <code>~/...</code>). You can override any
-              individual project&apos;s folder from the projects table.
+              Files (<code>.tex</code>, <code>.bib</code>, images, and{' '}
+              <code>.pdf</code>) are kept readable under{' '}
+              <code>{allowedRoot}</code>.
             </div>
           </OLFormGroup>
 
           <div className="ol-local-presets mb-3">
-            <span className="ol-local-presets-label">Quick locations:</span>
+            <span className="ol-local-presets-label">Presets:</span>
             {presets.map(preset => (
               <button
                 key={preset}
@@ -206,7 +179,7 @@ function BaseFolderSettingsModal() {
                 onClick={() => setBaseDir(preset)}
                 disabled={isSaving}
               >
-                {preset.replace(/^\/home\/[^/]+/, '~')}
+                {formatLocalDisplayPath(preset, allowedRoot)}
               </button>
             ))}
           </div>
@@ -221,31 +194,24 @@ function BaseFolderSettingsModal() {
             </div>
           )}
 
-          <div className="ol-local-options-box">
-            <OLFormCheckbox
-              id="base-folder-sync-all"
-              label="Sync all default-location projects to this folder now"
-              checked={syncAll}
-              onChange={e => setSyncAll(e.target.checked)}
-              disabled={isSaving}
-            />
-            {pathChanged && (
-              <div className="mt-2">
-                <OLFormCheckbox
-                  id="base-folder-clean-old"
-                  label="Clean up old Overleaf-synced files from the previous default folder after verifying the new copy"
-                  checked={cleanOld}
-                  onChange={e => setCleanOld(e.target.checked)}
-                  disabled={isSaving || !syncAll}
-                />
-                <div className="ol-local-field-help ms-4">
-                  Safe cleanup: only removes files tracked in{' '}
-                  <code>.overleaf-sync.json</code>; any personal files you added
-                  are never deleted.
-                </div>
-              </div>
-            )}
-          </div>
+          <OLFormCheckbox
+            id="base-folder-sync-all"
+            label="Update existing projects in this folder now"
+            checked={syncAll}
+            onChange={e => setSyncAll(e.target.checked)}
+            disabled={isSaving}
+          />
+          {pathChanged && (
+            <div className="mt-2">
+              <OLFormCheckbox
+                id="base-folder-clean-old"
+                label="Remove Overleaf-managed copies from the previous folder"
+                checked={cleanOld}
+                onChange={e => setCleanOld(e.target.checked)}
+                disabled={isSaving || !syncAll}
+              />
+            </div>
+          )}
         </OLForm>
       </OLModalBody>
       <OLModalFooter>
@@ -260,9 +226,11 @@ function BaseFolderSettingsModal() {
           variant="primary"
           type="submit"
           form="base-folder-settings-form"
+          isLoading={isSaving}
+          loadingLabel="Saving..."
           disabled={isSaving || !baseDir.trim()}
         >
-          {isSaving ? 'Saving & Syncing...' : 'Save Folder Location'}
+          Save
         </OLButton>
       </OLModalFooter>
     </OLModal>

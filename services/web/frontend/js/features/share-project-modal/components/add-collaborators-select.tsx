@@ -21,6 +21,25 @@ import MaterialIcon, {
 } from '@/shared/components/material-icon'
 import { isValidEmail } from '@/shared/utils/email'
 
+type InvitePermissionChoice =
+  | 'readAndWrite'
+  | 'review'
+  | 'readOnlyCopy'
+  | 'readOnlyNoCopy'
+
+function choiceToInviteParams(choice: InvitePermissionChoice): {
+  privileges: PermissionsLevel
+  allowCopy: boolean
+} {
+  if (choice === 'readOnlyNoCopy') {
+    return { privileges: 'readOnly', allowCopy: false }
+  }
+  if (choice === 'readOnlyCopy') {
+    return { privileges: 'readOnly', allowCopy: true }
+  }
+  return { privileges: choice, allowCopy: true }
+}
+
 type AddCollaboratorsSelectProps = {
   readOnly?: boolean
   multipleSelectionProps: ReturnType<typeof useMultipleSelection<ContactItem>>
@@ -41,7 +60,8 @@ function AddCollaboratorsSelect({
   const isSharingUpdatesEnabled = useFeatureFlag('sharing-updates')
   const { t } = useTranslation()
   const { features } = useProjectContext()
-  const [privileges, setPrivileges] = useState<PermissionsLevel>('readAndWrite')
+  const [selectedChoice, setSelectedChoice] =
+    useState<InvitePermissionChoice>('readAndWrite')
 
   const isMounted = useIsMounted()
 
@@ -53,7 +73,7 @@ function AddCollaboratorsSelect({
 
   const privilegeOptions = useMemo(() => {
     const options: {
-      key: PermissionsLevel
+      key: InvitePermissionChoice
       label: string
       description?: string | null
       icon: AvailableUnfilledIcon
@@ -61,6 +81,7 @@ function AddCollaboratorsSelect({
       {
         key: 'readAndWrite',
         label: t('editor'),
+        description: 'Modify original',
         icon: 'edit',
       },
     ]
@@ -76,11 +97,20 @@ function AddCollaboratorsSelect({
       })
     }
 
-    options.push({
-      key: 'readOnly',
-      label: t('viewer'),
-      icon: 'visibility',
-    })
+    options.push(
+      {
+        key: 'readOnlyCopy',
+        label: 'Viewer (can copy)',
+        description: 'View & use as a copy',
+        icon: 'visibility',
+      },
+      {
+        key: 'readOnlyNoCopy',
+        label: 'Viewer (no copy)',
+        description: 'View only, copying disabled',
+        icon: 'visibility_off',
+      }
+    )
 
     return options
   }, [features.trackChanges, features.trackChangesVisible, t])
@@ -88,13 +118,25 @@ function AddCollaboratorsSelect({
   const { reset, selectedItems } = multipleSelectionProps
 
   useEffect(() => {
-    if (readOnly && privileges !== 'readOnly') {
-      setPrivileges('readOnly')
+    if (
+      readOnly &&
+      selectedChoice !== 'readOnlyCopy' &&
+      selectedChoice !== 'readOnlyNoCopy'
+    ) {
+      setSelectedChoice('readOnlyCopy')
     }
-  }, [privileges, readOnly])
+  }, [selectedChoice, readOnly])
 
   const handleSubmit = useCallback(async () => {
-    if (!selectedItems.length) {
+    const cleanInputEmail = inputValue?.trim() || ''
+    const itemsToInvite =
+      selectedItems.length > 0
+        ? selectedItems
+        : cleanInputEmail && isValidEmail(cleanInputEmail)
+          ? [{ email: cleanInputEmail, display: cleanInputEmail, type: 'user' }]
+          : []
+
+    if (!itemsToInvite.length) {
       return
     }
 
@@ -110,8 +152,9 @@ function AddCollaboratorsSelect({
 
     let hasError = false
     let hasInvited = false
+    const { privileges, allowCopy } = choiceToInviteParams(selectedChoice)
 
-    for (const contact of selectedItems) {
+    for (const contact of itemsToInvite) {
       // unmounting means can't add any more collaborators
       if (!isMounted.current) {
         break
@@ -133,11 +176,11 @@ function AddCollaboratorsSelect({
           data = await resendInvite(projectId, invite)
         } else {
           data = await sendInviteHook.run(
-            ...sendInviteParams(projectId, email, privileges)
+            ...sendInviteParams(projectId, email, privileges, allowCopy)
           )
         }
 
-        const role = data?.invite?.privileges
+        const role = data?.invite?.privileges || data?.user?.privileges
         const membersAndInvites = (members || []).concat(invites || [])
         const previousEditorsAmount = membersAndInvites.filter(
           member => member.privileges === 'readAndWrite'
@@ -152,7 +195,7 @@ function AddCollaboratorsSelect({
         sendMB('collaborator-invited', {
           project_id: projectId,
           // invitation is only populated on successful invite, meaning that for paywall and other cases this will be null
-          successful_invite: !!data.invite,
+          successful_invite: !!(data.invite || data.user),
           users_updated: !!(data.users || data.user),
           current_collaborators_amount: members?.length || 0,
           current_invites_amount: invites?.length || 0,
@@ -209,8 +252,19 @@ function AddCollaboratorsSelect({
         })
       } else if (data.user) {
         hasInvited = true
+        const currentMembers = members || []
+        const exists = currentMembers.some(m => m._id === data.user._id)
+        const nextMembers = exists
+          ? currentMembers.map(m =>
+              m._id === data.user._id ? { ...m, ...data.user } : m
+            )
+          : currentMembers.concat(data.user)
+        const nextInvites = (invites || []).filter(
+          inv => inv.email?.toLowerCase() !== data.user.email?.toLowerCase()
+        )
         updateProject({
-          members: members?.concat(data.user) || [data.user],
+          members: nextMembers,
+          invites: nextInvites,
         })
       } else if (!('invite' in data)) {
         // a successful resend returns an empty body (no `invite` field)
@@ -240,12 +294,13 @@ function AddCollaboratorsSelect({
     }
   }, [
     currentMemberEmails,
+    inputValue,
     invites,
     isMounted,
     isSharingUpdatesEnabled,
     members,
     onInviteSuccess,
-    privileges,
+    selectedChoice,
     projectId,
     reset,
     selectedItems,
@@ -271,15 +326,21 @@ function AddCollaboratorsSelect({
       itemToKey={item => item.key}
       itemToString={item => item?.label || ''}
       itemToSubtitle={item => item?.description || ''}
-      itemToDisabled={item => !!(readOnly && item?.key !== 'readOnly')}
+      itemToDisabled={item =>
+        !!(
+          readOnly &&
+          item?.key !== 'readOnlyCopy' &&
+          item?.key !== 'readOnlyNoCopy'
+        )
+      }
       itemToLeadingIcon={item =>
         isSharingUpdatesEnabled &&
         item && <MaterialIcon type={item.icon} unfilled />
       }
-      selected={privilegeOptions.find(option => option.key === privileges)}
+      selected={privilegeOptions.find(option => option.key === selectedChoice)}
       onSelectedItemChanged={item => {
         if (item) {
-          setPrivileges(item.key)
+          setSelectedChoice(item.key)
         }
       }}
       selectedIcon={isSharingUpdatesEnabled}

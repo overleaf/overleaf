@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { BookBookmark, Trash, Folder } from '@phosphor-icons/react'
+import { BookBookmark, FolderOpen, Trash, Folder } from '@phosphor-icons/react'
 import {
   Filter,
   UNCATEGORIZED_KEY,
@@ -75,7 +75,8 @@ function NavigationDropdown({
     activePage === 'library' ? t('library') : t('all_projects')
   )
   const [view, setView] = useState<'top' | 'tags' | 'trash'>('top')
-  const { filter, selectedTagId, tags } = useProjectListContext()
+  const { filter, selectedTagId, tags, openBaseFolderModal } =
+    useProjectListContext()
   const projectsTrashActive =
     activePage === 'projects' &&
     selectedTagId === undefined &&
@@ -207,6 +208,18 @@ function NavigationDropdown({
                 {t('library')}
               </OLDropdownItem>
             </li>
+            {activePage !== 'library' && (
+              <li role="none">
+                <OLDropdownItem
+                  as="button"
+                  tabIndex={-1}
+                  leadingIcon={<FolderOpen size={20} />}
+                  onClick={openBaseFolderModal}
+                >
+                  Folder Location
+                </OLDropdownItem>
+              </li>
+            )}
             <li role="none">
               <OLDropdownItem
                 as="button"

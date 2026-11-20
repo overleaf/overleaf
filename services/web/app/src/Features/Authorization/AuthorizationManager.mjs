@@ -13,6 +13,7 @@ import Errors from '../Errors/Errors.js'
 import AdminAuthorizationHelper from '../Helpers/AdminAuthorizationHelper.mjs'
 import Settings from '@overleaf/settings'
 import ChatApiHandler from '../Chat/ChatApiHandler.mjs'
+import ProjectAccessPolicyService from './ProjectAccessPolicyService.mjs'
 
 const { hasAdminAccess, getAdminCapabilities } = AdminAuthorizationHelper
 const { ObjectId } = mongodb
@@ -169,10 +170,26 @@ async function getPrivilegeLevelForProjectWithUser(
     projectAccess ||
     (await CollaboratorsGetter.promises.getProjectAccess(projectId))
 
+  const enterprisePolicy =
+    await ProjectAccessPolicyService.evaluateEnterpriseAccessForUserById(
+      userId,
+      projectId
+    )
+
   const privilegeLevel = projectAccess.privilegeLevelForUser(userId)
   if (privilegeLevel && privilegeLevel !== PrivilegeLevels.NONE) {
-    // The user has direct access
+    if (
+      privilegeLevel !== PrivilegeLevels.OWNER &&
+      enterprisePolicy.granted &&
+      enterprisePolicy.privilegeLevel === PrivilegeLevels.READ_AND_WRITE
+    ) {
+      return PrivilegeLevels.READ_AND_WRITE
+    }
     return privilegeLevel
+  }
+
+  if (enterprisePolicy.granted && enterprisePolicy.privilegeLevel) {
+    return enterprisePolicy.privilegeLevel
   }
 
   if (!opts.ignorePublicAccess) {

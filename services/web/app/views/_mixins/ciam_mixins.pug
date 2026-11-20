@@ -12,27 +12,9 @@ mixin ciamCardSeparator
 mixin ciamCardFooter(short)
 	section.ciam-card-footer
 		+ciamCardSeparator
-		.ciam-footer-ds-logo
-			a.ciam-image-link(
-				href='https://www.digital-science.com/'
-				target='_blank'
-				rel='noopener noreferrer'
-				event-tracking-mb='true'
-				event-tracking='unified-access-footer-click'
-				event-tracking-trigger='click'
-				event-segmentation={
-					product: 'overleaf',
-					item: 'logo',
-					destinationUrl: 'https://www.digital-science.com/',
-				}
-			)
-				img(
-					src=buildImgPath('digital-science/digital-science.svg')
-					alt='Digital Science — home'
-				)
 		p
 			if short
-				| !{translate('overleaf_is_a_ds_product')}
+				| #{settings.appName}
 			else
 				-
 					const linkArgs = [

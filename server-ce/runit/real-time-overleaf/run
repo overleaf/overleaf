@@ -3,4 +3,4 @@
 source /etc/overleaf/env.sh
 export LISTEN_ADDRESS=127.0.0.1
 
-exec /sbin/setuser www-data /usr/bin/node /overleaf/services/real-time/app.js >> /var/log/overleaf/real-time.log 2>&1
+exec /sbin/setuser www-data /usr/bin/node --max-old-space-size=128 --max-semi-space-size=2 /overleaf/services/real-time/app.js >> /var/log/overleaf/real-time.log 2>&1

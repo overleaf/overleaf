@@ -7,6 +7,7 @@ import SessionManager from '../Authentication/SessionManager.mjs'
 import { expressify } from '@overleaf/promise-utils'
 import logger from '@overleaf/logger'
 import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
+import LaunchpadController from '../../../../modules/launchpad/app/src/LaunchpadController.mjs'
 
 const __dirname = new URL('.', import.meta.url).pathname
 
@@ -45,7 +46,10 @@ async function home(req, res) {
       shouldLoadHotjar: hotjarAssignment?.variant === 'enabled',
     })
   } else {
-    res.redirect('/login')
+    const adminExists = await LaunchpadController._atLeastOneAdminExists().catch(
+      () => true
+    )
+    res.redirect(adminExists ? '/login' : '/launchpad')
   }
 }
 

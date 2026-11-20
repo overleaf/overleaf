@@ -21,11 +21,10 @@ import DefaultNavbar from '@/shared/components/navbar/default-navbar'
 import Footer from '@/shared/components/footer/footer'
 import SidebarDsNav from '@/features/project-list/components/sidebar/sidebar-ds-nav'
 import SystemMessages from '@/shared/components/system-messages'
-import overleafLogo from '@/shared/svgs/overleaf-a-ds-solution-mallard.svg'
-import overleafLogoDark from '@/shared/svgs/overleaf-a-ds-solution-mallard-dark.svg'
+import overleafLogo from '@/shared/svgs/overleaf-green.svg'
+import overleafLogoDark from '@/shared/svgs/overleaf-white.svg'
 import CookieBanner from '@/shared/components/cookie-banner'
 import NoProjects from '@/features/project-list/components/no-projects'
-import LocalFolderBanner from './local-folder/local-folder-banner'
 import BaseFolderSettingsModal from './local-folder/base-folder-settings-modal'
 import ProjectFolderModal from './local-folder/project-folder-modal'
 import { useActiveOverallTheme } from '@/shared/hooks/use-active-overall-theme'
@@ -167,7 +166,6 @@ export function ProjectListDsNav() {
                       {/* Omit the survey card in mobile view for now */}
                     </div>
                     <ProjectsToolbarMobile />
-                    {!showTrashHeader && <LocalFolderBanner />}
                     <div className="mt-3">
                       <TableContainer bordered>
                         {tableTopArea}

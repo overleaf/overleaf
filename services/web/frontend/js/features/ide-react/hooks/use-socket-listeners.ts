@@ -59,6 +59,19 @@ function useSocketListeners() {
 
   useSocketListener(
     socket,
+    'project:enterpriseAccess:changed',
+    useCallback(
+      (data: { enterpriseAccess?: any }) => {
+        if (data?.enterpriseAccess) {
+          updateProject({ enterpriseAccess: data.enterpriseAccess })
+        }
+      },
+      [updateProject]
+    )
+  )
+
+  useSocketListener(
+    socket,
     'project:collaboratorAccessLevel:changed',
     useCallback(() => {
       listProjectMembers(projectId)

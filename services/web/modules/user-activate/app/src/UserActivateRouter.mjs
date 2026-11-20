@@ -7,12 +7,6 @@ export default {
   apply(webRouter) {
     logger.debug({}, 'Init UserActivate router')
 
-    webRouter.get(
-      '/admin/user',
-      AuthorizationMiddleware.ensureUserIsSiteAdmin,
-      (req, res) => res.redirect('/admin/register')
-    )
-
     webRouter.get('/user/activate', UserActivateController.activateAccountPage)
     AuthenticationController.addEndpointToLoginWhitelist('/user/activate')
 

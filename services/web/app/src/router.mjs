@@ -23,6 +23,8 @@ import UserInfoController from './Features/User/UserInfoController.mjs'
 import UserController from './Features/User/UserController.mjs'
 import UserEmailsController from './Features/User/UserEmailsController.mjs'
 import UserPagesController from './Features/User/UserPagesController.mjs'
+import PackageHubController from './Features/PackageHub/PackageHubController.mjs'
+import { multerErrorHandler } from './infrastructure/Multer.mjs'
 import TutorialController from './Features/Tutorial/TutorialController.mjs'
 import DocumentController from './Features/Documents/DocumentController.mjs'
 import CompileManager from './Features/Compile/CompileManager.mjs'
@@ -66,6 +68,8 @@ import { plainTextResponse } from './infrastructure/Response.mjs'
 import SocketDiagnostics from './Features/SocketDiagnostics/SocketDiagnostics.mjs'
 import ClsiCacheController from './Features/Compile/ClsiCacheController.mjs'
 import AsyncLocalStorage from './infrastructure/AsyncLocalStorage.mjs'
+import ProjectAccessPolicyService from './Features/Authorization/ProjectAccessPolicyService.mjs'
+import ProjectSharingController from './Features/Authorization/ProjectSharingController.mjs'
 import {
   getRawReqInput,
   parseReq,
@@ -218,6 +222,7 @@ const statusCompilerSchema = z.object({
 
 async function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.use(unsupportedBrowserMiddleware)
+  webRouter.use(ProjectAccessPolicyService.requestContextMiddleware)
 
   if (!Settings.allowPublicAccess) {
     webRouter.all('*', AuthenticationController.requireGlobalLogin)
@@ -336,6 +341,167 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     AuthenticationController.requireLogin(),
     PermissionsController.useCapabilities(),
     UserPagesController.settingsPage
+  )
+
+  // Package Hub UI & API (same origin, session auth + CSRF)
+  webRouter.get(
+    '/packages',
+    AuthenticationController.requireLogin(),
+    PackageHubController.renderPackagesPage
+  )
+  webRouter.get(
+    '/api/packages',
+    AuthenticationController.requireLogin(),
+    PackageHubController.listPackages
+  )
+  webRouter.get(
+    '/api/packages/installed',
+    AuthenticationController.requireLogin(),
+    PackageHubController.listInstalled
+  )
+  webRouter.get(
+    '/api/packages/search',
+    AuthenticationController.requireLogin(),
+    PackageHubController.searchPackages
+  )
+  webRouter.get(
+    '/api/packages/updates',
+    AuthenticationController.requireLogin(),
+    PackageHubController.listUpdates
+  )
+  webRouter.get(
+    '/api/packages/docs',
+    AuthenticationController.requireLogin(),
+    PackageHubController.getOpenApiDocs
+  )
+  webRouter.get(
+    '/api/packages/audit',
+    AuthenticationController.requireLogin(),
+    PackageHubController.getAuditLog
+  )
+  webRouter.post(
+    '/api/packages/history/clear',
+    AuthenticationController.requireLogin(),
+    PackageHubController.clearHistory
+  )
+  webRouter.post(
+    '/api/packages/install',
+    AuthenticationController.requireLogin(),
+    PackageHubController.installPackages
+  )
+  webRouter.post(
+    '/api/packages/remove',
+    AuthenticationController.requireLogin(),
+    PackageHubController.removePackages
+  )
+  webRouter.post(
+    '/api/packages/update',
+    AuthenticationController.requireLogin(),
+    PackageHubController.updatePackages
+  )
+  webRouter.post(
+    '/api/packages/reconcile',
+    AuthenticationController.requireLogin(),
+    PackageHubController.reconcilePackages
+  )
+  webRouter.post(
+    '/api/packages/snapshot',
+    AuthenticationController.requireLogin(),
+    PackageHubController.snapshotEnvironment
+  )
+  webRouter.post(
+    '/api/packages/upload/validate',
+    AuthenticationController.requireLogin(),
+    PackageHubController.uploadMulterMiddleware,
+    PackageHubController.validateUpload,
+    multerErrorHandler
+  )
+  webRouter.post(
+    '/api/packages/upload',
+    AuthenticationController.requireLogin(),
+    PackageHubController.uploadMulterMiddleware,
+    PackageHubController.uploadPackage,
+    multerErrorHandler
+  )
+  webRouter.delete(
+    '/api/packages/custom/:name',
+    AuthenticationController.requireLogin(),
+    PackageHubController.deleteCustomPackage
+  )
+  webRouter.get(
+    '/api/packages/jobs',
+    AuthenticationController.requireLogin(),
+    PackageHubController.listJobs
+  )
+  webRouter.get(
+    '/api/packages/jobs/:jobId',
+    AuthenticationController.requireLogin(),
+    PackageHubController.getJob
+  )
+  webRouter.get(
+    '/api/packages/jobs/:jobId/stream',
+    AuthenticationController.requireLogin(),
+    PackageHubController.streamJob
+  )
+  webRouter.get(
+    '/api/packages/sources',
+    AuthenticationController.requireLogin(),
+    PackageHubController.getSources
+  )
+  webRouter.get(
+    '/api/packages/sources/community',
+    AuthenticationController.requireLogin(),
+    PackageHubController.listCommunityManifests
+  )
+  webRouter.post(
+    '/api/packages/sources/community',
+    AuthenticationController.requireLogin(),
+    PackageHubController.registerCommunityManifest
+  )
+  webRouter.post(
+    '/api/packages/sources/texlive/mirror',
+    AuthenticationController.requireLogin(),
+    PackageHubController.setTexliveMirror
+  )
+  webRouter.get(
+    '/api/packages/:name',
+    AuthenticationController.requireLogin(),
+    PackageHubController.getPackageDetails
+  )
+  webRouter.get(
+    '/api/jobs',
+    AuthenticationController.requireLogin(),
+    PackageHubController.listJobs
+  )
+  webRouter.get(
+    '/api/jobs/:jobId',
+    AuthenticationController.requireLogin(),
+    PackageHubController.getJob
+  )
+  webRouter.get(
+    '/api/jobs/:jobId/stream',
+    AuthenticationController.requireLogin(),
+    PackageHubController.streamJob
+  )
+  webRouter.get(
+    '/api/sources',
+    AuthenticationController.requireLogin(),
+    PackageHubController.getSources
+  )
+  webRouter.get(
+    '/api/sources/community',
+    AuthenticationController.requireLogin(),
+    PackageHubController.listCommunityManifests
+  )
+  webRouter.post(
+    '/api/sources/community',
+    AuthenticationController.requireLogin(),
+    PackageHubController.registerCommunityManifest
+  )
+  webRouter.post(
+    '/api/sources/texlive/mirror',
+    AuthenticationController.requireLogin(),
+    PackageHubController.setTexliveMirror
   )
   webRouter.post(
     '/user/settings',
@@ -1156,6 +1322,152 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     AuthorizationMiddleware.ensureUserIsSiteAdmin,
     AdminController.index
   )
+  webRouter.get(
+    '/admin/user',
+    AuthorizationMiddleware.ensureUserIsSiteAdmin,
+    AdminController.usersPage
+  )
+  webRouter.get(
+    '/admin/projects',
+    AuthorizationMiddleware.ensureUserIsSiteAdmin,
+    AdminController.projectsPage
+  )
+
+  webRouter.get(
+    '/api/projects/:Project_id/sharing',
+    AuthenticationController.requireLogin(),
+    AuthorizationMiddleware.ensureUserCanReadProject,
+    ProjectSharingController.getProjectSharing
+  )
+  webRouter.get(
+    '/api/projects/:Project_id/sharing/user-search',
+    AuthenticationController.requireLogin(),
+    AuthorizationMiddleware.ensureUserCanAdminProject,
+    ProjectSharingController.searchUsers
+  )
+  webRouter.post(
+    '/api/projects/:Project_id/sharing/collaborators',
+    AuthenticationController.requireLogin(),
+    AuthorizationMiddleware.ensureUserCanAdminProject,
+    ProjectSharingController.addCollaborator
+  )
+  webRouter.patch(
+    '/api/projects/:Project_id/sharing/collaborators/:userId',
+    AuthenticationController.requireLogin(),
+    AuthorizationMiddleware.ensureUserCanAdminProject,
+    ProjectSharingController.updateCollaborator
+  )
+  webRouter.delete(
+    '/api/projects/:Project_id/sharing/collaborators/:userId',
+    AuthenticationController.requireLogin(),
+    AuthorizationMiddleware.ensureUserCanAdminProject,
+    ProjectSharingController.removeCollaborator
+  )
+
+  webRouter.get(
+    '/api/admin/overview',
+    AuthorizationMiddleware.ensureUserIsSiteAdmin,
+    AdminController.getOverview
+  )
+  webRouter.post(
+    '/api/admin/editor',
+    AuthorizationMiddleware.ensureUserIsSiteAdmin,
+    AdminController.setEditorStatus
+  )
+  webRouter.post(
+    '/api/admin/disconnect-all',
+    AuthorizationMiddleware.ensureUserIsSiteAdmin,
+    AdminController.disconnectAllUsersJson
+  )
+  webRouter.post(
+    '/api/admin/messages',
+    AuthorizationMiddleware.ensureUserIsSiteAdmin,
+    AdminController.createMessageJson
+  )
+  webRouter.delete(
+    '/api/admin/messages/:messageId',
+    AuthorizationMiddleware.ensureUserIsSiteAdmin,
+    AdminController.deleteMessageJson
+  )
+  webRouter.post(
+    '/api/admin/messages/clear',
+    AuthorizationMiddleware.ensureUserIsSiteAdmin,
+    AdminController.clearMessagesJson
+  )
+  webRouter.get(
+    '/api/admin/users',
+    AuthorizationMiddleware.ensureUserIsSiteAdmin,
+    AdminController.listUsers
+  )
+  webRouter.post(
+    '/api/admin/users',
+    AuthorizationMiddleware.ensureUserIsSiteAdmin,
+    AdminController.createUser
+  )
+  webRouter.patch(
+    '/api/admin/users/:userId',
+    AuthorizationMiddleware.ensureUserIsSiteAdmin,
+    AdminController.updateUser
+  )
+  webRouter.post(
+    '/api/admin/users/:userId/reset-link',
+    AuthorizationMiddleware.ensureUserIsSiteAdmin,
+    AdminController.generateResetLink
+  )
+  webRouter.delete(
+    '/api/admin/users/:userId',
+    AuthorizationMiddleware.ensureUserIsSiteAdmin,
+    AdminController.deleteUser
+  )
+  webRouter.get(
+    '/api/admin/projects',
+    AuthorizationMiddleware.ensureUserIsSiteAdmin,
+    AdminController.listProjects
+  )
+  webRouter.get(
+    '/api/admin/projects/:projectId/access',
+    AuthorizationMiddleware.ensureUserIsSiteAdmin,
+    AdminController.getProjectAccess
+  )
+  webRouter.put(
+    '/api/admin/projects/:projectId/access',
+    AuthorizationMiddleware.ensureUserIsSiteAdmin,
+    AdminController.updateProjectAccess
+  )
+  webRouter.post(
+    '/api/admin/projects/:projectId/collaborators',
+    AuthorizationMiddleware.ensureUserIsSiteAdmin,
+    AdminController.addProjectCollaborator
+  )
+  webRouter.patch(
+    '/api/admin/projects/:projectId/collaborators/:userId',
+    AuthorizationMiddleware.ensureUserIsSiteAdmin,
+    AdminController.updateProjectCollaborator
+  )
+  webRouter.delete(
+    '/api/admin/projects/:projectId/collaborators/:userId',
+    AuthorizationMiddleware.ensureUserIsSiteAdmin,
+    AdminController.removeProjectCollaborator
+  )
+  webRouter.get('/api/branding/logo', AdminController.getPublicLogo)
+  webRouter.get('/api/branding/logo-dark', AdminController.getPublicLogo)
+  AuthenticationController.addEndpointToLoginWhitelist('/api/branding/logo')
+  AuthenticationController.addEndpointToLoginWhitelist('/api/branding/logo-dark')
+  webRouter.get(
+    '/api/admin/branding',
+    AuthorizationMiddleware.ensureUserIsSiteAdmin,
+    AdminController.getBranding
+  )
+  webRouter.put(
+    '/api/admin/branding',
+    AuthorizationMiddleware.ensureUserIsSiteAdmin,
+    AdminController.updateBranding
+  )
+  webRouter.delete(
+    '/api/admin/branding',
+    AuthorizationMiddleware.ensureUserIsSiteAdmin,
+    AdminController.resetBranding
+  )
 
   if (!Features.hasFeature('saas')) {
     webRouter.post(
@@ -1173,17 +1485,18 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
       AuthorizationMiddleware.ensureUserIsSiteAdmin,
       AdminController.disconnectAllUsers
     )
+  } else {
+    webRouter.post(
+      '/admin/flushProjectToTpds',
+      AuthorizationMiddleware.ensureUserIsSiteAdmin,
+      AdminController.flushProjectToTpds
+    )
+    webRouter.post(
+      '/admin/pollDropboxForUser',
+      AuthorizationMiddleware.ensureUserIsSiteAdmin,
+      AdminController.pollDropboxForUser
+    )
   }
-  webRouter.post(
-    '/admin/flushProjectToTpds',
-    AuthorizationMiddleware.ensureUserIsSiteAdmin,
-    AdminController.flushProjectToTpds
-  )
-  webRouter.post(
-    '/admin/pollDropboxForUser',
-    AuthorizationMiddleware.ensureUserIsSiteAdmin,
-    AdminController.pollDropboxForUser
-  )
   webRouter.post(
     '/admin/messages',
     AuthorizationMiddleware.ensureUserIsSiteAdmin,

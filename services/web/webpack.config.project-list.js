@@ -20,6 +20,14 @@ module.exports = {
 
   entry: {
     'pages/project-list': './frontend/js/pages/project-list.tsx',
+    'pages/packages': './frontend/js/pages/packages.tsx',
+    'pages/user/settings': './frontend/js/pages/user/settings.tsx',
+    'pages/admin': './frontend/js/pages/admin.tsx',
+    marketing: './frontend/js/marketing.ts',
+    'modules/launchpad/pages/launchpad':
+      './modules/launchpad/frontend/js/pages/launchpad.ts',
+    'modules/user-activate/pages/user-activate-page':
+      './modules/user-activate/frontend/js/pages/user-activate-page.tsx',
   },
 
   output: {

@@ -3,9 +3,7 @@ import type {
   FooterMetadata,
 } from '@/shared/components/types/footer-metadata'
 import OLRow from '@/shared/components/ol/ol-row'
-import OLCol from '@/shared/components/ol/ol-col'
 import LanguagePicker from '@/shared/components/language-picker'
-import getMeta from '@/utils/meta.ts'
 import React from 'react'
 
 function FooterItemLi({
@@ -48,12 +46,14 @@ function ThinFooter({
   leftItems,
   rightItems,
 }: FooterMetadata) {
-  const { env } = getMeta('ol-ExposedSettings')
   const showLanguagePicker = Boolean(
     subdomainLang && Object.keys(subdomainLang).length > 1
   )
 
   const hasCustomLeftNav = Boolean(leftItems && leftItems.length > 0)
+  const filteredRightItems = rightItems?.filter(
+    item => !/\bfork\b/i.test((item && (item.translatedText || item.text)) || '')
+  )
 
   return (
     <footer className="site-footer">
@@ -84,25 +84,11 @@ function ThinFooter({
             ))}
           </ul>
           <ul className="site-footer-items col-lg-3 text-end">
-            {rightItems?.map(item => (
+            {filteredRightItems?.map(item => (
               <FooterItemLi key={item.text} {...item} />
             ))}
           </ul>
         </OLRow>
-        {env === 'server-ce' && (
-          <OLRow>
-            <OLCol lg={12}>
-              <p className="copyright-notice">
-                Overleaf Community Edition™ is a free unsupported software that
-                may contain vulnerabilities and used at your own risk. Use of
-                Overleaf Community Edition™ here is not operated, supported or
-                endorsed by Overleaf®. It has been provided "AS IS" with all
-                liability disclaimed (to the fullest extent lawful) and all
-                rights reserved.
-              </p>
-            </OLCol>
-          </OLRow>
-        )}
       </div>
     </footer>
   )

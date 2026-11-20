@@ -69,11 +69,47 @@ assert.equal(
   sanitizeProjectFolderName('My / Cool: Paper? *2026*', '6acd0bd1c78525f12b4a65b0'),
   'My _ Cool_ Paper_ _2026_'
 )
+assert.equal(
+  sanitizeProjectFolderName('CON', '6acd0bd1c78525f12b4a65b0'),
+  'CON_4a65b0',
+  'escape Windows reserved CON folder name'
+)
+assert.equal(
+  sanitizeProjectFolderName('nul.txt', '6acd0bd1c78525f12b4a65b0'),
+  'nul.txt_4a65b0',
+  'escape Windows reserved nul.txt folder name'
+)
+assert.equal(
+  sanitizeProjectFolderName('COM1', '6acd0bd1c78525f12b4a65b0'),
+  'COM1_4a65b0',
+  'escape Windows reserved COM1 folder name'
+)
+assert.equal(
+  sanitizeProjectFolderName('LPT9', '6acd0bd1c78525f12b4a65b0'),
+  'LPT9_4a65b0',
+  'escape Windows reserved LPT9 folder name'
+)
+assert.equal(
+  sanitizeProjectFolderName('My Paper...   ', '6acd0bd1c78525f12b4a65b0'),
+  'My Paper',
+  'strip trailing dots and spaces for NTFS/SMB'
+)
+assert.equal(
+  validateHostFolderPath('~\\Documents\\WinPaper').normalizedPath,
+  path.join(fakeHome, 'Documents/WinPaper'),
+  'normalize Windows backslashes after tilde'
+)
 assert.equal(validateRelativeEntityPath('../secret.txt').ok, false)
 assert.equal(validateRelativeEntityPath('.overleaf-sync.json').ok, false)
 assert.equal(validateRelativeEntityPath('/chapters/intro.tex').relPath, 'chapters/intro.tex')
 assert.equal(doPathsOverlap('/a/b', '/a/b/c'), true)
 assert.equal(doPathsOverlap('/a/b', '/a/bc'), false)
+assert.equal(
+  doPathsOverlap('/projects/Paper', '/projects/paper/sub', {
+    caseInsensitive: true,
+  }),
+  true
+)
 console.log('[pass] path-utils unit tests passed')
 
 // --- Integration tests for local-sync daemon ---

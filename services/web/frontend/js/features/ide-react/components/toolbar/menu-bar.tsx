@@ -21,6 +21,7 @@ import useIsNetworkStalled from '@/features/ide-react/hooks/use-is-network-stall
 import WordCountModal from '@/features/word-count-modal/components/word-count-modal'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
+import { useProjectContext } from '@/shared/context/project-context'
 import { useProjectSettingsContext } from '@/features/ide-settings/context/project-settings-context'
 import getMeta from '@/utils/meta'
 import EditorCloneProjectModalWrapper from '@/features/clone-project-modal/components/editor-clone-project-modal-wrapper'
@@ -43,6 +44,7 @@ export const ToolbarMenuBar = () => {
 
   const { setView, view } = useLayoutContext()
   const { pdfUrl } = useCompileContext()
+  const { project } = useProjectContext()
   const wordCountEnabled = pdfUrl || isSplitTestEnabled('word-count-client')
   const isDisabledDueToNetworkStall = useIsNetworkStalled()
   const [showWordCountModal, setShowWordCountModal] = useState(false)
@@ -50,6 +52,7 @@ export const ToolbarMenuBar = () => {
   const openProject = useOpenProject()
 
   const anonymous = getMeta('ol-anonymous')
+  const copyDisabled = project?.canCopy === false
   const showSupport = getMeta('ol-showSupport')
   const showDocumentation = getMeta('ol-wikiEnabled')
 
@@ -76,14 +79,22 @@ export const ToolbarMenuBar = () => {
       {
         type: 'command',
         label: t('make_a_copy'),
-        disabled: anonymous || isDisabledDueToNetworkStall,
+        disabled: anonymous || isDisabledDueToNetworkStall || copyDisabled,
         handler: () => {
           setShowCloneProjectModal(true)
         },
         id: 'copy_project',
       },
     ],
-    [t, setView, view, wordCountEnabled, anonymous, isDisabledDueToNetworkStall]
+    [
+      t,
+      setView,
+      view,
+      wordCountEnabled,
+      anonymous,
+      isDisabledDueToNetworkStall,
+      copyDisabled,
+    ]
   )
   const fileMenuStructure: MenuStructure = useMemo(
     () => [

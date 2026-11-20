@@ -55,4 +55,5 @@ export type ExposedSettings = {
   templatesEnabled?: boolean
   linkedInInsightsPartnerId?: string
   enablePandocConversions: boolean
+  hasPackageHubFeature?: boolean
 }

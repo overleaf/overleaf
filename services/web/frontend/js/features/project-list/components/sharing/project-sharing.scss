@@ -1,0 +1,24 @@
+// Native Overleaf dashboard sharing badge styles (Share modal uses core Overleaf share.scss + share-enterprise.scss)
+
+.ol-project-sharing-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-02);
+  margin-left: var(--spacing-03);
+  padding: 1px var(--spacing-03);
+  border: 1px solid var(--border-divider-themed);
+  border-radius: var(--border-radius-base);
+  background-color: var(--bg-secondary-themed);
+  color: var(--content-secondary-themed);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-01);
+  line-height: var(--line-height-02);
+  font-weight: 500;
+  vertical-align: middle;
+  white-space: nowrap;
+
+  .material-symbols {
+    font-size: 13px;
+    line-height: 1;
+  }
+}

@@ -1,17 +1,65 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 source /etc/overleaf/env.sh
 
+ALLOWED_ROOT="${LOCAL_SYNC_ALLOWED_ROOT:-/var/lib/overleaf/local-projects}"
+DEFAULT_BASE_DIR="${LOCAL_SYNC_DEFAULT_BASE_DIR:-$ALLOWED_ROOT/OverleafProjects}"
+
+if [[ ! -d "$ALLOWED_ROOT" ]]; then
+  mkdir -p "$ALLOWED_ROOT" || true
+fi
+
+select_sync_user() {
+  if [[ -n "${LOCAL_SYNC_USER:-}" ]] && id "$LOCAL_SYNC_USER" >/dev/null 2>&1; then
+    echo "$LOCAL_SYNC_USER"
+    return
+  fi
+
+  local mount_uid=""
+  mount_uid=$(stat -c '%u' "$ALLOWED_ROOT" 2>/dev/null || echo "")
+  if [[ -n "$mount_uid" ]]; then
+    local uid_user=""
+    uid_user=$(getent passwd "$mount_uid" | cut -d: -f1 || true)
+    if [[ -n "$uid_user" && "$uid_user" != "www-data" ]]; then
+      echo "$uid_user"
+      return
+    fi
+  fi
+
+  if id ubuntu >/dev/null 2>&1; then
+    if [[ "$ALLOWED_ROOT" == "/var/lib/overleaf/local-projects" ]]; then
+      chown -R ubuntu:ubuntu "$ALLOWED_ROOT" 2>/dev/null || true
+    fi
+    if /sbin/setuser ubuntu test -w "$ALLOWED_ROOT" 2>/dev/null; then
+      echo "ubuntu"
+      return
+    fi
+  fi
+
+  echo "root"
+}
+
+SYNC_USER=$(select_sync_user)
+SYNC_GROUP=$(id -gn "$SYNC_USER")
+
+if [[ "$ALLOWED_ROOT" == "/var/lib/overleaf/local-projects" && ! -d "$DEFAULT_BASE_DIR" ]]; then
+  mkdir -p "$DEFAULT_BASE_DIR" || true
+  chown -R "${SYNC_USER}:${SYNC_GROUP}" "$ALLOWED_ROOT" 2>/dev/null || true
+fi
+
 mkdir -p /run/overleaf-local-sync
-chown ubuntu:www-data /run/overleaf-local-sync
+chown "${SYNC_USER}:www-data" /run/overleaf-local-sync
 chmod 2750 /run/overleaf-local-sync
 rm -f /run/overleaf-local-sync/sync.sock
 
 mkdir -p /tmp/overleaf-local-sync-stage
-chown www-data:ubuntu /tmp/overleaf-local-sync-stage
-chmod 2750 /tmp/overleaf-local-sync-stage
+chown "www-data:${SYNC_GROUP}" /tmp/overleaf-local-sync-stage
+chmod 2770 /tmp/overleaf-local-sync-stage
 
 mkdir -p /var/log/overleaf
-SYNC_USER="${LOCAL_SYNC_USER:-ubuntu}"
-exec /sbin/setuser "$SYNC_USER" /usr/bin/node /overleaf/services/local-sync/app.mjs >> /var/log/overleaf/local-sync.log 2>&1
+if [[ "$SYNC_USER" == "root" ]]; then
+  exec /usr/bin/node --max-old-space-size=64 --max-semi-space-size=2 /overleaf/services/local-sync/app.mjs >> /var/log/overleaf/local-sync.log 2>&1
+else
+  exec /sbin/setuser "$SYNC_USER" /usr/bin/node --max-old-space-size=64 --max-semi-space-size=2 /overleaf/services/local-sync/app.mjs >> /var/log/overleaf/local-sync.log 2>&1
+fi

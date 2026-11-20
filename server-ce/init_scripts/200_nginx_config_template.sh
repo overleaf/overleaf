@@ -19,7 +19,7 @@ nginx_config_file="${nginx_dir}/nginx.conf"
 if [ -f "${nginx_template_file}" ]; then
   export NGINX_KEEPALIVE_TIMEOUT="${NGINX_KEEPALIVE_TIMEOUT:-65}"
   export NGINX_WORKER_CONNECTIONS="${NGINX_WORKER_CONNECTIONS:-768}"
-  export NGINX_WORKER_PROCESSES="${NGINX_WORKER_PROCESSES:-4}"
+  export NGINX_WORKER_PROCESSES="${NGINX_WORKER_PROCESSES:-2}"
 
   echo "Nginx: generating config file from template"
 

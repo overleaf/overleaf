@@ -13,6 +13,7 @@ import {
 } from '@/shared/components/ol/ol-dropdown-menu'
 import DropdownListItem from '@/shared/components/dropdown/dropdown-list-item'
 import LinkSharing from '@/features/share-project-modal/components/link-sharing'
+import EnterpriseAccessSection from '@/features/share-project-modal/components/enterprise-access-section'
 import Notification from '@/shared/components/notification'
 import { useEditorContext } from '@/shared/context/editor-context'
 import { useProjectContext } from '@/shared/context/project-context'
@@ -50,8 +51,9 @@ function ProjectAccess({ setScreen, invitedPeopleCount }: ProjectAccessProps) {
   const [pendingAccess, setPendingAccess] = useState<PendingAccessType | null>(
     null
   )
-  const { isProjectOwner } = useEditorContext()
-  const { activeProfessionalGroupSubscriptions } = getMeta('ol-user')
+  const { isProjectOwner, canAdminProject } = useEditorContext()
+  const canManageSharing = isProjectOwner || Boolean(canAdminProject)
+  const { activeProfessionalGroupSubscriptions } = getMeta('ol-user') || {}
   const groupSharingEnabled = useFeatureFlag('group-link-sharing')
   // When the new reusable-link feature is off, the modal only offers the
   // legacy token-based link ("Via sharing links") alongside "Only invited
@@ -66,8 +68,8 @@ function ProjectAccess({ setScreen, invitedPeopleCount }: ProjectAccessProps) {
     sharingLinkData,
     setSharingLinkData,
   } = useShareProjectContext()
-  const { projectId, project } = useProjectContext()
-  const accessRequestCount = isProjectOwner
+  const { projectId, project, updateProject } = useProjectContext()
+  const accessRequestCount = canManageSharing
     ? (project?.editAccessRequests?.length ?? 0)
     : 0
 
@@ -96,6 +98,7 @@ function ProjectAccess({ setScreen, invitedPeopleCount }: ProjectAccessProps) {
 
       if (projectAccess === 'legacyLinkSharing') {
         await setPublicAccessLevel(projectId, 'private')
+        updateProject({ publicAccessLevel: 'private' as any })
       }
 
       return data
@@ -122,6 +125,7 @@ function ProjectAccess({ setScreen, invitedPeopleCount }: ProjectAccessProps) {
 
     monitorRequest(() => setPublicAccessLevel(projectId, publicAccessLevel))
       .then(() => {
+        updateProject({ publicAccessLevel: publicAccessLevel as any })
         setProjectAccess(newAccess)
         setSuccessActionMessage(t('access_updated'))
         sendMB('sharing-link-set-permissions', {
@@ -433,7 +437,9 @@ function ProjectAccess({ setScreen, invitedPeopleCount }: ProjectAccessProps) {
         </ShareProjectModalRow>
       )}
 
-      {isProjectOwner && <LinkSharing />}
+      {canManageSharing && <LinkSharing />}
+
+      <EnterpriseAccessSection />
     </>
   )
 }

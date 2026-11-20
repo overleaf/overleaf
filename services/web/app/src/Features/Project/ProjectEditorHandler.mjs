@@ -11,7 +11,8 @@ export default ProjectEditorHandler = {
     members,
     invites,
     isRestrictedUser,
-    accessRequestData = {}
+    accessRequestData = {},
+    extraMeta = {}
   ) {
     const result = {
       _id: project._id,
@@ -31,6 +32,15 @@ export default ProjectEditorHandler = {
         project.imageName != null
           ? Path.basename(project.imageName)
           : undefined,
+      canCopy: extraMeta.canCopy !== undefined ? Boolean(extraMeta.canCopy) : true,
+      linkSharingEnabled:
+        extraMeta.linkSharingEnabled !== undefined
+          ? Boolean(extraMeta.linkSharingEnabled)
+          : true,
+    }
+
+    if (extraMeta.enterpriseAccess !== undefined) {
+      result.enterpriseAccess = extraMeta.enterpriseAccess
     }
 
     if (isRestrictedUser) {
@@ -87,6 +97,7 @@ export default ProjectEditorHandler = {
       last_name: user.last_name,
       email: user.email,
       privileges: member.privilegeLevel,
+      allowCopy: member.allowCopy !== false,
       signUpDate: user.signUpDate,
       pendingEditor: member.pendingEditor,
       pendingReviewer: member.pendingReviewer,

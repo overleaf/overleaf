@@ -1,3 +1,4 @@
+import '../../../stylesheets/pages/auth-launchpad.scss'
 import { renderInReactLayout } from '@/react'
 import '@/utils/meta'
 import '@/utils/webpack-public-path'

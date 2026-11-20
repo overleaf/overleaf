@@ -4,9 +4,19 @@ import { ProjectSettings } from '@/features/ide-settings/utils/api'
 import { Folder } from '../../../../../types/folder'
 import { ExtractStrict } from '../../../../../types/utils'
 
+export type EnterpriseScope = 'private' | 'network' | 'all_users' | 'custom'
+export type EnterprisePermissionMode = 'edit' | 'copy' | 'view_only'
+
+export type EnterpriseAccessSummary = {
+  scope: EnterpriseScope
+  permissionMode: EnterprisePermissionMode | null
+  networkOnly: boolean
+}
+
 export type ProjectMember = {
   _id: UserId
   privileges: 'readOnly' | 'readAndWrite' | 'review'
+  allowCopy?: boolean
   email: string
   first_name: string
   last_name: string
@@ -68,6 +78,9 @@ export interface ProjectMetadata extends ProjectSettings {
     github?: boolean
   }
   publicAccessLevel?: PublicAccessLevel
+  canCopy?: boolean
+  linkSharingEnabled?: boolean
+  enterpriseAccess?: EnterpriseAccessSummary
   owner: ProjectOwner
   rootFolder?: Folder[]
   trackChangesState?: false | TrackChangesStateData

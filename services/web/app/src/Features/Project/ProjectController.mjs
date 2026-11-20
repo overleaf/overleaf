@@ -43,6 +43,7 @@ import AdminAuthorizationHelper from '../Helpers/AdminAuthorizationHelper.mjs'
 import InstitutionsFeatures from '../Institutions/InstitutionsFeatures.mjs'
 import InstitutionsGetter from '../Institutions/InstitutionsGetter.mjs'
 import ProjectAuditLogHandler from './ProjectAuditLogHandler.mjs'
+import ProjectAccessPolicyService from '../Authorization/ProjectAccessPolicyService.mjs'
 import PublicAccessLevels from '../Authorization/PublicAccessLevels.mjs'
 import TagsHandler from '../Tags/TagsHandler.mjs'
 import TutorialHandler from '../Tutorial/TutorialHandler.mjs'
@@ -408,6 +409,15 @@ const _ProjectController = {
     logger.debug({ projectId, projectName, isDebugCopy }, 'cloning project')
     if (!SessionManager.isUserLoggedIn(req.session)) {
       return res.json({ redir: '/register' })
+    }
+    const canCopy = await ProjectAccessPolicyService.canUserCopyProject(
+      currentUser._id,
+      projectId
+    )
+    if (!canCopy) {
+      return res.status(403).json({
+        message: 'Copying this shared project is disabled by its sharing permissions.',
+      })
     }
     const { first_name: firstName, last_name: lastName, email } = currentUser
     try {

@@ -16,6 +16,8 @@ import DeleteProjectButton from '../table/cells/action-buttons/delete-project-bu
 import { Project } from '../../../../../../types/project/dashboard/api'
 import CompileAndDownloadProjectPDFButton from '../table/cells/action-buttons/compile-and-download-project-pdf-button'
 import RenameProjectButton from '../table/cells/action-buttons/rename-project-button'
+import OrganizeTagsProjectButton from '../table/cells/action-buttons/organize-tags-project-button'
+import ShareProjectButton from '../sharing/share-project-modal-button'
 import {
   CustomizeFolderButton,
   SyncProjectButton,
@@ -25,20 +27,122 @@ import OLSpinner from '@/shared/components/ol/ol-spinner'
 
 type ActionDropdownProps = {
   project: Project
+  compact?: boolean
 }
 
-function ActionsDropdown({ project }: ActionDropdownProps) {
+function ActionsDropdown({ project, compact = false }: ActionDropdownProps) {
   const { t } = useTranslation()
 
   return (
     <OLDropdown align="end">
       <OLDropdownToggle
-        id={`project-actions-dropdown-toggle-btn-${project.id}`}
+        id={`project-${compact ? 'more-' : ''}actions-dropdown-toggle-btn-${project.id}`}
         bsPrefix="dropdown-table-button-toggle"
+        variant="link"
       >
         <MaterialIcon type="more_vert" accessibilityLabel={t('actions')} />
       </OLDropdownToggle>
       <OLDropdownMenu flip={false}>
+        <RenameProjectButton project={project}>
+          {(text, handleOpenModal) => (
+            <li role="none">
+              <OLDropdownItem
+                as="button"
+                tabIndex={-1}
+                onClick={handleOpenModal}
+                leadingIcon="edit"
+              >
+                {text}
+              </OLDropdownItem>
+            </li>
+          )}
+        </RenameProjectButton>
+        <OrganizeTagsProjectButton project={project}>
+          {(text, handleOpenModal) => (
+            <li role="none">
+              <OLDropdownItem
+                as="button"
+                tabIndex={-1}
+                onClick={handleOpenModal}
+                leadingIcon="label"
+              >
+                {text}
+              </OLDropdownItem>
+            </li>
+          )}
+        </OrganizeTagsProjectButton>
+        {!compact && (
+          <>
+            <ShareProjectButton project={project}>
+              {(text, handleOpenModal) => (
+                <li role="none">
+                  <OLDropdownItem
+                    as="button"
+                    tabIndex={-1}
+                    onClick={handleOpenModal}
+                    leadingIcon="person_add"
+                  >
+                    {text}
+                  </OLDropdownItem>
+                </li>
+              )}
+            </ShareProjectButton>
+            <CopyProjectButton project={project}>
+              {(text, handleOpenModal) => (
+                <li role="none">
+                  <OLDropdownItem
+                    as="button"
+                    tabIndex={-1}
+                    onClick={handleOpenModal}
+                    leadingIcon="file_copy"
+                  >
+                    {text}
+                  </OLDropdownItem>
+                </li>
+              )}
+            </CopyProjectButton>
+            <DownloadProjectButton project={project}>
+              {(text, downloadProject) => (
+                <li role="none">
+                  <OLDropdownItem
+                    as="button"
+                    tabIndex={-1}
+                    onClick={downloadProject}
+                    leadingIcon="download"
+                  >
+                    {text}
+                  </OLDropdownItem>
+                </li>
+              )}
+            </DownloadProjectButton>
+            <CompileAndDownloadProjectPDFButton project={project}>
+              {(text, pendingCompile, downloadProject) => (
+                <li role="none">
+                  <OLDropdownItem
+                    as="button"
+                    tabIndex={-1}
+                    onClick={e => {
+                      e.stopPropagation()
+                      downloadProject()
+                    }}
+                    leadingIcon={
+                      pendingCompile ? (
+                        <OLSpinner
+                          size="sm"
+                          className="dropdown-item-leading-icon spinner"
+                        />
+                      ) : (
+                        'picture_as_pdf'
+                      )
+                    }
+                  >
+                    {text}
+                  </OLDropdownItem>
+                </li>
+              )}
+            </CompileAndDownloadProjectPDFButton>
+          </>
+        )}
         <CustomizeFolderButton project={project}>
           {(text, handleOpenModal) => (
             <li role="none">
@@ -77,74 +181,6 @@ function ActionsDropdown({ project }: ActionDropdownProps) {
             </li>
           )}
         </SyncProjectButton>
-        <RenameProjectButton project={project}>
-          {(text, handleOpenModal) => (
-            <li role="none">
-              <OLDropdownItem
-                as="button"
-                tabIndex={-1}
-                onClick={handleOpenModal}
-                leadingIcon="edit"
-              >
-                {text}
-              </OLDropdownItem>
-            </li>
-          )}
-        </RenameProjectButton>
-        <CopyProjectButton project={project}>
-          {(text, handleOpenModal) => (
-            <li role="none">
-              <OLDropdownItem
-                as="button"
-                tabIndex={-1}
-                onClick={handleOpenModal}
-                leadingIcon="file_copy"
-              >
-                {text}
-              </OLDropdownItem>
-            </li>
-          )}
-        </CopyProjectButton>
-        <DownloadProjectButton project={project}>
-          {(text, downloadProject) => (
-            <li role="none">
-              <OLDropdownItem
-                as="button"
-                tabIndex={-1}
-                onClick={downloadProject}
-                leadingIcon="download"
-              >
-                {text}
-              </OLDropdownItem>
-            </li>
-          )}
-        </DownloadProjectButton>
-        <CompileAndDownloadProjectPDFButton project={project}>
-          {(text, pendingCompile, downloadProject) => (
-            <li role="none">
-              <OLDropdownItem
-                as="button"
-                tabIndex={-1}
-                onClick={e => {
-                  e.stopPropagation()
-                  downloadProject()
-                }}
-                leadingIcon={
-                  pendingCompile ? (
-                    <OLSpinner
-                      size="sm"
-                      className="dropdown-item-leading-icon spinner"
-                    />
-                  ) : (
-                    'picture_as_pdf'
-                  )
-                }
-              >
-                {text}
-              </OLDropdownItem>
-            </li>
-          )}
-        </CompileAndDownloadProjectPDFButton>
         <ArchiveProjectButton project={project}>
           {(text, handleOpenModal) => (
             <li role="none">

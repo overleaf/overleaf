@@ -32,7 +32,8 @@ function CopyProjectButton({ project, children }: CopyButtonProps) {
     updateProjectViewData,
   } = useProjectListContext()
   const { t } = useTranslation()
-  const text = t('copy')
+  const text =
+    project.accessLevel !== 'owner' ? t('use_as_a_copy', 'Use as a copy') : t('copy')
   const [showModal, setShowModal] = useState(false)
   const isMounted = useIsMounted()
   const projectTags = useProjectTags(project.id)
@@ -75,7 +76,7 @@ function CopyProjectButton({ project, children }: CopyButtonProps) {
     ]
   )
 
-  if (project.archived || project.trashed) return null
+  if (project.archived || project.trashed || project.sharingInfo?.allowCopy === false) return null
 
   return (
     <>

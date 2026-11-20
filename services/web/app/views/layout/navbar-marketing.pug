@@ -9,14 +9,16 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(
 )
 	.container-fluid.navbar-container
 		.navbar-header
-			- var customLogo = settings.nav.custom_logo_light || settings.nav.custom_logo
-			a.navbar-brand(href='/' aria-label=settings.appName)
-				if customLogo
-					.navbar-logo(style=`background-image:url("${customLogo}")`)
-				if nav.title
-					.navbar-title #{nav.title}
-				if !nav.title && !customLogo
-					.navbar-logo
+			- var legacyTitles = ['Our Overleaf Instance', 'Overleaf Community Edition', 'Overleaf (Community Edition)']
+			- var customLogo = (workspaceBranding && workspaceBranding.logoUrl) || settings.nav.custom_logo_light || settings.nav.custom_logo
+			- var effectiveTitle = nav.title && !legacyTitles.includes(String(nav.title).trim()) ? nav.title : null
+			- var brandLabel = (workspaceBranding && workspaceBranding.organizationName) || (settings.appName && !legacyTitles.includes(String(settings.appName).trim()) ? settings.appName : 'Overleaf')
+			- var defaultLogoUrl = customLogo || buildImgPath(isWebsiteRedesign ? '/ol-brand/overleaf-green.svg' : '/ol-brand/overleaf-white.svg')
+			a.navbar-brand(href='/' aria-label=brandLabel)
+				if customLogo || !effectiveTitle
+					.navbar-logo(style=`background-image:url("${defaultLogoUrl}")`)
+				if effectiveTitle
+					.navbar-title #{effectiveTitle}
 
 			- var enableUpgradeButton = projectDashboardReact && usersBestSubscription && (usersBestSubscription.type === 'free' || usersBestSubscription.type === 'standalone-ai-add-on')
 			if enableUpgradeButton
@@ -31,7 +33,7 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(
 
 		- var canDisplayAdminMenu = hasAdminAccess()
 		- var canDisplayAdminRedirect = canRedirectToAdminDomain()
-		- var canDisplayProjectUrlLookup = settings.adminPrivilegeAvailable && canDisplayAdminMenu && hasAdminCapability('view-project-setting', false)
+		- var canDisplayProjectUrlLookup = hasFeature('saas') && settings.adminPrivilegeAvailable && canDisplayAdminMenu && hasAdminCapability('view-project-setting', false)
 		- var canDisplaySplitTestMenu = hasFeature('saas') && hasNonAdminDomainCapability('view-split-test')
 		- var canDisplaySurveyMenu = hasFeature('saas') && canDisplayAdminMenu && hasAdminCapability('manage-survey', false)
 		- var canDisplayScriptLogMenu = hasFeature('saas') && hasAdminCapability('view-script-log', false) && canDisplayAdminMenu
@@ -64,8 +66,10 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(
 								| Admin
 							+dropdown-menu.dropdown-menu-end
 								if canDisplayAdminMenu
-									+dropdown-menu-link-item(href='/admin') Manage Site
+									+dropdown-menu-link-item(href='/admin') System Admin
 									+dropdown-menu-link-item(href='/admin/user') Manage Users
+									if hasFeature('package-hub')
+										+dropdown-menu-link-item(href='/packages') Manage Packages
 								if canDisplayProjectUrlLookup
 									+dropdown-menu-link-item(href='/admin/project') Project/Object Lookup
 								if canDisplayAdminRedirect

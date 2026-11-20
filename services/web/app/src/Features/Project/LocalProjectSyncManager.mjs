@@ -648,16 +648,25 @@ async function getSettings(userId) {
   } catch {
     serviceHealthy = false
   }
+  const presets = [DEFAULT_BASE_DIR]
+  const docsDir = path.join(ALLOWED_ROOT, 'Documents')
+  const desktopDir = path.join(ALLOWED_ROOT, 'Desktop')
+  if (fs.existsSync(docsDir)) {
+    presets.push(path.join(docsDir, 'Overleaf'))
+  }
+  if (fs.existsSync(desktopDir)) {
+    presets.push(path.join(desktopDir, 'Overleaf'))
+  }
+  if (presets.length === 1) {
+    presets.push(path.join(ALLOWED_ROOT, 'Papers'))
+  }
+
   return {
     baseDir,
     defaultBaseDir: DEFAULT_BASE_DIR,
     allowedRoot: ALLOWED_ROOT,
     serviceHealthy,
-    presets: [
-      DEFAULT_BASE_DIR,
-      path.join(ALLOWED_ROOT, 'Documents', 'Overleaf'),
-      path.join(ALLOWED_ROOT, 'Desktop', 'Overleaf'),
-    ],
+    presets: Array.from(new Set(presets)),
     daemonUid: daemonInfo?.uid ?? null,
   }
 }
@@ -807,7 +816,7 @@ async function updateProjectFolder(
     }
 
     // Reject if the custom path equals baseDir itself
-    if (normalizedCustomPath === baseDir) {
+    if (normalizedCustomPath.toLowerCase() === baseDir.toLowerCase()) {
       const err = new Error(
         `Choose a subfolder inside "${baseDir}" rather than the base folder itself.`
       )
@@ -843,7 +852,11 @@ async function updateProjectFolder(
         other.localFolderPath ||
         ownerResolvedMap.get(String(other._id))?.effectivePath
       if (!otherPath) continue
-      if (doPathsOverlap(normalizedCustomPath, otherPath)) {
+      if (
+        doPathsOverlap(normalizedCustomPath, otherPath, {
+          caseInsensitive: true,
+        })
+      ) {
         const err = new Error(
           `Folder "${normalizedCustomPath}" conflicts with project "${other.name}" (${otherPath}). Please select a separate folder.`
         )

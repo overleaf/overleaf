@@ -24,6 +24,8 @@ import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 import SubscriptionGroupHandler from '../Subscription/SubscriptionGroupHandler.mjs'
 import SubscriptionLocator from '../Subscription/SubscriptionLocator.mjs'
 import TokenAccessHandler from '../TokenAccess/TokenAccessHandler.mjs'
+import { User } from '../../models/User.mjs'
+import ProjectAccessPolicyService from '../Authorization/ProjectAccessPolicyService.mjs'
 
 // This rate limiter allows a different number of requests depending on the
 // number of callaborators a user is allowed. This is implemented by providing
@@ -106,6 +108,7 @@ const inviteToProjectSchema = z.object({
       PrivilegeLevels.READ_AND_WRITE,
       PrivilegeLevels.REVIEW,
     ]),
+    allowCopy: z.boolean().optional(),
   }),
 })
 // Rollout-temporary fallback (pre-refinement schema from main); delete
@@ -121,6 +124,7 @@ const inviteToProjectFallbackSchema = z.object({
       PrivilegeLevels.READ_AND_WRITE,
       PrivilegeLevels.REVIEW,
     ]),
+    allowCopy: z.boolean().optional(),
   }),
 })
 
@@ -130,6 +134,7 @@ async function inviteToProject(req, res) {
   })
   const projectId = params.Project_id
   let { email, privileges } = body
+  const requestedAllowCopy = body.allowCopy !== false
   const sendingUser = SessionManager.getSessionUser(req.session)
   const sendingUserId = sendingUser._id
   req.logger.addFields({ email, sendingUserId })
@@ -173,6 +178,94 @@ async function inviteToProject(req, res) {
     await CollaboratorsInviteController._checkRateLimit(sendingUserId)
   if (!underRateLimit) {
     return res.sendStatus(429)
+  }
+
+  // In LAN / zero-SMTP enterprise deployments and workspace instances, add
+  // existing active accounts directly so collaborators get immediate access.
+  const existingUser = await User.findOne(
+    {
+      holdingAccount: { $ne: true },
+      $or: [{ email }, { 'emails.email': email }],
+    },
+    {
+      _id: 1,
+      email: 1,
+      first_name: 1,
+      last_name: 1,
+      suspended: 1,
+      signUpDate: 1,
+    }
+  ).lean()
+
+  if (existingUser) {
+    if (existingUser.suspended === true) {
+      return res.status(400).json({ errorReason: 'user_suspended' })
+    }
+    const project = await ProjectGetter.promises.getProject(projectId, {
+      owner_ref: 1,
+    })
+    if (!project) {
+      return res.sendStatus(404)
+    }
+    if (
+      project.owner_ref &&
+      String(project.owner_ref) === String(existingUser._id)
+    ) {
+      return res.json({ invite: null, error: 'cannot_invite_self' })
+    }
+
+    const added = await ProjectAccessPolicyService.upsertNativeCollaborator(
+      projectId,
+      existingUser._id,
+      privileges,
+      requestedAllowCopy
+    )
+
+    try {
+      await CollaboratorsInviteHandler.promises.revokeInviteForUser(projectId, [
+        email,
+      ])
+    } catch (err) {
+      logger.warn(
+        { err, projectId, email },
+        'failed revoking stale invite after direct workspace share'
+      )
+    }
+
+    ProjectAuditLogHandler.addEntryInBackground(
+      projectId,
+      'add-collaborator',
+      sendingUserId,
+      req.ip,
+      {
+        userId: existingUser._id,
+        role: CollaboratorsInviteHelper.privilegeLevelToRole(
+          added.privilegeLevel
+        ),
+        allowCopy: added.allowCopy,
+      }
+    )
+
+    EditorRealTimeController.emitToRoom(
+      projectId,
+      'project:membership:changed',
+      {
+        members: true,
+        invites: true,
+      }
+    )
+
+    return res.json({
+      user: {
+        _id: existingUser._id,
+        email: existingUser.email,
+        first_name: existingUser.first_name || '',
+        last_name: existingUser.last_name || '',
+        privileges: added.privilegeLevel,
+        allowCopy: added.allowCopy,
+        signUpDate: existingUser.signUpDate,
+      },
+    })
   }
 
   const shouldAllowInvite =

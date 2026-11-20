@@ -4,6 +4,7 @@ import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import OLIconButton from '@/shared/components/ol/ol-icon-button'
 import { useProjectListContext } from '../../context/project-list-context'
 import { syncProjectToLocalFolder } from '../../util/api'
+import { formatLocalDisplayPath } from './path-display'
 
 type CustomizeFolderButtonProps = {
   project: Project
@@ -25,14 +26,23 @@ export function CustomizeFolderButton({
 
 export const CustomizeFolderButtonTooltip = memo(
   function CustomizeFolderButtonTooltip({ project }: { project: Project }) {
+    const { localSyncSettings } = useProjectListContext()
     if (project.trashed) return null
+    const lf = project.localFolder
+    const shortPath = lf?.effectivePath
+      ? formatLocalDisplayPath(lf.effectivePath, localSyncSettings?.allowedRoot)
+      : null
+    const tooltipDescription = shortPath
+      ? `Folder: ${shortPath}`
+      : 'Folder location'
+
     return (
       <CustomizeFolderButton project={project}>
         {(text, handleOpen) => (
           <OLTooltip
             key={`tooltip-folder-location-${project.id}`}
             id={`folder-location-${project.id}`}
-            description="Customize local folder location"
+            description={tooltipDescription}
             overlayProps={{ placement: 'top', trigger: ['hover', 'focus'] }}
           >
             <span>
@@ -40,7 +50,11 @@ export const CustomizeFolderButtonTooltip = memo(
                 onClick={handleOpen}
                 variant="link"
                 accessibilityLabel={`${text} for ${project.name}`}
-                className="action-btn"
+                className={
+                  lf?.status === 'error'
+                    ? 'action-btn ol-action-btn-error'
+                    : 'action-btn'
+                }
                 icon="folder_open"
               />
             </span>

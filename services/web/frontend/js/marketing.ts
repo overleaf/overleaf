@@ -1,3 +1,4 @@
+import '../stylesheets/pages/auth-launchpad.scss'
 import './utils/webpack-public-path'
 import './infrastructure/error-reporter'
 import './infrastructure/hotjar'

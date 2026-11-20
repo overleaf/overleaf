@@ -7,6 +7,22 @@ const {
 
 let defaultFeatures, siteUrl
 
+const LEGACY_PLACEHOLDER_APP_NAMES = new Set([
+  'Our Overleaf Instance',
+  'Overleaf Community Edition',
+  'Overleaf (Community Edition)',
+])
+const configuredAppName = process.env.APP_NAME?.trim()
+const resolvedAppName =
+  configuredAppName && !LEGACY_PLACEHOLDER_APP_NAMES.has(configuredAppName)
+    ? configuredAppName
+    : 'Overleaf'
+const configuredNavTitle = process.env.NAV_TITLE?.trim()
+const resolvedNavTitle =
+  configuredNavTitle && !LEGACY_PLACEHOLDER_APP_NAMES.has(configuredNavTitle)
+    ? configuredNavTitle
+    : undefined
+
 // Make time interval config easier.
 const seconds = 1000
 const minutes = 60 * seconds
@@ -781,7 +797,7 @@ module.exports = {
     userId: process.env.SMOKE_TEST_USER_ID,
   },
 
-  appName: process.env.APP_NAME || 'Overleaf (Community Edition)',
+  appName: resolvedAppName,
 
   adminEmail: process.env.ADMIN_EMAIL || 'placeholder@example.com',
   adminDomains: process.env.ADMIN_DOMAINS
@@ -789,16 +805,12 @@ module.exports = {
     : undefined,
 
   nav: {
-    title: process.env.APP_NAME || 'Overleaf Community Edition',
+    title: resolvedNavTitle,
 
     hide_powered_by: process.env.NAV_HIDE_POWERED_BY === 'true',
     left_footer: [],
 
-    right_footer: [
-      {
-        text: '<a href="https://github.com/overleaf/overleaf">Fork on GitHub!</a>',
-      },
-    ],
+    right_footer: [],
 
     showSubscriptionLink: false,
 

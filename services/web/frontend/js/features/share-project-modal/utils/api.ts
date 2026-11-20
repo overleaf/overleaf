@@ -40,7 +40,8 @@ export function updateSharingLink(
 export function sendInviteParams(
   projectId: string,
   email: string,
-  privileges: PermissionsLevel
+  privileges: PermissionsLevel,
+  allowCopy?: boolean
 ) {
   return [
     `/project/${projectId}/invite`,
@@ -48,6 +49,7 @@ export function sendInviteParams(
       body: {
         email, // TODO: normalisedEmail?
         privileges,
+        ...(allowCopy !== undefined ? { allowCopy } : {}),
       },
     },
   ] as const
@@ -68,7 +70,7 @@ export function revokeInvite(projectId: string, invite: ProjectMember) {
 export function updateMember(
   projectId: string,
   member: ProjectMember,
-  data: { privilegeLevel: PermissionsLevel }
+  data: { privilegeLevel: PermissionsLevel; allowCopy?: boolean }
 ) {
   return putJSON(`/project/${projectId}/users/${member._id}`, {
     body: data,
@@ -142,4 +144,76 @@ export function listProjectAccessRequests(projectId: string) {
 
 export function listProjectInvites(projectId: string) {
   return getJSON(`/project/${projectId}/invites`)
+}
+
+export type AdminEnterpriseScope = 'private' | 'network' | 'all_users' | 'custom'
+export type AdminEnterprisePermissionMode = 'edit' | 'copy' | 'view_only'
+
+export type AdminEnterpriseMiniUser = {
+  id: string
+  email: string
+  fullName: string
+  role: string
+  institution: string
+}
+
+export type AdminProjectAccessDetailsResponse = {
+  project: {
+    id: string
+    name: string
+    enterpriseAccess: {
+      scope: AdminEnterpriseScope
+      permissionMode: AdminEnterprisePermissionMode
+      allowCopy: boolean
+      networkOnly: boolean
+      allowedCidrs: string[]
+      targetRoles: string[]
+      targetInstitutions: string[]
+      targetUsers: AdminEnterpriseMiniUser[]
+      updatedAt: string | null
+    }
+  }
+  facets: {
+    roles: string[]
+    institutions: string[]
+    defaultNetworkCidrs: string[]
+  }
+}
+
+export type AdminEnterpriseAccessPayload = {
+  scope: AdminEnterpriseScope
+  permissionMode: AdminEnterprisePermissionMode
+  networkOnly?: boolean
+  allowedCidrs?: string[]
+  targetRoles?: string[]
+  targetInstitutions?: string[]
+  targetUserIds?: string[]
+}
+
+export function getAdminProjectEnterpriseAccess(projectId: string) {
+  return getJSON<AdminProjectAccessDetailsResponse>(
+    `/api/admin/projects/${encodeURIComponent(projectId)}/access`
+  )
+}
+
+export function updateAdminProjectEnterpriseAccess(
+  projectId: string,
+  payload: AdminEnterpriseAccessPayload
+) {
+  return putJSON<{ ok: boolean; project: AdminProjectAccessDetailsResponse['project'] }>(
+    `/api/admin/projects/${encodeURIComponent(projectId)}/access`,
+    { body: payload }
+  )
+}
+
+export function searchAdminWorkspaceUsers(search: string) {
+  const qs = new URLSearchParams({
+    search,
+    filter: 'active',
+    page: '1',
+    limit: '8',
+  })
+  return getJSON<{ users: AdminEnterpriseMiniUser[] }>(
+    `/api/admin/users?${qs.toString()}`
+  )
 }

@@ -124,6 +124,27 @@ export const ProjectSchema = new Schema(
     localFolderLastSyncedPath: { type: String },
     localFolderFileCount: { type: Number },
     localFolderHasPdf: { type: Boolean, default: false },
+    copyDisabled_refs: [{ type: ObjectId, ref: 'User' }],
+    enterpriseAccess: {
+      scope: {
+        type: String,
+        enum: ['private', 'network', 'all_users', 'custom'],
+        default: 'private',
+      },
+      privilegeLevel: {
+        type: String,
+        enum: ['readOnly', 'readAndWrite'],
+        default: 'readOnly',
+      },
+      allowCopy: { type: Boolean, default: true },
+      networkOnly: { type: Boolean, default: false },
+      allowedCidrs: [{ type: String }],
+      targetRoles: [{ type: String }],
+      targetInstitutions: [{ type: String }],
+      targetUserIds: [{ type: ObjectId, ref: 'User' }],
+      updatedBy: { type: ObjectId, ref: 'User' },
+      updatedAt: { type: Date },
+    },
   },
   { minimize: false }
 )

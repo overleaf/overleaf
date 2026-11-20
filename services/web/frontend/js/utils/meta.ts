@@ -387,6 +387,12 @@ export interface Meta {
   'ol-wikiEnabled': boolean
   'ol-writefullEnabled': boolean
   'ol-writefullEnv': WritefullPublicEnv
+  'ol-packageHubConfig'?: {
+    canMutate: boolean
+    canUpload: boolean
+    isAdmin: boolean
+  }
+  'ol-adminInitialTab'?: 'overview' | 'users' | 'projects' | 'maintenance'
   'ol-wsUrl': string
 }
 

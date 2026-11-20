@@ -45,7 +45,7 @@ COSL Overleaf is fully compatible with `overleaf-toolkit`.
    services:
      sharelatex:
        volumes:
-         - /home/uzairserver:/home/uzairserver:rw
+         - $HOME:$HOME:rw
    ```
 
 3. Launch Overleaf:

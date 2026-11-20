@@ -17,7 +17,10 @@ export default function ViewMember({ member }: { member: ProjectMember }) {
       </div>
       <div className="h5 m-0 px-4 fw-semibold">
         <div className="form-control-plaintext border-0">
-          <MemberPrivileges privileges={member.privileges} />
+          <MemberPrivileges
+            privileges={member.privileges}
+            allowCopy={member.allowCopy}
+          />
         </div>
       </div>
     </ShareProjectModalRow>
@@ -30,7 +33,10 @@ export default function ViewMember({ member }: { member: ProjectMember }) {
         </div>
       </OLCol>
       <OLCol xs={4} className="text-end">
-        <MemberPrivileges privileges={member.privileges} />
+        <MemberPrivileges
+          privileges={member.privileges}
+          allowCopy={member.allowCopy}
+        />
       </OLCol>
     </OLRow>
   )

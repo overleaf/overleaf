@@ -3,8 +3,10 @@ import { useTranslation } from 'react-i18next'
 
 export default function MemberPrivileges({
   privileges,
+  allowCopy,
 }: {
   privileges: ProjectMember['privileges']
+  allowCopy?: boolean
 }) {
   const { t } = useTranslation()
 
@@ -13,7 +15,7 @@ export default function MemberPrivileges({
       return t('editor')
 
     case 'readOnly':
-      return t('viewer')
+      return allowCopy === false ? 'Viewer (no copy)' : 'Viewer (can copy)'
 
     case 'review':
       return t('reviewer')

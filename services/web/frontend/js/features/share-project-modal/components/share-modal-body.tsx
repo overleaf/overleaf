@@ -16,6 +16,7 @@ import ErrorMessage from '@/features/share-project-modal/components/error-messag
 import ProjectAccess from '@/features/share-project-modal/components/project-access'
 import InvitedPeople from '@/features/share-project-modal/components/invited-people'
 import AccessRequests from '@/features/share-project-modal/components/access-requests'
+import EnterpriseAccessSection from '@/features/share-project-modal/components/enterprise-access-section'
 import type { ProjectMember } from '@/shared/context/types/project-metadata'
 import type { ShareModalScreen } from './share-project-modal-content'
 
@@ -32,12 +33,13 @@ export default function ShareModalBody({
 }: ShareModalBodyProps) {
   const { project, features } = useProjectContext()
   const { members, invites } = project || {}
-  const { isProjectOwner } = useEditorContext()
+  const { isProjectOwner, canAdminProject } = useEditorContext()
+  const canManageSharing = isProjectOwner || Boolean(canAdminProject)
   const isSharingUpdatesEnabled = useFeatureFlag('sharing-updates')
 
   // whether the project has not reached the collaborator limit
   const canAddCollaborators = useMemo(() => {
-    if (!isProjectOwner || !features) {
+    if (!canManageSharing || !features) {
       return false
     }
 
@@ -55,7 +57,7 @@ export default function ShareModalBody({
         editorInvites <
       (features.collaborators ?? 1)
     )
-  }, [members, invites, features, isProjectOwner])
+  }, [members, invites, features, canManageSharing])
 
   // determine if some but not all pending editors' permissions have been resolved,
   // for moving between warning and info notification states etc.
@@ -69,7 +71,7 @@ export default function ShareModalBody({
   }, [members])
 
   const haveAnyEditorsBeenDowngraded = useMemo(() => {
-    if (!isProjectOwner || !features) {
+    if (!canManageSharing || !features) {
       return false
     }
 
@@ -80,10 +82,10 @@ export default function ShareModalBody({
       members?.some(member => member.pendingEditor || member.pendingReviewer) ||
       false
     )
-  }, [features, isProjectOwner, members])
+  }, [features, canManageSharing, members])
 
   const hasExceededCollaboratorLimit = useMemo(() => {
-    if (!isProjectOwner || !features || !members) {
+    if (!canManageSharing || !features || !members) {
       return false
     }
 
@@ -95,7 +97,7 @@ export default function ShareModalBody({
       members.filter(member => member.privileges !== 'readOnly').length >
       (features.collaborators ?? 1)
     )
-  }, [features, isProjectOwner, members])
+  }, [features, canManageSharing, members])
 
   const sortedMembers = useMemo(() => {
     if (!members) {
@@ -117,7 +119,7 @@ export default function ShareModalBody({
 
   return (
     <>
-      {isProjectOwner ? (
+      {canManageSharing ? (
         <SendInvites
           canAddCollaborators={canAddCollaborators}
           hasExceededCollaboratorLimit={hasExceededCollaboratorLimit}
@@ -140,7 +142,7 @@ export default function ShareModalBody({
           <ShareModalScreenContent
             screen={screen}
             setScreen={setScreen}
-            isProjectOwner={isProjectOwner}
+            isProjectOwner={canManageSharing}
             sortedMembers={sortedMembers}
             invites={invites}
             canAddCollaborators={canAddCollaborators}
@@ -150,12 +152,14 @@ export default function ShareModalBody({
         </>
       ) : (
         <>
-          {isProjectOwner && <LinkSharing />}
+          {canManageSharing && <LinkSharing />}
+
+          <EnterpriseAccessSection />
 
           <OwnerInfo />
 
           {sortedMembers.map(member =>
-            isProjectOwner ? (
+            canManageSharing ? (
               <EditMember
                 key={member._id}
                 member={member}
@@ -177,12 +181,12 @@ export default function ShareModalBody({
             <Invite
               key={invite._id}
               invite={invite}
-              isProjectOwner={isProjectOwner}
+              isProjectOwner={canManageSharing}
             />
           ))}
         </>
       )}
-      {!getMeta('ol-ExposedSettings').recaptchaDisabled?.invite && (
+      {!getMeta('ol-ExposedSettings')?.recaptchaDisabled?.invite && (
         <RecaptchaConditions />
       )}
     </>

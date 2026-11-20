@@ -48,6 +48,8 @@ export type User = {
   hasPaidSubscription?: boolean
   first_name?: string
   last_name?: string
+  role?: string
+  institution?: string
   alphaProgram?: boolean
   betaProgram?: boolean
   labsProgram?: boolean
@@ -77,6 +79,8 @@ export type LoggedOutUser = {
   email?: undefined
   first_name?: undefined
   last_name?: undefined
+  role?: undefined
+  institution?: undefined
   signUpDate?: undefined
   labsProgram?: undefined
   alphaProgram?: undefined

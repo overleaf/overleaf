@@ -1,6 +1,7 @@
 import type { DefaultNavbarMetadata } from '@/shared/components/types/default-navbar-metadata'
 import NavDropdownMenu from '@/shared/components/navbar/nav-dropdown-menu'
 import NavDropdownLinkItem from '@/shared/components/navbar/nav-dropdown-link-item'
+import getMeta from '@/utils/meta'
 import { useSendProjectListMB } from '@/features/project-list/components/project-list-events'
 
 export default function AdminMenu({
@@ -37,10 +38,15 @@ export default function AdminMenu({
     >
       {canDisplayAdminMenu ? (
         <>
-          <NavDropdownLinkItem href="/admin">Manage Site</NavDropdownLinkItem>
+          <NavDropdownLinkItem href="/admin">System Admin</NavDropdownLinkItem>
           <NavDropdownLinkItem href="/admin/user">
             Manage Users
           </NavDropdownLinkItem>
+          {getMeta('ol-ExposedSettings')?.hasPackageHubFeature && (
+            <NavDropdownLinkItem href="/packages">
+              Manage Packages
+            </NavDropdownLinkItem>
+          )}
         </>
       ) : null}
       {canDisplayProjectUrlLookup ? (

@@ -24,6 +24,10 @@ export function AccountMenuItems({
   const logOutFormId = 'logOutForm'
   const dsNavStyle = useDsNavStyle()
   const hasOverallThemes = Boolean(getMeta('ol-overallThemes'))
+  const hasPackageHub = Boolean(
+    getMeta('ol-ExposedSettings')?.hasPackageHubFeature
+  )
+  const isSiteAdmin = Boolean(getMeta('ol-navbar')?.canDisplayAdminMenu)
 
   return (
     <>
@@ -34,6 +38,19 @@ export function AccountMenuItems({
       <NavDropdownLinkItem href="/user/settings">
         {t('account_settings')}
       </NavDropdownLinkItem>
+      {hasPackageHub && (
+        <NavDropdownLinkItem href="/packages">
+          {t('package_hub', 'Package Hub')}
+        </NavDropdownLinkItem>
+      )}
+      {isSiteAdmin && (
+        <>
+          <NavDropdownLinkItem href="/admin">System Admin</NavDropdownLinkItem>
+          <NavDropdownLinkItem href="/admin/user">
+            Manage Users
+          </NavDropdownLinkItem>
+        </>
+      )}
       {showSubscriptionLink ? (
         <NavDropdownLinkItem href="/user/subscription">
           {t('subscription')}

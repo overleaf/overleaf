@@ -26,7 +26,7 @@ export default function CopySharingLinkButton() {
     }
 
     const origin = isAdmin
-      ? getMeta('ol-ExposedSettings').siteUrl
+      ? getMeta('ol-ExposedSettings')?.siteUrl || window.location.origin
       : window.location.origin
     const link = `${origin}/project/${projectId}/share#${sharingLinkData.token}`
 

@@ -1,8 +1,12 @@
+import mongodb from 'mongodb-legacy'
 import SessionManager from '../Authentication/SessionManager.mjs'
 import ContactManager from './ContactManager.mjs'
 import UserGetter from '../User/UserGetter.mjs'
+import { User } from '../../models/User.mjs'
 import Modules from '../../infrastructure/Modules.mjs'
 import { expressify } from '@overleaf/promise-utils'
+
+const { ObjectId } = mongodb
 
 function _formatContact(contact) {
   return {
@@ -15,9 +19,13 @@ function _formatContact(contact) {
 }
 
 const MAX_CONTACTS = 50
+const MAX_WORKSPACE_DIRECTORY_USERS = 200
 
 async function getContacts(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
+  if (!userId) {
+    return res.json({ contacts: [] })
+  }
 
   const contactIds = await ContactManager.promises.getContactIds(
     userId,
@@ -29,6 +37,7 @@ async function getContacts(req, res) {
     first_name: 1,
     last_name: 1,
     holdingAccount: 1,
+    suspended: 1,
   })
 
   // UserGetter.getUsers may not preserve order so put them back in order
@@ -41,8 +50,8 @@ async function getContacts(req, res) {
     (a, b) => positions[a._id?.toString()] - positions[b._id?.toString()]
   )
 
-  // Don't count holding accounts to discourage users from repeating mistakes (mistyped or wrong emails, etc)
-  contacts = contacts.filter(c => !c.holdingAccount)
+  // Don't count holding or suspended accounts
+  contacts = contacts.filter(c => !c.holdingAccount && !c.suspended)
 
   contacts = contacts.map(_formatContact)
 
@@ -53,6 +62,43 @@ async function getContacts(req, res) {
   )
 
   contacts = contacts.concat(...(additionalContacts || []))
+
+  // Append active workspace users so coworker search-by-name-or-email works
+  // natively in both LAN/zero-SMTP and cloud deployments.
+  const selfFilter = ObjectId.isValid(String(userId))
+    ? { $ne: new ObjectId(String(userId)) }
+    : { $ne: userId }
+  const workspaceUsers = await User.find(
+    {
+      _id: selfFilter,
+      suspended: { $ne: true },
+      holdingAccount: { $ne: true },
+    },
+    { email: 1, first_name: 1, last_name: 1 }
+  )
+    .sort({ first_name: 1, last_name: 1, email: 1 })
+    .limit(MAX_WORKSPACE_DIRECTORY_USERS)
+    .lean()
+
+  const seenIds = new Set(contacts.map(c => c.id).filter(Boolean))
+  const seenEmails = new Set(
+    contacts.map(c => (c.email || '').toLowerCase()).filter(Boolean)
+  )
+
+  for (const user of workspaceUsers) {
+    const formatted = _formatContact(user)
+    const emailKey = formatted.email.toLowerCase()
+    if (
+      (formatted.id && seenIds.has(formatted.id)) ||
+      (emailKey && seenEmails.has(emailKey))
+    ) {
+      continue
+    }
+    if (formatted.id) seenIds.add(formatted.id)
+    if (emailKey) seenEmails.add(emailKey)
+    contacts.push(formatted)
+  }
+
   return res.json({
     contacts,
   })

@@ -27,35 +27,36 @@ type UpgradeTrackChangesModal = {
 
 export const EditorContext = createContext<
   | {
-      cobranding?: Cobranding
-      hasPremiumCompile?: boolean
-      renameProject: (newName: string) => void
-      insertSymbol?: (symbol: SymbolWithCharacter) => void
-      isProjectOwner: boolean
-      isRestrictedTokenMember?: boolean
-      isPendingEditor: boolean
-      hasSuggestionsLeft: boolean
-      suggestionsLeft: number
-      setSuggestionsLeft: (value: number) => void
-      premiumSuggestionResetDate: Date
-      setPremiumSuggestionResetDate: (date: Date) => void
-      hasTokensLeft: boolean
-      tokensLeft: number
-      setTokensLeft: (value: number) => void
-      tokenResetDate: Date
-      setTokenResetDate: (date: Date) => void
-      writefullInstance: WritefullAPI | null
-      setWritefullInstance: (instance: WritefullAPI) => void
-      upgradeTrackChangesModal: UpgradeTrackChangesModal
-      setUpgradeTrackChangesModal: Dispatch<
-        SetStateAction<UpgradeTrackChangesModal>
-      >
-    }
+    cobranding?: Cobranding
+    hasPremiumCompile?: boolean
+    renameProject: (newName: string) => void
+    insertSymbol?: (symbol: SymbolWithCharacter) => void
+    isProjectOwner: boolean
+    canAdminProject?: boolean
+    isRestrictedTokenMember?: boolean
+    isPendingEditor: boolean
+    hasSuggestionsLeft: boolean
+    suggestionsLeft: number
+    setSuggestionsLeft: (value: number) => void
+    premiumSuggestionResetDate: Date
+    setPremiumSuggestionResetDate: (date: Date) => void
+    hasTokensLeft: boolean
+    tokensLeft: number
+    setTokensLeft: (value: number) => void
+    tokenResetDate: Date
+    setTokenResetDate: (date: Date) => void
+    writefullInstance: WritefullAPI | null
+    setWritefullInstance: (instance: WritefullAPI) => void
+    upgradeTrackChangesModal: UpgradeTrackChangesModal
+    setUpgradeTrackChangesModal: Dispatch<
+      SetStateAction<UpgradeTrackChangesModal>
+    >
+  }
   | undefined
 >(undefined)
 
 export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
-  const { id: userId, featureUsage } = useUserContext()
+  const { id: userId, featureUsage, isAdmin } = useUserContext()
   const { role } = useDetachContext()
   const { showGenericMessageModal } = useModalsContext()
 
@@ -188,6 +189,7 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
       hasPremiumCompile: features?.compileGroup === 'priority',
       renameProject,
       isProjectOwner: owner?._id === userId,
+      canAdminProject: owner?._id === userId || Boolean(isAdmin),
       isRestrictedTokenMember: getMeta('ol-isRestrictedTokenMember'),
       isPendingEditor,
       insertSymbol,
@@ -211,6 +213,7 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
       features?.compileGroup,
       owner,
       userId,
+      isAdmin,
       renameProject,
       isPendingEditor,
       insertSymbol,

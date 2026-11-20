@@ -1,7 +1,8 @@
 import { JSXElementConstructor } from 'react'
 import { useTranslation } from 'react-i18next'
 import classnames from 'classnames'
-import { Trash } from '@phosphor-icons/react'
+import { FolderOpen, Package, Trash } from '@phosphor-icons/react'
+import getMeta from '@/utils/meta'
 import SidebarFilters from './sidebar-filters'
 import AddAffiliation, { useAddAffiliation } from '../add-affiliation'
 import { usePersistedResize } from '@/shared/hooks/use-resize'
@@ -27,7 +28,13 @@ function SidebarDsNav({
 }) {
   const { t } = useTranslation()
   const { show: showAddAffiliationWidget } = useAddAffiliation()
-  const { filter, selectedTagId, selectFilter } = useProjectListContext()
+  const {
+    filter,
+    selectedTagId,
+    selectFilter,
+    openBaseFolderModal,
+    localSyncSettings,
+  } = useProjectListContext()
   const isTrashActive =
     activePage === 'library'
       ? trashActive
@@ -88,6 +95,36 @@ function SidebarDsNav({
               active={activePage === 'library' && !trashActive}
               inLibrary={activePage === 'library'}
             />
+          )}
+          {getMeta('ol-ExposedSettings')?.hasPackageHubFeature && (
+            <a
+              href="/packages"
+              className="ds-nav-page-switcher-item"
+              data-testid="sidebar-package-hub-btn"
+            >
+              <Package size={20} />
+              <span className="ds-nav-page-switcher-item-label">
+                {t('package_hub', 'Package Hub')}
+              </span>
+            </a>
+          )}
+          {activePage !== 'library' && (
+            <button
+              type="button"
+              className="ds-nav-page-switcher-item"
+              onClick={openBaseFolderModal}
+              data-testid="sidebar-folder-location-btn"
+              title={
+                localSyncSettings?.baseDir
+                  ? `Default folder: ${localSyncSettings.baseDir}`
+                  : 'Default folder location'
+              }
+            >
+              <FolderOpen size={20} />
+              <span className="ds-nav-page-switcher-item-label">
+                Folder Location
+              </span>
+            </button>
           )}
           {/* The trash view defaults to the location the user is navigating from: the
           library trash when on the library, the project trash everywhere else. */}

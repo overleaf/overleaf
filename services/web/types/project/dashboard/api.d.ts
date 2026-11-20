@@ -74,6 +74,15 @@ export type ProjectApi = {
   accessLevel: ProjectAccessLevel
   source: Source
   localFolder?: ProjectLocalFolderInfo
+  sharingInfo?: {
+    source: 'owner' | 'direct' | 'enterprise' | 'token'
+    scope: 'private' | 'network' | 'all_users' | 'custom'
+    networkOnly: boolean
+    permissionMode: 'edit' | 'copy' | 'view_only'
+    allowCopy: boolean
+    collaboratorCount: number
+    enterprisePermissionMode?: 'edit' | 'copy' | 'view_only' | null
+  }
 }
 
 export type Project = MergeAndOverride<

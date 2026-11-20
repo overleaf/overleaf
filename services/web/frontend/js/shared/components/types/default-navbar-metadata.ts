@@ -6,6 +6,7 @@ import type {
 export type DefaultNavbarMetadata = {
   customLogo?: string
   customLogoDark?: string
+  organizationName?: string
   title?: string
   canDisplayAdminMenu: boolean
   canDisplayAdminRedirect: boolean

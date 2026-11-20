@@ -5,6 +5,7 @@ if [ "$DEBUG_NODE" == "true" ]; then
     echo "running debug - clsi"
     NODE_PARAMS="--inspect=0.0.0.0:30130"
 fi
+NODE_PARAMS="$NODE_PARAMS --max-old-space-size=128 --max-semi-space-size=2"
 
 # Set permissions on docker.sock if present,
 # To enable sibling-containers (see entrypoint.sh in clsi project)

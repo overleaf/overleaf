@@ -93,9 +93,10 @@ function RegisterForm({
 
 function parseEmails(emailsText) {
   const regexBySpaceOrComma = /[\s,]+/
-  let emails = emailsText.split(regexBySpaceOrComma)
-  emails.map(email => email.trim())
-  emails = emails.filter(email => email.indexOf('@') !== -1)
+  let emails = emailsText
+    .split(regexBySpaceOrComma)
+    .map(email => email.trim())
+    .filter(email => email.includes('@'))
   return emails
 }
 

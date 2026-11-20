@@ -41,7 +41,7 @@ function LeaveProjectButton({ project, children }: LeaveProjectButtonProps) {
     removeProjectFromView(project)
   }, [project, removeProjectFromView])
 
-  if (!project.trashed || isOwner) return null
+  if (!project.trashed || isOwner || project.sharingInfo?.source === 'enterprise') return null
 
   return (
     <>

@@ -91,6 +91,11 @@ const Features = {
         return symbolPaletteModuleAvailable
       case 'track-changes':
         return trackChangesModuleAvailable
+      case 'package-hub':
+        return (
+          Settings.enablePackageHub !== false &&
+          process.env.OVERLEAF_ENABLE_PACKAGE_HUB !== 'false'
+        )
       default:
         throw new Error(`unknown feature: ${feature}`)
     }

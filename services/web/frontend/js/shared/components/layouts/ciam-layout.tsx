@@ -1,7 +1,6 @@
 import React, { FC, ReactNode } from 'react'
 import { Trans } from 'react-i18next'
 import * as eventTracking from '@/infrastructure/event-tracking'
-import dsLogo from '@/shared/svgs/digital-science.svg'
 
 type Props = { children: ReactNode }
 
@@ -17,23 +16,7 @@ const CiamLayout: FC<Props> = ({ children }: Props) => (
         {children}
         <section className="ciam-card-footer">
           <hr className="ciam-card-separator" />
-          <div className="ciam-footer-ds-logo">
-            <a
-              href="https://www.digital-science.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ciam-image-link"
-              onClick={() =>
-                eventTracking.sendMB('unified-access-footer-click', {
-                  product: 'overleaf',
-                  item: 'logo',
-                  destinationUrl: 'https://www.digital-science.com/',
-                })
-              }
-            >
-              <img src={dsLogo} alt="Digital Science — home" />
-            </a>
-          </div>
+
           <p>
             <Trans
               i18nKey="advancing_research_with"

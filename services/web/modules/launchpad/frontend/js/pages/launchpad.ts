@@ -98,6 +98,29 @@ function setUpStatusIndicators() {
   })
 }
 
+function setUpConfirmPasswordValidation() {
+  const passwordInput = document.getElementById(
+    'passwordField'
+  ) as HTMLInputElement | null
+  const confirmInput = document.getElementById(
+    'confirmPasswordField'
+  ) as HTMLInputElement | null
+  if (!passwordInput || !confirmInput) return
+
+  const syncValidity = () => {
+    if (confirmInput.value && confirmInput.value !== passwordInput.value) {
+      confirmInput.setCustomValidity('Passwords do not match')
+    } else {
+      confirmInput.setCustomValidity('')
+    }
+  }
+
+  passwordInput.addEventListener('input', syncValidity)
+  confirmInput.addEventListener('input', syncValidity)
+}
+
+setUpConfirmPasswordValidation()
+
 if (getMeta('ol-adminUserExists')) {
   setUpStatusIndicators()
 }

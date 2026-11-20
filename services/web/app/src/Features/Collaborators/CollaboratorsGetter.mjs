@@ -26,6 +26,7 @@ const { ObjectId } = mongodb
  * @property {string} id
  * @property {PrivilegeLevel} privilegeLevel
  * @property {Source} source
+ * @property {boolean} [allowCopy]
  * @property {boolean} [pendingEditor]
  * @property {boolean} [pendingReviewer]
  */
@@ -34,6 +35,7 @@ const { ObjectId } = mongodb
  * @typedef LoadedProjectMember
  * @property {PrivilegeLevel} privilegeLevel
  * @property {{_id: ObjectId, email: string, features: any, first_name: string, last_name: string, signUpDate: Date}} user
+ * @property {boolean} [allowCopy]
  * @property {boolean} [pendingEditor]
  * @property {boolean} [pendingReviewer]
  */
@@ -52,6 +54,7 @@ class ProjectAccess {
     owner_ref: 1,
     collaberator_refs: 1,
     readOnly_refs: 1,
+    copyDisabled_refs: 1,
     tokenAccessReadOnly_refs: 1,
     tokenAccessReadAndWrite_refs: 1,
     publicAccesLevel: 1,
@@ -77,7 +80,7 @@ class ProjectAccess {
   #accessRequests
 
   /**
-   * @param {{ owner_ref: ObjectId; collaberator_refs: ObjectId[]; readOnly_refs: ObjectId[]; tokenAccessReadAndWrite_refs: ObjectId[]; tokenAccessReadOnly_refs: ObjectId[]; publicAccesLevel: PublicAccessLevel; pendingEditor_refs: ObjectId[]; reviewer_refs: ObjectId[]; pendingReviewer_refs: ObjectId[]; editAccessRequests?: AccessRequest[]; }} project
+   * @param {{ owner_ref: ObjectId; collaberator_refs: ObjectId[]; readOnly_refs: ObjectId[]; copyDisabled_refs?: ObjectId[]; tokenAccessReadAndWrite_refs: ObjectId[]; tokenAccessReadOnly_refs: ObjectId[]; publicAccesLevel: PublicAccessLevel; pendingEditor_refs: ObjectId[]; reviewer_refs: ObjectId[]; pendingReviewer_refs: ObjectId[]; editAccessRequests?: AccessRequest[]; }} project
    */
   constructor(project) {
     this.#members = _getMemberIdsWithPrivilegeLevelsFromFields(
@@ -89,7 +92,8 @@ class ProjectAccess {
       project.publicAccesLevel,
       project.pendingEditor_refs,
       project.reviewer_refs,
-      project.pendingReviewer_refs
+      project.pendingReviewer_refs,
+      project.copyDisabled_refs || []
     )
     this.#stats = {
       reviewers: (project.reviewer_refs || []).length,
@@ -699,6 +703,7 @@ async function userIsReadWriteTokenMember(userId, projectId) {
  * @param {ObjectId[]} pendingEditorIds
  * @param {ObjectId[]} reviewerIds
  * @param {ObjectId[]} pendingReviewerIds
+ * @param {ObjectId[]} [copyDisabledIds]
  * @return {ProjectMember[]}
  * @private
  */
@@ -711,13 +716,18 @@ function _getMemberIdsWithPrivilegeLevelsFromFields(
   publicAccessLevel,
   pendingEditorIds,
   reviewerIds,
-  pendingReviewerIds
+  pendingReviewerIds,
+  copyDisabledIds = []
 ) {
+  const copyDisabledSet = new Set(
+    (copyDisabledIds || []).map(id => id.toString())
+  )
   const members = []
   members.push({
     id: ownerId.toString(),
     privilegeLevel: PrivilegeLevels.OWNER,
     source: Sources.OWNER,
+    allowCopy: true,
   })
 
   for (const memberId of collaboratorIds || []) {
@@ -725,6 +735,7 @@ function _getMemberIdsWithPrivilegeLevelsFromFields(
       id: memberId.toString(),
       privilegeLevel: PrivilegeLevels.READ_AND_WRITE,
       source: Sources.INVITE,
+      allowCopy: true,
     })
   }
 
@@ -733,15 +744,18 @@ function _getMemberIdsWithPrivilegeLevelsFromFields(
       id: memberId.toString(),
       privilegeLevel: PrivilegeLevels.REVIEW,
       source: Sources.INVITE,
+      allowCopy: true,
     })
   }
 
   for (const memberId of readOnlyIds || []) {
+    const idStr = memberId.toString()
     /** @type {ProjectMember} */
     const record = {
-      id: memberId.toString(),
+      id: idStr,
       privilegeLevel: PrivilegeLevels.READ_ONLY,
       source: Sources.INVITE,
+      allowCopy: !copyDisabledSet.has(idStr),
     }
 
     if (
@@ -762,13 +776,16 @@ function _getMemberIdsWithPrivilegeLevelsFromFields(
         id: memberId.toString(),
         privilegeLevel: PrivilegeLevels.READ_AND_WRITE,
         source: Sources.TOKEN,
+        allowCopy: true,
       })
     }
     for (const memberId of tokenAccessReadOnlyIds || []) {
+      const idStr = memberId.toString()
       members.push({
-        id: memberId.toString(),
+        id: idStr,
         privilegeLevel: PrivilegeLevels.READ_ONLY,
         source: Sources.TOKEN,
+        allowCopy: !copyDisabledSet.has(idStr),
       })
     }
   }
@@ -803,6 +820,7 @@ async function _loadMembers(members) {
       const record = {
         user,
         privilegeLevel: member.privilegeLevel,
+        allowCopy: member.allowCopy !== false,
       }
       if (member.pendingEditor) {
         record.pendingEditor = true

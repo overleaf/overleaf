@@ -80,15 +80,15 @@ function TagsDropdown() {
     <>
       <OLDropdown align="end" autoClose="outside">
         <OLDropdownToggle
-          id="project-tools-more-dropdown"
+          id="project-tools-tags-dropdown"
           variant="secondary"
-          aria-label={t('tags')}
+          aria-label={t('organize_tags')}
         >
           <MaterialIcon type="label" className="align-text-top" />
         </OLDropdownToggle>
         <OLDropdownMenu
           flip={false}
-          data-testid="project-tools-more-dropdown-menu"
+          data-testid="project-tools-tags-dropdown-menu"
         >
           <OLDropdownHeader>{t('add_to_tag')}</OLDropdownHeader>
           {sortBy(tags, tag => tag.name?.toLowerCase()).map(tag => (

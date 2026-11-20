@@ -1,0 +1,15 @@
+extends ../layout-react
+
+block entrypointVar
+	- entrypoint = 'pages/packages'
+
+block vars
+	- isWebsiteRedesign = true
+
+block append meta
+	meta(name='ol-user' data-type='json' content=user)
+	meta(name='ol-packageHubConfig' data-type='json' content=packageHubConfig)
+
+block content
+	main#main-content.content.content-alt
+		#package-hub-root

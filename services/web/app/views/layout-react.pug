@@ -11,7 +11,7 @@ block append meta
 	- const canDisplayAdminMenu = hasAdminAccess()
 	- const canDisplayAdminRedirect = canRedirectToAdminDomain()
 	- const sessionUser = getSessionUser()
-	- const canDisplayProjectUrlLookup = settings.adminPrivilegeAvailable && canDisplayAdminMenu && hasAdminCapability('view-project-setting', false)
+	- const canDisplayProjectUrlLookup = hasFeature('saas') && settings.adminPrivilegeAvailable && canDisplayAdminMenu && hasAdminCapability('view-project-setting', false)
 	- const canDisplaySplitTestMenu = hasFeature('saas') && hasNonAdminDomainCapability('view-split-test')
 	- const canDisplaySurveyMenu = hasFeature('saas') && canDisplayAdminMenu && hasAdminCapability('manage-survey', false)
 	- const canDisplayScriptLogMenu = hasFeature('saas') && hasAdminCapability('view-script-log', false) && canDisplayAdminMenu
@@ -22,8 +22,9 @@ block append meta
 		name='ol-navbar'
 		data-type='json'
 		content={
-			customLogo: settings.nav.custom_logo_light || settings.nav.custom_logo,
-			customLogoDark: settings.nav.custom_logo_dark || settings.nav.custom_logo,
+			customLogo: (workspaceBranding && workspaceBranding.logoUrl) || settings.nav.custom_logo_light || settings.nav.custom_logo,
+			customLogoDark: (workspaceBranding && (workspaceBranding.logoDarkUrl || workspaceBranding.logoUrl)) || settings.nav.custom_logo_dark || settings.nav.custom_logo,
+			organizationName: (workspaceBranding && workspaceBranding.organizationName) || undefined,
 			title: nav.title,
 			canDisplayAdminMenu,
 			canDisplayAdminRedirect,

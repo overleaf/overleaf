@@ -11,6 +11,7 @@ import { expressify } from '@overleaf/promise-utils'
 import Features from '../../infrastructure/Features.mjs'
 import Modules from '../../infrastructure/Modules.mjs'
 import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
+import LaunchpadController from '../../../../modules/launchpad/app/src/LaunchpadController.mjs'
 import {
   z,
   parseReq,
@@ -150,6 +151,8 @@ async function settingsPage(req, res) {
       allowedFreeTrial: user.allowedFreeTrial,
       first_name: user.first_name,
       last_name: user.last_name,
+      role: user.role || '',
+      institution: user.institution || '',
       alphaProgram: user.alphaProgram,
       betaProgram: user.betaProgram,
       labsProgram: user.labsProgram,
@@ -263,6 +266,7 @@ async function emailPreferencesPage(req, res) {
 const loginPageSchema = z.object({
   query: z.object({
     redir: z.string().optional(),
+    stay: z.string().optional(),
   }),
 })
 
@@ -286,8 +290,24 @@ const UserPagesController = {
     })
   },
 
-  loginPage(req, res) {
+  loginPage: expressify(async function loginPage(req, res) {
+    if (SessionManager.isUserLoggedIn(req.session)) {
+      return res.redirect(
+        AuthenticationController.getRedirectFromSession(req) || '/project'
+      )
+    }
     const { query } = parseReq(req, loginPageSchema, { logOnly: true })
+
+    const isSaas = Features.hasFeature('saas')
+    let adminExists = true
+    if (!isSaas) {
+      adminExists = await LaunchpadController._atLeastOneAdminExists().catch(
+        () => true
+      )
+      if (!adminExists && query.stay !== '1') {
+        return res.redirect('/launchpad')
+      }
+    }
 
     // if user is being sent to /login with explicit redirect (redir=/foo),
     // such as being sent from the editor to /login, then set the redirect explicitly
@@ -308,9 +328,11 @@ const UserPagesController = {
       title: Settings.nav?.login_support_title || 'login',
       login_support_title: Settings.nav?.login_support_title,
       login_support_text: Settings.nav?.login_support_text,
+      noAdminExists: !isSaas && !adminExists,
+      showThinFooter: !isSaas,
       metadata,
     })
-  },
+  }),
 
   /**
    * Landing page for users who may have received one-time login

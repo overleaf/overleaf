@@ -1,49 +1,91 @@
 extends ../layout-website-redesign
+include ../_mixins/material_symbol
 
 block vars
 	- isWebsiteRedesign = true
+	- showThinFooter = true
 
 block content
-	main#main-content.content
-		.container
-			.row
-				.col-lg-6.offset-lg-3.col-xl-4.offset-xl-4
-					.page-header
-						if login_support_title
-							h1 !{login_support_title}
-						else
-							h1 #{translate("log_in")} 
-					form(name='loginForm' data-ol-async-form action='/login' method='POST')
-						input(name='_csrf' type='hidden' value=csrfToken)
-						+formMessagesNewStyle
-						+customFormMessageNewStyle('invalid-password-retry-or-reset', 'danger')
-							| !{translate('email_or_password_wrong_try_again_or_reset', {}, [{ name: 'a', attrs: { href: '/user/password/reset', 'aria-describedby': 'resetPasswordDescription' } }])}
-							span.visually-hidden(id='resetPasswordDescription')
-								| #{translate('reset_password_link')}
-						+customFormMessageNewStyle('password-compromised')
-							| !{translate('password_compromised_try_again_or_use_known_device_or_reset', {}, [{name: 'a', attrs: {href: 'https://haveibeenpwned.com/passwords', rel: 'noopener noreferrer', target: '_blank'}}, {name: 'a', attrs: {href: '/user/password/reset', target: '_blank'}}])}.
-						.form-group
-							label(for='email') #{translate("email")}
-							input#email.form-control(
-								name='email'
-								type='email'
-								required
-								autofocus='true'
-								autocomplete='username'
-							)
-						.form-group
-							label(for='password') #{translate("password")}
+	main#main-content.ol-auth-main
+		.ol-auth-shell
+			.ol-auth-card
+				- var loginLogoSrc = (workspaceBranding && workspaceBranding.logoUrl) || buildImgPath('/ol-brand/overleaf-green.svg')
+				- var loginLogoAlt = (workspaceBranding && workspaceBranding.organizationName) || settings.appName
+				.ol-auth-brand
+					img(
+						src=loginLogoSrc
+						alt=loginLogoAlt
+						height='30'
+						style='max-height:36px;max-width:180px;object-fit:contain;'
+					)
+
+				.ol-auth-header
+					if login_support_title
+						h1 !{login_support_title}
+					else
+						h1 #{translate("log_in")}
+					p Sign in with your administrator or workspace account.
+
+				if noAdminExists
+					.ol-auth-notice(role='status')
+						+material-symbol('info')
+						span
+							| No administrator account is configured yet. 
+							a(href='/launchpad') Complete first-time setup
+
+				form.ol-auth-form(name='loginForm' data-ol-async-form action='/login' method='POST')
+					input(name='_csrf' type='hidden' value=csrfToken)
+					+formMessagesNewStyle
+					+customFormMessageNewStyle('invalid-password-retry-or-reset', 'danger')
+						| !{translate('email_or_password_wrong_try_again_or_reset', {}, [{ name: 'a', attrs: { href: '/user/password/reset', 'aria-describedby': 'resetPasswordDescription' } }])}
+						span.visually-hidden(id='resetPasswordDescription')
+							| #{translate('reset_password_link')}
+					+customFormMessageNewStyle('password-compromised')
+						| !{translate('password_compromised_try_again_or_use_known_device_or_reset', {}, [{name: 'a', attrs: {href: 'https://haveibeenpwned.com/passwords', rel: 'noopener noreferrer', target: '_blank'}}, {name: 'a', attrs: {href: '/user/password/reset', target: '_blank'}}])}.
+
+					.form-group
+						label.form-label(for='email') #{translate("email")}
+						input#email.form-control(
+							name='email'
+							type='email'
+							required
+							autofocus='true'
+							autocomplete='username'
+							placeholder='admin@overleaf.local'
+						)
+
+					.form-group
+						label.form-label(for='password') #{translate("password")}
+						.ol-password-wrapper
 							input#password.form-control(
 								name='password'
 								type='password'
 								autocomplete='current-password'
 								required
+								data-ol-password-visibility-target
 							)
-						.actions
-							button.btn-primary.btn(type='submit' data-ol-disabled-inflight)
-								span(data-ol-inflight='idle') #{translate("login")}
-								span(hidden data-ol-inflight='pending') #{translate("logging_in")}…
-							a.float-end(href='/user/password/reset') #{translate("forgot_your_password")}?
-						if login_support_text
-							hr
-							p.text-center !{login_support_text}
+							button.visibility-toggle(
+								type='button'
+								data-ol-password-visibility-toggle='visibilityOn'
+								aria-controls='password'
+								aria-label=translate('turn_on_password_visibility')
+							)
+								ph-eye.form-input-icon-ds
+							button.visibility-toggle(
+								type='button'
+								data-ol-password-visibility-toggle='visibilityOff'
+								aria-controls='password'
+								aria-label=translate('turn_off_password_visibility')
+								hidden
+							)
+								ph-eye-slash.form-input-icon-ds
+
+					.ol-auth-actions
+						button.btn.btn-primary.ol-auth-submit(type='submit' data-ol-disabled-inflight)
+							span(data-ol-inflight='idle') #{translate("login")}
+							span(hidden data-ol-inflight='pending') #{translate("logging_in")}…
+						.ol-auth-secondary-row
+							a(href='/user/password/reset') #{translate("forgot_your_password")}?
+
+					if login_support_text
+						.ol-auth-support-text !{login_support_text}

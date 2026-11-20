@@ -11,6 +11,8 @@ import Errors from '../Errors/Errors.js'
 import { expressify } from '@overleaf/promise-utils'
 import Settings from '@overleaf/settings'
 import CollaboratorsGetter from '../Collaborators/CollaboratorsGetter.mjs'
+import Features from '../../infrastructure/Features.mjs'
+import ProjectAccessPolicyService from '../Authorization/ProjectAccessPolicyService.mjs'
 import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
 
 const ProjectAccess = CollaboratorsGetter.ProjectAccess
@@ -135,6 +137,12 @@ async function _buildJoinProjectView(projectId, userId, token) {
     accessRequestData.myAccessRequest =
       projectAccess.getAccessRequestForUser(userId)
   }
+  const canCopy = userId
+    ? await ProjectAccessPolicyService.canUserCopyProject(userId, projectId)
+    : false
+  const enterpriseAccess =
+    ProjectAccessPolicyService.buildEnterpriseAccessView(project)
+
   return {
     project: ProjectEditorHandler.buildProjectModelView(
       project,
@@ -142,7 +150,12 @@ async function _buildJoinProjectView(projectId, userId, token) {
       members,
       invites,
       isRestrictedUser,
-      accessRequestData
+      accessRequestData,
+      {
+        canCopy,
+        linkSharingEnabled: Features.hasFeature('link-sharing'),
+        enterpriseAccess,
+      }
     ),
     privilegeLevel,
     isTokenMember,

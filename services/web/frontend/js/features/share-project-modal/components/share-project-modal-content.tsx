@@ -85,7 +85,9 @@ function ShareProjectModalContentInner({
   const isNewLinkEnabled = useFeatureFlag('sharing-updates-new-link')
   const { successActionMessage, projectAccess } = useShareProjectContext()
   const [screen, setScreen] = useState<ShareModalScreen>('project-access')
-  const { isRestrictedTokenMember, isProjectOwner } = useEditorContext()
+  const { isRestrictedTokenMember, isProjectOwner, canAdminProject } =
+    useEditorContext()
+  const canManageSharing = isProjectOwner || Boolean(canAdminProject)
   const isSubScreen = screen !== 'project-access'
 
   return (
@@ -107,7 +109,7 @@ function ShareProjectModalContentInner({
                 : t('share_project')}
             </OLModalTitle>
           )}
-          {isSharingUpdatesEnabled && isProjectOwner && <GiveFeedbackLink />}
+          {isSharingUpdatesEnabled && canManageSharing && <GiveFeedbackLink />}
         </div>
       </OLModalHeader>
       <OLModalBody
